@@ -1,0 +1,4 @@
+.dev
+*.pyc
+__pycache__
+TODO

@@ -1,0 +1,1 @@
+add pre-commit hook that generates new CLI help text and sample config file

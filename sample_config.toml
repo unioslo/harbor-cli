@@ -1,0 +1,11 @@
+[harbor]
+url = ""
+username = ""
+secret = ""
+credentials_base64 = ""
+credentials_file = ""
+
+[logging]
+enabled = true
+structlog = false
+level = "INFO"
