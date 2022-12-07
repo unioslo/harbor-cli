@@ -62,4 +62,7 @@ omit = ["harbor_cli/__about__.py"]
 exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 
 [tool.ruff]
-ignore = ["E501"]
+ignore = [
+  "E501", # line too long
+  "F541", # f-string is missing placeholders
+]

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-from enum import Enum
 from pathlib import Path
 from typing import Any
 from typing import TypedDict
@@ -21,7 +20,9 @@ from rich.table import Table
 
 from .dirs import CONFIG_DIR
 from .exceptions import CredentialsError
+from .logs import LogLevel
 from .utils import replace_none
+
 
 DEFAULT_CONFIG_FILE = CONFIG_DIR / "config.toml"
 
@@ -95,7 +96,7 @@ class BaseModel(PydanticBaseModel):
             title_style="magenta",
             title_justify="left",
         )
-        subtables = []
+        subtables = []  # type: list[BaseModel]
         for field_name, field in self.__fields__.items():
             # Try to use field title if available
             field_title = field.field_info.title or field_name
@@ -103,8 +104,11 @@ class BaseModel(PydanticBaseModel):
             attr = getattr(self, field_name)
             try:
                 # issubclass is prone to TypeError, so we use try/except
-                if issubclass(field.type_, BaseModel):
-                    subtables.append(attr)
+                if issubclass(field.type_, BaseModel) and attr is not None:
+                    if isinstance(attr, (list, set)):  # check iterable types?
+                        subtables.extend(attr)
+                    else:
+                        subtables.append(attr)
                     continue
             except:  # noqa: E722
                 pass
@@ -189,38 +193,6 @@ class HarborSettings(BaseModel):
             credentials=self.credentials_base64,
             credentials_file=self.credentials_file,
         )
-
-
-class LogLevel(Enum):
-    """Enum for log levels."""
-
-    TRACE = "TRACE"
-    DEBUG = "DEBUG"
-    INFO = "INFO"
-    SUCCESS = "SUCCESS"
-    WARNING = "WARNING"
-    ERROR = "ERROR"
-    CRITICAL = "CRITICAL"
-
-    @classmethod
-    def _missing_(cls, value: object) -> LogLevel:
-        """Convert string to enum value.
-
-        Raises
-        ------
-        ValueError
-            If the value is not a valid log level.
-        """
-        if not isinstance(value, str):
-            raise TypeError(f"Expected str, got {type(value)}")
-        for member in cls:
-            if member.value == value.upper():
-                return member
-        raise ValueError(f"{value} is not a valid log level.")
-
-    def __str__(self) -> str:
-        """Return the enum value as a string."""
-        return self.value
 
 
 class LoggingSettings(BaseModel):

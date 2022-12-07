@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 from harborapi import HarborAsyncClient
 
-from .config import HarborCLIConfig
+if TYPE_CHECKING:
+    from ..config import HarborCLIConfig
 
 # It's unlikely that we will authenticate with multiple
 # Harbor instances, so keeping it in a dict is probably superfluous.
