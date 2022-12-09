@@ -34,11 +34,27 @@ class State(BaseModel):
         validate_assignments = True
         extra = "allow"
 
-    def run(self, coro: Awaitable[T]) -> T:
-        """Run a coroutine in the event loop."""
+    def run(
+        self,
+        coro: Awaitable[T],
+        no_handle: type[Exception] | tuple[type[Exception], ...] | None = None,
+    ) -> T:
+        """Run a coroutine in the event loop.
+
+        Parameters
+        ----------
+        coro : Awaitable[T]
+            The coroutine to run.
+        no_handle : type[Exception] | tuple[type[Exception], ...]
+            A single exception type or a tuple of exception types that
+            should not be passed to the default exception handler.
+            Exceptions of this type will be raised as-is.
+        """
         try:
             resp = self.loop.run_until_complete(coro)
         except StatusError as e:
+            if no_handle and isinstance(e, no_handle):
+                raise
             handle_status_error(e)
         return resp
 

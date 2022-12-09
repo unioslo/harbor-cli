@@ -26,10 +26,22 @@ def replace_none(d: dict[str, Any], replacement: Any = "") -> dict[str, Any]:
 
 def get_artifact_parts(s: str) -> tuple[str | None, str, str, str]:
     """Splits an artifact string into domain name (optional), project,
-    repo, and tag_or_digest.
+    repo, and reference (tag or digest).
 
     Raises ValueError if the string is not in the correct format.
+
+    Parameters
+    ----------
+    s : str
+        Artifact string in the form of [domain/]<project>/<repo>{@sha256:<digest>,:<tag>}
+
+    Returns
+    -------
+    tuple[str | None, str, str, str]
+        Tuple of domain name (optional), project, repo, and reference (tag or digest).
     """
+
+    # TODO: use some sort of regex to make this more robust
 
     def _raise_value_error() -> NoReturn:
         raise ValueError(

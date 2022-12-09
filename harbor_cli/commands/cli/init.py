@@ -5,9 +5,9 @@ from typing import Optional
 
 import typer
 
-from ..app import app
-from ..config import create_config
-from ..output.console import console
+from ...app import app
+from ...config import create_config
+from ...output.console import console
 
 
 @app.command("init")

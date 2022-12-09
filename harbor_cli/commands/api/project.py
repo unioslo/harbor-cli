@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import typer
 
-from ..output.console import console
-from ..state import state
+from ...output.console import console
+from ...state import state
 
 # Create a command group
 app = typer.Typer(name="project")

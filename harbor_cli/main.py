@@ -16,7 +16,7 @@ from .output.format import OutputFormat
 from .state import state
 
 # Init subcommand groups here
-for group in commands.command_groups:
+for group in commands.ALL_GROUPS:
     app.add_typer(group)
 
 # The callback defines global command options
@@ -48,6 +48,9 @@ def main(
         "--format",
         "-f",
         help=f"Output format.",
+    ),
+    output_file: Optional[Path] = typer.Option(
+        None, "--output", "-o", help="Output file."
     ),
 ) -> None:
     """

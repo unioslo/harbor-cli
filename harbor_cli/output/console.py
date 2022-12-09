@@ -1,15 +1,23 @@
 from __future__ import annotations
 
 from typing import NoReturn
+from typing import Optional
 
 import typer
 from rich.console import Console
 
+_exit = exit  # save the original exit function
+
 console = Console()
-err_console = Console(stderr=True, style="red")
+err_console = Console(
+    stderr=True,
+    style="red",
+    highlight=False,
+    soft_wrap=True,
+)
 
 
-def exit(msg: str, code: int = 0) -> NoReturn:
+def exit(msg: Optional[str] = None, code: int = 0) -> NoReturn:
     """Prints a message to the default console and exits with the given
     code (default: 0).
 
@@ -20,7 +28,8 @@ def exit(msg: str, code: int = 0) -> NoReturn:
     code : int, optional
         Exit code, by default 0
     """
-    console.print(msg)
+    if msg:
+        console.print(msg)
     raise typer.Exit(code)
 
 

@@ -63,6 +63,6 @@ exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 
 [tool.ruff]
 ignore = [
-  "E501", # line too long
+  "E501", # line too long (does not respect black)
   "F541", # f-string is missing placeholders
 ]

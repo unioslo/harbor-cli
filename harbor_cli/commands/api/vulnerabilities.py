@@ -7,17 +7,17 @@ import typer
 from harborapi.ext.api import get_artifact
 from harborapi.models.scanner import Severity
 
-from ..app import app
-from ..output.console import console
-from ..output.console import exit_err
-from ..output.format import OutputFormat
-from ..output.tables import artifact_table
-from ..output.tables import artifact_vulnerabilities_table
-from ..state import state
-from ..utils import get_artifact_parts
+from ...app import app
+from ...output.console import console
+from ...output.console import exit_err
+from ...output.format import OutputFormat
+from ...output.tables import artifact_table
+from ...output.tables import artifact_vulnerabilities_table
+from ...state import state
+from ...utils import get_artifact_parts
 
 
-@app.command("vulnerabilities")
+@app.command("vulnerabilities", no_args_is_help=True)
 def vulnerabilities(
     ctx: typer.Context,
     project: Optional[str] = typer.Option(

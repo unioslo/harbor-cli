@@ -1,16 +1,17 @@
 from __future__ import annotations
 
-import typer
+from .api import api_commands
+from .cli import cli_commands
 
-from . import artifact as artifact
-from . import init as init
-from . import project as project
-from . import sample_config as sample_config
-from . import system as system
-from . import vulnerabilities as vulnerabilities
+groups = {
+    "API": api_commands,
+    "CLI": cli_commands,
+}
 
-command_groups: list[typer.Typer] = [
-    project.app,
-    system.app,
-    artifact.app,
-]
+# Patch help text for the different groups
+for group_name, command_groups in groups.items():
+    for command_group in command_groups:
+        # command_group.info.help = f"[{group_name}] {command_group.info.help or ''}"
+        pass
+
+ALL_GROUPS = [command for group in groups.values() for command in group]
