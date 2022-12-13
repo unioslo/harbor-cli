@@ -36,6 +36,10 @@ class CredentialsError(HarborCLIError):
     """Error loading credentials."""
 
 
+class OverwriteError(HarborCLIError, FileExistsError):
+    """Error overwriting an existing file."""
+
+
 class ArtifactNameFormatError(HarborCLIError):
     def __init__(self, s: str) -> None:
         super().__init__(

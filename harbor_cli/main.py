@@ -57,6 +57,11 @@ def main_callback(
         "-o",
         help="Output file, by default None, which means output to stdout. If the file already exists, it will be overwritten.",
     ),
+    no_overwrite: bool = typer.Option(
+        False,
+        "--no-overwrite",
+        help="Do not overwrite the output file if it already exists.",
+    ),
     with_stdout: bool = typer.Option(
         False,
         "--with-stdout",
@@ -89,6 +94,8 @@ def main_callback(
         state.config = HarborCLIConfig.from_file(create=True)
 
     state.client = harbor.get_client(state.config)
+
+    # TODO: run configure_from_config and expand it to include all options
 
 
 def configure_from_config(config: HarborCLIConfig) -> None:

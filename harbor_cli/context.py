@@ -45,8 +45,8 @@ def get_output_file(ctx: typer.Context) -> Path | None:
     """Get the output path from the context."""
     params = _get_ctx_params(ctx)
     try:
-        return params["output_file"]  # type: ignore
-    except (AttributeError, KeyError):
+        return Path(params["output_file"])  # type: ignore
+    except (AttributeError, KeyError, TypeError):
         return None
 
 
@@ -55,5 +55,14 @@ def get_with_stdout(ctx: typer.Context) -> bool:
     params = _get_ctx_params(ctx)
     try:
         return bool(params["with_stdout"])  # type: ignore
+    except (AttributeError, KeyError):
+        return False
+
+
+def get_no_overwrite(ctx: typer.Context) -> bool:
+    """Get the no_overwrite flag from the context."""
+    params = _get_ctx_params(ctx)
+    try:
+        return bool(params["no_overwrite"])  # type: ignore
     except (AttributeError, KeyError):
         return False

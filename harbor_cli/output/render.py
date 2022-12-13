@@ -6,9 +6,11 @@ from typing import TypeVar
 import typer
 from pydantic import BaseModel
 
+from ..context import get_no_overwrite
 from ..context import get_output_file
 from ..context import get_output_format
 from ..context import get_with_stdout
+from ..exceptions import OverwriteError
 from .console import console
 from .format import OutputFormat
 from .schema import Schema
@@ -45,6 +47,7 @@ def render_json(result: T | Sequence[T], ctx: typer.Context) -> None:
     """Render the result of a command as JSON."""
     p = get_output_file(ctx)
     with_stdout = get_with_stdout(ctx)
+    no_overwrite = get_no_overwrite(ctx)
 
     # To make the JSON serialization more compatible with Pydantic
     # models and data types, we wrap the data in a Pydantic model
@@ -57,6 +60,8 @@ def render_json(result: T | Sequence[T], ctx: typer.Context) -> None:
     o = Output(__root__=result)
     o_json = o.json(indent=4)
     if p:
+        if p.exists() and no_overwrite:
+            raise OverwriteError(f"File {p.resolve()} exists.")
         with open(p, "w") as f:
             f.write(o_json)
     # Print to stdout if no output file is specified or if the
@@ -69,11 +74,14 @@ def render_jsonschema(result: T | Sequence[T], ctx: typer.Context) -> None:
     """Render the result of a command as JSON with metadata."""
     p = get_output_file(ctx)
     with_stdout = get_with_stdout(ctx)
+    no_overwrite = get_no_overwrite(ctx)
 
     # TODO: add switch to print to file and stdout at the same time
     schema = Schema(data=result)  # type: Schema[T | list[T]]
     schema_json = schema.json(indent=4)
     if p:
+        if p.exists() and no_overwrite:
+            raise FileExistsError(f"File {p} exists.")
         with open(p, "w") as f:
             f.write(schema_json)
     if not p or with_stdout:
