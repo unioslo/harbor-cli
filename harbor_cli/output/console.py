@@ -3,8 +3,9 @@ from __future__ import annotations
 from typing import NoReturn
 from typing import Optional
 
-import typer
 from rich.console import Console
+
+from ..logs import logger
 
 _exit = exit  # save the original exit function
 
@@ -29,8 +30,8 @@ def exit(msg: Optional[str] = None, code: int = 0) -> NoReturn:
         Exit code, by default 0
     """
     if msg:
-        console.print(msg)
-    raise typer.Exit(code)
+        logger.info(msg)
+    _exit(code)
 
 
 def exit_err(msg: str, code: int = 1, prefix: str = "ERROR") -> NoReturn:
@@ -44,7 +45,5 @@ def exit_err(msg: str, code: int = 1, prefix: str = "ERROR") -> NoReturn:
     code : int, optional
         Exit code, by default 1
     """
-    if prefix:
-        prefix = f"[bold]{prefix}[/bold]: "
-    err_console.print(f"{prefix}{msg}")
-    raise typer.Exit(code)
+    logger.error(msg)
+    _exit(code)

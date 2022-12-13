@@ -10,6 +10,8 @@ from . import commands
 from . import harbor
 from .app import app
 from .config import HarborCLIConfig
+from .exceptions import exit_err
+from .exceptions import HarborCLIError
 from .logs import disable_logging
 from .logs import setup_logging
 from .output.format import OutputFormat
@@ -21,7 +23,7 @@ for group in commands.ALL_GROUPS:
 
 # The callback defines global command options
 @app.callback(no_args_is_help=True)
-def main(
+def main_callback(
     ctx: typer.Context,
     # Configuration options
     verbose: bool = typer.Option(
@@ -95,3 +97,11 @@ def configure_from_config(config: HarborCLIConfig) -> None:
         setup_logging(config.logging.level)
     else:
         disable_logging()
+
+
+def main() -> None:
+    """Main entry point for the CLI."""
+    try:
+        app()
+    except HarborCLIError as e:
+        exit_err(str(e))
