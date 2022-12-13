@@ -4,6 +4,7 @@ import inspect
 from functools import wraps
 from typing import Any
 
+import typer
 from pydantic import BaseModel
 
 
@@ -27,11 +28,10 @@ def replace_none(d: dict[str, Any], replacement: Any = "") -> dict[str, Any]:
     return d
 
 
-# inject help fields
 def inject_help(model: type[BaseModel], strict: bool = False) -> Any:
     """
     Injects the description attributes of a pydantic model's fields into the
-    help attributes of typer options with matching names.
+    help attributes of Typer options with matching names.
 
     Parameters
     ----------
@@ -65,3 +65,66 @@ def inject_help(model: type[BaseModel], strict: bool = False) -> Any:
         return wrapper
 
     return decorator
+
+
+# This injection seems too complicated...?
+#
+# '--sort' and '-query' are two parameters that are used in many commands
+# in order to not have to write out the same code over and over again,
+# we can use these decorators to inject the parameters into the function,
+# given that the function has a parameter with the same name.
+#
+# NOTE: we COULD technically inject the parameter even if the function doesn't
+# already have it, but that is too magical, and does not play well with
+# static analysis tools like mypy.
+
+
+def inject_query(strict: bool = False) -> Any:
+    def decorator(func: Any) -> Any:
+        option = typer.Option(
+            None, "--query", help="Query parameters to filter the results. "
+        )
+        return _patch_param(func, "query", option, strict)
+
+    return decorator
+
+
+def inject_sort(strict: bool = False) -> Any:
+    def decorator(func: Any) -> Any:
+        option = typer.Option(
+            None,
+            "--sort",
+            help="Sorting order of the results. Example: 'name,-id' to sort by name ascending and id descending. ",
+        )
+        return _patch_param(func, "sort", option, strict)
+
+    return decorator
+
+
+def _patch_param(func: Any, name: str, param: typer.models.OptionInfo, strict) -> Any:
+    sig = inspect.signature(func)
+    mutable_params = sig.parameters.copy()
+    to_replace = mutable_params.get(name)
+
+    if not to_replace:
+        if strict:
+            raise ValueError(
+                f"Field {name!r} not found in function signature of {func.__qualname__!r}."
+            )
+        return func
+
+    if not to_replace.annotation:
+        raise ValueError(
+            f"Parameter {name!r} in function {func.__qualname__!r} must have a type annotation."
+        )
+
+    if to_replace.annotation not in ["Optional[str]", "str | None", "None | str"]:
+        raise ValueError(
+            f"Parameter {name!r} in function {func.__qualname__!r} must be of type 'Optional[str]' or 'str | None'."
+        )
+
+    mutable_params[name] = to_replace.replace(default=param)
+    new_sig = sig.replace(parameters=list(mutable_params.values()))
+    func.__signature__ = new_sig
+
+    return func
