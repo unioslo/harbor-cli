@@ -48,3 +48,12 @@ def get_output_file(ctx: typer.Context) -> Path | None:
         return params["output_file"]  # type: ignore
     except (AttributeError, KeyError):
         return None
+
+
+def get_with_stdout(ctx: typer.Context) -> bool:
+    """Get the with_stdout flag from the context."""
+    params = _get_ctx_params(ctx)
+    try:
+        return bool(params["with_stdout"])  # type: ignore
+    except (AttributeError, KeyError):
+        return False

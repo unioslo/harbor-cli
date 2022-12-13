@@ -50,7 +50,15 @@ def main(
         help=f"Output format.",
     ),
     output_file: Optional[Path] = typer.Option(
-        None, "--output", "-o", help="Output file."
+        None,
+        "--output",
+        "-o",
+        help="Output file, by default None, which means output to stdout. If the file already exists, it will be overwritten.",
+    ),
+    with_stdout: bool = typer.Option(
+        False,
+        "--with-stdout",
+        help="Output to stdout in addition to the specified output file, if any. Has no effect if no output file is specified.",
     ),
 ) -> None:
     """

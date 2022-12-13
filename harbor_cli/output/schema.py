@@ -1,3 +1,9 @@
+"""Somewhat experimental schema for (de)serializing data (JSON, YAML, etc.)
+
+The aim is to be able to serialize a Pydantic model to JSON, YAML, etc. and
+include metadata about the model in the serialized data. This metadata can
+then be used to deserialize the data back into the correct Pydantic model.
+"""
 from __future__ import annotations
 
 import importlib
@@ -45,7 +51,9 @@ class Schema(BaseModel, Generic[T]):
         After deserializing, we need to re-validate the data using the
         type_ attribute. This is because the default data type for the
         data field is BaseModel | list[BaseModel], but we want to
-        use the actual harborapi.models data type.
+        use the actual harborapi.models data type to get the correct
+        field names and types, as well as any custom validation, methods
+        and properties tied to the data type.
         """
         module = importlib.import_module("harborapi.models")
         if self.type_ is None:

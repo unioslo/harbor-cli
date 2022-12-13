@@ -8,4 +8,5 @@ class OutputFormat(Enum):
 
     TABLE = "table"
     JSON = "json"
+    JSONSCHEMA = "jsonschema"
     # others...?
