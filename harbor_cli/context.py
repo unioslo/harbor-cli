@@ -9,7 +9,7 @@ from .output.format import OutputFormat
 
 
 def _get_ctx_params(ctx: typer.Context) -> dict[str, Any]:
-    """Recursively gets all params from the context and its parents.
+    """Recursively gets all params from the context and its parent contexts.
 
     This way we can get the global options from the parent context, no
     matter how deeply nested the command is.

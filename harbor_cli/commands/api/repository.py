@@ -8,13 +8,14 @@ from harborapi.ext.api import get_artifacts
 from harborapi.models import Label
 from harborapi.models import Tag
 
+from ...harbor.artifact import parse_artifact_name
 from ...logs import logger
 from ...output.console import console
 from ...output.console import exit
 from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
-from ...utils import get_artifact_parts
+from ..help import ARTIFACT_HELP_STRING
 
 
 # Create a command group
@@ -37,9 +38,6 @@ label_cmd = typer.Typer(
 
 app.add_typer(tag_cmd)
 app.add_typer(label_cmd)
-
-# TODO: add callback that takes --project, --repo, --reference and --artifact
-# which lets us parse it and pass it to the function via a context object
 
 # get_artifacts()
 @app.command("list")
@@ -97,7 +95,7 @@ def delete_artifact(
     ctx: typer.Context,
     artifact: str = typer.Argument(
         ...,
-        help="The fully qualified name of a specific artifact.",
+        help=ARTIFACT_HELP_STRING,
     ),
     force: bool = typer.Option(
         False,
@@ -107,7 +105,7 @@ def delete_artifact(
     ),
 ) -> None:
     """Delete an artifact."""
-    _, project, repo, reference = get_artifact_parts(artifact)
+    an = parse_artifact_name(artifact)
     if not force:
         if not typer.confirm(
             f"Are you sure you want to delete {artifact}?",
@@ -118,7 +116,7 @@ def delete_artifact(
     logger.info(f"Deleting artifact {artifact}...")
     try:
         state.run(
-            state.client.delete_artifact(project, repo, reference),
+            state.client.delete_artifact(an.project, an.repository, an.reference),
             no_handle=NotFound,
         )
     except NotFound:
@@ -133,7 +131,7 @@ def copy_artifact(
     ctx: typer.Context,
     artifact: str = typer.Argument(
         ...,
-        help="Source artifact.",
+        help=ARTIFACT_HELP_STRING,
     ),
     project: str = typer.Argument(
         ...,
@@ -167,14 +165,12 @@ def copy_artifact(
 
 
 # HarborAsyncClient.get_artifact()
-
-
 @app.command("get")
 def get(
     ctx: typer.Context,
     artifact: str = typer.Argument(
         ...,
-        help="The fully qualified name of a specific artifact.",
+        help=ARTIFACT_HELP_STRING,
     ),
     # TODO: --tag
 ) -> None:
@@ -183,34 +179,31 @@ def get(
     """
     logger.info(f"Fetching artifact(s)...")
 
-    _, project, repo, digest = get_artifact_parts(artifact)
-
+    an = parse_artifact_name(artifact)
     # Just use normal endpoint method for a single artifact
     artifact = state.run(
-        state.client.get_artifact(project, repo, digest)  # type: ignore
+        state.client.get_artifact(an.project, an.repository, an.reference)  # type: ignore
     )
     render_result(artifact, ctx)
 
 
-# HarborAsyncClient.get_artifact_vulnerabilities()
-# HarborAsyncClient.get_artifact_build_history()
-# HarborAsyncClient.get_artifact_accessories()
 # HarborAsyncClient.get_artifact_tags()
-
-
 @tag_cmd.command("list", no_args_is_help=True)
 def list_artifact_tags(
     ctx: typer.Context,
     artifact: str = typer.Argument(
-        ..., help="The fully qualified name of a specific artifact."
+        ...,
+        help=ARTIFACT_HELP_STRING,
     ),
 ) -> None:
     """List tags for an artifact."""
-    _, project, repo, reference = get_artifact_parts(artifact)
-    tags = state.run(state.client.get_artifact_tags(project, repo, reference))
+    an = parse_artifact_name(artifact)
+    tags = state.run(
+        state.client.get_artifact_tags(an.project, an.repository, an.reference)
+    )
 
     if not tags:
-        exit_err(f"No tags found for {artifact!r}")
+        exit_err(f"No tags found for {an!r}")
 
     for tag in tags:
         console.print(tag)
@@ -220,16 +213,21 @@ def list_artifact_tags(
 @tag_cmd.command("create", no_args_is_help=True)
 def create_artifact_tag(
     ctx: typer.Context,
-    artifact: str = typer.Argument(...),
+    artifact: str = typer.Argument(
+        ...,
+        help=ARTIFACT_HELP_STRING,
+    ),
     tag: str = typer.Argument(..., help="Name of the tag to create."),
     # signed
     # immutable
 ) -> None:
     """Create a tag for an artifact."""
-    _, project, repo, reference = get_artifact_parts(artifact)
+    an = parse_artifact_name(artifact)
     # NOTE: We might need to fetch repo and artifact IDs
     t = Tag(name=tag)
-    location = state.run(state.client.create_artifact_tag(project, repo, reference, t))
+    location = state.run(
+        state.client.create_artifact_tag(an.project, an.repository, an.reference, t)
+    )
     logger.info(f"Created {tag} for {artifact} at {location}.")
 
 
@@ -237,7 +235,10 @@ def create_artifact_tag(
 @tag_cmd.command("delete", no_args_is_help=True)
 def delete_artifact_tag(
     ctx: typer.Context,
-    artifact: str = typer.Argument(...),
+    artifact: str = typer.Argument(
+        ...,
+        help=ARTIFACT_HELP_STRING,
+    ),
     tag: str = typer.Argument(..., help="Name of the tag to delete."),
     force: bool = typer.Option(
         False,
@@ -247,7 +248,7 @@ def delete_artifact_tag(
     ),
 ) -> None:
     """Delete a tag for an artifact."""
-    _, project, repo, reference = get_artifact_parts(artifact)
+    an = parse_artifact_name(artifact)
     # NOTE: We might need to fetch repo and artifact IDs
     if not force:
         if not typer.confirm(
@@ -256,7 +257,9 @@ def delete_artifact_tag(
         ):
             exit()
 
-    state.run(state.client.delete_artifact_tag(project, repo, reference, tag))
+    state.run(
+        state.client.delete_artifact_tag(an.project, an.repository, an.reference, tag)
+    )
 
 
 # add_artifact_label()
@@ -265,7 +268,7 @@ def add_artifact_label(
     ctx: typer.Context,
     artifact: str = typer.Argument(
         ...,
-        help="Name of the artifact in the format '<project>/<repository><{:tag,@sha256:digest}>'.",
+        help=ARTIFACT_HELP_STRING,
     ),
     name: Optional[str] = typer.Option(
         None,
@@ -292,14 +295,16 @@ def add_artifact_label(
     # TODO: add parameter validation. Name is probably required?
     # Otherwise, we can just leave validation to the API, and
     # print a default error message.
-    _, project, repo, reference = get_artifact_parts(artifact)
+    an = parse_artifact_name(artifact)
     label = Label(
         name=name,
         description=description,
         color=color,
         scope=scope,
     )
-    state.run(state.client.add_artifact_label(project, repo, reference, label))
+    state.run(
+        state.client.add_artifact_label(an.project, an.repository, an.reference, label)
+    )
     logger.info(f"Added label {label.name!r} to {artifact}.")
 
 
@@ -309,7 +314,7 @@ def delete_artifact_label(
     ctx: typer.Context,
     artifact: str = typer.Argument(
         ...,
-        help="Name of the artifact in the format '<project>/<repository><{:tag,@sha256:digest}>'.",
+        help=ARTIFACT_HELP_STRING,
     ),
     label_id: int = typer.Argument(
         ...,
@@ -317,5 +322,44 @@ def delete_artifact_label(
     ),
 ) -> None:
     """Add a label to an artifact."""
-    _, project, repo, reference = get_artifact_parts(artifact)
-    state.run(state.client.delete_artifact_label(project, repo, reference, label_id))
+    an = parse_artifact_name(artifact)
+    state.run(
+        state.client.delete_artifact_label(
+            an.project, an.repository, an.reference, label_id
+        )
+    )
+
+
+# HarborAsyncClient.get_artifact_vulnerabilities()
+# HarborAsyncClient.get_artifact_accessories()
+@app.command("accessories")
+def get_accessories(
+    ctx: typer.Context,
+    artifact: str = typer.Argument(
+        ...,
+        help=ARTIFACT_HELP_STRING,
+    ),
+) -> None:
+    """Get accessories for an artifact."""
+    an = parse_artifact_name(artifact)
+    accessories = state.run(
+        state.client.get_artifact_accessories(an.project, an.repository, an.reference)
+    )
+    render_result(accessories, ctx)
+
+
+# HarborAsyncClient.get_artifact_build_history()
+@app.command("buildhistory")
+def get_buildhistory(
+    ctx: typer.Context,
+    artifact: str = typer.Argument(
+        ...,
+        help=ARTIFACT_HELP_STRING,
+    ),
+) -> None:
+    """Get build history for an artifact."""
+    an = parse_artifact_name(artifact)
+    history = state.run(
+        state.client.get_artifact_build_history(an.project, an.repository, an.reference)
+    )
+    render_result(history, ctx)

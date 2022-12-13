@@ -9,7 +9,7 @@ from ...output.console import console
 from ...state import state
 
 # Create a command group
-app = typer.Typer(name="users", help="Manage users", no_args_is_help=True)
+app = typer.Typer(name="user", help="Manage users", no_args_is_help=True)
 
 
 # HarborAsyncClient.create_user()

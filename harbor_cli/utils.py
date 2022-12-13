@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import inspect
+from functools import wraps
 from typing import Any
-from typing import NoReturn
+
+from pydantic import BaseModel
 
 
 def replace_none(d: dict[str, Any], replacement: Any = "") -> dict[str, Any]:
@@ -24,49 +27,41 @@ def replace_none(d: dict[str, Any], replacement: Any = "") -> dict[str, Any]:
     return d
 
 
-def get_artifact_parts(s: str) -> tuple[str | None, str, str, str]:
-    """Splits an artifact string into domain name (optional), project,
-    repo, and reference (tag or digest).
-
-    Raises ValueError if the string is not in the correct format.
+# inject help fields
+def inject_help(model: type[BaseModel], strict: bool = False) -> Any:
+    """
+    Injects the description attributes of a pydantic model's fields into the
+    help attributes of typer options with matching names.
 
     Parameters
     ----------
-    s : str
-        Artifact string in the form of [domain/]<project>/<repo>{@sha256:<digest>,:<tag>}
-
-    Returns
-    -------
-    tuple[str | None, str, str, str]
-        Tuple of domain name (optional), project, repo, and reference (tag or digest).
+    model : type[BaseModel]
+        The pydantic model to use for help injection.
+    strict : bool
+        If True, fail if a field in the model does not have a matching typer
+        option, by default False
     """
 
-    # TODO: use some sort of regex to make this more robust
+    def decorator(func: Any) -> Any:
+        sig = inspect.signature(func)
+        for field_name, field in model.__fields__.items():
+            # only overwrite help if not already set
+            param = sig.parameters.get(field_name, None)
+            if not param:
+                if strict:
+                    raise ValueError(
+                        f"Field {field_name!r} not found in function signature of {func.__qualname__!r}."
+                    )
+                continue
+            if not hasattr(param, "default") or not hasattr(param.default, "help"):
+                continue
+            if not param.default.help:
+                param.default.help = field.field_info.description
 
-    def _raise_value_error() -> NoReturn:
-        raise ValueError(
-            f"Artifact string {s} is not in the correct format. "
-            "Expected format: [domain/]<project>/<repo>{@sha256:<digest>,:<tag>}"
-        )
+        @wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            return func(*args, **kwargs)
 
-    parts = s.split("/")
-    if len(parts) == 3:
-        domain, project, rest = parts
-    elif len(parts) == 2:
-        project, rest = parts
-        domain = None
-    else:
-        _raise_value_error()
+        return wrapper
 
-    # TODO: make this more robust
-    if "@" in rest:
-        repo, tag_or_digest = rest.split("@")
-    elif ":" in rest:
-        parts = rest.split(":")
-        if len(parts) != 2:
-            _raise_value_error()
-        repo, tag_or_digest = parts
-    else:
-        _raise_value_error()
-
-    return domain, project, repo, tag_or_digest
+    return decorator

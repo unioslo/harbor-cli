@@ -36,6 +36,15 @@ class CredentialsError(HarborCLIError):
     """Error loading credentials."""
 
 
+class ArtifactNameFormatError(HarborCLIError):
+    def __init__(self, s: str) -> None:
+        super().__init__(
+            self,
+            f"Artifact string {s} is not in the correct format. "
+            "Expected format: [domain/]<project>/<repo>{@sha256:<digest>,:<tag>}",
+        )
+
+
 MESSAGE_BADREQUEST = "400 Bad request: {method} {url}. Check your input. If you think this is a bug, please report it."
 MESSAGE_UNAUTHORIZED = "401 Unauthorized: {method} {url}. Check your credentials, and make sure you have permissions to access the resource."
 MESSAGE_FORBIDDEN = "403 Forbidden: {method} {url}. Check your credentials, and make sure you have permissions to access the resource."

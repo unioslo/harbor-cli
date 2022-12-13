@@ -8,13 +8,13 @@ from harborapi.ext.api import get_artifact
 from harborapi.models.scanner import Severity
 
 from ...app import app
+from ...harbor.artifact import parse_artifact_name
 from ...output.console import console
 from ...output.console import exit_err
 from ...output.format import OutputFormat
 from ...output.tables import artifact_table
 from ...output.tables import artifact_vulnerabilities_table
 from ...state import state
-from ...utils import get_artifact_parts
 
 
 @app.command("vulnerabilities", no_args_is_help=True)
@@ -57,12 +57,10 @@ def vulnerabilities(
 
     # TODO: move to own function
     if artifact is not None:
-        _, project, repo, tag_or_digest = get_artifact_parts(artifact)
-        a = state.run(get_artifact(state.client, project, repo, tag_or_digest))
+        an = parse_artifact_name(artifact)
         try:
-            a = state.loop.run_until_complete(
-                get_artifact(state.client, project, repo, tag_or_digest)
-                # state.client.get_artifact_vulnerabilities(project, repo, tag_or_digest)
+            a = state.run(
+                get_artifact(state.client, an.project, an.repository, an.reference)
             )
         except harborapi.exceptions.NotFound as e:  # noqa: F841
             exit_err(f"Artifact {artifact!r} not found.")
