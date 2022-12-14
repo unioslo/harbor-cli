@@ -28,7 +28,9 @@ def replace_none(d: dict[str, Any], replacement: Any = "") -> dict[str, Any]:
     return d
 
 
-def inject_help(model: type[BaseModel], strict: bool = False) -> Any:
+def inject_help(
+    model: type[BaseModel], strict: bool = False, **field_additions: str
+) -> Any:
     """
     Injects the description attributes of a pydantic model's fields into the
     help attributes of Typer options with matching names.
@@ -40,6 +42,12 @@ def inject_help(model: type[BaseModel], strict: bool = False) -> Any:
     strict : bool
         If True, fail if a field in the model does not have a matching typer
         option, by default False
+    **field_additions
+        Additional help text to add to the help attribute of a field.
+        The parameter name should be the name of the field, and the value
+        should be the additional help text to add. This is useful when
+        the field's description is not sufficient, and you want to add
+        additional help text.
     """
 
     def decorator(func: Any) -> Any:
@@ -56,7 +64,10 @@ def inject_help(model: type[BaseModel], strict: bool = False) -> Any:
             if not hasattr(param, "default") or not hasattr(param.default, "help"):
                 continue
             if not param.default.help:
-                param.default.help = field.field_info.description
+                addition = field_additions.get(field_name, "")
+                if addition:
+                    addition = f" {addition}"  # add leading space
+                param.default.help = f"{field.field_info.description}{addition}"
 
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
