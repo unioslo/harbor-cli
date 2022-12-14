@@ -13,7 +13,6 @@ authors = [{ name = "pederhan", email = "pederhan@uio.no" }]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.7",
   "Programming Language :: Python :: 3.8",
   "Programming Language :: Python :: 3.9",
   "Programming Language :: Python :: 3.10",
@@ -63,7 +62,7 @@ exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
 
 [tool.ruff]
 ignore = [
-  "E501", # line too long (does not respect black)
+  "E501", # line too long (we let black handle this)
   "F541", # f-string is missing placeholders
 ]
 
