@@ -51,7 +51,7 @@ cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=harbor
 no-cov = "cov --no-cov {args}"
 
 [[tool.hatch.envs.test.matrix]]
-python = ["37", "38", "39", "310", "311"]
+python = ["38", "39", "310", "311"]
 
 [tool.coverage.run]
 branch = true
@@ -66,3 +66,8 @@ ignore = [
   "E501", # line too long (does not respect black)
   "F541", # f-string is missing placeholders
 ]
+
+[tool.mypy]
+python_version = "3.8"
+ignore_missing_imports = true
+strict = false

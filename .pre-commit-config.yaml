@@ -24,13 +24,13 @@ repos:
     hooks:
       - id: reorder-python-imports
         exclude: ^(pre_commit/resources/|testing/resources/python3_hooks_repo/)
-
         args: [--py38-plus, --add-import, "from __future__ import annotations"]
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.0.176"
+    rev: "v0.0.178"
     hooks:
       - id: ruff
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: "v0.991"
     hooks:
       - id: mypy
+        args: [--config-file, pyproject.toml]
