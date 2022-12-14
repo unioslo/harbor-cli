@@ -32,8 +32,32 @@ def inject_help(
     model: type[BaseModel], strict: bool = False, **field_additions: str
 ) -> Any:
     """
-    Injects the description attributes of a pydantic model's fields into the
-    help attributes of Typer options with matching names.
+    Injects a Pydantic model's field descriptions into the help attributes
+    of Typer.Option() function parameters whose names match the field names.
+
+    Example
+    -------
+    ```python
+    class MyModel(BaseModel):
+        my_field: str = Field(..., description="Description of my_field")
+
+    @app.command(name="my-command")
+    @inject_help(MyModel)
+    def my_command(my_field: str = typer.Option(...)):
+        ...
+
+    # `my-app my-command --help`
+    # my_field's help text will be "Description of my_field"
+    ```
+
+    NOTE
+    ----
+    Does not modify the help text of options with existing help text!
+    Use the `**field_additions` parameter to add additional help text to a field
+    in addition to the field's description. This text is appended to the
+    help text, separated by a space.
+
+    e.g. `@inject_help(MyModel, my_field="Additional help text that is appended to the field's description.")`
 
     Parameters
     ----------
@@ -82,12 +106,21 @@ def inject_help(
 #
 # '--sort' and '-query' are two parameters that are used in many commands
 # in order to not have to write out the same code over and over again,
-# we can use these decorators to inject the parameters into the function,
-# given that the function has a parameter with the same name.
+# we can use these decorators to inject the parameters (and their accompanying help text)
+# into a function, given that the function has a parameter with the same name,
+# (e.g. 'query', 'sort', etc.)
 #
 # NOTE: we COULD technically inject the parameter even if the function doesn't
 # already have it, but that is too magical, and does not play well with
 # static analysis tools like mypy.
+#
+# Fundamentally, we don't want to change the function signature, only set the
+# default value of the parameter to a typer.Option() instance.
+# This lets Typer pick it up and use it to display help text and create the
+# correct commandline option (--query, --sort, etc.)
+#
+# Unlike most decorators, the function is not wrapped, but rather its
+# signature is modified in-place, and then the function is returned.
 
 
 def inject_query(strict: bool = False) -> Any:
@@ -112,10 +145,13 @@ def inject_sort(strict: bool = False) -> Any:
     return decorator
 
 
-def _patch_param(func: Any, name: str, param: typer.models.OptionInfo, strict) -> Any:
+def _patch_param(
+    func: Any, name: str, value: typer.models.OptionInfo, strict: bool
+) -> Any:
+    """Patches a function's parameter with the given name to have the given default value."""
     sig = inspect.signature(func)
-    mutable_params = sig.parameters.copy()
-    to_replace = mutable_params.get(name)
+    new_params = sig.parameters.copy()  # this copied object is mutable
+    to_replace = new_params.get(name)
 
     if not to_replace:
         if strict:
@@ -134,8 +170,8 @@ def _patch_param(func: Any, name: str, param: typer.models.OptionInfo, strict) -
             f"Parameter {name!r} in function {func.__qualname__!r} must be of type 'Optional[str]' or 'str | None'."
         )
 
-    mutable_params[name] = to_replace.replace(default=param)
-    new_sig = sig.replace(parameters=list(mutable_params.values()))
+    new_params[name] = to_replace.replace(default=value)
+    new_sig = sig.replace(parameters=list(new_params.values()))
     func.__signature__ = new_sig
 
     return func
