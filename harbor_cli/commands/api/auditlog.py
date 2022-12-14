@@ -7,22 +7,21 @@ import typer
 from ...logs import logger
 from ...output.render import render_result
 from ...state import state
-from ...utils import inject_query
-from ...utils import inject_sort
+from ...utils import inject_resource_options
 
 # Create a command group
 app = typer.Typer(name="auditlog", help="System information", no_args_is_help=True)
 
 
 @app.command("list")
-@inject_sort()
-@inject_query()
+@inject_resource_options()
 def list_audit_logs(
     ctx: typer.Context,
-    query: Optional[str] = None,
-    sort: Optional[str] = None,
-    page_size: int = typer.Option(10, "--page-size"),
-    fetch_all: bool = typer.Option(False, "--all"),
+    query: Optional[str],
+    sort: Optional[str],
+    page: int,
+    page_size: int,
+    retrieve_all: bool = typer.Option(True),
 ) -> None:
     """List audit logs for the current user."""
     logger.info(f"Fetching audit logs...")
@@ -30,8 +29,9 @@ def list_audit_logs(
         state.client.get_audit_logs(
             query=query,
             sort=sort,
+            page=page,
             page_size=page_size,
-            retrieve_all=fetch_all,
+            retrieve_all=retrieve_all,
         )
     )
     render_result(logs, ctx)

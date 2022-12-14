@@ -12,8 +12,7 @@ from ...logs import logger
 from ...output.render import render_result
 from ...state import state
 from ...utils import inject_help
-from ...utils import inject_query
-from ...utils import inject_sort
+from ...utils import inject_resource_options
 
 # Create a command group
 app = typer.Typer(
@@ -83,12 +82,24 @@ schedule_cmd.command("update", help="Update existing Garbage Collection schedule
 
 # HarborAsyncClient.get_gc_jobs()
 @app.command("jobs", no_args_is_help=True)
-@inject_query()
-@inject_sort()
-def get_gc_jobs(ctx: typer.Context, query: Optional[str], sort: Optional[str]) -> None:
+@inject_resource_options()
+def get_gc_jobs(
+    ctx: typer.Context,
+    query: Optional[str],
+    sort: Optional[str],
+    page: int,
+    page_size: int,
+) -> None:
     """Get garbage collection jobs."""
     logger.info(f"Fetching Garbage Collection jobs...")
-    jobs = state.run(state.client.get_gc_jobs(query=query, sort=sort))
+    jobs = state.run(
+        state.client.get_gc_jobs(
+            query=query,
+            sort=sort,
+            page=page,
+            page_size=page_size,
+        )
+    )
     render_result(jobs, ctx)
 
 
