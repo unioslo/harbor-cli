@@ -13,9 +13,15 @@ from ...state import state
 from ...utils import inject_help
 
 # Create a command group
-app = typer.Typer(name="scan-all", help="Manage 'Scan All'.", no_args_is_help=True)
+app = typer.Typer(
+    name="scan-all",
+    help="Scanning of all artifacts.",
+    no_args_is_help=True,
+)
 schedule_cmd = typer.Typer(
-    name="schedule", help="Manage 'Scan All' schedule.", no_args_is_help=True
+    name="schedule",
+    help="Manage 'Scan All' schedule.",
+    no_args_is_help=True,
 )
 app.add_typer(schedule_cmd)
 
