@@ -7,16 +7,11 @@ from typing import TypedDict
 
 import tomli
 import tomli_w
+from harborapi.models.base import BaseModel as HarborBaseModel
 from loguru import logger
-from pydantic import BaseModel as PydanticBaseModel
 from pydantic import Field
 from pydantic import root_validator
 from pydantic import validator
-from rich.console import Console
-from rich.console import ConsoleOptions
-from rich.console import RenderResult
-from rich.table import Column
-from rich.table import Table
 
 from .dirs import CONFIG_DIR
 from .exceptions import CredentialsError
@@ -44,7 +39,15 @@ def load_toml_file(config_file: Path) -> dict[str, Any]:
     return conf
 
 
-class BaseModel(PydanticBaseModel):
+# We use the harborapi.models.BaseModel as our base class
+# for the config models. This isn't ideal, and we should instead
+# be able to import as_table from harborapi and add it to our own
+# BaseModel class. But for now, this works.
+#
+# The reason we can't do the above is because as_table is a bound method
+# on the harborapi.models.BaseModel class, and we can't add it to our own
+# until the method is moved out of the class.
+class BaseModel(HarborBaseModel):
     """Base model shared by all config models."""
 
     # https://pydantic-docs.helpmanual.io/usage/model_config/#change-behaviour-globally
@@ -68,55 +71,6 @@ class BaseModel(PydanticBaseModel):
                     key,
                 )
         return values
-
-    def __rich_console__(
-        self, console: Console, options: ConsoleOptions
-    ) -> RenderResult:
-        """Rich console representation of the model.
-
-        Returns a table with the model's fields and values.
-
-        If the model has a nested model, the nested model's table representation
-        is printed after the main table. Should support multiple levels of
-        nested models, but not tested.
-
-        See: https://rich.readthedocs.io/en/latest/protocol.html#console-render
-        """
-        try:
-            name = self.__name__  # type: ignore # this is populated by Pydantic
-        except AttributeError:
-            name = self.__class__.__name__
-        table = Table(
-            Column(
-                header="Setting", justify="left", style="green", header_style="bold"
-            ),
-            Column(header="Value", style="blue", justify="left"),
-            Column(header="Description", style="yellow", justify="left"),
-            title=f"[bold]{name}[/bold]",
-            title_style="magenta",
-            title_justify="left",
-        )
-        subtables = []  # type: list[BaseModel]
-        for field_name, field in self.__fields__.items():
-            # Try to use field title if available
-            field_title = field.field_info.title or field_name
-
-            attr = getattr(self, field_name)
-            try:
-                # issubclass is prone to TypeError, so we use try/except
-                if issubclass(field.type_, BaseModel) and attr is not None:
-                    if isinstance(attr, (list, set)):  # check iterable types?
-                        subtables.extend(attr)
-                    else:
-                        subtables.append(attr)
-                    continue
-            except:  # noqa: E722
-                pass
-            table.add_row(field_title, str(attr), field.field_info.description)
-
-        if table.rows:
-            yield table
-        yield from subtables
 
     class Config:
         # Allow for future fields to be added to the config file without
