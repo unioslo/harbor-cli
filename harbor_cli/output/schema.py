@@ -3,6 +3,10 @@
 The aim is to be able to serialize a Pydantic model to JSON, YAML, etc. and
 include metadata about the model in the serialized data. This metadata can
 then be used to deserialize the data back into the correct Pydantic model.
+
+The benefit of this is that we can more easily print the data as tables
+using the harborapi.models.BaseModel's as_table() method, and we can also use the
+Pydantic models' custom validation, methods and properties.
 """
 from __future__ import annotations
 
@@ -24,10 +28,12 @@ T = TypeVar("T")
 class Schema(BaseModel, Generic[T]):
     """A schema for (de)serializing data (JSON, YAML, etc.)"""
 
-    version: str = "1.0.0"
+    version: str = "1.0.0"  # TODO: use harborapi.models.SemVer?
     data: T | list[T]
-    type_: str | None = None
-    is_list: bool = False
+    type_: str | None = None  # should only be None if empty list
+
+    class Config:
+        extra = "allow"
 
     @root_validator
     def set_type(cls, values: dict[str, Any]) -> dict[str, Any]:
@@ -39,14 +45,14 @@ class Schema(BaseModel, Generic[T]):
                 typ = str(data[0].__class__.__name__)
             else:
                 typ = str(type(data[0])) if data else None  # type: ignore
-            values["is_list"] = True
         else:
             typ = str(type(data))
         values["type_"] = typ
+        # TODO: set source module
         return values
 
     def update_data_type(self) -> Schema:
-        """Re-validates the data using the type_ attribute.
+        """Re-runs validation using the type_ attribute.
 
         After deserializing, we need to re-validate the data using the
         type_ attribute. This is because the default data type for the
@@ -55,6 +61,7 @@ class Schema(BaseModel, Generic[T]):
         field names and types, as well as any custom validation, methods
         and properties tied to the data type.
         """
+        # TODO: add support for harborapi.ext
         module = importlib.import_module("harborapi.models")
         if self.type_ is None:
             return self
