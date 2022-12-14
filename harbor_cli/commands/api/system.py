@@ -7,7 +7,11 @@ from ...output.render import render_result
 from ...state import state
 
 # Create a command group
-app = typer.Typer(name="system")
+app = typer.Typer(
+    name="system",
+    help="System information",
+    no_args_is_help=True,
+)
 
 
 @app.command("info")

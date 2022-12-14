@@ -22,6 +22,7 @@ from ..help import ARTIFACT_HELP_STRING
 # Create a command group
 app = typer.Typer(
     name="artifact",
+    help="Manage artifacts.",
     no_args_is_help=True,
 )
 
@@ -353,7 +354,7 @@ def get_accessories(
 
 
 # HarborAsyncClient.get_artifact_build_history()
-@app.command("buildhistory")
+@app.command("buildhistory", no_args_is_help=True)
 def get_buildhistory(
     ctx: typer.Context,
     artifact: str = typer.Argument(

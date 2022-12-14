@@ -11,7 +11,11 @@ from ...state import state
 from ...utils import inject_help
 
 # Create a command group
-app = typer.Typer(name="config", no_args_is_help=True)
+app = typer.Typer(
+    name="config",
+    help="Manage Harbor configuration.",
+    no_args_is_help=True,
+)
 
 
 @app.command("get", no_args_is_help=True)
@@ -29,7 +33,6 @@ def update_config(
     auth_mode: Optional[str] = typer.Option(
         None,
         "--auth-mode",
-        help="The authentication mode of Harbor. The valid values are db_auth, ldap_auth, uaa_auth, http_auth, oidc_auth, and default is db_auth.",
     ),
     email_from: Optional[str] = typer.Option(
         None,

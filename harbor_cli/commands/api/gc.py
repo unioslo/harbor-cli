@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import datetime
 from typing import Optional
 
 import typer
@@ -17,7 +16,11 @@ from ...utils import inject_query
 from ...utils import inject_sort
 
 # Create a command group
-app = typer.Typer(name="gc", help="Garbage collection commands", no_args_is_help=True)
+app = typer.Typer(
+    name="gc",
+    help="Garbage Collection scheduling and information",
+    no_args_is_help=True,
+)
 
 schedule_cmd = typer.Typer(
     name="schedule", help="Garbage collection scheduling", no_args_is_help=True
@@ -46,15 +49,10 @@ def _do_handle_gc_command(
         None,
         "--cron",
     ),
-    next_scheduled_time: Optional[datetime] = typer.Option(
-        None,
-        "--next_scheduled_time",
-    ),
 ) -> None:
     schedule_obj = ScheduleObj(
         type=type,
         cron=cron,
-        next_scheduled_time=next_scheduled_time,
     )
     # TODO: investigate which parameters the `parameters` field takes
     schedule = Schedule(schedule=schedule_obj)

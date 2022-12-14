@@ -51,6 +51,7 @@ def vulnerabilities(
         help="Minimum severity of vulnerabilities to list.",
     ),
 ) -> None:
+    """List vulnerabilities for an artifact."""
     # TODO: move to own function
     if artifact is not None:
         an = parse_artifact_name(artifact)

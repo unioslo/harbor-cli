@@ -6,7 +6,11 @@ from ...output.console import console
 from ...state import state
 
 # Create a command group
-app = typer.Typer(name="project")
+app = typer.Typer(
+    name="project",
+    help="Manage projects.",
+    no_args_is_help=True,
+)
 
 
 @app.command("info", no_args_is_help=True)
