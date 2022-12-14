@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import inspect
-from functools import wraps
 from typing import Any
 
 import typer
@@ -92,12 +91,7 @@ def inject_help(
                 if addition:
                     addition = f" {addition}"  # add leading space
                 param.default.help = f"{field.field_info.description}{addition}"
-
-        @wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> Any:
-            return func(*args, **kwargs)
-
-        return wrapper
+        return func
 
     return decorator
 
