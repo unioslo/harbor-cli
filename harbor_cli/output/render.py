@@ -4,17 +4,14 @@ from typing import Sequence
 from typing import TypeVar
 
 import typer
+from harborapi.models.base import BaseModel as HarborBaseModel
 from pydantic import BaseModel
 
-from ..context import get_no_overwrite
-from ..context import get_output_file
-from ..context import get_output_format
-from ..context import get_with_stdout
 from ..exceptions import OverwriteError
+from ..state import state
 from .console import console
 from .format import OutputFormat
 from .schema import Schema
-
 
 T = TypeVar("T")
 
@@ -23,7 +20,7 @@ T = TypeVar("T")
 
 def render_result(result: T, ctx: typer.Context) -> None:
     """Render the result of a command."""
-    fmt = get_output_format(ctx)
+    fmt = state.options.output_format
     if fmt == OutputFormat.TABLE:
         render_table(result, ctx)
     elif fmt == OutputFormat.JSON:
@@ -36,18 +33,28 @@ def render_result(result: T, ctx: typer.Context) -> None:
 
 def render_table(result: T | Sequence[T], ctx: typer.Context) -> None:
     """Render the result of a command as a table."""
-    if isinstance(result, list):
-        for item in result:
+    show_description = state.options.show_description
+
+    def print_item(item: T) -> None:
+        """Prints a harbor base model as a table (optionally with description),
+        if it is a harborapi BaseModel, otherwise just prints the item."""
+        if isinstance(item, HarborBaseModel):
+            console.print(*(item.as_table(with_description=show_description)))
+        else:
             console.print(item)
+
+    if isinstance(result, Sequence):
+        for item in result:
+            print_item(item)
     else:
-        console.print(result)
+        print_item(result)
 
 
-def render_json(result: T | Sequence[T], ctx: typer.Context) -> None:
+def render_json(result: T | Sequence[T], ctx: typer.Context | None = None) -> None:
     """Render the result of a command as JSON."""
-    p = get_output_file(ctx)
-    with_stdout = get_with_stdout(ctx)
-    no_overwrite = get_no_overwrite(ctx)
+    p = state.options.output_file
+    with_stdout = state.options.with_stdout
+    no_overwrite = state.options.no_overwrite
 
     # To make the JSON serialization more compatible with Pydantic
     # models and data types, we wrap the data in a Pydantic model
@@ -70,11 +77,13 @@ def render_json(result: T | Sequence[T], ctx: typer.Context) -> None:
         console.print_json(o_json)
 
 
-def render_jsonschema(result: T | Sequence[T], ctx: typer.Context) -> None:
+def render_jsonschema(
+    result: T | Sequence[T], ctx: typer.Context | None = None
+) -> None:
     """Render the result of a command as JSON with metadata."""
-    p = get_output_file(ctx)
-    with_stdout = get_with_stdout(ctx)
-    no_overwrite = get_no_overwrite(ctx)
+    p = state.options.output_file
+    with_stdout = state.options.with_stdout
+    no_overwrite = state.options.no_overwrite
 
     # TODO: add switch to print to file and stdout at the same time
     schema = Schema(data=result)  # type: Schema[T | list[T]]

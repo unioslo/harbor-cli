@@ -26,10 +26,7 @@ for group in commands.ALL_GROUPS:
 def main_callback(
     ctx: typer.Context,
     # Configuration options
-    verbose: bool = typer.Option(
-        False, "--verbose", "-v", help="Enable verbose output."
-    ),
-    config: Optional[Path] = typer.Option(
+    config_file: Optional[Path] = typer.Option(
         None, "--config", "-c", help="Path to config file."
     ),
     # Harbor options
@@ -45,6 +42,11 @@ def main_callback(
         None, "--credentials-file", "-F", help="Harbor basic access credentials file."
     ),
     # Formatting
+    show_description: bool = typer.Option(
+        False,
+        "--show-description",
+        help="Include field descriptions in tables. Has no effect if tables aren't printed.",
+    ),
     output_format: OutputFormat = typer.Option(
         OutputFormat.TABLE.value,
         "--format",
@@ -61,6 +63,10 @@ def main_callback(
         False,
         "--no-overwrite",
         help="Do not overwrite the output file if it already exists.",
+    ),
+    # stdout/stderr options
+    verbose: bool = typer.Option(
+        False, "--verbose", "-v", help="Enable verbose output."
     ),
     with_stdout: bool = typer.Option(
         False,
@@ -79,21 +85,31 @@ def main_callback(
         return
 
     # TODO: find a better way to do this
+    # We don't want to run the rest of the callback if the useris asking
+    # for help, so we check for the help option names and exit early if
+    # any are present. The problem is that if the --help option is passed
+    # to a subcommand, we can't access it through the ctx object here,
+    # so we have to check the sys.argv list.
     if any(help_arg in sys.argv for help_arg in ctx.help_option_names):
         return
 
-    if verbose:
-        state.verbose = True
-
-    if config:
+    if config_file:
         # If a config file is specified, it needs to exist
-        state.config = HarborCLIConfig.from_file(config)
+        state.config = HarborCLIConfig.from_file(config_file)
     else:
         # Support creating config file if no path is specified,
         # and the default config file doesn't exist.
         state.config = HarborCLIConfig.from_file(create=True)
 
     state.client = harbor.get_client(state.config)
+
+    # Set common options
+    state.options.verbose = verbose
+    state.options.show_description = show_description
+    state.options.output_format = output_format
+    state.options.output_file = output_file
+    state.options.no_overwrite = no_overwrite
+    state.options.with_stdout = with_stdout
 
     # TODO: run configure_from_config and expand it to include all options
 
@@ -111,4 +127,8 @@ def main() -> None:
     try:
         app()
     except HarborCLIError as e:
+        # exceptions of this type are expected, and if they're
+        # not handled internally (i.e. other function calls exit()),
+        # we want to only display their message and exit with a
+        # non-zero status code.
         exit_err(str(e))

@@ -51,10 +51,6 @@ def vulnerabilities(
         help="Minimum severity of vulnerabilities to list.",
     ),
 ) -> None:
-    # We need the parent context to get the global options (output format etc.)
-    if ctx.parent is None:
-        exit_err(f"No parent context found in command {ctx.command.name!r}.")
-
     # TODO: move to own function
     if artifact is not None:
         an = parse_artifact_name(artifact)
@@ -69,11 +65,9 @@ def vulnerabilities(
             exit_err("Unauthorized. Check your credentials.")
         except harborapi.exceptions.HarborAPIException as e:
             exit_err(f"Error: {e}")
-
-        if ctx.parent.params["output_format"] == OutputFormat.TABLE.value:
+        if state.options.output_format == OutputFormat.TABLE:
             table = artifact_table([a])
             console.print(table)
-
             a.report.sort(use_cvss=True)
             console.print(artifact_vulnerabilities_table(a))
 

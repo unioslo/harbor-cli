@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from pathlib import Path
 from typing import Awaitable
 from typing import TypeVar
 
@@ -11,8 +12,28 @@ from pydantic import Field
 
 from .config import HarborCLIConfig
 from .exceptions import handle_status_error
+from .output.format import OutputFormat
 
 T = TypeVar("T")
+
+
+class CommonOptions(BaseModel):
+    """Options that can be used with any command.
+
+    These options are not specific to any particular command.
+    """
+
+    verbose: bool = False
+    # Output options
+    output_format: OutputFormat = OutputFormat.TABLE
+    with_stdout: bool = False
+    show_description: bool = False
+    # File options
+    output_file: Path | None = None
+    no_overwrite: bool = False
+
+    class Config:
+        extra = "allow"
 
 
 class State(BaseModel):
@@ -25,8 +46,8 @@ class State(BaseModel):
 
     config: HarborCLIConfig = Field(default_factory=HarborCLIConfig)
     client: HarborAsyncClient = None  # type: ignore # will be patched by the callback
-    verbose: bool = False
     loop: asyncio.AbstractEventLoop = Field(default_factory=asyncio.get_event_loop)
+    options: CommonOptions = Field(default_factory=CommonOptions)
 
     class Config:
         keep_untouched = (asyncio.AbstractEventLoop,)
