@@ -96,8 +96,9 @@ def inject_help(
     return decorator
 
 
-# This injection seems too complicated...?
-#
+# NOTE: This injection seems too complicated...? Could maybe just create default
+# typer.Option() instances for each field in the model and use them as defaults?
+
 # '--sort' and '-query' are two parameters that are used in many commands
 # in order to not have to write out the same code over and over again,
 # we can use these decorators to inject the parameters (and their accompanying help text)
@@ -117,12 +118,79 @@ def inject_help(
 # signature is modified in-place, and then the function is returned.
 
 
-def inject_query(f: Any = None, *, strict: bool = False) -> Any:
+def inject_resource_options(
+    f: Any = None, *, strict: bool = False, use_defaults: bool = True
+) -> Any:
+    """Decorator that calls inject_query, inject_sort, inject_page_size,
+    inject_page and inject_retrieve_all to inject typer.Option() defaults
+    for common options used when querying multiple resources.
+
+    NOTE: needs to be specified BEFORE @app.command() in order to work!
+
+    Not strict by default, so that it can be used on functions that only
+    have a subset of the parameters (e.g. only query and sort).
+
+    The decorated function should always declare the parameters in the following order
+    if the parameters don't have defaults:
+    `query`, `sort`, `page`, `page_size`, `retrieve_all`
+
+    Parameters
+    ----------
+    f : Any, optional
+        The function to decorate, by default None
+    strict : bool, optional
+        If True, fail if a field in the model does not have a matching typer
+        option, by default False
+    use_defaults : bool, optional
+        If True, use the default value specified by a parameter's typer.Option() field
+        as the default value for the parameter, by default True.
+
+        Example:
+        @inject_resource_options(use_defaults=True)
+        my_func(page_size: int = typer.Option(20)) -> None: ...
+
+        If use_defaults is True, the default value of page_size will be 20,
+        instead of 10, which is the value inject_page_size() would use by default.
+        NOTE: Only accepts defaults specified via typer.Option() and
+        typer.Argument() instances!
+
+        @inject_resource_options(use_default=True)
+        my_func(page_size: int = 20) -> None: ... # will fail (for now)
+
+    Returns
+    -------
+    Any
+        The decorated function
+    """
+
+    # TODO: add check that the function signature is in the correct order
+    # so we don't raise a cryptic error message later on!
+
+    def decorator(func: Any) -> Any:
+        # Inject in reverse order, because parameters with defaults
+        # can't be followed by parameters without defaults
+        func = inject_retrieve_all(func, strict=strict, use_default=use_defaults)
+        func = inject_page_size(func, strict=strict, use_default=use_defaults)
+        func = inject_page(func, strict=strict, use_default=use_defaults)
+        func = inject_sort(func, strict=strict, use_default=use_defaults)
+        func = inject_query(func, strict=strict, use_default=use_defaults)
+        return func
+
+    # Support using plain @inject_resource_options or @inject_resource_options()
+    if callable(f):
+        return decorator(f)
+    else:
+        return decorator
+
+
+def inject_query(
+    f: Any = None, *, strict: bool = False, use_default: bool = True
+) -> Any:
     def decorator(func: Any) -> Any:
         option = typer.Option(
             None, "--query", help="Query parameters to filter the results. "
         )
-        return _patch_param(func, "query", option, strict)
+        return _patch_param(func, "query", option, strict, use_default)
 
     # Support using plain @inject_query or @inject_query()
     if callable(f):
@@ -131,14 +199,16 @@ def inject_query(f: Any = None, *, strict: bool = False) -> Any:
         return decorator
 
 
-def inject_sort(f: Any = None, *, strict: bool = False) -> Any:
+def inject_sort(
+    f: Any = None, *, strict: bool = False, use_default: bool = True
+) -> Any:
     def decorator(func: Any) -> Any:
         option = typer.Option(
             None,
             "--sort",
             help="Sorting order of the results. Example: 'name,-id' to sort by name ascending and id descending. ",
         )
-        return _patch_param(func, "sort", option, strict)
+        return _patch_param(func, "sort", option, strict, use_default)
 
     # Support using plain @inject_sort or @inject_sort()
     if callable(f):
@@ -147,8 +217,64 @@ def inject_sort(f: Any = None, *, strict: bool = False) -> Any:
         return decorator
 
 
+def inject_page_size(
+    f: Any = None, *, strict: bool = False, use_default: bool = True
+) -> Any:
+    def decorator(func: Any) -> Any:
+        option = typer.Option(
+            10,
+            "--page-size",
+            help="(Advanced) Number of results to fetch per API call. ",
+        )
+        return _patch_param(func, "page_size", option, strict, use_default)
+
+    # Support using plain @inject_page_size or @inject_page_size()
+    if callable(f):
+        return decorator(f)
+    else:
+        return decorator
+
+
+def inject_page(
+    f: Any = None, *, strict: bool = False, use_default: bool = True
+) -> Any:
+    def decorator(func: Any) -> Any:
+        option = typer.Option(
+            None, "--page", help="(Advanced) Page to begin fetching from. "
+        )
+        return _patch_param(func, "page", option, strict, use_default)
+
+    # Support using plain @inject_page or @inject_page()
+    if callable(f):
+        return decorator(f)
+    else:
+        return decorator
+
+
+def inject_retrieve_all(
+    f: Any = None, *, strict: bool = False, use_default: bool = False
+) -> Any:
+    def decorator(func: Any) -> Any:
+        option = typer.Option(
+            True,
+            "--all",
+            help="(Advanced) Fetch all matches instead of only first <page_size> matches. ",
+        )
+        return _patch_param(func, "retrieve_all", option, strict, use_default)
+
+    # Support using plain @inject_page or @inject_page()
+    if callable(f):
+        return decorator(f)
+    else:
+        return decorator
+
+
 def _patch_param(
-    func: Any, name: str, value: typer.models.OptionInfo, strict: bool
+    func: Any,
+    name: str,
+    value: typer.models.OptionInfo,
+    strict: bool,
+    use_default: bool,
 ) -> Any:
     """Patches a function's parameter with the given name to have the given default value."""
     sig = inspect.signature(func)
@@ -162,16 +288,17 @@ def _patch_param(
             )
         return func
 
-    if not to_replace.annotation:
-        raise ValueError(
-            f"Parameter {name!r} in function {func.__qualname__!r} must have a type annotation."
-        )
+    # if not to_replace.annotation:
+    #     raise ValueError(
+    #         f"Parameter {name!r} in function {func.__qualname__!r} must have a type annotation."
+    #     )
 
-    if to_replace.annotation not in ["Optional[str]", "str | None", "None | str"]:
-        raise ValueError(
-            f"Parameter {name!r} in function {func.__qualname__!r} must be of type 'Optional[str]' or 'str | None'."
-        )
-
+    # if to_replace.annotation not in ["Optional[str]", "str | None", "None | str"]:
+    #     raise ValueError(
+    #         f"Parameter {name!r} in function {func.__qualname__!r} must be of type 'Optional[str]' or 'str | None'."
+    #     )
+    if use_default and hasattr(to_replace.default, "default"):
+        value.default = to_replace.default.default
     new_params[name] = to_replace.replace(default=value)
     new_sig = sig.replace(parameters=list(new_params.values()))
     func.__signature__ = new_sig
