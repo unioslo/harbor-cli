@@ -123,17 +123,21 @@ def inject_help(
 # signature is modified in-place, and then the function is returned.
 
 
-def inject_query(strict: bool = False) -> Any:
+def inject_query(f: Any = None, *, strict: bool = False) -> Any:
     def decorator(func: Any) -> Any:
         option = typer.Option(
             None, "--query", help="Query parameters to filter the results. "
         )
         return _patch_param(func, "query", option, strict)
 
-    return decorator
+    # Support using plain @inject_query or @inject_query()
+    if callable(f):
+        return decorator(f)
+    else:
+        return decorator
 
 
-def inject_sort(strict: bool = False) -> Any:
+def inject_sort(f: Any = None, *, strict: bool = False) -> Any:
     def decorator(func: Any) -> Any:
         option = typer.Option(
             None,
@@ -142,7 +146,11 @@ def inject_sort(strict: bool = False) -> Any:
         )
         return _patch_param(func, "sort", option, strict)
 
-    return decorator
+    # Support using plain @inject_sort or @inject_sort()
+    if callable(f):
+        return decorator(f)
+    else:
+        return decorator
 
 
 def _patch_param(
