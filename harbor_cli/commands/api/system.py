@@ -24,7 +24,7 @@ def info(ctx: typer.Context) -> None:
     render_result(system_info, ctx)
 
 
-@app.command("volumeinfo")
+@app.command("volumes")
 def volumeinfo(ctx: typer.Context) -> None:
     """Get information about the system volumes."""
     logger.info(f"Fetching system volume info...")
