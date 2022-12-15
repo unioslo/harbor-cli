@@ -240,7 +240,7 @@ def inject_page(
 ) -> Any:
     def decorator(func: Any) -> Any:
         option = typer.Option(
-            None, "--page", help="(Advanced) Page to begin fetching from. "
+            1, "--page", help="(Advanced) Page to begin fetching from. "
         )
         return _patch_param(func, "page", option, strict, use_default)
 
