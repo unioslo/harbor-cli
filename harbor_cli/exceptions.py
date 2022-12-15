@@ -13,6 +13,7 @@ from harborapi.exceptions import StatusError
 from harborapi.exceptions import Unauthorized
 from harborapi.exceptions import UnsupportedMediaType
 
+from .logs import logger
 from .output.console import exit_err
 
 
@@ -94,6 +95,10 @@ def handle_status_error(e: StatusError) -> NoReturn:
     url = e.__cause__.request.url
     method = e.__cause__.request.method
     httpx_message = e.__cause__.args[0]
+
+    # Print out all errors from the API
+    for error in e.errors:
+        logger.error(f"{error.code}: {error.message}")
 
     # Exception has custom message if its message is different from the
     # underlying HTTPX exception's message
