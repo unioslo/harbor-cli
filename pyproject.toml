@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "harbor-cli"
 description = ''
 readme = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.8"
 license = "MIT"
 keywords = []
 authors = [{ name = "pederhan", email = "pederhan@uio.no" }]
@@ -70,3 +70,4 @@ ignore = [
 python_version = "3.8"
 ignore_missing_imports = true
 strict = false
+exclude = ["tests"]
