@@ -16,6 +16,7 @@ from ...output.console import exit
 from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
+from ...utils import inject_resource_options
 from ..help import ARTIFACT_HELP_STRING
 
 
@@ -43,21 +44,35 @@ app.add_typer(label_cmd)
 
 # get_artifacts()
 @app.command("list")
+@inject_resource_options()
 def list_artifacts(
     ctx: typer.Context,
+    query: Optional[str],
     project: str = typer.Argument(
         ...,
         help="Name of project to fetch artifacts from.",
     ),
-    repo: str = typer.Argument(
-        "",
+    repo: Optional[str] = typer.Argument(
+        None,
         help="Specific repository in project to fetch artifacts from.",
+    ),
+    tag: Optional[str] = typer.Option(
+        None,
+        "--tag",
+        help="Limit to artifacts with this tag (e.g. 'latest').",
     ),
     with_report: bool = typer.Option(
         False,
         "--with-report",
-        "-r",
         help="Include vulnerability report in output.",
+    ),
+    max_connections: int = typer.Option(
+        5,
+        "--max-connections",
+        help=(
+            "Maximum number of concurrent connections to use. "
+            "Setting this too high can lead to severe performance degradation."
+        ),
     ),
     # TODO: add ArtifactReport filtering options here
 ) -> None:
@@ -72,6 +87,7 @@ def list_artifacts(
 
     # Get all artifacts in a specific repo
     if project and repo:
+        repositories = [repo]
         artifacts = state.run(
             get_artifacts(
                 state.client,
@@ -81,14 +97,18 @@ def list_artifacts(
         )
     # Get all artifacts in all repos in a project
     else:
-        artifacts = state.run(
-            get_artifacts(
-                state.client,
-                projects=[project],
-            )
+        repositories = None
+    artifacts = state.run(
+        get_artifacts(
+            state.client,
+            projects=[project],
+            repositories=repositories,
+            tag=tag,
+            query=query,
         )
-
+    )
     render_result(artifacts, ctx)
+    logger.info(f"Fetched {len(artifacts)} artifact(s).")
 
 
 # delete_artifact()
