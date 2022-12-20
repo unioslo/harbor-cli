@@ -6,6 +6,7 @@ import typer
 from . import artifact as artifact
 from . import auditlog as auditlog
 from . import config as config
+from . import cve_allowlist as cve_allowlist
 from . import gc as gc
 from . import project as project
 from . import registry as registry
@@ -20,6 +21,7 @@ api_commands: list[typer.Typer] = [
     artifact.app,
     auditlog.app,
     config.app,
+    cve_allowlist.app,
     gc.app,
     project.app,
     registry.app,

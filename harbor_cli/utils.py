@@ -27,6 +27,17 @@ def replace_none(d: dict[str, Any], replacement: Any = "") -> dict[str, Any]:
     return d
 
 
+def parse_commalist(arg: list[str]) -> list[str]:
+    """Parses an argument that can be specified multiple times,
+    or as a comma-separated list, into a list of strings.
+
+    Example:
+    my_app --arg foo --arg bar,baz
+    will be parsed as: ["foo", "bar", "baz"]
+    """
+    return [item for arg_list in arg for item in arg_list.split(",")]
+
+
 def inject_help(
     model: type[BaseModel], strict: bool = False, **field_additions: str
 ) -> Any:
