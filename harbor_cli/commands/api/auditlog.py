@@ -23,7 +23,10 @@ def list_audit_logs(
     page_size: int,
     retrieve_all: bool = typer.Option(True),
 ) -> None:
-    """List audit logs for the current user."""
+    """List audit logs for projects the current user has access to.
+    [bold red]WARNING:[/] This command can return a lot of data if no query
+    is specified.
+    """
     logger.info(f"Fetching audit logs...")
     logs = state.run(
         state.client.get_audit_logs(
