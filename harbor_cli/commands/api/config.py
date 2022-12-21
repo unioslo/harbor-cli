@@ -91,10 +91,10 @@ def get_config(
 @inject_help(Configurations)
 def update_config(
     ctx: typer.Context,
-    patch: bool = typer.Option(
+    replace: bool = typer.Option(
         False,
-        "--patch",
-        help="Patch the configuration with the provided instead of replacing it.",
+        "--replace",
+        help="Replace the entire configuration with the provided values. Omitted values are set to `None`.",
     ),
     auth_mode: Optional[str] = typer.Option(
         None,
@@ -336,14 +336,17 @@ def update_config(
     """Update the configuration of Harbor."""
     logger.info("Updating configuration...")
     params = model_params_from_ctx(ctx, Configurations)
-    if patch:
-        # We need to create a dict of key:ConfigItem.value, so we can
-        # use it to instantiate a Configurations object.
+    if replace:
+        c = params
+    else:
+        # get_config fetches a ConfigurationsResponse object, but we need
+        # to pass a Configurations object to update_config. To get the
+        # correct parameters to pass to Configurations, we need to flatten
+        # the dict representation of the ConfigurationsResponse object
+        # to create a dict of key:ConfigItem.value.
         current_config = state.run(state.client.get_config())
         c = flatten_config_response(current_config)
         c.update(params)
-    else:
-        c = params
 
     configuration = Configurations.parse_obj(c)
 
