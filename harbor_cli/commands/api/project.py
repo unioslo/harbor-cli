@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import List
 from typing import Literal
 from typing import Optional
 from typing import overload
@@ -13,6 +14,9 @@ from ...output.render import render_result
 from ...state import state
 from ...utils import inject_help
 from ...utils import inject_resource_options
+from ...utils import parse_commalist
+from ...utils import parse_key_value_args
+from ...utils.args import model_params_from_ctx
 
 # Create a command group
 app = typer.Typer(
@@ -25,11 +29,22 @@ scanner_cmd = typer.Typer(
     help="Manage project scanners.",
     no_args_is_help=True,
 )
+metadata_cmd = typer.Typer(
+    name="metadata",
+    help="Manage project metadata.",
+    no_args_is_help=True,
+)
+metadata_field_cmd = typer.Typer(
+    name="field",
+    help="Manage project metadata fields.",
+    no_args_is_help=True,
+)
+metadata_cmd.add_typer(metadata_field_cmd)
 app.add_typer(scanner_cmd)
-
+app.add_typer(metadata_cmd)
 
 # HarborAsyncClient.get_project()
-@app.command("info", no_args_is_help=True)
+@app.command("get", no_args_is_help=True)
 def get_project_info(
     ctx: typer.Context,
     project_name_or_id: str = typer.Argument(
@@ -326,6 +341,7 @@ def delete_project(
         help="Whether the project name is an ID.",
     ),
 ) -> None:
+    """Delete a project."""
     arg = get_project_arg(project_name_or_id, is_id)
 
     project_repr = get_project_repr(arg)
@@ -348,6 +364,7 @@ def get_project_summary(
         help="Whether the project name is an ID.",
     ),
 ) -> None:
+    """Fetch project summary."""
     arg = get_project_arg(project_name_or_id, is_id)
     project_repr = get_project_repr(arg)
     logger.info(f"Fetching summary for {project_repr}...")
@@ -472,3 +489,188 @@ def get_project_arg(arg: str, is_id: bool) -> str | int:
             raise typer.BadParameter(f"Project ID {arg!r} is not an integer.")
     else:
         return arg
+
+
+# Metadata commands (which are in their own category in Harbor API)
+
+# HarborAsyncClient.get_project_metadata()
+@metadata_cmd.command("get")
+def get_project_metadata(
+    ctx: typer.Context,
+    project_name_or_id: str = typer.Argument(
+        ...,
+        help="Name or ID of the project to delete (interpreted as name by default).",
+    ),
+    is_id: bool = typer.Option(
+        False,
+        "--is-id",
+        help="Whether the project name is an ID or not.",
+    ),
+) -> None:
+    """Get metadata for a project."""
+    arg = get_project_arg(project_name_or_id, is_id)
+    project_repr = get_project_repr(arg)
+    logger.info(f"Fetching metadata for {project_repr}...")
+    metadata = state.run(state.client.get_project_metadata(arg))
+    render_result(metadata, ctx)
+
+
+# HarborAsyncClient.set_project_metadata()
+@metadata_cmd.command("set", short_help="Set metadata for a project.")
+@inject_help(ProjectMetadata)
+def set_project_metadata(
+    ctx: typer.Context,
+    project_name_or_id: str = typer.Argument(
+        ...,
+        help="Name or ID of the project (interpreted as name by default).",
+    ),
+    is_id: bool = typer.Option(
+        False,
+        "--is-id",
+        help="Whether the argument is a project ID or name (by default name)",
+    ),
+    public: Optional[str] = typer.Option(
+        None,
+    ),
+    enable_content_trust: Optional[str] = typer.Option(
+        None,
+    ),
+    enable_content_trust_cosign: Optional[str] = typer.Option(
+        None,
+    ),
+    prevent_vul: Optional[str] = typer.Option(
+        None,
+    ),
+    severity: Optional[str] = typer.Option(
+        None,
+        "--severity",
+    ),
+    auto_scan: Optional[str] = typer.Option(
+        None,
+    ),
+    reuse_sys_cve_whitelist: Optional[str] = typer.Option(
+        None,
+    ),
+    retention_id: Optional[int] = typer.Option(
+        None,
+        "--retention-id",
+    ),
+    extra: List[str] = typer.Option(
+        [],
+        "--extra",
+        help=(
+            "Extra metadata to set beyond the fields in the spec."
+            "Format: [green]key[/green][magenta]=[/magenta][cyan]value[/cyan]. "
+            "May be specified multiple times, or as a comma-separated list."
+        ),
+        metavar="KEY=VALUE",
+    ),
+) -> None:
+    """Set metadata for a project. Until Harbor API spec"""
+    # Model field args
+    params = model_params_from_ctx(ctx, ProjectMetadata)
+
+    # Extra metadata args
+    extra_metadata = parse_key_value_args(parse_commalist(extra))
+    arg = get_project_arg(project_name_or_id, is_id)
+
+    metadata = ProjectMetadata(
+        **params,
+        **extra_metadata,
+    )
+
+    project_repr = get_project_repr(arg)
+    logger.info(f"Setting metadata for {project_repr}...")
+    state.run(state.client.set_project_metadata(arg, metadata))
+    logger.info(f"Set metadata for {project_repr}.")
+
+
+# HarborAsyncClient.get_project_metadata_entry()
+@metadata_field_cmd.command("get")
+def get_project_metadata_field(
+    ctx: typer.Context,
+    project_name_or_id: str = typer.Argument(
+        ...,
+        help="Name or ID of the project to update (interpreted as name by default).",
+    ),
+    is_id: bool = typer.Option(
+        False,
+        "--is-id",
+        help="Whether the argument is a project ID or name (by default name)",
+    ),
+    field: str = typer.Argument(
+        ...,
+        help="The name of the field to get.",
+    ),
+) -> None:
+    """Get a single field from the metadata for a project. NOTE: does not support table output currently."""
+    arg = get_project_arg(project_name_or_id, is_id)
+    project_repr = get_project_repr(arg)
+    logger.info(f"Fetching metadata field {field!r} for {project_repr}...")
+    metadata = state.run(state.client.get_project_metadata_entry(arg, field))
+    render_result(metadata, ctx)
+
+
+# HarborAsyncClient.update_project_metadata_entry()
+@metadata_field_cmd.command("set")
+def set_project_metadata_field(
+    ctx: typer.Context,
+    project_name_or_id: str = typer.Argument(
+        ...,
+        help="Name or ID of the project to update (interpreted as name by default).",
+    ),
+    is_id: bool = typer.Option(
+        False,
+        "--is-id",
+        help="Whether the argument is a project ID or name (by default name)",
+    ),
+    field: str = typer.Argument(
+        ...,
+        help="The name of the field to set.",
+    ),
+    value: str = typer.Argument(
+        ...,
+        help="The value to set.",
+    ),
+) -> None:
+    """Set a single field in the metadata for a project."""
+    if field not in ProjectMetadata.__fields__:
+        logger.warning(f"Field {field!r} is not a known project metadata field.")
+
+    arg = get_project_arg(project_name_or_id, is_id)
+    project_repr = get_project_repr(arg)
+
+    metadata = ProjectMetadata.parse_obj({field: value})
+
+    logger.info(f"Setting metadata for {project_repr}...")
+    state.run(state.client.update_project_metadata_entry(arg, field, metadata))
+    logger.info(f"Set metadata for {project_repr}.")
+
+
+# HarborAsyncClient.delete_project_metadata_entry()
+@metadata_field_cmd.command("delete")
+def delete_project_metadata_field(
+    ctx: typer.Context,
+    project_name_or_id: str = typer.Argument(
+        ...,
+        help="Name or ID of the project (interpreted as name by default).",
+    ),
+    field: str = typer.Argument(
+        ...,
+        help="The metadata field to delete.",
+    ),
+    is_id: bool = typer.Option(
+        False,
+        "--is-id",
+        help="Whether the argument is a project ID or name (by default name)",
+    ),
+) -> None:
+    """Delete a single field in the metadata for a project."""
+    if field not in ProjectMetadata.__fields__:
+        logger.warning(f"Field {field!r} is not a known project metadata field.")
+
+    arg = get_project_arg(project_name_or_id, is_id)
+
+    logger.info(f"Deleting metadata field {field!r}...")
+    state.run(state.client.delete_project_metadata_entry(arg, field))
+    logger.info(f"Deleted metadata field {field!r}.")
