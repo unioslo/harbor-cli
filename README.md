@@ -5,6 +5,8 @@
 
 -----
 
+**NOTE**: This project is still in early development, and most functionality, such as CLI options and configuration file format, is subject to change. Prior to version 1.0.0, breaking changes may be introduced in minor version updates.
+
 **Table of Contents**
 
 - [Installation](#installation)
