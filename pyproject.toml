@@ -33,9 +33,9 @@ dependencies = [
 dynamic = ["version"]
 
 [project.urls]
-Documentation = "https://github.com/unknown/harbor-cli#readme"
-Issues = "https://github.com/unknown/harbor-cli/issues"
-Source = "https://github.com/unknown/harbor-cli"
+Documentation = "https://github.com/pederhan/harbor-cli#readme"
+Issues = "https://github.com/pederhan/harbor-cli/issues"
+Source = "https://github.com/pederhan/harbor-cli"
 
 [tool.hatch.metadata]
 allow-direct-references = true
