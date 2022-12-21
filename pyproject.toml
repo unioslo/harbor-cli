@@ -65,6 +65,8 @@ ignore = [
   "E501", # line too long (we let black handle this)
   "F541", # f-string is missing placeholders
 ]
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["E402", "F401", "F403"]
 
 [tool.mypy]
 python_version = "3.8"
