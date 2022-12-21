@@ -13,6 +13,7 @@ from ...output.render import render_result
 from ...state import state
 from ...utils import inject_help
 from ...utils import inject_resource_options
+from ...utils.args import model_params_from_ctx
 
 # Create a command group
 app = typer.Typer(
@@ -36,9 +37,10 @@ def get_gc_schedule(ctx: typer.Context) -> None:
     render_result(schedule, ctx)
 
 
+@schedule_cmd.command("create")
 @inject_help(ScheduleObj)
 @inject_help(Schedule)
-def _do_handle_gc_command(
+def create_gc_schedule(
     ctx: typer.Context,
     type: Optional[ScheduleType] = typer.Option(
         None,
@@ -49,36 +51,61 @@ def _do_handle_gc_command(
         "--cron",
     ),
 ) -> None:
+    """Create a new Garbage Collection schedule."""
     schedule_obj = ScheduleObj(
         type=type,
         cron=cron,
     )
     # TODO: investigate which parameters the `parameters` field takes
     schedule = Schedule(schedule=schedule_obj)
-    if ctx.command.name == "create":
-        logger.info(f"Creating Garbage Collection schedule...")
-        state.run(state.client.create_gc_schedule(schedule))
-        logger.info(f"Garbage Collection schedule created.")
-    elif ctx.command.name == "update":
-        logger.info(f"Updating Garbage Collection schedule...")
-        state.run(state.client.update_gc_schedule(schedule))
-        logger.info(f"Garbage Collection schedule updated.")
+    logger.debug(f"Creating Garbage Collection schedule...")
+    state.run(state.client.create_gc_schedule(schedule))
+    logger.info(f"Garbage Collection schedule created.")
+
+
+@schedule_cmd.command("update")
+@inject_help(ScheduleObj)
+@inject_help(Schedule)
+def update_gc_schedule(
+    ctx: typer.Context,
+    replace: bool = typer.Option(
+        False,
+        "--replace",
+        help="Replace the existing schedule with the new one.",
+    ),
+    type: Optional[ScheduleType] = typer.Option(
+        None,
+        "--type",
+    ),
+    cron: Optional[str] = typer.Option(
+        None,
+        "--cron",
+    ),
+) -> None:
+    obj_params = model_params_from_ctx(ctx, ScheduleObj)
+    # schedule_params = model_params_from_ctx(ctx, Schedule)
+    if replace:
+        schedule_obj = ScheduleObj(
+            type=type,
+            cron=cron,
+        )
+        schedule = Schedule(schedule=schedule_obj)
     else:
-        raise HarborCLIError(f"Unknown command {ctx.command.name}")
+        schedule = state.run(state.client.get_gc_schedule())
+        if schedule.schedule is None:
+            raise HarborCLIError(
+                "No existing schedule to update. Use `harbor gc schedule create` to create a new schedule."
+            )
+        # this is kind of convoluted. generalize?
+        schedule_obj_dict = schedule.schedule.dict()
+        schedule_obj_dict.update(obj_params)
+        schedule.schedule = ScheduleObj.parse_obj(schedule_obj_dict)
 
+    # TODO: investigate which parameters the `parameters` field takes
+    logger.debug(f"Updating Garbage Collection schedule...")
+    state.run(state.client.update_gc_schedule(schedule))
+    logger.info(f"Garbage Collection schedule updated.")
 
-# 'gc schedule create' and 'gc schedule update' take the same parameters,
-# and only differ in which method is called on the client. To simplify
-# the code, we use a single function to handle both commands.
-
-# HarborAsyncClient.create_gc_schedule()
-schedule_cmd.command("create", help="Create a new Garbage Collection schedule.")(
-    _do_handle_gc_command
-)
-# HarborAsyncClient.update_gc_schedule()
-schedule_cmd.command("update", help="Update existing Garbage Collection schedule.")(
-    _do_handle_gc_command
-)
 
 # HarborAsyncClient.get_gc_jobs()
 @app.command("jobs", no_args_is_help=True)
