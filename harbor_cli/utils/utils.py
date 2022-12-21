@@ -38,6 +38,36 @@ def parse_commalist(arg: list[str]) -> list[str]:
     return [item for arg_list in arg for item in arg_list.split(",")]
 
 
+def parse_key_value_args(arg: list[str]) -> dict[str, str]:
+    """Parses a list of key=value arguments.
+
+    Example
+    -------
+    >>> parse_key_value_args(["foo=bar", "baz=qux"])
+    {'foo': 'bar', 'baz': 'qux'}
+
+    Parameters
+    ----------
+    arg
+        A list of key=value arguments.
+
+    Returns
+    -------
+    dict[str, str]
+        A dictionary mapping keys to values.
+    """
+    metadata = {}
+    for item in arg:
+        try:
+            key, value = item.split("=", maxsplit=1)
+        except ValueError:
+            raise typer.BadParameter(
+                f"Invalid metadata item {item!r}. Expected format: key=value"
+            )
+        metadata[key] = value
+    return metadata
+
+
 def inject_help(
     model: type[BaseModel], strict: bool = False, **field_additions: str
 ) -> Any:
