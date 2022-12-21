@@ -37,6 +37,9 @@ Documentation = "https://github.com/pederhan/harbor-cli#readme"
 Issues = "https://github.com/pederhan/harbor-cli/issues"
 Source = "https://github.com/pederhan/harbor-cli"
 
+[project.scripts]
+harbor = "harbor_cli.main:main"
+
 [tool.hatch.metadata]
 allow-direct-references = true
 
@@ -48,6 +51,12 @@ dependencies = ["pytest", "pytest-cov", "mypy", "black"]
 [tool.hatch.envs.default.scripts]
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=harbortui --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
+
+[tool.hatch.envs.docs]
+dependencies = ["mkdocs"]
+[tool.hatch.envs.docs.scripts]
+build = "mkdocs build --clean --strict"
+serve = "mkdocs serve --dev-addr localhost:8000"
 
 [[tool.hatch.envs.test.matrix]]
 python = ["38", "39", "310", "311"]
