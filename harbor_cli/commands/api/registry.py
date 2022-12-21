@@ -161,7 +161,7 @@ def delete_registry(
     logger.info(f"Deleted registry with ID {registry_id}.")
 
 
-@app.command("info", no_args_is_help=True)
+@app.command("get", no_args_is_help=True)
 def get_registry_info(
     ctx: typer.Context,
     registry_id: int = typer.Argument(
@@ -221,7 +221,7 @@ def list_registries(
     page_size: int,
     retrieve_all: bool,
 ) -> None:
-    """List all (or a subset of) registries."""
+    """List registries."""
     logger.debug(f"Fetching registries..")
     registries = state.run(
         state.client.get_registries(
