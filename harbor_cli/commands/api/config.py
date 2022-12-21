@@ -1,14 +1,17 @@
 from __future__ import annotations
 
+from typing import Any
 from typing import Optional
 
 import typer
 from harborapi.models import Configurations
+from harborapi.models import ConfigurationsResponse
 
 from ...logs import logger
-from ...output.console import console
+from ...output.render import render_result
 from ...state import state
 from ...utils import inject_help
+from ...utils.args import model_params_from_ctx
 
 # Create a command group
 app = typer.Typer(
@@ -18,18 +21,81 @@ app = typer.Typer(
 )
 
 
-@app.command("get", no_args_is_help=True)
-def get_config(ctx: typer.Context) -> None:
+def flatten_config_response(response: ConfigurationsResponse) -> dict[str, Any]:
+    """Flattens a ConfigurationsResponse object to a single level.
+
+    Example:
+        >>> response = ConfigurationsResponse(
+        ...     auth_mode=StringConfigItem(value="db_auth", editable=True),
+        ... )
+        >>> response.dict()
+        {'auth_mode': {'value': 'db_auth', 'editable': True}}
+        >>> flatten_config_response(response)
+        {'auth_mode': 'db_auth'}
+
+    Parameters
+    ----------
+    response : ConfigurationsResponse
+        A ConfigurationsResponse object from the Harbor API.
+        Fields are either None or a {String,Int,Bool}ConfigItem object,
+        that each have the fields "value" and "editable".
+
+    Returns
+    -------
+    dict[str, Any]
+        A flattened dictionary with the "value" fields of the
+        {String,Int,Bool}ConfigItem objects.
+    """
+    # A ConfigurationsResponse contains {String,Int,Bool}ConfigItem objects
+    # which has the fields "value" and "editable".
+    c = response.dict()
+    for key, value in list(c.items()):
+        if value is None:
+            del c[key]
+        if not isinstance(value, dict):
+            # NOTE: continue or delete?
+            # add flag to keep or delete?
+            continue
+        v = value.get("value")
+        c[key] = v
+    return c
+
+
+@app.command("get")
+def get_config(
+    ctx: typer.Context,
+    flatten: bool = typer.Option(
+        False,
+        "--flatten",
+        help=(
+            "Flatten config fields. "
+            "Removes 'editable' field and replaces field value with 'value' field."
+        ),
+    ),
+) -> None:
     """Fetch the Harbor configuration."""
     logger.info(f"Fetching system info...")
     system_info = state.loop.run_until_complete(state.client.get_config())
-    console.print(system_info)
+    if flatten:
+        # In order to print a flattened response, we turn it from a
+        # ConfigurationsResponse to a Configurations object.
+        flattened = flatten_config_response(system_info)
+        c = Configurations.parse_obj(flattened)
+        render_result(c, ctx)
+    else:
+        render_result(system_info, ctx)
 
 
+# TODO: fix Optional[bool] options
 @app.command("update", no_args_is_help=True)
 @inject_help(Configurations)
 def update_config(
     ctx: typer.Context,
+    patch: bool = typer.Option(
+        False,
+        "--patch",
+        help="Patch the configuration with the provided instead of replacing it.",
+    ),
     auth_mode: Optional[str] = typer.Option(
         None,
         "--auth-mode",
@@ -176,7 +242,6 @@ def update_config(
         help=(
             "The username of the user with admin privileges. "
             "NOTE: ONLY ACCEPTS A SINGLE USERNAME DESPITE NAMING SCHEME IMPLYING OTHERWISE! "
-            "(we keep parity with harbor naming schemes, and that's what the spec calls this field.)"
         ),
     ),
     http_authproxy_verify_cert: Optional[bool] = typer.Option(
@@ -270,67 +335,21 @@ def update_config(
 ) -> None:
     """Update the configuration of Harbor."""
     logger.info("Updating configuration...")
+    params = model_params_from_ctx(ctx, Configurations)
+    if patch:
+        # We need to create a dict of key:ConfigItem.value, so we can
+        # use it to instantiate a Configurations object.
+        current_config = state.run(state.client.get_config())
+        c = flatten_config_response(current_config)
+        c.update(params)
+    else:
+        c = params
+
+    configuration = Configurations.parse_obj(c)
+
     state.run(
         state.client.update_config(
-            Configurations(
-                auth_mode=auth_mode,
-                email_from=email_from,
-                email_host=email_host,
-                email_identity=email_identity,
-                email_insecure=email_insecure,
-                email_password=email_password,
-                email_port=email_port,
-                email_ssl=email_ssl,
-                email_username=email_username,
-                ldap_base_dn=ldap_base_dn,
-                ldap_filter=ldap_filter,
-                ldap_group_base_dn=ldap_group_base_dn,
-                ldap_group_admin_dn=ldap_group_admin_dn,
-                ldap_group_attribute_name=ldap_group_attribute_name,
-                ldap_group_search_filter=ldap_group_search_filter,
-                ldap_group_search_scope=ldap_group_search_scope,
-                ldap_scope=ldap_scope,
-                ldap_search_dn=ldap_search_dn,
-                ldap_search_password=ldap_search_password,
-                ldap_timeout=ldap_timeout,
-                ldap_uid=ldap_uid,
-                ldap_url=ldap_url,
-                ldap_verify_cert=ldap_verify_cert,
-                ldap_group_membership_attribute=ldap_group_membership_attribute,
-                project_creation_restriction=project_creation_restriction,
-                read_only=read_only,
-                self_registration=self_registration,
-                token_expiration=token_expiration,
-                uaa_client_id=uaa_client_id,
-                uaa_client_secret=uaa_client_secret,
-                uaa_endpoint=uaa_endpoint,
-                uaa_verify_cert=uaa_verify_cert,
-                http_authproxy_endpoint=http_authproxy_endpoint,
-                http_authproxy_tokenreview_endpoint=http_authproxy_tokenreview_endpoint,
-                http_authproxy_admin_groups=http_authproxy_admin_groups,
-                http_authproxy_admin_usernames=http_authproxy_admin_usernames,
-                http_authproxy_verify_cert=http_authproxy_verify_cert,
-                http_authproxy_skip_search=http_authproxy_skip_search,
-                http_authproxy_server_certificate=http_authproxy_server_certificate,
-                oidc_name=oidc_name,
-                oidc_endpoint=oidc_endpoint,
-                oidc_client_id=oidc_client_id,
-                oidc_client_secret=oidc_client_secret,
-                oidc_groups_claim=oidc_groups_claim,
-                oidc_admin_group=oidc_admin_group,
-                oidc_scope=oidc_scope,
-                oidc_user_claim=oidc_user_claim,
-                oidc_verify_cert=oidc_verify_cert,
-                oidc_auto_onboard=oidc_auto_onboard,
-                oidc_extra_redirect_parms=oidc_extra_redirect_parms,
-                robot_token_duration=robot_token_duration,
-                robot_name_prefix=robot_name_prefix,
-                notification_enable=notification_enable,
-                quota_per_project_enable=quota_per_project_enable,
-                storage_per_project=storage_per_project,
-                audit_log_forward_endpoint=audit_log_forward_endpoint,
-                skip_audit_log_database=skip_audit_log_database,
-            )
+            configuration,
         )
     )
     logger.info("Configuration updated.")
