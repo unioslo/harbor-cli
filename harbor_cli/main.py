@@ -44,8 +44,13 @@ def main_callback(
     # Formatting
     show_description: bool = typer.Option(
         False,
-        "--show-description",
-        help="Include field descriptions in tables. Has no effect if tables aren't printed.",
+        "--table-show-description",
+        help="Include field descriptions in tables. Only affects tables.",
+    ),
+    max_depth: Optional[int] = typer.Option(
+        None,
+        "--table-max-depth",
+        help="Maximum depth to print nested objects. Only affects tables." "",
     ),
     output_format: OutputFormat = typer.Option(
         OutputFormat.TABLE.value,
@@ -106,6 +111,7 @@ def main_callback(
     # Set common options
     state.options.verbose = verbose
     state.options.show_description = show_description
+    state.options.max_depth = max_depth
     state.options.output_format = output_format
     state.options.output_file = output_file
     state.options.no_overwrite = no_overwrite

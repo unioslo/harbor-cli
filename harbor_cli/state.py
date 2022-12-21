@@ -28,6 +28,7 @@ class CommonOptions(BaseModel):
     output_format: OutputFormat = OutputFormat.TABLE
     with_stdout: bool = False
     show_description: bool = False
+    max_depth: int | None = None
     # File options
     output_file: Path | None = None
     no_overwrite: bool = False

@@ -34,12 +34,15 @@ def render_result(result: T, ctx: typer.Context) -> None:
 def render_table(result: T | Sequence[T], ctx: typer.Context) -> None:
     """Render the result of a command as a table."""
     show_description = state.options.show_description
+    max_depth = state.options.max_depth
 
     def print_item(item: T) -> None:
         """Prints a harbor base model as a table (optionally with description),
         if it is a harborapi BaseModel, otherwise just prints the item."""
         if isinstance(item, HarborBaseModel):
-            console.print(*(item.as_table(with_description=show_description)))
+            console.print(
+                *(item.as_table(with_description=show_description, max_depth=max_depth))
+            )
         else:
             console.print(item)
 
