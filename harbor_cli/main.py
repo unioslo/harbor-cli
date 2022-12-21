@@ -44,7 +44,7 @@ def main_callback(
     # Formatting
     show_description: bool = typer.Option(
         False,
-        "--table-show-description",
+        "--table-description",
         help="Include field descriptions in tables. Only affects tables.",
     ),
     max_depth: Optional[int] = typer.Option(
