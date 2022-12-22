@@ -16,6 +16,7 @@ from pydantic import validator
 from .dirs import CONFIG_DIR
 from .exceptions import CredentialsError
 from .logs import LogLevel
+from .output.format import OutputFormat
 from .utils import replace_none
 
 
@@ -62,12 +63,11 @@ class BaseModel(HarborBaseModel):
 
         See: Config class below.
         """
-        clsname = getattr(cls, "__name__", str(cls))
         for key in values:
             if key not in cls.__fields__:
                 logger.warning(
                     "{}: Got unknown config key {!r}.",
-                    clsname,
+                    getattr(cls, "__name__", str(cls)),
                     key,
                 )
         return values
@@ -155,9 +155,46 @@ class LoggingSettings(BaseModel):
     level: LogLevel = LogLevel.INFO
 
 
+class TableSettings(BaseModel):
+    """Settings for the table output format."""
+
+    description: bool = False
+    max_depth: int | None = -1
+
+    @validator("max_depth", pre=True)
+    def negative_is_none(cls, v: int | None) -> int | None:
+        """TOML has no None type, so we interpret negative values as None.
+        This validator converts negative values to None.
+
+        TODO: convert None to -1 when writing to TOML!
+        """
+        if v is None:
+            return v
+        elif v < 0:
+            return None
+        return v
+
+
+class JSONSettings(BaseModel):
+    indent: int = 2
+    sort_keys: bool = True
+
+
+class OutputSettings(BaseModel):
+    format: OutputFormat = OutputFormat.TABLE
+    # Don't shadow the built-in .json() method
+    # The config file can still use the key "json" because of the alias
+    table: TableSettings = Field(default_factory=TableSettings)
+    JSON: JSONSettings = Field(default_factory=JSONSettings, alias="json")
+
+    class Config:
+        allow_population_by_field_name = True
+
+
 class HarborCLIConfig(BaseModel):
     harbor: HarborSettings = Field(default_factory=HarborSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
+    output: OutputSettings = Field(default_factory=OutputSettings)
     config_file: Path | None = Field(
         None, exclude=True, description="Path to config file (if any)."
     )  # populated by CLI if loaded from file
@@ -187,7 +224,7 @@ class HarborCLIConfig(BaseModel):
             else:
                 raise FileNotFoundError(f"Config file {config_file} does not exist.")
         config = load_toml_file(config_file)
-        return cls(**config, config_file=config_file)  # type: ignore # mypy bug until Self type is supported
+        return cls(**config, config_file=config_file)
 
 
 def create_config(config_path: Path | None, overwrite: bool = False) -> Path:

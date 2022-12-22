@@ -42,7 +42,7 @@ def main_callback(
         None, "--credentials-file", "-F", help="Harbor basic access credentials file."
     ),
     # Formatting
-    show_description: bool = typer.Option(
+    show_description: Optional[bool] = typer.Option(
         False,
         "--table-description",
         help="Include field descriptions in tables. Only affects tables.",
@@ -52,6 +52,17 @@ def main_callback(
         "--table-max-depth",
         help="Maximum depth to print nested objects. Only affects tables." "",
     ),
+    json_indent: Optional[int] = typer.Option(
+        None,
+        "--json-indent",
+        help="Indentation level for JSON output. Affects JSON and JSON schema.",
+    ),
+    json_sort_keys: Optional[bool] = typer.Option(
+        None,
+        "--json-sort-keys",
+        help="Sort keys in JSON output. Affects JSON and JSON schema.",
+    ),
+    # Output options
     output_format: OutputFormat = typer.Option(
         OutputFormat.TABLE.value,
         "--format",
@@ -106,17 +117,25 @@ def main_callback(
         # and the default config file doesn't exist.
         state.config = HarborCLIConfig.from_file(create=True)
 
-    state.client = harbor.get_client(state.config)
+    # Set config overrides
+    if show_description is not None:
+        state.config.output.table.description = show_description
+    if max_depth is not None:
+        state.config.output.table.max_depth = max_depth
+    if json_indent is not None:
+        state.config.output.JSON.indent = json_indent
+    if json_sort_keys is not None:
+        state.config.output.JSON.sort_keys = json_sort_keys
+    if output_format is not None:
+        state.config.output.format = output_format
 
-    # Set common options
+    # Set global options
     state.options.verbose = verbose
-    state.options.show_description = show_description
-    state.options.max_depth = max_depth
-    state.options.output_format = output_format
     state.options.output_file = output_file
     state.options.no_overwrite = no_overwrite
     state.options.with_stdout = with_stdout
 
+    state.client = harbor.get_client(state.config)
     # TODO: run configure_from_config and expand it to include all options
 
 

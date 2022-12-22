@@ -12,7 +12,6 @@ from pydantic import Field
 
 from .config import HarborCLIConfig
 from .exceptions import handle_status_error
-from .output.format import OutputFormat
 
 T = TypeVar("T")
 
@@ -23,13 +22,10 @@ class CommonOptions(BaseModel):
     These options are not specific to any particular command.
     """
 
+    # Output
     verbose: bool = False
-    # Output options
-    output_format: OutputFormat = OutputFormat.TABLE
     with_stdout: bool = False
-    show_description: bool = False
-    max_depth: int | None = None
-    # File options
+    # File
     output_file: Path | None = None
     no_overwrite: bool = False
 

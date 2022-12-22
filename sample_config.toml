@@ -9,3 +9,14 @@ credentials_file = ""
 enabled = true
 structlog = false
 level = "INFO"
+
+[output]
+format = "table"
+
+[output.table]
+description = false
+max_depth = -1
+
+[output.JSON]
+indent = 2
+sort_keys = true

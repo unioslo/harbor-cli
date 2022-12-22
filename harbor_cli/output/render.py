@@ -20,7 +20,7 @@ T = TypeVar("T")
 
 def render_result(result: T, ctx: typer.Context) -> None:
     """Render the result of a command."""
-    fmt = state.options.output_format
+    fmt = state.config.output.format
     if fmt == OutputFormat.TABLE:
         render_table(result, ctx)
     elif fmt == OutputFormat.JSON:
@@ -33,8 +33,8 @@ def render_result(result: T, ctx: typer.Context) -> None:
 
 def render_table(result: T | Sequence[T], ctx: typer.Context) -> None:
     """Render the result of a command as a table."""
-    show_description = state.options.show_description
-    max_depth = state.options.max_depth
+    show_description = state.config.output.table.description
+    max_depth = state.config.output.table.max_depth
 
     def print_item(item: T) -> None:
         """Prints a harbor base model as a table (optionally with description),
@@ -58,6 +58,8 @@ def render_json(result: T | Sequence[T], ctx: typer.Context | None = None) -> No
     p = state.options.output_file
     with_stdout = state.options.with_stdout
     no_overwrite = state.options.no_overwrite
+    indent = state.config.output.JSON.indent
+    # sort_keys = state.config.output.JSON.sort_keys
 
     # To make the JSON serialization more compatible with Pydantic
     # models and data types, we wrap the data in a Pydantic model
@@ -68,7 +70,7 @@ def render_json(result: T | Sequence[T], ctx: typer.Context | None = None) -> No
         __root__: T | list[T]
 
     o = Output(__root__=result)
-    o_json = o.json(indent=4)
+    o_json = o.json(indent=indent)
     if p:
         if p.exists() and no_overwrite:
             raise OverwriteError(f"File {p.resolve()} exists.")
@@ -77,7 +79,10 @@ def render_json(result: T | Sequence[T], ctx: typer.Context | None = None) -> No
     # Print to stdout if no output file is specified or if the
     # --with-stdout flag is set.
     if not p or with_stdout:
-        console.print_json(o_json)
+        # We have to specify indent again here, because
+        # rich.console.Console.print_json() ignores the indent of
+        # the string passed to it.
+        console.print_json(o_json, indent=indent)
 
 
 def render_jsonschema(
@@ -87,14 +92,16 @@ def render_jsonschema(
     p = state.options.output_file
     with_stdout = state.options.with_stdout
     no_overwrite = state.options.no_overwrite
+    indent = state.config.output.JSON.indent
+    # sort_keys = state.config.output.JSON.sort_keys
 
     # TODO: add switch to print to file and stdout at the same time
     schema = Schema(data=result)  # type: Schema[T | list[T]]
-    schema_json = schema.json(indent=4)
+    schema_json = schema.json(indent=indent)
     if p:
         if p.exists() and no_overwrite:
             raise FileExistsError(f"File {p} exists.")
         with open(p, "w") as f:
             f.write(schema_json)
     if not p or with_stdout:
-        console.print_json(schema_json)
+        console.print_json(schema_json, indent=indent)
