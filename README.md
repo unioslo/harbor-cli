@@ -133,29 +133,6 @@ The args for a command is usually the name or ID of a resource. For example, `ha
 
 Command options are options that apply to a command action. For example, `harbor project create` has an option `--public` that can be used to create a public project.
 
-#### Actions
-
-Actions use this terminology:
-
-* `get` - Get a resource
-* `create` - Create a resource
-* `delete` - Delete a resource
-* `list` - List resources (optionally filtered by a query)
-* `update` - Perform a (partial) update of a resource.
-  * Default behavior is similar to a PATCH request, where only the provided fields are updated.
-  * **FLAG**: `--replace` - Replace the entire resource with a new resource using the provided data. Similar to a PUT request.
-  * The default behavior is to perform a partial update with only the given parameters (corresponding to fields) being updated.
-* `set` - Configure a specific field of a resource.
-  * Used for setting single values, such as setting default project scanner.
-* `add` - Add a value or resource to a resource
-  * Used when multiple values can be added to a resource field, such as adding labels to artifacts.
-* `start` - Start a job (scan, replication, etc.)
-* `stop` - Stop a job
-* `info` - Get information about an immutable resource
-  * Used for getting information about a resource that cannot be updated by users, such as
-  getting information about the system status.
-
-
 ### Commands
 
 The following commands (and their subcommands) are available:
