@@ -247,7 +247,7 @@ def inject_sort(
         option = typer.Option(
             None,
             "--sort",
-            help="Sorting order of the results. Example: 'name,-id' to sort by name ascending and id descending. ",
+            help="Sorting order of the results. Example: [green]'name,-id'[/] to sort by name ascending and id descending. ",
         )
         return _patch_param(func, "sort", option, strict, use_default)
 
