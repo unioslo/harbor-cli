@@ -1,0 +1,47 @@
+site_name: harbor-cli
+
+repo_url: https://github.com/pederhan/harbor-cli
+repo_name: pederhan/harbor-cli
+edit_uri: edit/main/docs/
+
+theme:
+  name: "material"
+  palette:
+    scheme: slate
+    primary: blue
+    accent: orange
+  language: en
+  features:
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.expand
+    - navigation.indexes
+
+plugins:
+  - search
+  - autorefs
+  - mkdocstrings:
+      watch:
+        - harbor_cli
+      enable_inventory: true
+      handlers:
+        python:
+          import:
+            - https://docs.python.org/3/objects.inv
+          options:
+            docstring_style: numpy
+            members_order: source
+            docstring_section_style: table
+            show_source: false
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - admonition
+  - pymdownx.details
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+
+nav:
+  - index.md

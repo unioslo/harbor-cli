@@ -53,10 +53,10 @@ cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=harbor
 no-cov = "cov --no-cov {args}"
 
 [tool.hatch.envs.docs]
-dependencies = ["mkdocs"]
+dependencies = ["mkdocs", "mkdocs-material", "mkdocstrings[python]"]
 [tool.hatch.envs.docs.scripts]
 build = "mkdocs build --clean --strict"
-serve = "mkdocs serve --dev-addr localhost:8000"
+serve = "mkdocs serve --dev-addr localhost:8001"
 
 [[tool.hatch.envs.test.matrix]]
 python = ["38", "39", "310", "311"]
