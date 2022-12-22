@@ -6,6 +6,7 @@ import typer
 from harborapi.exceptions import NotFound
 from harborapi.models.models import UserCreationReq
 from harborapi.models.models import UserProfile
+from harborapi.models.models import UserResp
 
 from ...exceptions import HarborCLIError
 from ...logs import logger
@@ -32,13 +33,42 @@ def convert_uid(uid: str | int) -> int:
         )
 
 
-def uid_from_username(username: str) -> int:
+def user_from_username(username: str) -> UserResp:
+    """Fetches a Harbor user given a username.
+
+    Parameters
+    ----------
+    username : str
+        The username of the user to fetch.
+
+    Returns
+    -------
+    UserResp
+        The user object.
+    """
     try:
         user_resp = state.run(state.client.get_user_by_username(username))
-        if user_resp.user_id is None:  # spec states ID can be None...
-            raise NotFound  # kinda hacky, but this should never happen anyway
     except NotFound:
         raise HarborCLIError(f"User {username!r} not found.")
+    return user_resp
+
+
+def uid_from_username(username: str) -> int:
+    """Fetches the User ID of a Harbor user given a username.
+
+    Parameters
+    ----------
+    username : str
+        The username of the user to fetch.
+
+    Returns
+    -------
+    int
+        The User ID of the user.
+    """
+    user_resp = user_from_username(username)
+    if user_resp.user_id is None:  # spec states ID can be None...
+        raise HarborCLIError(f"User with username {username!r} has no user ID.")
     return user_resp.user_id
 
 
