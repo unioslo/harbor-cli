@@ -14,6 +14,10 @@ on:
 concurrency:
   group: docs-deploy
 
+env:
+  # https://github.com/Textualize/rich/pull/2449
+  NO_COLOR: "1"
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -32,11 +36,6 @@ jobs:
       - name: Install ourself
         run: |
           pip install -e .
-
-      # We have to uninstall Rich until we can print the help text without
-      # terminal color codes (which Rich adds).
-      - name: Uninstall Rich
-        run: pip uninstall -y rich
 
       - name: Install hatch
         run: pip install hatch
