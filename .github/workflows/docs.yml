@@ -36,6 +36,9 @@ jobs:
         run: |
           pip install -e .
 
+      - name: Install hatch
+        run: pip install hatch
+
       - name: Generate CLI help text for docs
         run: hatch run docs:python docs/scripts/get_help_text.py
 
