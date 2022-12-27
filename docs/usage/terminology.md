@@ -11,7 +11,7 @@ harbor [GLOBAL OPTIONS] COMMAND [SUBCOMMAND, SUBSUBCOMMAND, ...] [ARGS] [COMMAND
 
 Global options are options that apply to all commands. They must be specified before the command. Examples of this are `--config`, `--url`, `--username`, etc.
 
-See the output of `harbor --help` above for a full list of global options.
+See the output of `harbor --help` for a full list of global options.
 
 ## `COMMAND`
 
