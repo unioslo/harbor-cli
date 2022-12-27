@@ -15,6 +15,7 @@ if __name__ == "__main__":
     help_text = subprocess.check_output(
         ["harbor", "--help"],
         env=env,
+        shell=True,
     ).decode("utf-8")
     with open(DATA_PATH / "help.txt", "w") as f:
         f.write(help_text)
