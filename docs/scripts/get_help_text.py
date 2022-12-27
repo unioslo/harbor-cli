@@ -12,9 +12,13 @@ if __name__ == "__main__":
     env["COLUMNS"] = "80"
 
     # Get help text from the CLI
-    help_text = subprocess.check_output(
+    process = subprocess.Popen(
         ["harbor", "--help"],
         env=env,
-    ).decode("utf-8")
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )
+    output, error = process.communicate()
+    help_text = output.decode("utf-8")
     with open(DATA_PATH / "help.txt", "w") as f:
         f.write(help_text)
