@@ -24,7 +24,7 @@ dependencies = [
   "typer",
   "harborapi @ git+https://github.com/pederhan/harborapi",
   "pydantic",
-  "appdirs",
+  "platformdirs",
   "tomli",
   "tomli-w",
   "rich",
