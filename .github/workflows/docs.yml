@@ -14,9 +14,6 @@ on:
 concurrency:
   group: docs-deploy
 
-env:
-  FORCE_COLOR: "1"
-
 jobs:
   build:
     runs-on: ubuntu-latest
