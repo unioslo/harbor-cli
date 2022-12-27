@@ -1,24 +1,5 @@
-# Usage
 
-There are currently {{ commandlist | length }} available commands. For more information about a specific command, use `harbor <command> --help`.
-
-```
-$ harbor --help
-{% include "help.txt" %}
-```
-
-## Command List
-
-<details>
-<summary>All Commands</summary>
-```
-{% for command in commandlist %}
-{{ command }}
-{%- endfor %}
-```
-</details>
-
-## Terminology
+# Terminology
 
 Commands invocation is structured as follows:
 
@@ -26,17 +7,17 @@ Commands invocation is structured as follows:
 harbor [GLOBAL OPTIONS] COMMAND [SUBCOMMAND, SUBSUBCOMMAND, ...] [ARGS] [COMMAND OPTIONS]
 ```
 
-### `GLOBAL OPTIONS`
+## `GLOBAL OPTIONS`
 
 Global options are options that apply to all commands. They must be specified before the command. Examples of this are `--config`, `--url`, `--username`, etc.
 
 See the output of `harbor --help` above for a full list of global options.
 
-### `COMMAND`
+## `COMMAND`
 
 Command is a resource such as `project`, `repository`, `artifact`, etc.
 
-### `SUBCOMMAND`, `SUBSUBCOMMAND`, etc.
+## `SUBCOMMAND`, `SUBSUBCOMMAND`, etc.
 
 Certain commands have subcommands, and these subcommands can have their own set of subcommands, etc.
 
@@ -55,7 +36,7 @@ Which can be decomposed into the following:
 
 The final subcommand is the _action_ to perform on the resource, such as `create`, `delete`, `list`, etc.
 
-#### Actions terminology
+### Actions terminology
 
 * `get` - Get a resource
 * `create` - Create a resource
@@ -74,7 +55,7 @@ The final subcommand is the _action_ to perform on the resource, such as `create
     * Used for getting information about a resource that cannot be updated by users, such as
     getting information about the system status.
 
-### `ARGS`
+## `ARGS`
 
 The args for a command is usually the name or ID of a resource.
 
@@ -84,7 +65,7 @@ harbor project get my-project
 
 The command specifies `my-project` as the argument for the `get` action on the `project` resource.
 
-### `COMMAND OPTIONS`
+## `COMMAND OPTIONS`
 
 Command options are options that apply to a command.
 

@@ -50,4 +50,8 @@ markdown_extensions:
 
 nav:
   - index.md
-  - usage.md
+  - "Usage":
+      - "usage/index.md"
+      - "usage/configuration.md"
+      - "usage/commands.md"
+      - "usage/terminology.md"
