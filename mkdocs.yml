@@ -20,6 +20,11 @@ theme:
 plugins:
   - search
   - autorefs
+  - macros:
+      on_error_fail: true
+      include_dir: "docs/data"
+      include_yaml:
+        - commandlist: "docs/data/commands.yaml"
   - mkdocstrings:
       watch:
         - harbor_cli
@@ -45,3 +50,4 @@ markdown_extensions:
 
 nav:
   - index.md
+  - usage.md
