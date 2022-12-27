@@ -35,9 +35,6 @@ jobs:
         run: |
           pip install -e .
 
-      - name: Generate list of commands
-        run: python docs/scripts/validate_history.py
-
       - name: Generate CLI help text for docs
         run: hatch run docs:python docs/scripts/get_help_text.py
 
