@@ -19,7 +19,7 @@
 pip install harbor-cli
 ``` -->
 
-The name `harbor-cli` is in the process of being taken over on PyPI.
+The name `harbor-cli` is in the process of being acquired from its current owner on PyPI.
 
 In the meantime, you can install the package from GitHub:
 
