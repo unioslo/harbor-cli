@@ -1,6 +1,6 @@
 # Configuration
 
-Harbor CLI is configured via a TOML configuration file which must be created prior to running the first time. This configuration file can be created by running the command:
+Harbor CLI is configured via a TOML configuration file which must be created prior to running for the first time. This configuration file can be created by running the command:
 
 ```
 harbor init
