@@ -14,10 +14,6 @@ on:
 concurrency:
   group: docs-deploy
 
-env:
-  # https://github.com/Textualize/rich/pull/2449
-  NO_COLOR: "1"
-
 jobs:
   build:
     runs-on: ubuntu-latest

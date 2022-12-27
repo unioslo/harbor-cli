@@ -10,12 +10,12 @@ if __name__ == "__main__":
     env = os.environ.copy()
     env["LINES"] = "40"
     env["COLUMNS"] = "80"
+    env["TERM"] = "dumb"
 
     # Get help text from the CLI
     help_text = subprocess.check_output(
         ["harbor", "--help"],
         env=env,
-        shell=True,
     ).decode("utf-8")
     with open(DATA_PATH / "help.txt", "w") as f:
         f.write(help_text)
