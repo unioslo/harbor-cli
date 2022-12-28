@@ -564,6 +564,7 @@ def set_project_metadata(
             "May be specified multiple times, or as a comma-separated list."
         ),
         metavar="KEY=VALUE",
+        callback=parse_commalist,
     ),
 ) -> None:
     """Set metadata for a project. Until Harbor API spec"""
@@ -571,7 +572,7 @@ def set_project_metadata(
     params = model_params_from_ctx(ctx, ProjectMetadata)
 
     # Extra metadata args
-    extra_metadata = parse_key_value_args(parse_commalist(extra))
+    extra_metadata = parse_key_value_args(extra)
     arg = get_project_arg(project_name_or_id, is_id)
 
     metadata = ProjectMetadata(

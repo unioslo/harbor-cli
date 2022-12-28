@@ -30,10 +30,11 @@ def get_allowlist(ctx: typer.Context) -> None:
 @app.command("update")
 def update_allowlist(
     ctx: typer.Context,
-    cve: List[str] = typer.Option(
+    cves: List[str] = typer.Option(
         [],
         "--cve",
         help="CVE to add to the allowlist. Can be a comma-separated list, or specified multiple times.",
+        callback=parse_commalist,
     ),
     replace: bool = typer.Option(
         False,
@@ -42,8 +43,6 @@ def update_allowlist(
     ),
 ) -> None:
     """Add CVE IDs to the CVE allowlist."""
-    cves = parse_commalist(cve)
-
     current_list = state.run(state.client.get_cve_allowlist())
 
     cve_items = [CVEAllowlistItem(cve_id=cve_id) for cve_id in cves]
