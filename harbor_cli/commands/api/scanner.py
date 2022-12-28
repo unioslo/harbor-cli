@@ -29,7 +29,7 @@ def get_csanner(
         help="ID of the scanner to retrieve.",
     ),
 ) -> None:
-    """Start scanning an artifact."""
+    """Get a specific scanner."""
     logger.info(f"Fetching scanner...")
     scanner = state.run(state.client.get_scanner(scanner_id))
     render_result(scanner, ctx)
