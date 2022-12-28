@@ -41,7 +41,7 @@ def render_table(result: T | Sequence[T], ctx: typer.Context) -> None:
         if it is a harborapi BaseModel, otherwise just prints the item."""
         if isinstance(item, HarborBaseModel):
             console.print(
-                *(item.as_table(with_description=show_description, max_depth=max_depth))
+                item.as_panel(with_description=show_description, max_depth=max_depth)
             )
         else:
             console.print(item)
