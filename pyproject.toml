@@ -49,7 +49,8 @@ path = "harbor_cli/__about__.py"
 [tool.hatch.envs.default]
 dependencies = ["pytest", "pytest-cov", "mypy", "black"]
 [tool.hatch.envs.default.scripts]
-cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=harbortui --cov=tests {args}"
+test = "pytest {args}"
+cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=harbor_cli --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
 
 [tool.hatch.envs.docs]
