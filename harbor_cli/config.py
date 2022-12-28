@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 from typing import Any
+from typing import Optional
 from typing import TypedDict
 
 import tomli
@@ -14,7 +15,9 @@ from pydantic import root_validator
 from pydantic import validator
 
 from .dirs import CONFIG_DIR
+from .exceptions import ConfigError
 from .exceptions import CredentialsError
+from .exceptions import OverwriteError
 from .logs import LogLevel
 from .output.format import OutputFormat
 from .utils import replace_none
@@ -83,7 +86,7 @@ class HarborCredentialsKwargs(TypedDict):
     username: str
     secret: str
     credentials: str
-    credentials_file: Path | None
+    credentials_file: Optional[Path]
 
 
 class HarborSettings(BaseModel):
@@ -91,7 +94,7 @@ class HarborSettings(BaseModel):
     username: str = ""
     secret: str = ""
     credentials_base64: str = ""
-    credentials_file: Path | None = None
+    credentials_file: Optional[Path] = None
 
     @validator("credentials_file", pre=True)
     def _empty_string_is_none(cls, v: Any) -> Any:
@@ -159,7 +162,7 @@ class TableSettings(BaseModel):
     """Settings for the table output format."""
 
     description: bool = False
-    max_depth: int | None = -1
+    max_depth: Optional[int] = -1
 
     @validator("max_depth", pre=True)
     def negative_is_none(cls, v: int | None) -> int | None:
@@ -195,7 +198,7 @@ class HarborCLIConfig(BaseModel):
     harbor: HarborSettings = Field(default_factory=HarborSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     output: OutputSettings = Field(default_factory=OutputSettings)
-    config_file: Path | None = Field(
+    config_file: Optional[Path] = Field(
         None, exclude=True, description="Path to config file (if any)."
     )  # populated by CLI if loaded from file
 
@@ -234,11 +237,11 @@ def create_config(config_path: Path | None, overwrite: bool = False) -> Path:
     try:
         config_path.parent.mkdir(parents=True, exist_ok=True)
         config_path.touch(exist_ok=overwrite)
-    except FileExistsError:
-        raise FileExistsError(f"Config file {config_path} already exists.")
+    except FileExistsError as e:
+        raise OverwriteError(f"Config file {config_path} already exists.") from e
     except Exception as e:
         logger.bind(exc=e).error("Failed to create config file")
-        raise Exception(f"Could not create config file {config_path}: {e}")
+        raise ConfigError(f"Could not create config file {config_path}: {e}") from e
 
     # Write sample config to the created file
     config_path.write_text(sample_config())

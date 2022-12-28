@@ -13,8 +13,12 @@ from __future__ import annotations
 import importlib
 from pathlib import Path
 from typing import Any
+from typing import Dict
 from typing import Generic
+from typing import List
+from typing import Optional
 from typing import TypeVar
+from typing import Union
 
 from harborapi.models.base import BaseModel as HarborBaseModel
 from pydantic import BaseModel
@@ -29,14 +33,14 @@ class Schema(BaseModel, Generic[T]):
     """A schema for (de)serializing data (JSON, YAML, etc.)"""
 
     version: str = "1.0.0"  # TODO: use harborapi.models.SemVer?
-    type_: str | None = None  # should only be None if empty list
-    data: T | list[T]
+    type_: Optional[str] = None  # should only be None if empty list
+    data: Union[T, List[T]]
 
     class Config:
         extra = "allow"
 
     @root_validator
-    def set_type(cls, values: dict[str, Any]) -> dict[str, Any]:
+    def set_type(cls, values: Dict[str, Any]) -> Dict[str, Any]:
         if values["type_"] is not None:
             return values
 

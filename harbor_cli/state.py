@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 from pathlib import Path
 from typing import Awaitable
+from typing import Optional
 from typing import TypeVar
 
 from harborapi import HarborAsyncClient
@@ -26,7 +27,7 @@ class CommonOptions(BaseModel):
     verbose: bool = False
     with_stdout: bool = False
     # File
-    output_file: Path | None = None
+    output_file: Optional[Path] = None
     no_overwrite: bool = False
 
     class Config:

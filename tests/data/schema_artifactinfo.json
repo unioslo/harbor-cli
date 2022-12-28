@@ -1,0 +1,117 @@
+{
+  "version": "1.0.0",
+  "type_": "ArtifactInfo",
+  "data": {
+    "artifact": {
+      "id": 1234,
+      "type": "IMAGE",
+      "media_type": "application/vnd.oci.image.config.v1+json",
+      "manifest_media_type": "application/vnd.oci.image.manifest.v1+json",
+      "project_id": 123,
+      "repository_id": 456,
+      "digest": "sha256:1234567890abcdef",
+      "size": 1234567890,
+      "icon": "sha256:abcdef1234567890",
+      "push_time": "2022-11-09T12:43:22.775000+00:00",
+      "pull_time": "2022-12-11T00:51:43.159000+00:00",
+      "extra_attrs": {
+        "architecture": "amd64",
+        "created": "2022-11-09T12:42:27.324859184Z",
+        "config": {
+          "Entrypoint": [
+            "/test-repo"
+          ],
+          "Env": [
+            "PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+          ],
+          "ExposedPorts": {
+            "8080/tcp": {}
+          },
+          "Labels": {
+            "description": "Test program in the test repo",
+            "io.buildah.version": "1.26.2",
+            "no.uio.contact": "author@example.com"
+          },
+          "WorkingDir": "/"
+        },
+        "author": "author@example.com",
+        "os": "linux"
+      },
+      "annotations": {
+        "org.opencontainers.image.base.name": "harbor.example.com/library/docker.io-ubuntu:latest",
+        "org.opencontainers.image.base.digest": "sha256:d224747610648fb9f768890db4832aa6ebc92c4d17d6f6bb6a7a37ddb3c02b56"
+      },
+      "references": null,
+      "tags": [
+        {
+          "id": 21934,
+          "repository_id": 512,
+          "artifact_id": 40519,
+          "name": "latest",
+          "push_time": "2022-11-09T12:43:22.792000+00:00",
+          "pull_time": "2022-11-09T12:57:05.088000+00:00",
+          "immutable": false,
+          "signed": false
+        }
+      ],
+      "addition_links": {
+        "vulnerabilities": {
+          "absolute": false,
+          "href": "/api/v2.0/projects/test-project/repositories/test-repo/artifacts/sha256:1234567890abcdef/additions/vulnerabilities"
+        },
+        "build_history": {
+          "absolute": false,
+          "href": "/api/v2.0/projects/test-project/repositories/test-repo/artifacts/sha256:1234567890abcdef/additions/build_history"
+        }
+      },
+      "labels": null,
+      "scan_overview": {
+        "report_id": "5451a7d6-f369-4043-8987-42a9bdb8e66e",
+        "scan_status": "Success",
+        "severity": "High",
+        "duration": 2421,
+        "summary": {
+          "total": 18,
+          "fixable": 3,
+          "critical": 0,
+          "high": 1,
+          "medium": 3,
+          "low": 13,
+          "summary": {
+            "High": 1,
+            "Low": 13,
+            "Medium": 3,
+            "Unknown": 1
+          },
+          "Unknown": 1
+        },
+        "start_time": "2022-12-11T00:11:27+00:00",
+        "end_time": "2022-12-11T00:51:48+00:00",
+        "complete_percent": 100,
+        "scanner": {
+          "name": "Trivy",
+          "vendor": "Aqua Security",
+          "version": "v0.29.2"
+        }
+      },
+      "accessories": null
+    },
+    "repository": {
+      "id": 456,
+      "project_id": 123,
+      "name": "test-project/test-repo",
+      "description": null,
+      "artifact_count": 100,
+      "pull_count": 999,
+      "creation_time": "2022-01-01T01:02:03.000000+00:00",
+      "update_time": "2022-02-02T01:02:03.000000+00:00"
+    },
+    "report": {
+      "generated_at": null,
+      "artifact": null,
+      "scanner": null,
+      "severity": "Unknown",
+      "vulnerabilities": []
+    }
+  }
+}
