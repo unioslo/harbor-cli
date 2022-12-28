@@ -2,17 +2,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from appdirs import AppDirs
 from loguru import logger
+from platformdirs import PlatformDirs
 
 from .__about__ import APP_NAME
 from .__about__ import AUTHOR
 from .exceptions import DirectoryCreateError
 
-appdir = AppDirs(APP_NAME, AUTHOR)
-
-CONFIG_DIR = Path(appdir.user_config_dir)
-LOGS_DIR = Path(appdir.user_log_dir)
+_PLATFORM_DIR = PlatformDirs(APP_NAME, AUTHOR)
+CONFIG_DIR = Path(_PLATFORM_DIR.user_config_dir)
+LOGS_DIR = Path(_PLATFORM_DIR.user_log_dir)
 
 
 def init_directories() -> None:
