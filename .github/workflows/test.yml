@@ -3,10 +3,10 @@ name: test
 on:
   push:
     branches:
-      - workflow-test-fix
+      - main
   pull_request:
     branches:
-      - workflow-test-fix
+      - main
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
