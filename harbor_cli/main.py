@@ -109,13 +109,12 @@ def main_callback(
     if any(help_arg in sys.argv for help_arg in ctx.help_option_names):
         return
 
-    if config_file:
-        # If a config file is specified, it needs to exist
+    # Run init if config file doesn't exist
+    try:
         state.config = HarborCLIConfig.from_file(config_file)
-    else:
-        # Support creating config file if no path is specified,
-        # and the default config file doesn't exist.
-        state.config = HarborCLIConfig.from_file(create=True)
+    except FileNotFoundError:
+        # TODO: invoke init
+        exit_err(f"Config file not found. Run 'harbor-cli init' to create one.")
 
     # Set config overrides
     if show_description is not None:
