@@ -121,18 +121,22 @@ class HarborSettings(BaseModel):
             raise CredentialsError("A Harbor API URL is required")
 
         # require one of the auth methods to be set
-        if not (
-            self.username
-            and self.secret
-            or self.credentials_base64
-            or self.credentials_file
-        ):
+        if not self.has_auth_method:
             raise CredentialsError(
                 "A harbor authentication method must be specified. "
                 "One of 'username'+'secret', 'credentials_base64', or 'credentials_file' must be specified. "
                 "See the documentation for more information."
             )
         return True
+
+    @property
+    def has_auth_method(self) -> bool:
+        """Returns True if any of the auth methods are set."""
+        return bool(
+            (self.username and self.secret)
+            or self.credentials_base64
+            or self.credentials_file
+        )
 
     @property
     def credentials(self) -> HarborCredentialsKwargs:
