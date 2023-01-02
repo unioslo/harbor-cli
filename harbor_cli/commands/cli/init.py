@@ -112,7 +112,7 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
 
     hconf = config.harbor
     config.harbor.url = Prompt.ask(
-        "Harbor URL",
+        "Harbor API URL (e.g. https://harbor.example.com/api/v2.0)",
         default=hconf.url,
         show_default=True,
     )
