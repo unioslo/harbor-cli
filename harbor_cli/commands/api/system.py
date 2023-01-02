@@ -33,7 +33,7 @@ def volumeinfo(ctx: typer.Context) -> None:
 
 
 @app.command("health")
-def get_health(ctx: typer.Context) -> None:
+def health(ctx: typer.Context) -> None:
     """Get system health.
 
     NOTE: this is under the /health endpoint, not /system/health
@@ -46,7 +46,7 @@ def get_health(ctx: typer.Context) -> None:
 
 
 @app.command("ping")
-def ping_harbor(ctx: typer.Context) -> None:
+def ping(ctx: typer.Context) -> None:
     """Ping the harbor server. Returns the time it took to ping the server in milliseconds."""
     logger.info(f"Pinging server...")
     # Use perf_counter with nanosecond resolution to get the most accurate time
@@ -55,3 +55,11 @@ def ping_harbor(ctx: typer.Context) -> None:
     end = time.perf_counter_ns()
     duration_ms = (end - start) / 1000000
     render_result(duration_ms, ctx)
+
+
+@app.command("statistics")
+def statistics(ctx: typer.Context) -> None:
+    """Get statistics about the system."""
+    logger.info(f"Fetching statistics...")
+    statistics = state.run(state.client.get_statistics())
+    render_result(statistics, ctx)
