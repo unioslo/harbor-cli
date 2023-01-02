@@ -12,26 +12,63 @@ from harborapi.models.models import ScheduleObj
 from harbor_cli.output.schema import Schema
 
 
-def test_schema_deserialization() -> None:
+def test_schema_init() -> None:
     """Test deserialization of Schema."""
-    scheduleobj_data = {
+    schedule = ScheduleObj(
         # these are likely mutually exclusive in practice, but
         # just test them all in one go
-        "type": "Hourly",
-        "cron": "0 0 * * * *",
-        "next_scheduled_time": "2021-08-31T14:00:00Z",
-    }
+        type="Hourly",
+        cron="0 0 * * * *",
+        next_scheduled_time="2021-08-31T14:00:00Z",
+    )
 
-    data = {
-        "version": "1.0.0",
-        "type_": "ScheduleObj",
-        "data": scheduleobj_data,
-    }
-    schema = Schema(**data)
-    assert schema.data == scheduleobj_data
-    schema.update_data_type()
+    # Using __init__
+    schema = Schema(data=schedule)  # type: Schema[ScheduleObj]
+    assert schema.data == schedule
     assert isinstance(schema.data, ScheduleObj)
     assert isinstance(schema.data.next_scheduled_time, datetime)
+
+    # Using from_data classmethod (preferred)
+    schema2 = Schema.from_data(schedule)
+    assert schema2 == schema
+
+
+def test_schema_serialization() -> None:
+    """Test serialization of Schema."""
+    schedule = ScheduleObj(
+        type="Hourly",
+        cron="0 0 * * * *",
+        next_scheduled_time="2021-08-31T14:00:00+00:00",
+    )
+
+    schema = Schema.from_data(schedule)
+    # Serialize to JSON, so we can test the string representation
+    # of the different values. If we just use .dict(), we still
+    # have to deal with Python objects (e.g. datetime)
+    schema_dict = json.loads(schema.json())
+    assert schema_dict["data"]["type"] == "Hourly"
+    assert schema_dict["data"]["cron"] == "0 0 * * * *"
+    assert schema_dict["data"]["next_scheduled_time"] == "2021-08-31T14:00:00+00:00"
+    assert schema_dict["version"] == "1.0.0"
+    assert schema_dict["type"] == "ScheduleObj"
+    assert schema_dict["module"] == "harborapi.models.models"
+
+
+def test_schema_deserialization() -> None:
+    """Test deserialization of Schema."""
+    schedule = ScheduleObj(
+        type="Hourly",
+        cron="0 0 * * * *",
+        next_scheduled_time="2021-08-31T14:00:00+00:00",
+    )
+    schema = Schema.from_data(schedule)
+    # Serialize to JSON and then deserialize back to Schema
+    schema_dict = json.loads(schema.json())
+    schema2 = Schema(**schema_dict)
+    assert schema2 == schema
+    assert schema2.data == schedule
+    assert isinstance(schema2.data, ScheduleObj)
+    assert isinstance(schema2.data.next_scheduled_time, datetime)
 
 
 def test_schema_from_file() -> None:
@@ -80,3 +117,16 @@ def test_schema_from_file_ext() -> None:
 
     d_dict = json.loads(p.read_text())
     assert schema.data == ArtifactInfo(**d_dict["data"])
+
+
+def test_schema_non_basemodel() -> None:
+    """Test Schema with non-BaseModel data."""
+    s = Schema.from_data("hello, world")
+    assert s.data == "hello, world"
+    assert s.type == "str"
+    assert s.module == "builtins"
+
+    s2 = Schema(
+        data="hello, world",
+    )  # type: Schema[str]
+    assert s == s2

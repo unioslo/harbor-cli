@@ -1,6 +1,7 @@
 {
   "version": "1.0.0",
-  "type_": "ArtifactInfo",
+  "type": "ArtifactInfo",
+  "module": "harborapi.ext.artifact",
   "data": [
     {
       "artifact": {

@@ -1,6 +1,7 @@
 {
   "version": "1.0.0",
-  "type_": "Artifact",
+  "type": "Artifact",
+  "module": "harborapi.models.models",
   "data": {
     "id": 1234,
     "type": "IMAGE",
