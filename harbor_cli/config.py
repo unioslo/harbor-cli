@@ -17,6 +17,7 @@ from pydantic import validator
 from .dirs import CONFIG_DIR
 from .exceptions import ConfigError
 from .exceptions import CredentialsError
+from .exceptions import HarborCLIError
 from .exceptions import OverwriteError
 from .logs import LogLevel
 from .output.format import OutputFormat
@@ -79,6 +80,7 @@ class BaseModel(HarborBaseModel):
         # Allow for future fields to be added to the config file without
         # breaking older versions of Harbor CLI
         extra = "allow"
+        validate_assignment = True
 
 
 class HarborCredentialsKwargs(TypedDict):
@@ -119,18 +121,22 @@ class HarborSettings(BaseModel):
             raise CredentialsError("A Harbor API URL is required")
 
         # require one of the auth methods to be set
-        if not (
-            self.username
-            and self.secret
-            or self.credentials_base64
-            or self.credentials_file
-        ):
+        if not self.has_auth_method:
             raise CredentialsError(
                 "A harbor authentication method must be specified. "
                 "One of 'username'+'secret', 'credentials_base64', or 'credentials_file' must be specified. "
                 "See the documentation for more information."
             )
         return True
+
+    @property
+    def has_auth_method(self) -> bool:
+        """Returns True if any of the auth methods are set."""
+        return bool(
+            (self.username and self.secret)
+            or self.credentials_base64
+            or self.credentials_file
+        )
 
     @property
     def credentials(self) -> HarborCredentialsKwargs:
@@ -163,6 +169,7 @@ class TableSettings(BaseModel):
 
     description: bool = False
     max_depth: Optional[int] = -1
+    # TODO: table style
 
     @validator("max_depth", pre=True)
     def negative_is_none(cls, v: int | None) -> int | None:
@@ -204,7 +211,7 @@ class HarborCLIConfig(BaseModel):
 
     @classmethod
     def from_file(
-        cls, config_file: Path = DEFAULT_CONFIG_FILE, create: bool = False
+        cls, config_file: Path | None = DEFAULT_CONFIG_FILE, create: bool = False
     ) -> HarborCLIConfig:
         """Create a Config object from a TOML file.
 
@@ -221,6 +228,9 @@ class HarborCLIConfig(BaseModel):
         Config
             A Config object.
         """
+        if config_file is None:
+            config_file = DEFAULT_CONFIG_FILE
+
         if not config_file.exists():
             if create:
                 create_config(config_file)
@@ -249,13 +259,27 @@ def create_config(config_path: Path | None, overwrite: bool = False) -> Path:
     return config_path
 
 
-def load_config() -> HarborCLIConfig | None:
+def load_config(config_path: Path | None = None) -> HarborCLIConfig:
     """Load the config file."""
     try:
-        return HarborCLIConfig.from_file()
+        return HarborCLIConfig.from_file(config_path)
+    except HarborCLIError:
+        raise
     except Exception as e:
-        logger.error("Could not load config file: {}", e)
-        return None
+        logger.bind(exc=e).error("Failed to load config file")
+        raise ConfigError(f"Could not load config file {config_path}: {e}") from e
+
+
+def save_config(config: HarborCLIConfig, config_path: Path) -> None:
+    """Save the config file."""
+    try:
+        # Round-trip through JSON to handle incompatible tomli-w types
+        config_path.write_text(
+            tomli_w.dumps(json.loads(config.json(exclude_none=True)))
+        )
+    except Exception as e:
+        logger.bind(exc=e).error("Failed to save config file")
+        raise ConfigError(f"Could not save config file {config_path}: {e}") from e
 
 
 def sample_config(exclude_none: bool = False) -> str:

@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from typing import Any
+from typing import Type
 
 import typer
 from pydantic import BaseModel
 
 
 def model_params_from_ctx(
-    ctx: typer.Context, model: type[BaseModel], filter_none: bool = True
+    ctx: typer.Context, model: Type[BaseModel], filter_none: bool = True
 ) -> dict[str, Any]:
     """Get the model parameters from a Typer context.
 

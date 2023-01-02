@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import inspect
 from typing import Any
+from typing import List
+from typing import Type
 
 import typer
 from pydantic import BaseModel
@@ -27,7 +29,7 @@ def replace_none(d: dict[str, Any], replacement: Any = "") -> dict[str, Any]:
     return d
 
 
-def parse_commalist(arg: list[str]) -> list[str]:
+def parse_commalist(arg: List[str]) -> List[str]:
     """Parses an argument that can be specified multiple times,
     or as a comma-separated list, into a list of strings.
 
@@ -69,7 +71,7 @@ def parse_key_value_args(arg: list[str]) -> dict[str, str]:
 
 
 def inject_help(
-    model: type[BaseModel], strict: bool = False, **field_additions: str
+    model: Type[BaseModel], strict: bool = False, **field_additions: str
 ) -> Any:
     """
     Injects a Pydantic model's field descriptions into the help attributes
@@ -101,7 +103,7 @@ def inject_help(
 
     Parameters
     ----------
-    model : type[BaseModel]
+    model : Type[BaseModel]
         The pydantic model to use for help injection.
     strict : bool
         If True, fail if a field in the model does not have a matching typer
@@ -175,6 +177,8 @@ def inject_resource_options(
     if the parameters don't have defaults:
     `query`, `sort`, `page`, `page_size`, `retrieve_all`
 
+
+
     Parameters
     ----------
     f : Any, optional
@@ -202,6 +206,46 @@ def inject_resource_options(
     -------
     Any
         The decorated function
+
+
+    Example
+    -------
+    ```python
+    @app.command()
+    @inject_resource_options()
+    def my_command(query: str, sort: str, page: int, page_size: int, retrieve_all: bool):
+        ...
+
+    # OK
+    @app.command()
+    @inject_resource_options()
+    def my_command(query: str, sort: str):
+        ...
+
+    # NOT OK (missing all required parameters)
+    @app.command()
+    @inject_resource_options(strict=True)
+    def my_command(query: str, sort: str):
+        ...
+
+    # OK (inherits defaults)
+    @app.command()
+    @inject_resource_options()
+    def my_command(query: str, sort: str, page: int = typer.Option(1)):
+        ...
+
+    # NOT OK (syntax error [non-default param after param with default])
+    # Use ellipsis to specify unset defaults
+    @app.command()
+    @inject_resource_options()
+    def my_command(query: str = typer.Option("tag=latest"), sort: str, page: int):
+
+    # OK (inherit default query, but override others)
+    # Use ellipsis to specify unset defaults
+    @app.command()
+    @inject_resource_options()
+    def my_command(query: str = typer.Option("my-query"), sort: str = ..., page: int = ...):
+    ```
     """
 
     # TODO: add check that the function signature is in the correct order
