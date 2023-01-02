@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import inspect
 from typing import Any
+from typing import List
 from typing import Type
 
 import typer
@@ -28,7 +29,7 @@ def replace_none(d: dict[str, Any], replacement: Any = "") -> dict[str, Any]:
     return d
 
 
-def parse_commalist(arg: list[str]) -> list[str]:
+def parse_commalist(arg: List[str]) -> List[str]:
     """Parses an argument that can be specified multiple times,
     or as a comma-separated list, into a list of strings.
 
