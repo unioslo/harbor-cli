@@ -85,19 +85,11 @@ def list_artifacts(
 
     # TODO: add pagination to output
 
-    # Get all artifacts in a specific repo
     if project and repo:
         repositories = [repo]
-        artifacts = state.run(
-            get_artifacts(
-                state.client,
-                projects=[project],
-                repositories=[repo],
-            )
-        )
-    # Get all artifacts in all repos in a project
     else:
-        repositories = None
+        repositories = None  # all repos
+
     artifacts = state.run(
         get_artifacts(
             state.client,
