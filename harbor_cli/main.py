@@ -114,7 +114,7 @@ def main_callback(
         state.config = HarborCLIConfig.from_file(config_file)
     except FileNotFoundError:
         # TODO: invoke init
-        exit_err(f"Config file not found. Run 'harbor-cli init' to create one.")
+        exit_err(f"Config file not found. Run 'harbor init' to create one.")
 
     # Set config overrides
     if show_description is not None:
