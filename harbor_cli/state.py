@@ -4,6 +4,8 @@ import asyncio
 from pathlib import Path
 from typing import Awaitable
 from typing import Optional
+from typing import Tuple
+from typing import Type
 from typing import TypeVar
 
 from harborapi import HarborAsyncClient
@@ -56,7 +58,7 @@ class State(BaseModel):
     def run(
         self,
         coro: Awaitable[T],
-        no_handle: type[Exception] | tuple[type[Exception], ...] | None = None,
+        no_handle: Type[Exception] | Tuple[Type[Exception], ...] | None = None,
     ) -> T:
         """Run a coroutine in the event loop.
 
@@ -64,7 +66,7 @@ class State(BaseModel):
         ----------
         coro : Awaitable[T]
             The coroutine to run.
-        no_handle : type[Exception] | tuple[type[Exception], ...]
+        no_handle : Type[Exception] | Tuple[Type[Exception], ...]
             A single exception type or a tuple of exception types that
             should not be passed to the default exception handler.
             Exceptions of this type will be raised as-is.
