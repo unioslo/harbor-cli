@@ -1,11 +1,10 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-fancy-pypi-readme"]
 build-backend = "hatchling.build"
 
 [project]
 name = "harbor-cli"
 description = ''
-readme = "README.md"
 requires-python = ">=3.8"
 license = "MIT"
 keywords = []
@@ -30,18 +29,29 @@ dependencies = [
   "rich",
   "loguru",
 ]
-dynamic = ["version"]
+dynamic = ["version", "readme"]
 
 [project.urls]
-Documentation = "https://github.com/pederhan/harbor-cli#readme"
-Issues = "https://github.com/pederhan/harbor-cli/issues"
 Source = "https://github.com/pederhan/harbor-cli"
+Documentation = "https://pederhan.github.io/harbor-cli/"
+Changelog = "https://github.com/pederhan/harbor-cli/blob/main/CHANGELOG.md"
+Issues = "https://github.com/pederhan/harbor-cli/issues"
 
 [project.scripts]
 harbor = "harbor_cli.main:main"
 
 [tool.hatch.metadata]
 allow-direct-references = true
+
+[tool.hatch.metadata.hooks.fancy-pypi-readme]
+content-type = "text/markdown"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "README.md"
+
+[[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
+path = "CHANGELOG.md"
+pattern = "<!-- changelog follows -->\n\n(.*?)\n\n## "
 
 [tool.hatch.version]
 path = "harbor_cli/__about__.py"
