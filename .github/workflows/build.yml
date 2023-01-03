@@ -5,8 +5,6 @@ on:
   push:
     tags:
       - harbor-cli-v*
-    branches:
-      - main
 
 concurrency:
   group: build-harbor-cli-${{ github.head_ref }}
