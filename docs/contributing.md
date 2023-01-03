@@ -76,6 +76,10 @@ When submitting a pull request, please make sure to run the pre-commit hooks and
 
 ## Releasing
 
+!!! attention "On versioning"
+
+    In general, managing releases and versioning should only be handled by the project maintainer(s), but it is documented here for completeness.
+
 Releases are handled by a GitHub actions workflow found [here](https://github.com/pederhan/harbor-cli/blob/main/.github/workflows/build.yml). Whenever a new tag whose name starts `harbor-cli-v` is pushed to the repository on the `main` branch, the workflow will build and publish a new release to PyPI.
 
 ```
@@ -109,10 +113,6 @@ Pushing the new tag to the remote repository will trigger a new release.
 ```
 git push origin --tags
 ```
-
-!!! attention "On versioning"
-
-    In general, managing releases and versioning should only be handled by the project maintainer(s), but it is documented here for completeness.
 
 ### Examples
 
