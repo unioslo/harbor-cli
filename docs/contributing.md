@@ -114,9 +114,10 @@ Pushing the new tag to the remote repository will trigger a new release.
 git push origin --tags
 ```
 
-### Examples
 
-#### Bump major version
+### Bumping
+
+#### Major version
 
 Major releases are used to indicate breaking changes. Breaking changes are changes that break backwards compatibility, such as removing or renaming a command or option, changing the configuration file format, or changing the behavior of an existing command.
 
@@ -124,7 +125,7 @@ Major releases are used to indicate breaking changes. Breaking changes are chang
 python scripts/bump_version.py major
 ```
 
-#### Bump minor version
+#### Minor version
 
 Minor releases are used to indicate new features that maintain backwards compatibility. New commands and new options are considered new features.
 
@@ -132,7 +133,7 @@ Minor releases are used to indicate new features that maintain backwards compati
 python scripts/bump_version.py minor
 ```
 
-#### Bump patch version
+#### Patch version
 
 Patch releases are used to indicate bug fixes, refactoring, and other minor non-feature changes that maintain backwards compatibility.
 
@@ -140,7 +141,8 @@ Patch releases are used to indicate bug fixes, refactoring, and other minor non-
 python scripts/bump_version.py patch
 ```
 
-#### Bump major version and graduate to pre-release
+### Status suffixes
+#### Bump and pre-release
 
 Sometimes we want to publish a pre-release version to allow users to test the new version before it is officially released.
 
@@ -148,7 +150,7 @@ Sometimes we want to publish a pre-release version to allow users to test the ne
 python scripts/bump_version.py major,pre
 ```
 
-#### Graduate to release candidate
+#### Release candidate
 
 Graduating to release candidate is not necessary, but can sometimes be useful to indicate that the release is feature-complete and ready for testing, but not yet ready for general use due to possible minor bugs or missing/incomplete documentation.
 
@@ -156,7 +158,7 @@ Graduating to release candidate is not necessary, but can sometimes be useful to
 python scripts/bump_version.py major,rc
 ```
 
-#### Graduate to release
+#### Release
 
 Going from a pre-release or a release candidate to a release is done by removing the status suffix:
 
