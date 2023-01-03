@@ -51,7 +51,7 @@ path = "README.md"
 
 [[tool.hatch.metadata.hooks.fancy-pypi-readme.fragments]]
 path = "CHANGELOG.md"
-pattern = "<!-- changelog follows -->\n\n(.*?)\n\n## "
+pattern = "<!-- changelog follows -->\n\n(.*)"
 
 [tool.hatch.version]
 path = "harbor_cli/__about__.py"
