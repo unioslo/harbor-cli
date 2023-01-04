@@ -15,6 +15,7 @@ from pydantic import Field
 
 from .config import HarborCLIConfig
 from .exceptions import handle_status_error
+from .output.console import console
 
 T = TypeVar("T")
 
@@ -58,6 +59,7 @@ class State(BaseModel):
     def run(
         self,
         coro: Awaitable[T],
+        status: Optional[str] = None,
         no_handle: Type[Exception] | Tuple[Type[Exception], ...] | None = None,
     ) -> T:
         """Run a coroutine in the event loop.
@@ -71,8 +73,15 @@ class State(BaseModel):
             should not be passed to the default exception handler.
             Exceptions of this type will be raised as-is.
         """
+        if not status:
+            status = "Working..."
+        if not status.endswith("..."):  # aesthetic :)
+            status += "..."
+
         try:
-            resp = self.loop.run_until_complete(coro)
+            # show spinner when running a coroutine
+            with console.status(status):
+                resp = self.loop.run_until_complete(coro)
         except StatusError as e:
             if no_handle and isinstance(e, no_handle):
                 raise
