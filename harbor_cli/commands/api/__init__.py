@@ -12,6 +12,7 @@ from . import ldap as ldap
 from . import project as project
 from . import registry as registry
 from . import replication as replication
+from . import repository as repository
 from . import scan as scan
 from . import scanall as scanall
 from . import scanner as scanner
@@ -29,6 +30,7 @@ api_commands: list[typer.Typer] = [
     project.app,
     registry.app,
     replication.app,
+    repository.app,
     scan.app,
     scanall.app,
     scanner.app,
