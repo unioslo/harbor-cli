@@ -106,7 +106,9 @@ $ python scripts/bump_version.py --help
 
 ```
 
-The tool will automatically update the version in `harbor_cli/__about__.py`, and create a new tag with the new version number (`harbor-cli-vx.y.z`).
+To assist in bumping versions and tagging correctly, there is a script in `scripts/bump_version.py` that shares the same interface as `hatch version`.
+
+The tool will automatically update the version in `harbor_cli/__about__.py`, and create a new git tag with the bumped version number (`harbor-cli-vx.y.z`).
 
 Pushing the new tag to the remote repository will trigger a new release.
 
