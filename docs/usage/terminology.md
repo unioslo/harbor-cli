@@ -41,6 +41,7 @@ The final subcommand is the _action_ to perform on the resource, such as `create
 * `get` - Get a resource
 * `create` - Create a resource
 * `delete` - Delete a resource
+    * Prompts for confirmation unless `--force` is specified.
 * `list` - List resources (optionally filtered by a query)
 * `update` - Perform a (partial) update of a resource.
     * The default behavior is similar to a PATCH request. Performs a partial update with only the given parameters (corresponding to the resource's fields) being updated on the resource.
