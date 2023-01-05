@@ -169,6 +169,7 @@ class TableSettings(BaseModel):
 
     description: bool = False
     max_depth: Optional[int] = -1
+    compact: bool = False
     # TODO: table style
 
     @validator("max_depth", pre=True)
@@ -300,7 +301,6 @@ def sample_config(exclude_none: bool = False) -> str:
     config = HarborCLIConfig()
     # We need to create an intermediate JSON dump to get rid of non tomli-w
     # compatible objects such as Path objects.
-    #
     # The built-in pydantic `.json()` method handles these types gracefully,
     # whereas tomli_w does not. Hence the intermediate step.
     return tomli_w.dumps(

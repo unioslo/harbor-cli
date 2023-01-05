@@ -6,19 +6,22 @@ from typing import TypeVar
 import typer
 from harborapi.models.base import BaseModel as HarborBaseModel
 from pydantic import BaseModel
+from rich.table import Table
 
 from ..exceptions import OverwriteError
+from ..logs import logger
 from ..state import state
 from .console import console
 from .format import OutputFormat
 from .schema import Schema
+from .table import get_render_function
 
 T = TypeVar("T")
 
 # TODO: add ResultType = T | list[T] to types.py
 
 
-def render_result(result: T, ctx: typer.Context) -> None:
+def render_result(result: T, ctx: typer.Context | None = None) -> None:
     """Render the result of a command."""
     fmt = state.config.output.format
     if fmt == OutputFormat.TABLE:
@@ -31,8 +34,37 @@ def render_result(result: T, ctx: typer.Context) -> None:
         raise ValueError(f"Unknown output format {fmt!r}.")
 
 
-def render_table(result: T | Sequence[T], ctx: typer.Context) -> None:
+def render_table(result: T | Sequence[T], ctx: typer.Context | None = None) -> None:
     """Render the result of a command as a table."""
+    compact = state.config.output.table.compact
+
+    # Try to render compact table if enabled
+    table = None
+    if compact:
+        try:
+            table = render_table_compact(result)
+        except NotImplementedError as e:
+            logger.warning(f"Failed to render compact table: {e}")
+
+    # Fall back on harborapi full table rendering if we didn't get a compact table
+    if table:
+        console.print(table)
+    else:
+        render_table_full(result)
+
+
+def render_table_compact(result: T | Sequence[T]) -> Table | None:
+    """Render the result of a command as a compact table."""
+
+    try:
+        func = get_render_function(result)
+    except ValueError:
+        return None
+    else:
+        return func(result)
+
+
+def render_table_full(result: T | Sequence[T]) -> None:
     show_description = state.config.output.table.description
     max_depth = state.config.output.table.max_depth
 
