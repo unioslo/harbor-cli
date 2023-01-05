@@ -6,7 +6,6 @@ from typing import TypeVar
 import typer
 from harborapi.models.base import BaseModel as HarborBaseModel
 from pydantic import BaseModel
-from rich.table import Table
 
 from ..exceptions import OverwriteError
 from ..logs import logger
@@ -36,32 +35,34 @@ def render_result(result: T, ctx: typer.Context | None = None) -> None:
 
 def render_table(result: T | Sequence[T], ctx: typer.Context | None = None) -> None:
     """Render the result of a command as a table."""
-    compact = state.config.output.table.compact
+    # TODO: handle "primitives" like strings and numbers
 
     # Try to render compact table if enabled
-    table = None
+    compact = state.config.output.table.compact
     if compact:
         try:
-            table = render_table_compact(result)
+            render_table_compact(result)
         except NotImplementedError as e:
-            logger.warning(f"Failed to render compact table: {e}")
+            logger.warning(f"Unable to render compact table: {e}")
+        except ValueError:
+            return  # empty sequence (nothing to render)
+        else:
+            return
 
-    # Fall back on harborapi full table rendering if we didn't get a compact table
-    if table:
-        console.print(table)
-    else:
-        render_table_full(result)
+    # If we got to this point, we have not printed a compact table.
+    # Use built-in table rendering from harborapi.
+    render_table_full(result)
 
 
-def render_table_compact(result: T | Sequence[T]) -> Table | None:
+def render_table_compact(result: T | Sequence[T]) -> None:
     """Render the result of a command as a compact table."""
-
     try:
         func = get_render_function(result)
     except ValueError:
-        return None
+        logger.info("Nothing to print.")
     else:
-        return func(result)
+        table = func(result)
+        console.print(table)
 
 
 def render_table_full(result: T | Sequence[T]) -> None:
