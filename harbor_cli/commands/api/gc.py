@@ -32,8 +32,9 @@ app.add_typer(schedule_cmd)
 @schedule_cmd.command("get")
 def get_gc_schedule(ctx: typer.Context) -> None:
     """Get garbage collection schedule."""
-    logger.info(f"Fetching Garbage Collection schedule...")
-    schedule = state.run(state.client.get_gc_schedule())
+    schedule = state.run(
+        state.client.get_gc_schedule(), f"Fetching Garbage Collection schedule..."
+    )
     render_result(schedule, ctx)
 
 
@@ -58,8 +59,10 @@ def create_gc_schedule(
     )
     # TODO: investigate which parameters the `parameters` field takes
     schedule = Schedule(schedule=schedule_obj)
-    logger.debug(f"Creating Garbage Collection schedule...")
-    state.run(state.client.create_gc_schedule(schedule))
+    state.run(
+        state.client.create_gc_schedule(schedule),
+        "Creating Garbage Collection schedule...",
+    )
     logger.info(f"Garbage Collection schedule created.")
 
 
@@ -102,8 +105,10 @@ def update_gc_schedule(
         schedule.schedule = ScheduleObj.parse_obj(schedule_obj_dict)
 
     # TODO: investigate which parameters the `parameters` field takes
-    logger.debug(f"Updating Garbage Collection schedule...")
-    state.run(state.client.update_gc_schedule(schedule))
+    state.run(
+        state.client.update_gc_schedule(schedule),
+        f"Updating Garbage Collection schedule...",
+    )
     logger.info(f"Garbage Collection schedule updated.")
 
 
@@ -118,14 +123,14 @@ def get_gc_jobs(
     page_size: int,
 ) -> None:
     """Get garbage collection jobs."""
-    logger.info(f"Fetching Garbage Collection jobs...")
     jobs = state.run(
         state.client.get_gc_jobs(
             query=query,
             sort=sort,
             page=page,
             page_size=page_size,
-        )
+        ),
+        f"Fetching Garbage Collection jobs...",
     )
     render_result(jobs, ctx)
 
@@ -139,8 +144,9 @@ def get_gc_job(
     ),
 ) -> None:
     """Get garbage collection job by its ID."""
-    logger.info(f"Fetching Garbage Collection jobs...")
-    job = state.run(state.client.get_gc_job(job_id))
+    job = state.run(
+        state.client.get_gc_job(job_id), f"Fetching Garbage Collection jobs..."
+    )
     render_result(job, ctx)
 
 
@@ -153,6 +159,8 @@ def get_gc_log(
     ),
 ) -> None:
     """Get garbage collection job by its ID."""
-    logger.info(f"Fetching Garbage Collection jobs...")
-    log_lines = state.run(state.client.get_gc_log(job_id, as_list=True))
+    log_lines = state.run(
+        state.client.get_gc_log(job_id, as_list=True),
+        "Fetching Garbage Collection logs...",
+    )
     render_result(log_lines, ctx)

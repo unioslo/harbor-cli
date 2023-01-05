@@ -60,8 +60,9 @@ def get_project_info(
     """Get information about a project."""
     arg = get_project_arg(project_name_or_id, is_id)
     project_repr = get_project_repr(arg)
-    logger.info(f"Fetching project info for {project_repr}...")
-    project_info = state.run(state.client.get_project(arg))
+    project_info = state.run(
+        state.client.get_project(arg), f"Fetching project info for {project_repr}..."
+    )
     render_result(project_info, ctx)
 
 
@@ -82,7 +83,6 @@ def get_project_logs(
 ) -> None:
     """Fetch recent logs for a project."""
     project_repr = get_project_repr(project_name)
-    logger.info(f"Fetching logs for {project_repr}...")
     logs = state.run(
         state.client.get_project_logs(
             project_name,
@@ -91,7 +91,8 @@ def get_project_logs(
             page=page,
             page_size=page_size,
             retrieve_all=retrieve_all,
-        )
+        ),
+        f"Fetching logs for {project_repr}...",
     )
     logger.info(f"Fetched {len(logs)} logs.")
     render_result(logs, ctx)
@@ -109,8 +110,10 @@ def project_exists(
 ) -> None:
     """Check if a project exists. Exits with return code 0 if it does, 1 if it doesn't."""
     project_repr = get_project_repr(project_name)
-    logger.info(f"Checking if {project_repr} exists...")
-    exists = state.run(state.client.project_exists(project_name))
+    exists = state.run(
+        state.client.project_exists(project_name),
+        f"Checking if {project_repr} exists...",
+    )
     logger.info(f"{project_name!r} exists: {exists}")
     render_result(exists, ctx)
     exit(0 if exists else 1)
@@ -175,7 +178,6 @@ def create_project(
     # "true" and "false" for fields in the models that accept "true" and "false",
     # but are str rather than bool (WHY, HARBOR?!)
     """Create a new project."""
-    logger.info("Creating project...")
     project_req = ProjectReq(
         project_name=project_name,
         storage_limit=storage_limit,
@@ -191,7 +193,7 @@ def create_project(
             retention_id=retention_id,
         ),
     )
-    project = state.run(state.client.create_project(project_req))
+    project = state.run(state.client.create_project(project_req), "Creating project...")
     logger.info(f"Created project {project_name}")
     render_result(project, ctx)
 
@@ -227,7 +229,6 @@ def list_projects(
     ),
 ) -> None:
     """Fetch projects."""
-    logger.info("Fetching projects...")
     projects = state.run(
         state.client.get_projects(
             query=query,
@@ -238,7 +239,8 @@ def list_projects(
             with_detail=with_detail,
             page_size=page_size,
             retrieve_all=retrieve_all,
-        )
+        ),
+        "Fetching projects...",
     )
     logger.info(f"Fetched {len(projects)} projects.")
     render_result(projects, ctx)
@@ -306,8 +308,6 @@ def update_project(
 ) -> None:
     arg = get_project_arg(project_name_or_id, is_id)
     project_repr = get_project_repr(arg)
-    logger.info(f"Updating {project_repr}...")
-
     project_req = ProjectReq(
         project_name=arg if isinstance(arg, str) else None,
         storage_limit=storage_limit,
@@ -323,7 +323,9 @@ def update_project(
             retention_id=retention_id,
         ),
     )
-    state.run(state.client.update_project(arg, project_req))
+    state.run(
+        state.client.update_project(arg, project_req), f"Updating {project_repr}..."
+    )
     logger.info(f"Updated {project_repr}")
 
 
@@ -345,9 +347,8 @@ def delete_project(
     arg = get_project_arg(project_name_or_id, is_id)
 
     project_repr = get_project_repr(arg)
-    logger.info(f"Deleting {project_repr}...")
 
-    state.run(state.client.delete_project(arg))
+    state.run(state.client.delete_project(arg), f"Deleting {project_repr}...")
 
 
 # HarborAsyncClient.get_project_summary()
@@ -367,8 +368,9 @@ def get_project_summary(
     """Fetch project summary."""
     arg = get_project_arg(project_name_or_id, is_id)
     project_repr = get_project_repr(arg)
-    logger.info(f"Fetching summary for {project_repr}...")
-    summary = state.run(state.client.get_project_summary(arg))
+    summary = state.run(
+        state.client.get_project_summary(arg), f"Fetching summary for {project_repr}..."
+    )
     render_result(summary, ctx)
 
 
@@ -412,8 +414,9 @@ def set_project_scanner(
     arg = get_project_arg(project_name_or_id, is_id)
     project_repr = get_project_repr(arg)
     scanner_repr = f"scanner with ID {scanner_id!r}"
-    logger.info(f"Setting scanner for {project_repr} to {scanner_repr}")
-    state.run(state.client.set_project_scanner(arg, scanner_id))
+    state.run(
+        state.client.set_project_scanner(arg, scanner_id), f"Setting project scanner..."
+    )
     logger.info(f"Set scanner for {project_repr} to {scanner_repr}")
 
 
@@ -438,7 +441,6 @@ def get_project_scanner_candidates(
 ) -> None:
     arg = get_project_arg(project_name_or_id, is_id)
     project_repr = get_project_repr(arg)
-    logger.info(f"Fetching scanner candidates for {project_repr}...")
     candidates = state.run(
         state.client.get_project_scanner_candidates(
             arg,
@@ -446,7 +448,8 @@ def get_project_scanner_candidates(
             sort=sort,
             page=page,
             page_size=page_size,
-        )
+        ),
+        f"Fetching scanner candidates for {project_repr}...",
     )
     render_result(candidates, ctx)
 
@@ -509,9 +512,7 @@ def get_project_metadata(
 ) -> None:
     """Get metadata for a project."""
     arg = get_project_arg(project_name_or_id, is_id)
-    project_repr = get_project_repr(arg)
-    logger.info(f"Fetching metadata for {project_repr}...")
-    metadata = state.run(state.client.get_project_metadata(arg))
+    metadata = state.run(state.client.get_project_metadata(arg), "Fetching metadata...")
     render_result(metadata, ctx)
 
 
@@ -581,8 +582,10 @@ def set_project_metadata(
     )
 
     project_repr = get_project_repr(arg)
-    logger.info(f"Setting metadata for {project_repr}...")
-    state.run(state.client.set_project_metadata(arg, metadata))
+    state.run(
+        state.client.set_project_metadata(arg, metadata),
+        f"Setting metadata for {project_repr}...",
+    )
     logger.info(f"Set metadata for {project_repr}.")
 
 
@@ -607,8 +610,10 @@ def get_project_metadata_field(
     """Get a single field from the metadata for a project. NOTE: does not support table output currently."""
     arg = get_project_arg(project_name_or_id, is_id)
     project_repr = get_project_repr(arg)
-    logger.info(f"Fetching metadata field {field!r} for {project_repr}...")
-    metadata = state.run(state.client.get_project_metadata_entry(arg, field))
+    metadata = state.run(
+        state.client.get_project_metadata_entry(arg, field),
+        f"Fetching metadata field {field!r} for {project_repr}...",
+    )
     render_result(metadata, ctx)
 
 
@@ -643,8 +648,10 @@ def set_project_metadata_field(
 
     metadata = ProjectMetadata.parse_obj({field: value})
 
-    logger.info(f"Setting metadata for {project_repr}...")
-    state.run(state.client.update_project_metadata_entry(arg, field, metadata))
+    state.run(
+        state.client.update_project_metadata_entry(arg, field, metadata),
+        f"Setting metadata for {project_repr}...",
+    )
     logger.info(f"Set metadata for {project_repr}.")
 
 
@@ -672,6 +679,8 @@ def delete_project_metadata_field(
 
     arg = get_project_arg(project_name_or_id, is_id)
 
-    logger.info(f"Deleting metadata field {field!r}...")
-    state.run(state.client.delete_project_metadata_entry(arg, field))
+    state.run(
+        state.client.delete_project_metadata_entry(arg, field),
+        f"Deleting metadata field {field!r}...",
+    )
     logger.info(f"Deleted metadata field {field!r}.")

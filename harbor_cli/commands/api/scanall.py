@@ -30,8 +30,9 @@ app.add_typer(schedule_cmd)
 @app.command("metrics")
 def get_scanall_metrics(ctx: typer.Context) -> None:
     """Get metrics for all 'Scan All' jobs."""
-    logger.info(f"Fetching metrics for 'Scan All' jobs...")
-    metrics = state.run(state.client.get_scan_all_metrics())
+    metrics = state.run(
+        state.client.get_scan_all_metrics(), "Fetching metrics for 'Scan All' jobs..."
+    )
     render_result(metrics, ctx)
 
 
@@ -39,8 +40,9 @@ def get_scanall_metrics(ctx: typer.Context) -> None:
 @schedule_cmd.command("get")
 def get_scanall_schedule(ctx: typer.Context) -> None:
     """Get the current 'Scan All' schedule."""
-    logger.info(f"Fetching 'Scan All' schedule...")
-    schedule = state.run(state.client.get_scan_all_schedule())
+    schedule = state.run(
+        state.client.get_scan_all_schedule(), "Fetching 'Scan All' schedule..."
+    )
     render_result(schedule, ctx)
 
 
@@ -62,12 +64,16 @@ def _do_handle_schedule_modification_command(
     )
     schedule = Schedule(schedule=schedule_obj)
     if ctx.command.name == "create":
-        logger.info(f"Creating 'Scan All' schedule...")
-        state.run(state.client.create_scan_all_schedule(schedule))
+        state.run(
+            state.client.create_scan_all_schedule(schedule),
+            "Creating 'Scan All' schedule...",
+        )
         logger.info(f"'Scan All' schedule created.")
     elif ctx.command.name == "update":
-        logger.info(f"Updating 'Scan All' schedule...")
-        state.run(state.client.create_scan_all_schedule(schedule))
+        state.run(
+            state.client.create_scan_all_schedule(schedule),
+            f"Updating 'Scan All' schedule...",
+        )
         logger.info(f"'Scan All' schedule updated.")
     else:
         raise HarborCLIError(f"Unknown command {ctx.command.name}")
@@ -91,6 +97,5 @@ schedule_cmd.command("update", help="Update existing Garbage Collection schedule
 @app.command("stop")
 def stop_scanall_job(ctx: typer.Context) -> None:
     """Stop the currently running 'Scan All' job."""
-    logger.info(f"Stopping 'Scan All' job...")
-    state.run(state.client.stop_scan_all_job())
+    state.run(state.client.stop_scan_all_job(), "Stopping 'Scan All' job...")
     logger.info(f"'Scan All' job stopped.")

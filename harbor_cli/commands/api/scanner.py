@@ -30,8 +30,7 @@ def get_csanner(
     ),
 ) -> None:
     """Get a specific scanner."""
-    logger.info(f"Fetching scanner...")
-    scanner = state.run(state.client.get_scanner(scanner_id))
+    scanner = state.run(state.client.get_scanner(scanner_id), "Fetching scanner...")
     render_result(scanner, ctx)
 
 
@@ -101,18 +100,26 @@ def _do_handle_scanner_modification(
 
     # TODO: fix this shitshow
     if ctx.command.name == "create":
-        logger.info(f"Creating scanner...")
-        location = state.run(state.client.create_scanner(req))
+        location = state.run(state.client.create_scanner(req), "Creating scanner...")
         render_result(location, ctx)
         logger.info(f"Scanner created: {location}.")
     elif ctx.command.name == "update":
         assert scanner_id is not None  # type: ignore # mypy doesn't understand that we have checked this already
-        existing_scanner = state.run(state.client.get_scanner(scanner_id))
+        existing_scanner = state.run(
+            state.client.get_scanner(scanner_id), "Fetching current scanner..."
+        )
         if existing_scanner is None:
             raise HarborCLIError(f"Scanner with ID {scanner_id!r} does not exist.")
-        existing_scanner.dict().update(req.dict(exclude_none=True, exclude_unset=True))
-        logger.info(f"Updating scanner with ID {scanner_id!r}...")
-        state.run(state.client.update_scanner(scanner_id, existing_scanner))  # type: ignore
+
+        # Cast existing scanner to dict, update it with the new values and parse it back to a ScannerRegistrationReq
+        d = existing_scanner.dict()
+        d.update(req.dict(exclude_none=True, exclude_unset=True))
+        req = ScannerRegistrationReq.parse_obj(d)
+
+        state.run(
+            state.client.update_scanner(scanner_id, req),
+            "Updating scanner...",
+        )
         logger.info(f"Scanner with ID {scanner_id!r} updated.")
     else:
         raise HarborCLIError(f"Unknown command {ctx.command.name}")
@@ -137,8 +144,7 @@ def delete_scanner(
     ),
 ) -> None:
     """Delete a scanner."""
-    logger.info(f"Deleting scanner...")
-    state.run(state.client.delete_scanner(scanner_id))
+    state.run(state.client.delete_scanner(scanner_id), "Deleting scanner...")
     logger.info(f"Scanner with ID {scanner_id!r} deleted.")
 
 
@@ -153,14 +159,14 @@ def list_scanners(
     page_size: int,
 ) -> None:
     """List scanners."""
-    logger.info(f"Listing scanners...")
     scanners = state.run(
         state.client.get_scanners(
             query=query,
             sort=sort,
             page=page,
             page_size=page_size,
-        )
+        ),
+        f"Fetching scanners...",
     )
     render_result(scanners, ctx)
 
@@ -180,9 +186,11 @@ def set_default_scanner(
     ),
 ) -> None:
     """Set/unset default scanner."""
-    logger.info(f"Setting default scanner...")
     is_default = not unset_default  # invert the flag
-    state.run(state.client.set_default_scanner(scanner_id, is_default))
+    state.run(
+        state.client.set_default_scanner(scanner_id, is_default),
+        "Setting default scanner...",
+    )
     logger.info(f"Scanner with ID {scanner_id!r} set as default.")
 
 

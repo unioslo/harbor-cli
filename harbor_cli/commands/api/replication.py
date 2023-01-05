@@ -46,9 +46,11 @@ def start_replication_execution(
     ),
 ) -> None:
     """Start a replication execution."""
-    logger.debug(f"Starting replication execution for policy with ID {policy_id}.")
-    replication_url = state.run(state.client.start_replication(policy_id))
+    replication_url = state.run(
+        state.client.start_replication(policy_id), "Starting replication..."
+    )
     render_result(replication_url, ctx)
+    logger.info(f"Replication started for policy {policy_id}.")
 
 
 # HarborAsyncClient.stop_replication()
@@ -61,8 +63,10 @@ def stop_replication_execution(
     ),
 ) -> None:
     """Stop a replication execution."""
-    logger.debug(f"Stopping replication execution with ID {execution_id}...")
-    state.run(state.client.stop_replication(execution_id))
+    state.run(
+        state.client.stop_replication(execution_id),
+        f"Stopping replication execution...",
+    )
     logger.info(f"Stopped replication execution with ID {execution_id}.")
 
 
@@ -76,8 +80,9 @@ def get_replication_execution(
     ),
 ) -> None:
     """Get information about a replication execution."""
-    logger.debug(f"Fetching execution with ID {execution_id}...")
-    execution = state.run(state.client.get_replication(execution_id))
+    execution = state.run(
+        state.client.get_replication(execution_id), "Fetching replication execution..."
+    )
     render_result(execution, ctx)
 
 
@@ -103,7 +108,6 @@ def list_replication_executions(
     page_size: int = 10,
 ) -> None:
     """List replication executions."""
-    logger.debug(f"Fetching replication executions...")
     executions = state.run(
         state.client.get_replications(
             sort=sort,
@@ -112,7 +116,8 @@ def list_replication_executions(
             status=status,
             page=page,
             page_size=page_size,
-        )
+        ),
+        "Fetching replication executions...",
     )
     render_result(executions, ctx)
 
@@ -127,8 +132,9 @@ def get_replication_policy(
     ),
 ) -> None:
     """Get information about a replication policy."""
-    logger.debug(f"Fetching replication policy with ID {policy_id}...")
-    policy = state.run(state.client.get_replication_policy(policy_id))
+    policy = state.run(
+        state.client.get_replication_policy(policy_id), "Fetching replication policy..."
+    )
     render_result(policy, ctx)
 
 
@@ -276,8 +282,10 @@ def create_replication_policy(
         filters=filters if filters else None,
     )
 
-    logger.debug(f"Creating replication policy {policy}...")
-    policy_url = state.run(state.client.create_replication_policy(policy))
+    policy_url = state.run(
+        state.client.create_replication_policy(policy),
+        f"Creating replication policy {policy}...",
+    )
     logger.info(f"Created replication policy: {policy_url}.")
 
 
@@ -313,8 +321,10 @@ def delete_replication_policy(
     ),
 ) -> None:
     """Delete a replication policy."""
-    logger.debug(f"Deleting replication policy with ID {policy_id}...")
-    state.run(state.client.delete_replication_policy(policy_id))
+    state.run(
+        state.client.delete_replication_policy(policy_id),
+        f"Deleting replication policy with ID {policy_id}...",
+    )
     logger.info(f"Deleted replication policy with ID {policy_id}.")
 
 
@@ -329,14 +339,14 @@ def list_replication_policies(
     page_size: int,
 ) -> None:
     """List replication policies."""
-    logger.debug(f"Fetching replication policies...")
     policies = state.run(
         state.client.get_replication_policies(
             query=query,
             sort=sort,
             page=page,
             page_size=page_size,
-        )
+        ),
+        f"Fetching replication policies...",
     )
     render_result(policies, ctx)
 
@@ -362,7 +372,6 @@ def list_execution_tasks(
     ),
 ) -> None:
     """List replication tasks."""
-    logger.debug(f"Fetching replication tasks for execution {execution_id}...")
     tasks = state.run(
         state.client.get_replication_tasks(
             execution_id,
@@ -371,7 +380,8 @@ def list_execution_tasks(
             page_size=page_size,
             status=status,
             resource_type=resource_type,
-        )
+        ),
+        f"Fetching replication tasks for execution {execution_id}...",
     )
     render_result(tasks, ctx)
 
@@ -386,8 +396,11 @@ def get_task_log(
     task_id: int = typer.Argument(..., help="The ID of the task to get the log for."),
 ) -> None:
     """Get the log for a replication task."""
-    logger.debug(
-        f"Fetching log for replication task {task_id} of replication execution {execution_id}..."
+    log = state.run(
+        state.client.get_replication_task_log(execution_id, task_id),
+        "Fetching replication logs...",
     )
-    log = state.run(state.client.get_replication_task_log(execution_id, task_id))
     render_result(log, ctx)
+    logger.info(
+        f"Fetched log for replication task {task_id} of replication execution {execution_id}"
+    )

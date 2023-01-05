@@ -31,8 +31,7 @@ def get_registry(
     ),
 ) -> None:
     """Get information about the system."""
-    logger.debug(f"Fetching registry...")
-    registry = state.run(state.client.get_registry(registry_id))
+    registry = state.run(state.client.get_registry(registry_id), "Fetching registry...")
     render_result(registry, ctx)
 
 
@@ -76,7 +75,6 @@ def create_registry(
     # status omitted
 ) -> None:
     """Create a new registry."""
-    logger.debug(f"Creating registry...")
     credential = RegistryCredential(
         type=credential_type, access_key=access_key, access_secret=access_secret
     )
@@ -88,7 +86,7 @@ def create_registry(
         insecure=insecure,
         description=description,
     )
-    location = state.run(state.client.create_registry(registry))
+    location = state.run(state.client.create_registry(registry), "Creating registry...")
     render_result(location, ctx)
 
 
@@ -131,7 +129,6 @@ def update_registry(
     # status omitted
 ) -> None:
     """Update a registry."""
-    logger.debug(f"Updating registry...")
     registry = RegistryUpdate(
         name=name,
         url=url,
@@ -141,7 +138,9 @@ def update_registry(
         access_secret=access_secret,
         insecure=insecure,
     )
-    state.run(state.client.update_registry(registry_id, registry))
+    state.run(
+        state.client.update_registry(registry_id, registry), f"Updating registry..."
+    )
     render_result(None, ctx)  # is this allowed?
     logger.info("Registry updated successfully.")
 
@@ -155,8 +154,7 @@ def delete_registry(
     ),
 ) -> None:
     """Delete a registry."""
-    logger.debug(f"Deleting registry...")
-    state.run(state.client.delete_registry(registry_id))
+    state.run(state.client.delete_registry(registry_id), f"Deleting registry...")
     render_result(None, ctx)
     logger.info(f"Deleted registry with ID {registry_id}.")
 
@@ -170,8 +168,9 @@ def get_registry_info(
     ),
 ) -> None:
     """Get information about a registry's triggers and resource filters"""
-    logger.debug(f"Fetching registry info...")
-    registry_info = state.run(state.client.get_registry_info(registry_id))
+    registry_info = state.run(
+        state.client.get_registry_info(registry_id), "Fetching registry info..."
+    )
     render_result(registry_info, ctx)
 
 
@@ -180,8 +179,9 @@ def get_registry_adapters(
     ctx: typer.Context,
 ) -> None:
     """Get available adapters"""
-    logger.debug(f"Fetching registry adapters...")
-    registry_adapters = state.run(state.client.get_registry_adapters())
+    registry_adapters = state.run(
+        state.client.get_registry_adapters(), "Fetching registry adapters..."
+    )
     render_result(registry_adapters, ctx)
 
 
@@ -190,8 +190,9 @@ def get_registry_providers(
     ctx: typer.Context,
 ) -> None:
     """List all available registry providers"""
-    logger.debug(f"Fetching registry providers...")
-    registry_providers = state.run(state.client.get_registry_providers())
+    registry_providers = state.run(
+        state.client.get_registry_providers(), "Fetching registry providers..."
+    )
     render_result(registry_providers, ctx)
 
 
@@ -204,11 +205,14 @@ def check_registry_status(
         help="ID of registry to get status of.",
     ),
 ) -> None:
-    """Check the status of a registry. Exits with 0 if the registry is healthy, 1 otherwise."""
+    """Check the status of a registry. Throws an error if the registry is not reachable."""
+    # META-NOTE: i have no idea what i meant by this
     # NOTE: kind of absurd calling convention, but it's what the API expects
     # maybe we just accept a registry id for now and add the other options later
-    logger.debug(f"Checking registry status...")
-    state.run(state.client.check_registry_status(RegistryPing(id=registry_id)))
+    state.run(
+        state.client.check_registry_status(RegistryPing(id=registry_id)),
+        "Checking registry status...",
+    )
 
 
 @app.command("list")
@@ -222,7 +226,6 @@ def list_registries(
     retrieve_all: bool,
 ) -> None:
     """List registries."""
-    logger.debug(f"Fetching registries..")
     registries = state.run(
         state.client.get_registries(
             query=query,
@@ -230,6 +233,7 @@ def list_registries(
             page=page,
             page_size=page_size,
             retrieve_all=retrieve_all,
-        )
+        ),
+        "Fetching registries..",
     )
     render_result(registries, ctx)

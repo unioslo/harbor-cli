@@ -78,10 +78,8 @@ def list_artifacts(
 ) -> None:
     """List artifacts in a project or in a specific repository."""
     if "/" in project:
-        logger.info("Interpreting argument format as <project>/<repo>.")
+        logger.debug("Interpreting argument format as <project>/<repo>.")
         project, repo = project.split("/", 1)
-
-    logger.info(f"Fetching artifact(s)...")
 
     # TODO: add pagination to output
 
@@ -97,7 +95,8 @@ def list_artifacts(
             repositories=repositories,
             tag=tag,
             query=query,
-        )
+        ),
+        "Fetching artifacts...",
     )
     render_result(artifacts, ctx)
     logger.info(f"Fetched {len(artifacts)} artifact(s).")
@@ -127,10 +126,10 @@ def delete_artifact(
         ):
             exit()
 
-    logger.info(f"Deleting artifact {artifact}...")
     try:
         state.run(
             state.client.delete_artifact(an.project, an.repository, an.reference),
+            f"Deleting artifact {artifact}...",
             no_handle=NotFound,
         )
     except NotFound:
@@ -166,10 +165,10 @@ def copy_artifact(
             "Project name is part of the repository name, you likely don't want this."
         )
 
-    logger.info(f"Copying artifact {artifact} to {project}/{repository}...")
     try:
         resp = state.run(
             state.client.copy_artifact(project, repository, artifact),
+            f"Copying artifact {artifact} to {project}/{repository}...",
             no_handle=NotFound,
         )
     except NotFound:
@@ -194,12 +193,12 @@ def get(
     # TODO: --tag
 ) -> None:
     """Get information about a specific artifact."""
-    logger.info(f"Fetching artifact(s)...")
 
     an = parse_artifact_name(artifact)
     # Just use normal endpoint method for a single artifact
     artifact = state.run(
-        state.client.get_artifact(an.project, an.repository, an.reference)  # type: ignore
+        state.client.get_artifact(an.project, an.repository, an.reference),  # type: ignore
+        f"Fetching artifact(s)...",
     )
     render_result(artifact, ctx)
 
@@ -216,7 +215,8 @@ def list_artifact_tags(
     """List tags for an artifact."""
     an = parse_artifact_name(artifact)
     tags = state.run(
-        state.client.get_artifact_tags(an.project, an.repository, an.reference)
+        state.client.get_artifact_tags(an.project, an.repository, an.reference),
+        f"Fetching tags for {an!r}...",
     )
 
     if not tags:
@@ -243,9 +243,10 @@ def create_artifact_tag(
     # NOTE: We might need to fetch repo and artifact IDs
     t = Tag(name=tag)
     location = state.run(
-        state.client.create_artifact_tag(an.project, an.repository, an.reference, t)
+        state.client.create_artifact_tag(an.project, an.repository, an.reference, t),
+        f"Creating tag {tag!r} for {artifact}...",
     )
-    logger.info(f"Created {tag} for {artifact} at {location}.")
+    logger.info(f"Created {tag!r} for {artifact}: {location}")
 
 
 # delete_artifact_tag()
@@ -275,7 +276,8 @@ def delete_artifact_tag(
             exit()
 
     state.run(
-        state.client.delete_artifact_tag(an.project, an.repository, an.reference, tag)
+        state.client.delete_artifact_tag(an.project, an.repository, an.reference, tag),
+        f"Deleting tag {tag!r} for {artifact}...",
     )
 
 
@@ -320,7 +322,8 @@ def add_artifact_label(
         scope=scope,
     )
     state.run(
-        state.client.add_artifact_label(an.project, an.repository, an.reference, label)
+        state.client.add_artifact_label(an.project, an.repository, an.reference, label),
+        f"Adding label {label.name!r} to {artifact}...",
     )
     logger.info(f"Added label {label.name!r} to {artifact}.")
 
@@ -343,7 +346,8 @@ def delete_artifact_label(
     state.run(
         state.client.delete_artifact_label(
             an.project, an.repository, an.reference, label_id
-        )
+        ),
+        f"Deleting label {label_id} from {artifact}...",
     )
 
 
@@ -360,7 +364,8 @@ def get_accessories(
     """Get accessories for an artifact."""
     an = parse_artifact_name(artifact)
     accessories = state.run(
-        state.client.get_artifact_accessories(an.project, an.repository, an.reference)
+        state.client.get_artifact_accessories(an.project, an.repository, an.reference),
+        f"Getting accessories for {artifact}...",
     )
     render_result(accessories, ctx)
 
@@ -377,15 +382,15 @@ def get_buildhistory(
     """Get build history for an artifact."""
     an = parse_artifact_name(artifact)
     history = state.run(
-        state.client.get_artifact_build_history(an.project, an.repository, an.reference)
+        state.client.get_artifact_build_history(
+            an.project, an.repository, an.reference
+        ),
+        f"Getting build history for {artifact}...",
     )
     render_result(history, ctx)
 
 
 # harborapi.ext.api.get_artifact
-# FIXME: this will not be deserialized properly
-# since we rely on models from harborapi.ext, and the deserializer
-# relies on models from harborapi.models
 @app.command("vulnerabilities")
 def get_vulnerabilities(
     ctx: typer.Context,
@@ -396,5 +401,8 @@ def get_vulnerabilities(
 ) -> None:
     """Get vulnerabilities for an artifact."""
     an = parse_artifact_name(artifact)
-    a = state.run(get_artifact(state.client, an.project, an.repository, an.reference))
+    a = state.run(
+        get_artifact(state.client, an.project, an.repository, an.reference),
+        f"Getting vulnerabilities for {artifact}...",
+    )
     render_result(a, ctx)

@@ -22,8 +22,7 @@ app = typer.Typer(
 @app.command("get")
 def get_allowlist(ctx: typer.Context) -> None:
     """Get the current CVE allowlist."""
-    logger.info(f"Fetching system info...")
-    allowlist = state.run(state.client.get_cve_allowlist())
+    allowlist = state.run(state.client.get_cve_allowlist(), "Fetching system info...")
     render_result(allowlist, ctx)
 
 
@@ -54,7 +53,9 @@ def update_allowlist(
             current_list.items = []
         current_list.items += cve_items
 
-    state.run(state.client.update_cve_allowlist(current_list))
+    state.run(
+        state.client.update_cve_allowlist(current_list), "Updating CVE allowlist..."
+    )
     if replace:
         logger.info(f"Replaced CVE allowlist with {len(cves)} CVEs.")
     else:
@@ -73,13 +74,19 @@ def clear_allowlist(
     ),
 ) -> None:
     """Clear the current CVE allowlist of all CVEs, and optionally all metadata as well."""
-    logger.info("Clearing CVE allowlist...")
     if not full:
-        current_list = state.run(state.client.get_cve_allowlist())
+        current_list = state.run(
+            state.client.get_cve_allowlist(), "Fetching current allowlist..."
+        )
         current_list.items = []
-        state.run(state.client.update_cve_allowlist(current_list))
+        state.run(
+            state.client.update_cve_allowlist(current_list),
+            "Clearing CVEs from allowlist...",
+        )
         logger.info("Cleared CVE allowlist of CVEs.")
     else:
         new_list = CVEAllowlist(items=[])
-        state.run(state.client.update_cve_allowlist(new_list))
+        state.run(
+            state.client.update_cve_allowlist(new_list), "Clearing CVE allowlist..."
+        )
         logger.info("Cleared CVE allowlist of CVEs and metadata.")

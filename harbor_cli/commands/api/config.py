@@ -75,8 +75,7 @@ def get_config(
     ),
 ) -> None:
     """Fetch the Harbor configuration."""
-    logger.info(f"Fetching system info...")
-    system_info = state.loop.run_until_complete(state.client.get_config())
+    system_info = state.run(state.client.get_config(), "Fetching system info...")
     if flatten:
         # In order to print a flattened response, we turn it from a
         # ConfigurationsResponse to a Configurations object.
@@ -115,7 +114,7 @@ def update_config(
     ),
     email_insecure: Optional[bool] = typer.Option(
         None,
-        "--email-insecure",
+        "--email-insecure/--email-secure",
     ),
     email_password: Optional[str] = typer.Option(
         None,
@@ -345,15 +344,17 @@ def update_config(
         # correct parameters to pass to Configurations, we need to flatten
         # the dict representation of the ConfigurationsResponse object
         # to create a dict of key:ConfigItem.value.
-        current_config = state.run(state.client.get_config())
+        current_config = state.run(
+            state.client.get_config(),
+            "Fetching current configuration...",
+        )
         c = flatten_config_response(current_config)
         c.update(params)
 
     configuration = Configurations.parse_obj(c)
 
     state.run(
-        state.client.update_config(
-            configuration,
-        )
+        state.client.update_config(configuration),
+        "Updating configuration...",
     )
     logger.info("Configuration updated.")

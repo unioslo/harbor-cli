@@ -4,7 +4,6 @@ import time
 
 import typer
 
-from ...logs import logger
 from ...output.render import render_result
 from ...state import state
 
@@ -19,16 +18,16 @@ app = typer.Typer(
 @app.command("info")
 def info(ctx: typer.Context) -> None:
     """Get information about the system."""
-    logger.info(f"Fetching system info...")
-    system_info = state.run(state.client.get_system_info())
+    system_info = state.run(state.client.get_system_info(), "Fetching system info...")
     render_result(system_info, ctx)
 
 
 @app.command("volumes")
 def volumeinfo(ctx: typer.Context) -> None:
     """Get information about the system volumes."""
-    logger.info(f"Fetching system volume info...")
-    volume_info = state.run(state.client.get_system_volume_info())
+    volume_info = state.run(
+        state.client.get_system_volume_info(), "Fetching system volume info..."
+    )
     render_result(volume_info, ctx)
 
 
@@ -40,18 +39,16 @@ def health(ctx: typer.Context) -> None:
     but it is still a system health check, hence why it is here,
     and not in its own health.py file.
     """
-    logger.info(f"Fetching health info...")
-    health_status = state.run(state.client.health_check())
+    health_status = state.run(state.client.health_check(), "Fetching health info...")
     render_result(health_status, ctx)
 
 
 @app.command("ping")
 def ping(ctx: typer.Context) -> None:
     """Ping the harbor server. Returns the time it took to ping the server in milliseconds."""
-    logger.info(f"Pinging server...")
     # Use perf_counter with nanosecond resolution to get the most accurate time
     start = time.perf_counter_ns()
-    state.run(state.client.ping())
+    state.run(state.client.ping(), "Pinging server...")
     end = time.perf_counter_ns()
     duration_ms = (end - start) / 1000000
     render_result(duration_ms, ctx)
@@ -60,6 +57,5 @@ def ping(ctx: typer.Context) -> None:
 @app.command("statistics")
 def statistics(ctx: typer.Context) -> None:
     """Get statistics about the system."""
-    logger.info(f"Fetching statistics...")
-    statistics = state.run(state.client.get_statistics())
+    statistics = state.run(state.client.get_statistics(), "Fetching statistics...")
     render_result(statistics, ctx)

@@ -100,7 +100,6 @@ def create_user(
     ),
 ) -> None:
     """Create a new user."""
-    logger.info(f"Creating user {username!r}...")
     req = UserCreationReq(
         username=username,
         email=email,
@@ -108,7 +107,7 @@ def create_user(
         password=password,
         comment=comment,
     )
-    user_info = state.run(state.client.create_user(req))
+    user_info = state.run(state.client.create_user(req), f"Creating user...")
     render_result(user_info, ctx)
     logger.info(f"Created user {username!r}.")
 
@@ -161,8 +160,7 @@ def update_user(
     if comment is not None:
         user_profile.comment = comment
 
-    logger.info(f"Updating user with ID {uid}...")
-    state.run(state.client.update_user(uid, user_profile))
+    state.run(state.client.update_user(uid, user_profile), "Updating user...")
     logger.info(f"Updated user with ID {uid}.")
 
 
@@ -189,19 +187,18 @@ def delete_user(
 
     # Always confirm deletions unless --force is used
     if not force:
-        if not typer.confirm(
+        typer.confirm(
             f"Are you sure you want to delete user {username_or_id!r}?",
             default=False,
-        ):
-            raise typer.Abort()
+            abort=True,
+        )
 
     if is_id:
         uid = convert_uid(username_or_id)
     else:
         uid = uid_from_username(username_or_id)
 
-    logger.info(f"Deleting user with ID {uid}...")
-    state.run(state.client.delete_user(uid))
+    state.run(state.client.delete_user(uid), "Deleting user...")
     logger.info(f"Deleted user with ID {uid}.")
 
 
@@ -219,11 +216,11 @@ def search_users(
     ),
 ) -> None:
     """Search for users by username."""
-    logger.info(f"Searching for users with username {username!r}...")
     users = state.run(
         state.client.search_users_by_username(
             username, page=page, page_size=page_size, retrieve_all=retrieve_all
-        )
+        ),
+        "Searching...",
     )
     render_result(users, ctx)
 
@@ -247,8 +244,9 @@ def set_user_admin(
     else:
         uid = uid_from_username(username_or_id)
 
-    logger.info(f"Setting user with ID {uid} as admin...")
-    state.run(state.client.set_user_admin(uid, is_admin=True))
+    state.run(
+        state.client.set_user_admin(uid, is_admin=True), "Setting user as admin..."
+    )
     logger.info(f"Set user with ID {uid} as admin.")
 
 
@@ -270,8 +268,9 @@ def unset_user_admin(
     else:
         uid = uid_from_username(username_or_id)
 
-    logger.info(f"Removing user with ID {uid} as admin...")
-    state.run(state.client.set_user_admin(uid, is_admin=False))
+    state.run(
+        state.client.set_user_admin(uid, is_admin=False), "Removing user as admin..."
+    )
     logger.info(f"Removed user with ID {uid} as admin.")
 
 
@@ -309,13 +308,13 @@ def set_user_password(
     else:
         uid = uid_from_username(username_or_id)
 
-    logger.info(f"Setting password for user with ID {uid}...")
     state.run(
         state.client.set_user_password(
             uid,
             new_password=new_password,
             old_password=old_password,
         ),
+        "Setting password for user...",
     )
     logger.info(f"Set password for user with ID {uid}.")
 
@@ -346,8 +345,9 @@ def set_user_cli_secret(
     else:
         uid = uid_from_username(username_or_id)
 
-    logger.info(f"Setting CLI secret for user with ID {uid}...")
-    state.run(state.client.set_user_cli_secret(uid, secret))
+    state.run(
+        state.client.set_user_cli_secret(uid, secret), "Setting CLI secret for user..."
+    )
     logger.info(f"Set CLI secret for user with ID {uid}.")
 
 
@@ -355,8 +355,7 @@ def set_user_cli_secret(
 @app.command("get-current")
 def get_current_user(ctx: typer.Context) -> None:
     """Get information about the currently authenticated user."""
-    logger.info("Fetching current user...")
-    user_info = state.run(state.client.get_current_user())
+    user_info = state.run(state.client.get_current_user(), "Fetching current user...")
     render_result(user_info, ctx)
 
 
@@ -374,8 +373,10 @@ def get_current_user_permissions(
     ),
 ) -> None:
     """Get permissions for the currently authenticated user."""
-    logger.info("Fetching current user permissions...")
-    permissions = state.run(state.client.get_current_user_permissions())
+    permissions = state.run(
+        state.client.get_current_user_permissions(),
+        "Fetching current user permissions...",
+    )
     # TODO: print a message here if format is table and no permissions exist?
     # it's clear when using JSON, but not so much with table
     render_result(permissions, ctx)
@@ -390,20 +391,19 @@ def get_user(
         "",
         help="Username of user to update. Add the --id flag to update by ID.",
     ),
-    user_id: bool = typer.Option(
+    is_id: bool = typer.Option(
         False,
         "--id",
         help="Argument is a user ID.",
     ),
 ) -> None:
     """Get information about a specific user."""
+    msg = "Fetching user..."
     if username_or_id is not None:
-        logger.info(f"Fetching user {username_or_id!r}...")
-        user_info = state.run(state.client.get_user_by_username(username_or_id))
-    elif user_id is not None:
+        user_info = state.run(state.client.get_user_by_username(username_or_id), msg)
+    elif is_id is not None:
         uid = convert_uid(username_or_id)
-        logger.info(f"Fetching user {uid}...")
-        user_info = state.run(state.client.get_user(uid))
+        user_info = state.run(state.client.get_user(uid), msg)
     else:
         raise typer.BadParameter("First argument must be a username or ID.")
 
@@ -414,6 +414,5 @@ def get_user(
 @app.command("list")
 def list_users(ctx: typer.Context) -> None:
     """List all users in the system."""
-    logger.info(f"Fetching all users...")
-    users = state.run(state.client.get_users())
+    users = state.run(state.client.get_users(), "Fetching users...")
     render_result(users, ctx)

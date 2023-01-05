@@ -27,8 +27,10 @@ def start_scan(
 ) -> None:
     """Start scanning an artifact."""
     an = parse_artifact_name(artifact)
-    logger.info(f"Starting artifact scan...")
-    state.run(state.client.scan_artifact(an.project, an.repository, an.reference))
+    state.run(
+        state.client.scan_artifact(an.project, an.repository, an.reference),
+        "Starting artifact scan...",
+    )
     logger.info(f"Scan of {artifact!r} started.")
     # TODO: add some sort of results?
 
@@ -44,8 +46,10 @@ def stop_scan(
 ) -> None:
     """Stop scanning an artifact."""
     an = parse_artifact_name(artifact)
-    logger.info(f"Stopping artifact scan...")
-    state.run(state.client.stop_artifact_scan(an.project, an.repository, an.reference))
+    state.run(
+        state.client.stop_artifact_scan(an.project, an.repository, an.reference),
+        "Stopping artifact scan...",
+    )
     logger.info(f"Scan of {artifact!r} stopped.")
 
 
@@ -64,10 +68,10 @@ def get_artifact_scan_report_log(
 ) -> None:
     """Get the log for a specific scan report."""
     an = parse_artifact_name(artifact)
-    logger.info(f"Fetching Artifact scan report log...")
     log = state.run(
         state.client.get_artifact_scan_report_log(
             an.project, an.repository, an.reference, report_id
-        )
+        ),
+        f"Fetching Artifact scan report log...",
     )
     render_result(log, ctx)

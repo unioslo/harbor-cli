@@ -4,7 +4,6 @@ from typing import Optional
 
 import typer
 
-from ...logs import logger
 from ...output.render import render_result
 from ...state import state
 from ...utils import inject_resource_options
@@ -27,7 +26,6 @@ def list_audit_logs(
     [bold red]WARNING:[/] This command can return a lot of data if no query
     is specified.
     """
-    logger.info(f"Fetching audit logs...")
     logs = state.run(
         state.client.get_audit_logs(
             query=query,
@@ -35,6 +33,7 @@ def list_audit_logs(
             page=page,
             page_size=page_size,
             retrieve_all=retrieve_all,
-        )
+        ),
+        f"Fetching audit logs...",
     )
     render_result(logs, ctx)
