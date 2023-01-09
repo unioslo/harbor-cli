@@ -43,7 +43,7 @@ def render_table(result: T | Sequence[T], ctx: typer.Context | None = None) -> N
         try:
             render_table_compact(result)
         except NotImplementedError as e:
-            logger.warning(f"Unable to render compact table: {e}")
+            logger.debug(f"Unable to render compact table: {e}")
         except ValueError:
             return  # empty sequence (nothing to render)
         else:
@@ -109,6 +109,7 @@ def render_json(result: T | Sequence[T], ctx: typer.Context | None = None) -> No
             raise OverwriteError(f"File {p.resolve()} exists.")
         with open(p, "w") as f:
             f.write(o_json)
+            logger.info(f"Output written to {p.resolve()}")
     # Print to stdout if no output file is specified or if the
     # --with-stdout flag is set.
     if not p or with_stdout:
