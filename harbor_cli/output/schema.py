@@ -1,5 +1,7 @@
 """Somewhat experimental schema for (de)serializing data (JSON, YAML, etc.)
 
+Not to be confused with JSON Schema (<https://json-schema.org/specification.html>)
+
 The aim is to be able to serialize a Pydantic model to JSON, YAML, etc. and
 include metadata about the model in the serialized data. This metadata can
 then be used to deserialize the data back into the correct Pydantic model.
@@ -7,6 +9,11 @@ then be used to deserialize the data back into the correct Pydantic model.
 The benefit of this is that we can more easily print the data as tables
 using the harborapi.models.BaseModel's as_table() method, and we can also use the
 Pydantic models' custom validation, methods and properties.
+
+The difference between this and the built-in schema funtionality of Pydantic
+is that we are not interested in actually exporting the full schema of all
+the models, but rather just enough information to dynamically load the correct
+model from the correct location when deserializing the data.
 """
 from __future__ import annotations
 

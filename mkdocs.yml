@@ -12,8 +12,8 @@ theme:
     accent: orange
   language: en
   features:
-    - navigation.tabs
-    - navigation.tabs.sticky
+    # - navigation.tabs
+    # - navigation.tabs.sticky
     - navigation.expand
     - navigation.indexes
 
@@ -53,7 +53,13 @@ nav:
   - index.md
   - configuration.md
   - "Usage":
-      - usage/index.md
+      - usage/basic-usage.md
       - usage/commands.md
+      - usage/options.md
+      - usage/formats.md
       - usage/terminology.md
+      # TODO: formats
+  - "Reference":
+      - "reference/output/schema.md"
+
   - contributing.md
