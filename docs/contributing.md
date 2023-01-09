@@ -4,13 +4,19 @@
 
 ## Development environment
 
-The easiest way to set up a development environment is by configuring a Hatch environment.
+Start by cloning the repository.
+
+```
+git clone git@github.com:pederhan/harbor-cli.git
+```
+
+Use [Hatch](https://hatch.pypa.io/latest/) to set up the required development environments.
 
 ```
 hatch env create
 ```
 
-See [the Hatch docs](https://hatch.pypa.io/latest/environment/) for more information.
+See [the Hatch docs](https://hatch.pypa.io/latest/environment/) for more information on environments.
 
 ## Pre-commit hooks
 
