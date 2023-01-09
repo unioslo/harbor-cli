@@ -30,11 +30,15 @@ def main_callback(
         None, "--config", "-c", help="Path to config file."
     ),
     # Harbor options
-    harbor_url: Optional[str] = typer.Option(None, "--url", "-u", help="Harbor URL."),
-    harbor_username: Optional[str] = typer.Option(
-        None, "--username", "-U", help="Harbor username."
+    harbor_url: Optional[str] = typer.Option(
+        None, "--harbor-url", "-u", help="Harbor URL."
     ),
-    harbor_secret: Optional[str] = typer.Option(None),
+    harbor_username: Optional[str] = typer.Option(
+        None, "--harbor-username", "-U", help="Harbor username."
+    ),
+    harbor_secret: Optional[str] = typer.Option(
+        None, "--harbor-secret", "-S", help="Harbor secret."
+    ),
     harbor_credentials: Optional[str] = typer.Option(
         None, "--credentials", "-C", help="Harbor basic access credentials (base64)."
     ),
@@ -143,6 +147,7 @@ def main_callback(
 
     state.client = harbor.get_client(state.config)
     # TODO: run configure_from_config and expand it to include all options
+    configure_from_config(state.config)
 
 
 def configure_from_config(config: HarborCLIConfig) -> None:
