@@ -37,14 +37,14 @@ jobs:
       - name: Install hatch
         run: pip install hatch
 
-      - name: Generate CLI help text
-        run: hatch run docs:python docs/scripts/get_help_text.py
+      - name: Generate CLI output data for mkdocs
+        run: hatch run docs:python docs/scripts/gen_cli_data.py
+
+      - name: Generate list of output formats
+        run: hatch run docs:python docs/scripts/gen_formats.py
 
       - name: Generate list of CLI commands
-        run: hatch run docs:python docs/scripts/get_command_list_full.py
-
-      - name: Generate sample config
-        run: hatch run docs:python docs/scripts/get_sample_config.py
+        run: hatch run docs:python docs/scripts/gen_command_list_full.py
 
       - name: Build documentation and publish
         run: hatch run docs:mkdocs gh-deploy --force
