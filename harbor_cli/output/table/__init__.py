@@ -20,9 +20,11 @@ from typing import Callable
 from typing import Sequence
 from typing import TypeVar
 
+from harborapi.ext.artifact import ArtifactInfo
 from harborapi.models.models import Repository
 from rich.table import Table
 
+from .artifact import artifactinfo_table
 from .repository import repository_table
 
 T = TypeVar("T")
@@ -30,6 +32,7 @@ T = TypeVar("T")
 
 RENDER_FUNCTIONS = {
     Repository: repository_table,
+    ArtifactInfo: artifactinfo_table,
 }
 
 
@@ -43,4 +46,4 @@ def get_render_function(obj: T | list[T]) -> Callable[[T | list[T]], Table]:
     try:
         return RENDER_FUNCTIONS[obj.__class__]  # type: ignore # TODO: fix typing
     except KeyError:
-        raise NotImplementedError(f"No render function for {obj.__class__}")
+        raise NotImplementedError(f"{type(obj)} not implemented.")
