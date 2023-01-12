@@ -16,7 +16,13 @@ Use [Hatch](https://hatch.pypa.io/latest/) to set up the required development en
 hatch env create
 ```
 
-See [the Hatch docs](https://hatch.pypa.io/latest/environment/) for more information on environments.
+Enter the development environment:
+
+```
+hatch shell
+```
+
+See the [Hatch docs](https://hatch.pypa.io/latest/environment/) for more information on environments.
 
 ## Pre-commit hooks
 
