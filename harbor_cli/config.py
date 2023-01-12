@@ -95,7 +95,7 @@ class HarborSettings(BaseModel):
     url: str = ""
     username: str = ""
     secret: str = ""
-    credentials_base64: str = ""
+    basicauth: str = ""
     credentials_file: Optional[Path] = None
 
     @validator("credentials_file", pre=True)
@@ -124,7 +124,7 @@ class HarborSettings(BaseModel):
         if not self.has_auth_method:
             raise CredentialsError(
                 "A harbor authentication method must be specified. "
-                "One of 'username'+'secret', 'credentials_base64', or 'credentials_file' must be specified. "
+                "One of 'username'+'secret', 'basicauth', or 'credentials_file' must be specified. "
                 "See the documentation for more information."
             )
         return True
@@ -133,9 +133,7 @@ class HarborSettings(BaseModel):
     def has_auth_method(self) -> bool:
         """Returns True if any of the auth methods are set."""
         return bool(
-            (self.username and self.secret)
-            or self.credentials_base64
-            or self.credentials_file
+            (self.username and self.secret) or self.basicauth or self.credentials_file
         )
 
     @property
@@ -153,7 +151,7 @@ class HarborSettings(BaseModel):
             url=self.url,
             username=self.username,
             secret=self.secret,
-            credentials=self.credentials_base64,
+            credentials=self.basicauth,
             credentials_file=self.credentials_file,
         )
 

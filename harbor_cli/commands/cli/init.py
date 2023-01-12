@@ -154,9 +154,9 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
             empty_ok=False,
         )
     elif auth_method == "t":
-        hconf.credentials_base64 = str_prompt(
+        hconf.basicauth = str_prompt(
             f"Harbor base64 credentials",
-            default=hconf.credentials_base64,
+            default=hconf.basicauth,
             password=True,
             empty_ok=False,
         )
