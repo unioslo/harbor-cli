@@ -3,12 +3,15 @@
 Not to be confused with JSON Schema (<https://json-schema.org/specification.html>)
 
 The aim is to be able to serialize a Pydantic model to JSON, YAML, etc. and
-include metadata about the model in the serialized data. This metadata can
+include metadata about the model in the output. This metadata can
 then be used to deserialize the data back into the correct Pydantic model.
 
 The benefit of this is that we can more easily print the data as tables
 using the harborapi.models.BaseModel's as_table() method, and we can also use the
-Pydantic models' custom validation, methods and properties.
+Pydantic models' custom validation, methods and properties. Furthermore,
+we avoid the problem of forwards-compatibility of pickling data,
+because we can always deserialize the data back into the most up-to-date
+version of the data type.
 
 The difference between this and the built-in schema funtionality of Pydantic
 is that we are not interested in actually exporting the full schema of all

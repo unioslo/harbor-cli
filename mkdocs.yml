@@ -44,6 +44,7 @@ markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
   - admonition
+  - footnotes
   - pymdownx.details
   - pymdownx.inlinehilite
   - pymdownx.snippets
@@ -51,15 +52,21 @@ markdown_extensions:
 
 nav:
   - index.md
-  - configuration.md
+  # - configuration.md
+  - "Configuration":
+      - configuration/introduction.md
+      - configuration/config-file.md
+      - configuration/formats.md
   - "Usage":
       - usage/basic-usage.md
       - usage/commands.md
       - usage/options.md
-      - usage/formats.md
+      - usage/repl.md
       - usage/terminology.md
       # TODO: formats
   - "Reference":
-      - "reference/output/schema.md"
+      - "output":
+          - "reference/output/index.md"
+          - "reference/output/schema.md"
 
   - contributing.md

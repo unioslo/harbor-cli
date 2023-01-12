@@ -1,4 +1,4 @@
-# Schema
+# schema
 
 ::: harbor_cli.output.schema
     options:

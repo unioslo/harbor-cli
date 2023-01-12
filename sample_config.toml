@@ -2,7 +2,7 @@
 url = ""
 username = ""
 secret = ""
-credentials_base64 = ""
+basicauth = ""
 credentials_file = ""
 
 [logging]
