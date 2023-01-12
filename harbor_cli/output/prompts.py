@@ -43,7 +43,7 @@ def str_prompt(
 
     # Notify user that a default secret will be used,
     # but don't actually show the secret
-    if password and default:
+    if password and default not in (None, ...):
         _add_str = " (leave empty to use existing value)"
     else:
         _add_str = ""
