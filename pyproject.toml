@@ -28,6 +28,7 @@ dependencies = [
   "tomli-w",
   "rich",
   "loguru",
+  "click-repl>=0.2.0",
 ]
 dynamic = ["version", "readme"]
 
