@@ -145,13 +145,16 @@ def main_callback(
     state.options.no_overwrite = no_overwrite
     state.options.with_stdout = with_stdout
 
-    state.client = harbor.get_client(state.config)
-    # TODO: run configure_from_config and expand it to include all options
+    # Instantiate the client
+    harbor.setup_client(state)
+
+    # Run configuration based on config file
     configure_from_config(state.config)
 
 
 def configure_from_config(config: HarborCLIConfig) -> None:
     """Configure the program from a config file."""
+    # TODO: Include more setup here
     if config.logging.enabled:
         setup_logging(config.logging.level)
     else:
