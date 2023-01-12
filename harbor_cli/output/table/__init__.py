@@ -22,10 +22,12 @@ from typing import TypeVar
 
 from harborapi.ext.artifact import ArtifactInfo
 from harborapi.models.models import Repository
+from harborapi.models.models import SystemInfo
 from rich.table import Table
 
 from .artifact import artifactinfo_table
 from .repository import repository_table
+from .system import systeminfo_table
 
 T = TypeVar("T")
 
@@ -33,6 +35,7 @@ T = TypeVar("T")
 RENDER_FUNCTIONS = {
     Repository: repository_table,
     ArtifactInfo: artifactinfo_table,
+    SystemInfo: systeminfo_table,
 }
 
 
