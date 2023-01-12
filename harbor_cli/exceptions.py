@@ -51,8 +51,8 @@ class ArtifactNameFormatError(HarborCLIError):
 
 
 MESSAGE_BADREQUEST = "400 Bad request: {method} {url}. Check your input. If you think this is a bug, please report it."
-MESSAGE_UNAUTHORIZED = "401 Unauthorized: {method} {url}. Check your credentials, and make sure you have permissions to access the resource."
-MESSAGE_FORBIDDEN = "403 Forbidden: {method} {url}. Check your credentials, and make sure you have permissions to access the resource."
+MESSAGE_UNAUTHORIZED = "401 Unauthorized: {method} {url}. Check your credentials."
+MESSAGE_FORBIDDEN = "403 Forbidden: {method} {url}. Make sure you have permissions to access the resource."
 MESSAGE_NOTFOUND = "404 Not Found: {method} {url}. Resource not found."
 MESSAGE_METHODNOTALLOWED = "405 Method Not Allowed: {method} {url}. This is either a bug, or a problem with your server or credentials."
 MESSAGE_CONFLICT = "409 Conflict: {method} {url}. Resource already exists."
@@ -96,7 +96,7 @@ def handle_status_error(e: StatusError) -> NoReturn:
     method = e.__cause__.request.method
     httpx_message = e.__cause__.args[0]
 
-    # Print out all errors from the API
+    # Log all errors from the API
     for error in e.errors:
         logger.error(f"{error.code}: {error.message}")
 
@@ -105,7 +105,9 @@ def handle_status_error(e: StatusError) -> NoReturn:
     msg = e.args[0]
     has_default_message = httpx_message == msg
 
-    # Use custom message from our mapping if the exception has default msg
+    # Use custom message from our mapping if the exception has default HTTPX msg
+    # and we have a custom message for the exception type
+    # The default HTTPX messages are not very helpful.
     if has_default_message:
         template = MESSAGE_MAPPING.get(type(e), None)
         if template:
