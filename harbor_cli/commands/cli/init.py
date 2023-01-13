@@ -127,19 +127,14 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
         show_default=True,
     )
 
-    base_msg = "Authentication method: \[u]sername/password, \[t]oken or \[f]ile"
-    choices = ["u", "t", "f"]
-    if hconf.has_auth_method:
-        base_msg += ", \[s]kip"
-        choices.append("s")
-        default = "s"
-    else:
-        default = ...  # type: ignore
+    base_msg = (
+        "Authentication method: \[u]sername/password, \[t]oken, \[f]ile or [s]kip"
+    )
+    choices = ["u", "t", "f", "s"]
 
     auth_method = Prompt.ask(
         base_msg,
         choices=choices,
-        default=default,
     )
     if auth_method == "u":
         hconf.username = str_prompt(
@@ -167,6 +162,13 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
             show_default=True,
             must_exist=True,
             exist_ok=True,
+        )
+
+    # Explain what will happen if no auth method is provided
+    if not hconf.has_auth_method:
+        console.print(
+            "No authentication info provided. "
+            "You will be prompted for username and password when required."
         )
 
 
