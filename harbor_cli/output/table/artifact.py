@@ -18,9 +18,9 @@ def artifact_table(r: Artifact | list[Artifact]) -> Table:
     table.add_column("Size")
     for artifact in r:
         table.add_row(
-            artifact.id,
-            artifact.project_id,
-            artifact.repository_id,
+            str(artifact.id),
+            str(artifact.project_id),
+            str(artifact.repository_id),
             artifact.digest,
             str(artifact.push_time),
             str(artifact.size),
