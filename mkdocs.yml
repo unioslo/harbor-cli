@@ -12,8 +12,8 @@ theme:
     accent: orange
   language: en
   features:
-    # - navigation.tabs
-    # - navigation.tabs.sticky
+    - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.expand
     - navigation.indexes
 
@@ -38,7 +38,12 @@ plugins:
             docstring_style: numpy
             members_order: source
             docstring_section_style: table
-            show_source: false
+            heading_level: 1
+            show_source: true
+            show_if_no_docstring: true
+            show_signature_annotations: true
+            show_root_heading: true
+            show_category_heading: true
 
 markdown_extensions:
   - pymdownx.highlight:
@@ -51,22 +56,50 @@ markdown_extensions:
   - pymdownx.superfences
 
 nav:
-  - index.md
-  # - configuration.md
-  - "Configuration":
-      - configuration/introduction.md
-      - configuration/config-file.md
-      - configuration/formats.md
-  - "Usage":
-      - usage/basic-usage.md
-      - usage/commands.md
-      - usage/options.md
-      - usage/repl.md
-      - usage/terminology.md
-      # TODO: formats
+  - "Home":
+      - index.md
+      # - configuration.md
+      - "Configuration":
+          - configuration/introduction.md
+          - configuration/config-file.md
+          - configuration/formats.md
+      - "Usage":
+          - usage/basic-usage.md
+          - usage/commands.md
+          - usage/options.md
+          - usage/repl.md
+          - usage/terminology.md
+          # TODO: formats
   - "Reference":
-      - "output":
+      - "reference/index.md"
+      - "reference/config.md"
+      - "reference/dirs.md"
+      - "reference/exceptions.md"
+      - "reference/logs.md"
+      - "reference/main.md"
+      - "reference/state.md"
+      - "Utils":
+          - "reference/utils/index.md"
+          - "reference/utils/args.md"
+          - "reference/utils/utils.md"
+      - "Harbor":
+          - "reference/harbor/index.md"
+          - "reference/harbor/artifact.md"
+          - "reference/harbor/client.md"
+      - "Output":
           - "reference/output/index.md"
+          - "reference/output/console.md"
+          - "reference/output/format.md"
+          - "reference/output/prompts.md"
+          - "reference/output/render.md"
           - "reference/output/schema.md"
-
+          - "Formatting":
+              - "reference/output/formatting/index.md"
+              - "reference/output/formatting/bytes.md"
+              - "reference/output/formatting/path.md"
+          - "Tables":
+              - "reference/output/table/index.md"
+              - "reference/output/table/artifact.md"
+              - "reference/output/table/repository.md"
+              - "reference/output/table/system.md"
   - contributing.md

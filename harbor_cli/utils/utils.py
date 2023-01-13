@@ -33,9 +33,10 @@ def parse_commalist(arg: List[str]) -> List[str]:
     """Parses an argument that can be specified multiple times,
     or as a comma-separated list, into a list of strings.
 
-    Example:
-    my_app --arg foo --arg bar,baz
-    will be parsed as: ["foo", "bar", "baz"]
+    Examples
+    -------
+    `my_app --arg foo --arg bar,baz`
+    will be parsed as: `["foo", "bar", "baz"]`
     """
     return [item for arg_list in arg for item in arg_list.split(",")]
 
@@ -43,7 +44,7 @@ def parse_commalist(arg: List[str]) -> List[str]:
 def parse_key_value_args(arg: list[str]) -> dict[str, str]:
     """Parses a list of key=value arguments.
 
-    Example
+    Examples
     -------
     >>> parse_key_value_args(["foo=bar", "baz=qux"])
     {'foo': 'bar', 'baz': 'qux'}
@@ -77,7 +78,7 @@ def inject_help(
     Injects a Pydantic model's field descriptions into the help attributes
     of Typer.Option() function parameters whose names match the field names.
 
-    Example
+    Examples
     -------
     ```python
     class MyModel(BaseModel):
@@ -177,38 +178,7 @@ def inject_resource_options(
     if the parameters don't have defaults:
     `query`, `sort`, `page`, `page_size`, `retrieve_all`
 
-
-
-    Parameters
-    ----------
-    f : Any, optional
-        The function to decorate, by default None
-    strict : bool, optional
-        If True, fail if a field in the model does not have a matching typer
-        option, by default False
-    use_defaults : bool, optional
-        If True, use the default value specified by a parameter's typer.Option() field
-        as the default value for the parameter, by default True.
-
-        Example:
-        @inject_resource_options(use_defaults=True)
-        my_func(page_size: int = typer.Option(20)) -> None: ...
-
-        If use_defaults is True, the default value of page_size will be 20,
-        instead of 10, which is the value inject_page_size() would use by default.
-        NOTE: Only accepts defaults specified via typer.Option() and
-        typer.Argument() instances!
-
-        @inject_resource_options(use_default=True)
-        my_func(page_size: int = 20) -> None: ... # will fail (for now)
-
-    Returns
-    -------
-    Any
-        The decorated function
-
-
-    Example
+    Examples
     -------
     ```python
     @app.command()
@@ -246,6 +216,34 @@ def inject_resource_options(
     @inject_resource_options()
     def my_command(query: str = typer.Option("my-query"), sort: str = ..., page: int = ...):
     ```
+
+    Parameters
+    ----------
+    f : Any, optional
+        The function to decorate, by default None
+    strict : bool, optional
+        If True, fail if function is missing any of the injected parameters, by default False
+        E.g. all of `query`, `sort`, `page`, `page_size`, `retrieve_all` must be present
+    use_defaults : bool, optional
+        If True, use the default value specified by a parameter's typer.Option() field
+        as the default value for the parameter, by default True.
+
+        Example:
+        @inject_resource_options(use_defaults=True)
+        my_func(page_size: int = typer.Option(20)) -> None: ...
+
+        If use_defaults is True, the default value of page_size will be 20,
+        instead of 10, which is the value inject_page_size() would use by default.
+        NOTE: Only accepts defaults specified via typer.Option() and
+        typer.Argument() instances!
+
+        @inject_resource_options(use_default=True)
+        my_func(page_size: int = 20) -> None: ... # will fail (for now)
+
+    Returns
+    -------
+    Any
+        The decorated function
     """
 
     # TODO: add check that the function signature is in the correct order
