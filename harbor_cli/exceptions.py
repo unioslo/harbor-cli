@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+from typing import Dict
 from typing import NoReturn
 
 from harborapi.exceptions import BadRequest
@@ -73,11 +75,11 @@ MESSAGE_MAPPING = {
 }
 
 
-class Default(dict):
+class Default(Dict[str, Any]):
     """Dict subclass used for str.format_map() to provide default.
     Missing keys are replaced with the key surrounded by curly braces."""
 
-    def __missing__(self, key):
+    def __missing__(self, key: str) -> str:
         return "{" + key + "}"
 
 

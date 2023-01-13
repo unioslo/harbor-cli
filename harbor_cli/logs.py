@@ -4,7 +4,7 @@ import sys
 from enum import Enum
 from typing import TYPE_CHECKING
 
-from loguru import logger
+from loguru import logger as logger  # re-export
 
 if TYPE_CHECKING:
     from loguru import Record

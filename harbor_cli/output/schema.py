@@ -56,7 +56,7 @@ class Schema(BaseModel, Generic[T]):
         return cls(data=data)
 
     @classmethod
-    def from_file(cls, path: Path) -> Schema:
+    def from_file(cls, path: Path) -> Schema[T]:
         """Load a schema from a file"""
         if path.suffix == ".json":
             obj = cls.parse_file(path)

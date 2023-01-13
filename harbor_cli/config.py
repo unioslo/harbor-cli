@@ -58,7 +58,7 @@ class BaseModel(HarborBaseModel):
     # https://pydantic-docs.helpmanual.io/usage/model_config/#change-behaviour-globally
 
     @root_validator(pre=True)
-    def _pre_root_validator(cls, values: dict) -> dict:
+    def _pre_root_validator(cls, values: dict[str, Any]) -> dict[str, Any]:
         """Checks for unknown fields and logs a warning if any are found.
 
         Since we use `extra = "allow"`, it can be useful to check for unknown
