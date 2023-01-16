@@ -62,3 +62,15 @@ def parse_harbor_bool_arg(arg: str | None) -> bool | None:
         return False
     else:
         raise ValueError("Cannot parse argument as boolean: {}".format(arg))
+
+
+def parse_commalist(arg: list[str]) -> list[str]:
+    """Parses an argument that can be specified multiple times,
+    or as a comma-separated list, into a list of strings.
+
+    Examples
+    -------
+    `my_app --arg foo --arg bar,baz`
+    will be parsed as: `["foo", "bar", "baz"]`
+    """
+    return [item for arg_list in arg for item in arg_list.split(",")]

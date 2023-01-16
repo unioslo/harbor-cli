@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import inspect
 from typing import Any
-from typing import List
 from typing import Type
 
 import typer
@@ -27,18 +26,6 @@ def replace_none(d: dict[str, Any], replacement: Any = "") -> dict[str, Any]:
         elif value is None:
             d[key] = replacement
     return d
-
-
-def parse_commalist(arg: List[str]) -> List[str]:
-    """Parses an argument that can be specified multiple times,
-    or as a comma-separated list, into a list of strings.
-
-    Examples
-    -------
-    `my_app --arg foo --arg bar,baz`
-    will be parsed as: `["foo", "bar", "baz"]`
-    """
-    return [item for arg_list in arg for item in arg_list.split(",")]
 
 
 def parse_key_value_args(arg: list[str]) -> dict[str, str]:
