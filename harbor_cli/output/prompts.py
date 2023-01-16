@@ -1,8 +1,12 @@
 from __future__ import annotations
 
+import math
 from pathlib import Path
 from typing import Any
+from typing import overload
 
+from rich.prompt import FloatPrompt
+from rich.prompt import IntPrompt
 from rich.prompt import Prompt
 
 from .console import err_console
@@ -64,9 +68,131 @@ def str_prompt(
             if empty_ok:
                 break
             else:
-                err_console.print("[b]ERROR:[/] Input cannot be empty.")
-
+                err_console.print("Input cannot be empty.")
     return inp
+
+
+def int_prompt(
+    prompt: str,
+    default: int | None = None,
+    show_default: bool = True,
+    min: int | None = None,
+    max: int | None = None,
+    show_range: bool = True,
+    **kwargs: Any,
+) -> int:
+    return _number_prompt(
+        IntPrompt,
+        prompt,
+        default=default,
+        show_default=show_default,
+        min=min,
+        max=max,
+        show_range=show_range,
+        **kwargs,
+    )
+
+
+def float_prompt(
+    prompt: str,
+    default: float | None = None,
+    show_default: bool = True,
+    min: float | None = None,
+    max: float | None = None,
+    show_range: bool = True,
+    **kwargs: Any,
+) -> float:
+    val = _number_prompt(
+        FloatPrompt,
+        prompt,
+        default=default,
+        show_default=show_default,
+        min=min,
+        max=max,
+        show_range=show_range,
+        **kwargs,
+    )
+    # explicit cast to float since users might pass in int as default
+    # and we have no logic inside _number_prompt to handle that
+    return float(val)
+
+
+@overload
+def _number_prompt(
+    prompt_type: type[IntPrompt],
+    prompt: str,
+    default: int | float | None = ...,
+    show_default: bool = ...,
+    min: int | float | None = ...,
+    max: int | float | None = ...,
+    show_range: bool = ...,
+    **kwargs: Any,
+) -> int:
+    ...
+
+
+@overload
+def _number_prompt(
+    prompt_type: type[FloatPrompt],
+    prompt: str,
+    default: int | float | None = ...,
+    show_default: bool = ...,
+    min: int | float | None = ...,
+    max: int | float | None = ...,
+    show_range: bool = ...,
+    **kwargs: Any,
+) -> float:
+    ...
+
+
+def _number_prompt(
+    prompt_type: type[IntPrompt] | type[FloatPrompt],
+    prompt: str,
+    default: int | float | None = None,
+    show_default: bool = True,
+    min: int | float | None = None,
+    max: int | float | None = None,
+    show_range: bool = True,
+    **kwargs: Any,
+) -> int | float:
+    default_arg = ... if default is None else default
+
+    if show_range:
+        _prompt_add = ""
+        if min is not None and max is not None:
+            if min > max:
+                raise ValueError("min must be less than or equal to max")
+            _prompt_add = f"{min}<=x<={max}"
+        elif min is not None:
+            _prompt_add = f"x>={min}"
+        elif max is not None:
+            _prompt_add = f"x<={max}"
+        if _prompt_add:
+            prompt = f"{prompt} [yellow][{_prompt_add}][/]"
+
+    while True:
+        val = prompt_type.ask(
+            prompt,
+            default=default_arg,
+            show_default=show_default,
+            **kwargs,
+        )
+
+        # Shouldn't happen, but ask() returns DefaultType | int | float
+        # so it thinks we could have an ellipsis here
+        if not isinstance(val, (int, float)):
+            err_console.print("Value must be a number")
+            continue
+        if math.isnan(val):
+            err_console.print("Value can't be NaN")
+            continue
+        if min is not None and val < min:
+            err_console.print(f"Value must be greater or equal to {min}")
+            continue
+        if max is not None and val > max:
+            err_console.print(f"Value must be less than or equal to {max}")
+            continue
+        return val
 
 
 def path_prompt(
@@ -94,8 +220,8 @@ def path_prompt(
         path = Path(path_str)
 
         if must_exist and not path.exists():
-            err_console.print(f"[b]ERROR:[/] Path does not exist: {path_link(path)}")
+            err_console.print(f"Path does not exist: {path_link(path)}")
         elif not exist_ok and path.exists():
-            err_console.print(f"[b]ERROR:[/] Path already exists: {path_link(path)}")
+            err_console.print(f"Path already exists: {path_link(path)}")
         else:
             return path
