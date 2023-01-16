@@ -4,6 +4,7 @@ import math
 from pathlib import Path
 from typing import Any
 from typing import overload
+from typing import Type
 
 from rich.prompt import FloatPrompt
 from rich.prompt import IntPrompt
@@ -119,7 +120,7 @@ def float_prompt(
 
 @overload
 def _number_prompt(
-    prompt_type: type[IntPrompt],
+    prompt_type: Type[IntPrompt],
     prompt: str,
     default: int | float | None = ...,
     show_default: bool = ...,
@@ -133,7 +134,7 @@ def _number_prompt(
 
 @overload
 def _number_prompt(
-    prompt_type: type[FloatPrompt],
+    prompt_type: Type[FloatPrompt],
     prompt: str,
     default: int | float | None = ...,
     show_default: bool = ...,
@@ -146,7 +147,7 @@ def _number_prompt(
 
 
 def _number_prompt(
-    prompt_type: type[IntPrompt] | type[FloatPrompt],
+    prompt_type: Type[IntPrompt] | Type[FloatPrompt],
     prompt: str,
     default: int | float | None = None,
     show_default: bool = True,
