@@ -1,4 +1,25 @@
+# File types
+*.py[co]
+*.egg-info
+.*.sw[a-z]
+
+# Tool cache dirs
+.coverage
+.hypothesis
+
+# Directories
+dist
 .dev
-*.pyc
-__pycache__
+
+# Single files
 TODO
+
+# File types
+*.json
+*.DS_Store
+
+# Auto generated files
+docs/data/**
+
+# Overrides
+!tests/data/**
