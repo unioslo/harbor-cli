@@ -1,4 +1,4 @@
-# Basic Usage
+# Basics
 
 The application consists of several top-level commands pertaining to specific Harbor resources, such as `project`, `repository`, `artifact`, etc. Each of these commands have subcommands that can be used to perform actions on the resource, such as `create`, `delete`, `list`, etc.
 

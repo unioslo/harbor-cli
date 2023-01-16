@@ -4,7 +4,7 @@
 
 
 By default, Harbor-CLI renders results as one or more [Rich](https://rich.readthedocs.io/en/latest/tables.html) tables.
-The tables will always reflect the actual JSON structure of the data, and such
+The default tables will always reflect the actual JSON structure of the data, and such
 renders each field as a row. Nested values are rendered as separate tables (nesting level is indicated by its color-coded title).
 
 ```toml title="config.toml"
