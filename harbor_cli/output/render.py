@@ -45,7 +45,7 @@ def render_table(result: T | Sequence[T], ctx: typer.Context | None = None) -> N
         except NotImplementedError as e:
             logger.debug(f"Unable to render compact table: {e}")
         except ValueError:
-            return  # empty sequence (nothing to render)
+            pass  # empty sequence (nothing to render)
         else:
             return
 
@@ -60,6 +60,7 @@ def render_table_compact(result: T | Sequence[T]) -> None:
         func = get_render_function(result)
     except ValueError:
         logger.info("Nothing to print.")
+        console.print(result)
     else:
         table = func(result)
         console.print(table)
