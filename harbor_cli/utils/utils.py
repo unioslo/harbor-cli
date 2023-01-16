@@ -380,8 +380,14 @@ def _patch_param(
     #     raise ValueError(
     #         f"Parameter {name!r} in function {func.__qualname__!r} must be of type 'Optional[str]' or 'str | None'."
     #     )
-    if use_default and hasattr(to_replace.default, "default"):
-        value.default = to_replace.default.default
+
+    # Use defaults from the injected parameter if they exist
+    if use_default:
+        if hasattr(to_replace.default, "default"):
+            value.default = to_replace.default.default
+        if hasattr(to_replace.default, "help") and to_replace.default.help:
+            value.help = to_replace.default.help
+
     new_params[name] = to_replace.replace(default=value)
     new_sig = sig.replace(parameters=list(new_params.values()))
     func.__signature__ = new_sig
