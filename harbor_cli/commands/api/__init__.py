@@ -10,6 +10,7 @@ from . import cve_allowlist as cve_allowlist
 from . import gc as gc
 from . import ldap as ldap
 from . import project as project
+from . import quotas as quotas
 from . import registry as registry
 from . import replication as replication
 from . import repository as repository
@@ -28,6 +29,7 @@ api_commands: list[typer.Typer] = [
     gc.app,
     ldap.app,
     project.app,
+    quotas.app,
     registry.app,
     replication.app,
     repository.app,
