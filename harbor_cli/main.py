@@ -126,7 +126,7 @@ def main_callback(
         exit_err(f"Config file not found. Run 'harbor init' to create one.")
 
     # Set config overrides
-    if compact:
+    if compact is not None:
         state.config.output.table.compact = compact
     if show_description is not None:
         state.config.output.table.description = show_description
