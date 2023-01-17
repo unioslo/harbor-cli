@@ -49,6 +49,7 @@ class State(BaseModel):
     client: HarborAsyncClient = None  # type: ignore # will be patched by the callback
     loop: asyncio.AbstractEventLoop = Field(default_factory=asyncio.get_event_loop)
     options: CommonOptions = Field(default_factory=CommonOptions)
+    repl: bool = False
 
     class Config:
         keep_untouched = (asyncio.AbstractEventLoop,)
