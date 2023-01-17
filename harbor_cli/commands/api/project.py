@@ -108,15 +108,14 @@ def project_exists(
     ctx: typer.Context,
     project_name: str = typer.Argument(..., help="Project name to check existence of."),
 ) -> None:
-    """Check if a project exists. Exits with return code 0 if it does, 1 if it doesn't."""
+    """Check if a project exists."""
     project_repr = get_project_repr(project_name)
     exists = state.run(
         state.client.project_exists(project_name),
         f"Checking if {project_repr} exists...",
     )
-    logger.info(f"{project_name!r} exists: {exists}")
     render_result(exists, ctx)
-    exit(0 if exists else 1)
+    raise SystemExit(0 if exists else 1)
 
 
 # HarborAsyncClient.create_project()

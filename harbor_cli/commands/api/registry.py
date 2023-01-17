@@ -3,16 +3,20 @@ from __future__ import annotations
 from typing import Optional
 
 import typer
+from harborapi.exceptions import NotFound
 from harborapi.models.models import Registry
 from harborapi.models.models import RegistryCredential
 from harborapi.models.models import RegistryPing
 from harborapi.models.models import RegistryUpdate
 
 from ...logs import logger
+from ...output.console import exit_err
+from ...output.console import success
 from ...output.render import render_result
 from ...state import state
 from ...utils import inject_help
 from ...utils import inject_resource_options
+from ...utils.args import model_params_from_ctx
 
 # Create a command group
 app = typer.Typer(
@@ -30,7 +34,7 @@ def get_registry(
         help="ID of registry to get.",
     ),
 ) -> None:
-    """Get information about the system."""
+    """Fetch a registry."""
     registry = state.run(state.client.get_registry(registry_id), "Fetching registry...")
     render_result(registry, ctx)
 
@@ -141,7 +145,6 @@ def update_registry(
     state.run(
         state.client.update_registry(registry_id, registry), f"Updating registry..."
     )
-    render_result(None, ctx)  # is this allowed?
     logger.info("Registry updated successfully.")
 
 
@@ -155,7 +158,6 @@ def delete_registry(
 ) -> None:
     """Delete a registry."""
     state.run(state.client.delete_registry(registry_id), f"Deleting registry...")
-    render_result(None, ctx)
     logger.info(f"Deleted registry with ID {registry_id}.")
 
 
@@ -196,7 +198,7 @@ def get_registry_providers(
     render_result(registry_providers, ctx)
 
 
-@app.command("status", no_args_is_help=True)
+@app.command("ping", no_args_is_help=True)
 @inject_help(RegistryPing)
 def check_registry_status(
     ctx: typer.Context,
@@ -204,15 +206,46 @@ def check_registry_status(
         ...,
         help="ID of registry to get status of.",
     ),
+    type: Optional[str] = typer.Option(
+        None,
+        "--type",
+    ),
+    url: Optional[str] = typer.Option(
+        None,
+        "--url",
+    ),
+    credential_type: Optional[str] = typer.Option(
+        None,
+        "--credential-type",
+    ),
+    access_key: Optional[str] = typer.Option(
+        None,
+        "--access-key",
+    ),
+    access_secret: Optional[str] = typer.Option(
+        None,
+        "--access-secret",
+    ),
+    insecure: Optional[bool] = typer.Option(
+        None,
+        "--insecure",
+    ),
 ) -> None:
-    """Check the status of a registry. Throws an error if the registry is not reachable."""
-    # META-NOTE: i have no idea what i meant by this
-    # NOTE: kind of absurd calling convention, but it's what the API expects
-    # maybe we just accept a registry id for now and add the other options later
-    state.run(
-        state.client.check_registry_status(RegistryPing(id=registry_id)),
-        "Checking registry status...",
-    )
+    """Ping a registry to see if it's reachable."""
+    params = model_params_from_ctx(ctx, RegistryPing)
+    ping = RegistryPing(id=registry_id, **params)
+
+    # NOTE: handle all StatusErrors? or just NotFound?
+    try:
+        state.run(
+            state.client.check_registry_status(ping),
+            "Pinging registry...",
+            no_handle=NotFound,
+        )
+    except NotFound:
+        exit_err(f"Registry (id={registry_id}) not found.")
+    else:
+        success(f"Registry (id={registry_id}) is reachable.")
 
 
 @app.command("list")
