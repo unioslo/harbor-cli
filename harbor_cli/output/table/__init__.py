@@ -25,6 +25,8 @@ from harborapi.models.models import Repository
 from harborapi.models.models import SystemInfo
 from rich.table import Table
 
+from .anysequence import AnySequence
+from .anysequence import anysequence_table
 from .artifact import artifactinfo_table
 from .repository import repository_table
 from .system import systeminfo_table
@@ -36,6 +38,7 @@ RENDER_FUNCTIONS = {
     Repository: repository_table,
     ArtifactInfo: artifactinfo_table,
     SystemInfo: systeminfo_table,
+    AnySequence: anysequence_table,
 }
 
 
