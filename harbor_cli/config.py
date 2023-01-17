@@ -238,6 +238,42 @@ class HarborCLIConfig(BaseModel):
         config = load_toml_file(config_file)
         return cls(**config, config_file=config_file)
 
+    def save(self, path: Path | None = None) -> None:
+        if not path and not self.config_file:
+            raise ValueError("Cannot save config: no config file specified")
+        p = path or self.config_file
+        assert p is not None  # p shouldn't be None here! am i dumb???
+        save_config(self, p)
+
+    def toml(self, tomli_kwargs: dict[str, Any] | None = {}, **kwargs: Any) -> str:
+        """Return a TOML representation of the config object.
+        In order to serialize all types properly, the serialization takes
+        a round-trip through the Pydantic JSON converter.
+
+        Parameters
+        ----------
+        **kwargs
+            Keyword arguments passed to `BaseModel.json()`.
+
+        Returns
+        -------
+        str
+            TOML representation of the config as a string.
+
+        See Also
+        --------
+        `BaseModel.json()` <https://pydantic-docs.helpmanual.io/usage/exporting_models/#modeljson>
+        """
+        tomli_kwargs = tomli_kwargs or {}
+        return tomli_w.dumps(
+            replace_none(  # replace None values with empty strings (???)
+                json.loads(
+                    self.json(**kwargs),
+                )
+            ),
+            **tomli_kwargs,
+        )
+
 
 def create_config(config_path: Path | None, overwrite: bool = False) -> Path:
     if config_path is None:
@@ -272,10 +308,7 @@ def load_config(config_path: Path | None = None) -> HarborCLIConfig:
 def save_config(config: HarborCLIConfig, config_path: Path) -> None:
     """Save the config file."""
     try:
-        # Round-trip through JSON to handle incompatible tomli-w types
-        config_path.write_text(
-            tomli_w.dumps(json.loads(config.json(exclude_none=True)))
-        )
+        config_path.write_text(config.toml(exclude_none=True, exclude_unset=True))
     except Exception as e:
         logger.bind(exc=e).error("Failed to save config file")
         raise ConfigError(f"Could not save config file {config_path}: {e}") from e
@@ -297,10 +330,4 @@ def sample_config(exclude_none: bool = False) -> str:
         Sample config file contents in TOML format.
     """
     config = HarborCLIConfig()
-    # We need to create an intermediate JSON dump to get rid of non tomli-w
-    # compatible objects such as Path objects.
-    # The built-in pydantic `.json()` method handles these types gracefully,
-    # whereas tomli_w does not. Hence the intermediate step.
-    return tomli_w.dumps(
-        replace_none(json.loads(config.json(exclude_none=exclude_none)))
-    )
+    return config.toml(exclude_none=exclude_none)
