@@ -23,7 +23,7 @@ def str_prompt(
     **kwargs: Any,
 ) -> str:
     """Prompts the user for a string input. Optionally controls
-    for empty input.
+    for empty input. Loops until a valid input is provided.
 
     Parameters
     ----------
@@ -38,8 +38,7 @@ def str_prompt(
         Whether to show the default value, by default True
         `password=True` supercedes this option, and sets it to False.
     empty_ok : bool, optional
-        Whether to allow empty string as result, by default False.
-        Set to True to allow empty string as result.
+        Whether to allow input consisting of only whitespace, by default False
 
     """
     # Don't permit secrets to be shown ever
@@ -63,13 +62,15 @@ def str_prompt(
             default=default,
             **kwargs,
         )
+        if empty_ok:  # nothing else to check
+            break
 
         if not inp:
-            # Default is empty string, and we allow empty input result
-            if empty_ok:
-                break
-            else:
-                err_console.print("Input cannot be empty.")
+            err_console.print("Input cannot be empty.")
+        elif inp.isspace():
+            err_console.print("Input cannot solely consist of whitespace.")
+        else:
+            break
     return inp
 
 

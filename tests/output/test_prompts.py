@@ -7,6 +7,7 @@ from typing import Any
 from typing import Iterator
 
 import pytest
+from hypothesis import assume
 from hypothesis import given
 from hypothesis import HealthCheck
 from hypothesis import settings
@@ -32,10 +33,26 @@ def leading_newline() -> Iterator[str]:
     yield ""
 
 
-def test_str_prompt(monkeypatch: MonkeyPatch) -> None:
-    # simulate '[ENTER] test [ENTER]'
-    monkeypatch.setattr("sys.stdin", io.StringIO("\ntest\n"))
-    assert str_prompt("foo") == "test"
+@pytest.mark.parametrize("leading_newline", leading_newline())
+@given(st.text(min_size=1))
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
+def test_str_prompt(monkeypatch: MonkeyPatch, leading_newline: str, text: str) -> None:
+    assume(not text.isspace())  # not testing pure whitespace
+    stdin_str = leading_newline + text + "\n"
+    monkeypatch.setattr("sys.stdin", io.StringIO(stdin_str))
+    # Result is always stripped of whitespace, and newline = enter
+    # So anything after \n is ignored
+    assert str_prompt("foo") == text.strip().split("\n")[0]
+
+
+@given(st.text())
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
+def test_str_prompt_empty_ok(monkeypatch: MonkeyPatch, text: str) -> None:
+    stdin_str = text + "\n"
+    monkeypatch.setattr("sys.stdin", io.StringIO(stdin_str))
+    # Result is always stripped of whitespace, and newline = enter
+    # So anything after \n is ignored
+    assert str_prompt("foo", empty_ok=True) == text.strip().split("\n")[0]
 
 
 # NOTE: This is way too complicated
@@ -44,17 +61,15 @@ def test_str_prompt_looping(monkeypatch: MonkeyPatch, capsys: CaptureFixture) ->
     monkeypatch.setattr("rich.prompt.Prompt.ask", lambda *args, **kwargs: "")
 
     async def send_interrupt(*args: Any, **kwargs: Any) -> None:
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.01)
         raise KeyboardInterrupt
-
-    # Wrap the prompt func in an async function so we can run it in an executor
-    async def run_str_prompt() -> None:
-        str_prompt("foo")
 
     # Schedule the interrupt to be sent after 1 second
     loop = asyncio.new_event_loop()
     interrupt_task = loop.create_task(send_interrupt())
-    prompt_fut = loop.run_in_executor(None, run_str_prompt)
+
+    # TODO: pass locals to thread somehow
+    prompt_fut = loop.run_in_executor(None, str_prompt, "foo")
 
     with pytest.raises(KeyboardInterrupt):
         t = asyncio.gather(interrupt_task, prompt_fut)
