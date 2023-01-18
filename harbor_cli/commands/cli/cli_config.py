@@ -26,7 +26,7 @@ def get_cli_config(
     as_toml: bool = typer.Option(
         False,
         "--toml/--no-toml",
-        help="Show the current configuration in TOML format after setting the value.",
+        help="Show the current configuration in TOML format after setting the value. Overrides --format.",
     ),
 ) -> None:
     """Show the current CLI configuration."""

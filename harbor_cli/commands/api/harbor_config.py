@@ -24,14 +24,15 @@ app = typer.Typer(
 
 
 def flatten_config_response(response: ConfigurationsResponse) -> dict[str, Any]:
-    """Flattens a ConfigurationsResponse object to a single level.
+    """Flattens a ConfigurationsResponse object to a single level, removing
+    any information about whether the fields are editable or not.
 
     Examples
     -------
     >>> response = ConfigurationsResponse(
     ...     auth_mode=StringConfigItem(value="db_auth", editable=True),
     ... )
-    >>> response.dict()
+    >>> response.dict() # just to show the structure
     {'auth_mode': {'value': 'db_auth', 'editable': True}}
     >>> flatten_config_response(response)
     {'auth_mode': 'db_auth'}
