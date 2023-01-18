@@ -117,7 +117,6 @@ def update_config(
     ),
     email_insecure: Optional[bool] = typer.Option(
         None,
-        "--email-insecure/--email-secure",
     ),
     email_password: Optional[str] = typer.Option(
         None,
@@ -129,7 +128,6 @@ def update_config(
     ),
     email_ssl: Optional[bool] = typer.Option(
         None,
-        "--email-ssl",
     ),
     email_username: Optional[str] = typer.Option(
         None,
@@ -189,7 +187,6 @@ def update_config(
     ),
     ldap_verify_cert: Optional[bool] = typer.Option(
         None,
-        "--ldap-verify-cert",
     ),
     ldap_group_membership_attribute: Optional[str] = typer.Option(
         None,
@@ -201,11 +198,9 @@ def update_config(
     ),
     read_only: Optional[bool] = typer.Option(
         None,
-        "--read-only",
     ),
     self_registration: Optional[bool] = typer.Option(
         None,
-        "--self-registration",
     ),
     token_expiration: Optional[int] = typer.Option(
         None,
@@ -225,7 +220,6 @@ def update_config(
     ),
     uaa_verify_cert: Optional[bool] = typer.Option(
         None,
-        "--uaa-verify-cert",
     ),
     http_authproxy_endpoint: Optional[str] = typer.Option(
         None,
@@ -249,11 +243,9 @@ def update_config(
     ),
     http_authproxy_verify_cert: Optional[bool] = typer.Option(
         None,
-        "--http-authproxy-verify-cert",
     ),
     http_authproxy_skip_search: Optional[bool] = typer.Option(
         None,
-        "--http-authproxy-skip-search",
     ),
     http_authproxy_server_certificate: Optional[str] = typer.Option(
         None,
@@ -293,16 +285,13 @@ def update_config(
     ),
     oidc_verify_cert: Optional[bool] = typer.Option(
         None,
-        "--oidc-verify-cert",
     ),
     oidc_auto_onboard: Optional[bool] = typer.Option(
         None,
-        "--oidc-auto-onboard",
     ),
     # TODO: fix spelling when we add alias in harborapi
     oidc_extra_redirect_parms: Optional[str] = typer.Option(
         None,
-        "--oidc-extra-redirect-parms",
         help=(
             "Extra parameters to add when redirect request to OIDC provider. "
             "WARNING: 'parms' not 'parAms', due to Harbor spelling parity (blame them)."
@@ -318,11 +307,9 @@ def update_config(
     ),
     notification_enable: Optional[bool] = typer.Option(
         None,
-        "--notification-enable",
     ),
     quota_per_project_enable: Optional[bool] = typer.Option(
         None,
-        "--quota-per-project-enable",
     ),
     storage_per_project: Optional[int] = typer.Option(
         None,
@@ -334,7 +321,6 @@ def update_config(
     ),
     skip_audit_log_database: Optional[bool] = typer.Option(
         None,
-        "--skip-audit-log-database",
     ),
 ) -> None:
     """Update the configuration of Harbor."""

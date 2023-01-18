@@ -63,11 +63,9 @@ def _do_handle_scanner_modification(
     ),
     skip_cert_verify: Optional[bool] = typer.Option(
         None,
-        "--skip-cert-verify",
     ),
     use_internal_addr: Optional[bool] = typer.Option(
         None,
-        "--use-internal-addr",
     ),
     disabled: bool = typer.Option(
         False,
