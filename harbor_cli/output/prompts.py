@@ -47,7 +47,7 @@ def str_prompt(
 
     # Notify user that a default secret will be used,
     # but don't actually show the secret
-    if password and default not in (None, ...):
+    if password and default not in (None, ..., ""):
         _add_str = " (leave empty to use existing value)"
     else:
         _add_str = ""
@@ -67,7 +67,7 @@ def str_prompt(
 
         if not inp:
             err_console.print("Input cannot be empty.")
-        elif inp.isspace():
+        elif inp.isspace() and inp != default:
             err_console.print("Input cannot solely consist of whitespace.")
         else:
             break
