@@ -13,8 +13,11 @@ from .config import HarborCLIConfig
 from .exceptions import exit_err
 from .exceptions import HarborCLIError
 from .logs import disable_logging
+from .logs import logger
 from .logs import setup_logging
+from .output.console import success
 from .output.format import OutputFormat
+from .output.formatting.path import path_link
 from .state import state
 
 # Init subcommand groups here
@@ -118,12 +121,20 @@ def main_callback(
     if any(help_arg in sys.argv for help_arg in ctx.help_option_names):
         return
 
-    # Run init if config file doesn't exist
-    try:
-        state.config = HarborCLIConfig.from_file(config_file)
-    except FileNotFoundError:
-        # TODO: invoke init
-        exit_err(f"Config file not found. Run 'harbor init' to create one.")
+    # if we're in the REPL, we don't want to load again
+    if not state.config_loaded:
+        try:
+            state.config = HarborCLIConfig.from_file(config_file)
+        except FileNotFoundError:
+            # Create a new config file, but don't run wizard
+            logger.info("Config file not found. Creating new config file.")
+            state.config = HarborCLIConfig.from_file(config_file, create=True)
+            if state.config.config_file is None:
+                exit_err("Unable to create config file.")
+            success(f"Created config file at {path_link(state.config.config_file)}")
+            logger.info("Proceeding with default configuration.")
+            logger.info("Run 'harbor init' to configure Harbor CLI. ")
+        state.config_loaded = True
 
     # Set config overrides
     if compact is not None:
