@@ -167,7 +167,7 @@ class TableSettings(BaseModel):
 
     description: bool = False
     max_depth: Optional[int] = -1
-    compact: bool = False
+    compact: bool = True
     # TODO: table style
 
     @validator("max_depth", pre=True)
