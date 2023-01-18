@@ -2,12 +2,16 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
+from typing import Optional
 
 import typer
 from pydantic import Extra
 
+from ...config import HarborCLIConfig
 from ...output.console import console
 from ...output.console import err_console
+from ...output.console import exit_err
+from ...output.console import success
 from ...output.render import render_result
 from ...output.table.anysequence import AnySequence
 from ...state import state
@@ -20,20 +24,24 @@ app = typer.Typer(
 )
 
 
+def render_config(config: HarborCLIConfig, as_toml: bool) -> None:
+    if as_toml:
+        console.print(config.toml(), markup=False)
+    else:
+        render_result(config)
+
+
 @app.command("get")
 def get_cli_config(
     ctx: typer.Context,
     as_toml: bool = typer.Option(
-        False,
+        True,
         "--toml/--no-toml",
         help="Show the current configuration in TOML format after setting the value. Overrides --format.",
     ),
 ) -> None:
     """Show the current CLI configuration."""
-    if as_toml:
-        console.print(state.config.toml(), markup=False)
-    else:
-        render_result(state.config)
+    render_config(state.config, as_toml)
 
 
 @app.command("keys")
@@ -80,6 +88,11 @@ def set_cli_config(
         "--show/--no-show",
         help="Show the current configuration after setting the value.",
     ),
+    as_toml: bool = typer.Option(
+        True,
+        "--toml/--no-toml",
+        help="Render config as TOML if [green]--show[/] is set. Overrides [green]--format[/].",
+    ),
 ) -> None:
     """Set a key in the CLI configuration."""
     attrs = []
@@ -108,4 +121,24 @@ def set_cli_config(
         state.config.save(path=path)
 
     if show_config:
-        render_result(state.config)
+        render_config(state.config, as_toml)
+
+
+@app.command("write")
+def write_session_config(
+    ctx: typer.Context,
+    path: Optional[Path] = typer.Option(
+        None,
+        "--path",
+        help="Path to save configuration file. Overrides the config's current path.",
+    ),
+) -> None:
+    """Write the current [bold]session[/] configuration to disk. Used to save
+    changes made with [green]harbor cli-config set --session[/] in REPL mode."""
+    save_path = path or state.config.config_file
+    if save_path is None:
+        exit_err(
+            "No path specified and no path found in current configuration. Use [green]--path[/] to specify a path."
+        )
+    state.config.save(path=save_path)
+    success(f"Saved configuration to [green]{save_path}[/]")
