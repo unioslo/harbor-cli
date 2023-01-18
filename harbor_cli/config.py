@@ -308,7 +308,7 @@ def load_config(config_path: Path | None = None) -> HarborCLIConfig:
 def save_config(config: HarborCLIConfig, config_path: Path) -> None:
     """Save the config file."""
     try:
-        config_path.write_text(config.toml(exclude_none=True, exclude_unset=True))
+        config_path.write_text(config.toml(exclude_none=True))
     except Exception as e:
         logger.bind(exc=e).error("Failed to save config file")
         raise ConfigError(f"Could not save config file {config_path}: {e}") from e
