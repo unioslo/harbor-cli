@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+from typing import List
 from typing import Type
 
 import typer
@@ -64,7 +65,7 @@ def parse_harbor_bool_arg(arg: str | None) -> bool | None:
         raise ValueError("Cannot parse argument as boolean: {}".format(arg))
 
 
-def parse_commalist(arg: list[str]) -> list[str]:
+def parse_commalist(arg: List[str]) -> List[str]:
     """Parses an argument that can be specified multiple times,
     or as a comma-separated list, into a list of strings.
 
