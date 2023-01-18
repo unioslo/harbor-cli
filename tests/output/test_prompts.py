@@ -40,7 +40,7 @@ def test_str_prompt(monkeypatch: MonkeyPatch, leading_newline: str, text: str) -
     monkeypatch.setattr("sys.stdin", io.StringIO(stdin_str))
     # Result is always stripped of whitespace, and newline = enter
     # So anything after \n is ignored
-    assert str_prompt("foo") == text.strip().split("\n")[0]
+    assert str_prompt("foo") == text.split("\n")[0].strip()
 
 
 @pytest.mark.skip(reason="Flaky test in CI. Need to investigate.")
@@ -51,7 +51,7 @@ def test_str_prompt_empty_ok(monkeypatch: MonkeyPatch, text: str) -> None:
     monkeypatch.setattr("sys.stdin", io.StringIO(stdin_str))
     # Result is always stripped of whitespace, and newline = enter
     # So anything after \n is ignored
-    assert str_prompt("foo", empty_ok=True) == text.strip().split("\n")[0]
+    assert str_prompt("foo", empty_ok=True) == text.split("\n")[0].strip()
 
 
 @pytest.mark.parametrize("leading_newline", leading_newline())
