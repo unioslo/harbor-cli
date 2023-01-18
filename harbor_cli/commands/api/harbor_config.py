@@ -15,7 +15,9 @@ from ...utils.args import model_params_from_ctx
 
 # Create a command group
 app = typer.Typer(
-    name="config",
+    # Naming to remove ambiguity with the "cli-config" command group
+    # in ../cli/cli_config.py
+    name="harbor-config",
     help="Manage Harbor configuration.",
     no_args_is_help=True,
 )
@@ -296,6 +298,7 @@ def update_config(
         None,
         "--oidc-auto-onboard",
     ),
+    # TODO: fix spelling when we add alias in harborapi
     oidc_extra_redirect_parms: Optional[str] = typer.Option(
         None,
         "--oidc-extra-redirect-parms",

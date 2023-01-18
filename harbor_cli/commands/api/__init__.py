@@ -5,9 +5,9 @@ import typer
 
 from . import artifact as artifact
 from . import auditlog as auditlog
-from . import config as config
 from . import cve_allowlist as cve_allowlist
 from . import gc as gc
+from . import harbor_config as harbor_config
 from . import ldap as ldap
 from . import project as project
 from . import quotas as quotas
@@ -24,7 +24,7 @@ from . import vulnerabilities as vulnerabilities
 api_commands: list[typer.Typer] = [
     artifact.app,
     auditlog.app,
-    config.app,
+    harbor_config.app,
     cve_allowlist.app,
     gc.app,
     ldap.app,
