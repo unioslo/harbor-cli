@@ -45,7 +45,9 @@ def setup_client(state: State) -> None:
     if not has_auth:
         # TODO: refactor this so we can re-use username and password
         # prompts from commands.cli.init!
-        config.harbor.username = str_prompt("Username")
-        config.harbor.secret = str_prompt("Password", password=True)
+        if not config.harbor.username:
+            config.harbor.username = str_prompt("Username")
+        if not config.harbor.secret:
+            config.harbor.secret = str_prompt("Password", password=True)
 
     state.client = get_client(config)
