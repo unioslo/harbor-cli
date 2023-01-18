@@ -51,7 +51,7 @@ def main_callback(
     # Formatting
     show_description: Optional[bool] = typer.Option(
         None,
-        "--table-description/--table-no-description",
+        "--table-description/--no-table-description",
         help="Include field descriptions in tables. Only affects tables.",
     ),
     max_depth: Optional[int] = typer.Option(
@@ -61,7 +61,7 @@ def main_callback(
     ),
     compact: Optional[bool] = typer.Option(
         None,
-        "--table-compact/--table-no-compact",
+        "--table-compact/--no-table-compact",
         help="Compact table output. Only affects tables.",
     ),
     json_indent: Optional[int] = typer.Option(
@@ -71,7 +71,7 @@ def main_callback(
     ),
     json_sort_keys: Optional[bool] = typer.Option(
         None,
-        "--json-sort-keys/--json-no-sort-keys",
+        "--json-sort-keys/--no-json-sort-keys",
         help="Sort keys in JSON output. Affects JSON and JSON schema.",
     ),
     # Output options
