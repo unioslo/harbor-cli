@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import asyncio
 import io
 from pathlib import Path
-from typing import Any
 from typing import Iterator
 
 import pytest
@@ -54,36 +52,6 @@ def test_str_prompt_empty_ok(monkeypatch: MonkeyPatch, text: str) -> None:
     # Result is always stripped of whitespace, and newline = enter
     # So anything after \n is ignored
     assert str_prompt("foo", empty_ok=True) == text.strip().split("\n")[0]
-
-
-# NOTE: This is way too complicated
-def test_str_prompt_looping(monkeypatch: MonkeyPatch, capsys: CaptureFixture) -> None:
-    # Patches Prompt.ask to only return empty strings
-    monkeypatch.setattr("rich.prompt.Prompt.ask", lambda *args, **kwargs: "")
-
-    async def send_interrupt(*args: Any, **kwargs: Any) -> None:
-        await asyncio.sleep(0.01)
-        raise KeyboardInterrupt
-
-    # Schedule the interrupt to be sent after 1 second
-    loop = asyncio.new_event_loop()
-    interrupt_task = loop.create_task(send_interrupt())
-
-    # TODO: pass locals to thread somehow
-    prompt_fut = loop.run_in_executor(None, str_prompt, "foo")
-
-    with pytest.raises(KeyboardInterrupt):
-        t = asyncio.gather(interrupt_task, prompt_fut)
-        loop.run_until_complete(t)
-
-    # FIXME: we can't read capsys from other thread
-    #        how to schedule interruption without thread?
-
-    # stdout, stderr = capsys.readouterr()
-    # expect_msg = "Input cannot be empty."
-    # assert expect_msg in stderr
-    # assert "\n".join([expect_msg] * 2) in stderr
-    # # TODO: assert that the prompt was called multiple times using pytest-mock
 
 
 @pytest.mark.parametrize("leading_newline", leading_newline())
