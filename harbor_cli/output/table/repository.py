@@ -11,13 +11,13 @@ def repository_table(r: Repository | list[Repository]) -> Table:
     table = Table(show_header=True, header_style="bold magenta")
     table.add_column("Project")
     table.add_column("Name")
-    table.add_column("Pull Count")
+    table.add_column("Artifacts")
     table.add_column("Created")
     for repo in r:
         table.add_row(
             repo.project_name,
             repo.name,
-            str(repo.pull_count),
+            str(repo.artifact_count),
             str(repo.creation_time),
         )
     return table
