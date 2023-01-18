@@ -260,6 +260,12 @@ def _init_output_table_settings(config: HarborCLIConfig) -> None:
         show_default=True,
     )
 
+    oconf.compact = Confirm.ask(
+        "Compact tables",
+        default=oconf.compact,
+        show_default=True,
+    )
+
 
 def _init_output_jsonschema_settings(config: HarborCLIConfig) -> None:
     """Initialize JSON Schema output settings."""
