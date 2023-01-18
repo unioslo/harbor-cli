@@ -19,6 +19,7 @@ from ...exceptions import OverwriteError
 from ...logs import logger
 from ...logs import LogLevel
 from ...output.console import console
+from ...output.console import success
 from ...output.format import output_format_emoji
 from ...output.format import output_format_repr
 from ...output.format import OutputFormat
@@ -113,7 +114,7 @@ def run_config_wizard(config_path: Optional[Path] = None) -> None:
         raise ConfigError("Could not determine config file path.")
     save_config(config, conf_path)
     console.print("Configuration complete! :tada:")
-    logger.info(f"Saved config to {path_link(conf_path)}")
+    success(f"Saved config to {path_link(conf_path)}")
 
 
 def init_harbor_settings(config: HarborCLIConfig) -> None:
@@ -127,15 +128,10 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
         show_default=True,
     )
 
-    base_msg = (
-        "Authentication method: \[u]sername/password, \[t]oken, \[f]ile or [s]kip"
-    )
-    choices = ["u", "t", "f", "s"]
+    base_msg = "Authentication method [bold magenta](\[u]sername/password, \[b]asic auth, \[f]ile, \[s]kip)[/]"
+    choices = ["u", "b", "f", "s"]
 
-    auth_method = Prompt.ask(
-        base_msg,
-        choices=choices,
-    )
+    auth_method = Prompt.ask(base_msg, choices=choices, default="s", show_choices=False)
     if auth_method == "u":
         hconf.username = str_prompt(
             "Harbor username",
@@ -148,9 +144,9 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
             password=True,
             empty_ok=False,
         )
-    elif auth_method == "t":
+    elif auth_method == "b":
         hconf.basicauth = str_prompt(
-            f"Harbor base64 credentials",
+            f"Harbor Base64 Basic Auth token",
             default=hconf.basicauth,
             password=True,
             empty_ok=False,
@@ -167,8 +163,9 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
     # Explain what will happen if no auth method is provided
     if not hconf.has_auth_method:
         console.print(
-            "No authentication info provided. "
-            "You will be prompted for username and password when required."
+            ":warning: No authentication info provided. "
+            "You will be prompted for username and password when required.",
+            style="yellow",
         )
 
 
@@ -252,13 +249,13 @@ def _init_output_table_settings(config: HarborCLIConfig) -> None:
     oconf = config.output.table
 
     oconf.max_depth = IntPrompt.ask(
-        "Max number of subtables (leave empty for unlimited)",
+        "Max number of subtables [bold magenta](-1 or empty for unlimited)[/]",
         default=oconf.max_depth,
         show_default=True,
     )
 
     oconf.description = Confirm.ask(
-        "Show description column",
+        "Show descriptions",
         default=oconf.description,
         show_default=True,
     )
