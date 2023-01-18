@@ -39,8 +39,9 @@ def test_str_prompt(monkeypatch: MonkeyPatch, leading_newline: str, text: str) -
     stdin_str = leading_newline + text + "\n"
     monkeypatch.setattr("sys.stdin", io.StringIO(stdin_str))
     # Result is always stripped of whitespace, and newline = enter
-    # So anything after \n is ignored
-    assert str_prompt("foo") == text.split("\n")[0].strip()
+    # So anything after \n is
+    expect = next(t.strip() for t in text.split("\n") if t)
+    assert str_prompt("foo") == expect
 
 
 @pytest.mark.skip(reason="Flaky test in CI. Need to investigate.")
