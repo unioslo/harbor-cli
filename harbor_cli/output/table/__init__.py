@@ -25,6 +25,7 @@ from harborapi.models.models import Repository
 from harborapi.models.models import SystemInfo
 from rich.table import Table
 
+from ...utils._types import is_builtin_obj
 from .anysequence import AnySequence
 from .anysequence import anysequence_table
 from .artifact import artifactinfo_table
@@ -42,6 +43,10 @@ RENDER_FUNCTIONS = {
 }
 
 
+class BuiltinTypeException(TypeError):
+    pass
+
+
 def get_render_function(obj: T | list[T]) -> Callable[[T | list[T]], Table]:
     """Get the render function for a given object."""
 
@@ -52,4 +57,8 @@ def get_render_function(obj: T | list[T]) -> Callable[[T | list[T]], Table]:
     try:
         return RENDER_FUNCTIONS[obj.__class__]  # type: ignore # TODO: fix typing
     except KeyError:
+        if is_builtin_obj(obj):
+            raise BuiltinTypeException(
+                "Builtin types cannot be rendered as a compact table."
+            )
         raise NotImplementedError(f"{type(obj)} not implemented.")
