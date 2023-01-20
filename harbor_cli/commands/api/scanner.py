@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional
 
 import typer
+from harborapi.models.models import ScannerRegistration
 from harborapi.models.models import ScannerRegistrationReq
 
 from ...exceptions import HarborCLIError
@@ -11,6 +12,8 @@ from ...output.render import render_result
 from ...state import state
 from ...utils import inject_help
 from ...utils import inject_resource_options
+from ...utils.args import create_updated_model
+from ...utils.args import model_params_from_ctx
 
 # Create a command group
 app = typer.Typer(
@@ -18,6 +21,10 @@ app = typer.Typer(
     help="Manage scanners.",
     no_args_is_help=True,
 )
+
+
+def get_scanner(scanner_id: str) -> ScannerRegistration:
+    return state.run(state.client.get_scanner(scanner_id), "Fetching scanner...")
 
 
 # HarborAsyncClient.get_scanner()
@@ -30,7 +37,7 @@ def get_csanner(
     ),
 ) -> None:
     """Get a specific scanner."""
-    scanner = state.run(state.client.get_scanner(scanner_id), "Fetching scanner...")
+    scanner = get_scanner(scanner_id)
     render_result(scanner, ctx)
 
 
@@ -59,7 +66,7 @@ def _do_handle_scanner_modification(
     ),
     access_credential: Optional[str] = typer.Option(
         None,
-        "--access-cred",
+        "--access-credential",
     ),
     skip_cert_verify: Optional[bool] = typer.Option(
         None,
@@ -124,13 +131,94 @@ def _do_handle_scanner_modification(
 
 
 # HarborAsyncClient.create_scanner()
-app.command("create", help="Create a new scanner.", no_args_is_help=True)(
-    _do_handle_scanner_modification
-)
+@app.command("create", no_args_is_help=True)
+@inject_help(ScannerRegistrationReq)
+def create_scanner(
+    ctx: typer.Context,
+    name: str = typer.Argument(
+        ...,
+    ),
+    url: str = typer.Argument(
+        ...,
+    ),
+    description: Optional[str] = typer.Option(
+        None,
+        "--description",
+    ),
+    auth: Optional[str] = typer.Option(
+        None,
+        "--auth",
+    ),
+    access_credential: Optional[str] = typer.Option(
+        None,
+        "--access-credential",
+    ),
+    skip_cert_verify: Optional[bool] = typer.Option(
+        None,
+    ),
+    use_internal_addr: Optional[bool] = typer.Option(
+        None,
+    ),
+    disabled: Optional[bool] = typer.Option(
+        None,
+        "--disabled/--enabled",
+    ),
+) -> None:
+    """Create a new scanner."""
+    params = model_params_from_ctx(ctx, ScannerRegistrationReq)
+    req = ScannerRegistrationReq(**params)
+    location = state.run(state.client.create_scanner(req), "Creating scanner...")
+    render_result(location, ctx)
+    logger.info(f"Scanner created: {location}.")
+
+
 # HarborAsyncClient.update_scanner()
-app.command("update", help="Update existing scanner.", no_args_is_help=True)(
-    _do_handle_scanner_modification
-)
+@app.command("update", no_args_is_help=True)
+@inject_help(ScannerRegistrationReq)
+def update_scanner(
+    ctx: typer.Context,
+    scanner_id: str = typer.Argument(..., help="ID of the scanner to update."),
+    name: Optional[str] = typer.Option(
+        None,
+        "--name",
+    ),
+    url: Optional[str] = typer.Option(
+        None,
+        "--url",
+    ),
+    description: Optional[str] = typer.Option(
+        None,
+        "--description",
+    ),
+    auth: Optional[str] = typer.Option(
+        None,
+        "--auth",
+    ),
+    access_credential: Optional[str] = typer.Option(
+        None,
+        "--access-credential",
+    ),
+    skip_cert_verify: Optional[bool] = typer.Option(
+        None,
+    ),
+    use_internal_addr: Optional[bool] = typer.Option(
+        None,
+    ),
+    disabled: Optional[bool] = typer.Option(
+        False,
+        "--disabled/--enabled",
+    ),
+) -> None:
+    """Update a scanner."""
+    scanner = get_scanner(scanner_id)
+    req = create_updated_model(scanner, ScannerRegistrationReq, ctx)
+
+    state.run(
+        state.client.update_scanner(scanner_id, req),
+        "Updating scanner...",
+    )
+    logger.info(f"Scanner {scanner_id!r} updated.")
+
 
 # HarborAsyncClient.delete_scanner()
 @app.command("delete", no_args_is_help=True)

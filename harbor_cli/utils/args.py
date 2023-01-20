@@ -3,9 +3,12 @@ from __future__ import annotations
 from typing import Any
 from typing import List
 from typing import Type
+from typing import TypeVar
 
 import typer
 from pydantic import BaseModel
+
+BaseModelType = TypeVar("BaseModelType", bound=BaseModel)
 
 
 def model_params_from_ctx(
@@ -39,6 +42,61 @@ def model_params_from_ctx(
         for key, value in ctx.params.items()
         if key in model.__fields__ and value is not None
     }
+
+
+def create_updated_model(
+    existing: BaseModel, new: Type[BaseModelType], ctx: typer.Context
+) -> BaseModelType:
+    """Given a BaseModel and a new model type, create a new model
+    from the fields of the existing model combined with the arguments given
+    to the command in the Typer context.
+
+    Basically, when we call a PUT enpdoint, the API expects the full model definition,
+    but we want to allow the user to only specify the fields they want to update.
+    This function allows us to do that, by taking the existing model and updating
+    it with the new values from the Typer context (which derives its parameters
+    from the model used in send the PUT request.)
+
+    Examples
+    --------
+    >>> from pydantic import BaseModel
+    >>> class Foo(BaseModel):
+    ...     a: Optional[int]
+    ...     b: Optional[str]
+    ...     c: Optional[bool]
+    >>> class FooUpdateReq(BaseModel):
+    ...     a: Optional[int]
+    ...     b: Optional[int]
+    ...     c: Optional[bool]
+    ...     insecure: bool = False
+    >>> foo = Foo(a=1, b="foo", c=True)
+    >>> # we get a ctx object from Typer inside the function of a command
+    >>> ctx = typer.Context(...) # --a 2 --b bar
+    >>> foo_update = create_updated_model(foo, FooUpdateReq, ctx)
+    >>> foo_update
+    FooUpdateReq(a=2, b='bar', c=True, insecure=False)
+
+    Parameters
+    ----------
+    existing : BaseModel
+        The existing model to use as a base.
+    new : Type[BaseModelType]
+        The new model type to construct.
+    ctx : typer.Context
+        The Typer context to get the updated model parameters from.
+
+    Returns
+    -------
+    BaseModelType
+        The updated model.
+    """
+    params = model_params_from_ctx(ctx, new)
+    d = existing.dict()
+    # Cast existing model to dict, update it with the new values
+    d.update(params)
+    # Parse it back to the new model
+    new_model = new.parse_obj(d)
+    return new_model
 
 
 def parse_harbor_bool_arg(arg: str | None) -> bool | None:
