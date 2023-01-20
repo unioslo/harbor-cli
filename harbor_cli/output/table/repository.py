@@ -3,6 +3,8 @@ from __future__ import annotations
 from harborapi.models.models import Repository
 from rich.table import Table
 
+from ..formatting.dates import datetime_str
+
 
 def repository_table(r: Repository | list[Repository]) -> Table:
     """Display one or more repositories in a table."""
@@ -13,11 +15,13 @@ def repository_table(r: Repository | list[Repository]) -> Table:
     table.add_column("Name")
     table.add_column("Artifacts")
     table.add_column("Created")
+    table.add_column("Updated")
     for repo in r:
         table.add_row(
             repo.project_name,
             repo.name,
             str(repo.artifact_count),
-            str(repo.creation_time),
+            datetime_str(repo.creation_time),
+            datetime_str(repo.update_time),
         )
     return table
