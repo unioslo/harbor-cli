@@ -8,6 +8,7 @@ from harborapi.models import Configurations
 from harborapi.models import ConfigurationsResponse
 
 from ...logs import logger
+from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
 from ...utils import inject_help
@@ -94,11 +95,6 @@ def get_config(
 @inject_help(Configurations)
 def update_config(
     ctx: typer.Context,
-    replace: bool = typer.Option(
-        False,
-        "--replace",
-        help="Replace the entire configuration with the provided values. Omitted values are set to `None`.",
-    ),
     auth_mode: Optional[str] = typer.Option(
         None,
         "--auth-mode",
@@ -326,20 +322,20 @@ def update_config(
     """Update the configuration of Harbor."""
     logger.info("Updating configuration...")
     params = model_params_from_ctx(ctx, Configurations)
-    if replace:
-        c = params
-    else:
-        # get_config fetches a ConfigurationsResponse object, but we need
-        # to pass a Configurations object to update_config. To get the
-        # correct parameters to pass to Configurations, we need to flatten
-        # the dict representation of the ConfigurationsResponse object
-        # to create a dict of key:ConfigItem.value.
-        current_config = state.run(
-            state.client.get_config(),
-            "Fetching current configuration...",
-        )
-        c = flatten_config_response(current_config)
-        c.update(params)
+    if not params:
+        exit_err("No configuration parameters provided.")
+
+    current_config = state.run(
+        state.client.get_config(),
+        "Fetching current configuration...",
+    )
+    # get_config fetches a ConfigurationsResponse object, but we need
+    # to pass a Configurations object to update_config. To get the
+    # correct parameters to pass to Configurations, we need to flatten
+    # the dict representation of the ConfigurationsResponse object
+    # to create a dict of key:ConfigItem.value.
+    c = flatten_config_response(current_config)
+    c.update(params)
 
     configuration = Configurations.parse_obj(c)
 
