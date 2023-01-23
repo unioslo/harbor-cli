@@ -51,6 +51,7 @@ def create_updated_model(
     new: Type[BaseModelType],
     ctx: typer.Context,
     extra: bool = False,
+    empty_ok: bool = False,
 ) -> BaseModelType:
     """Given a BaseModel and a new model type, create a new model
     from the fields of the existing model combined with the arguments given
@@ -91,8 +92,11 @@ def create_updated_model(
         The new model type to construct.
     ctx : typer.Context
         The Typer context to get the updated model parameters from.
-    extra : bool, optional
+    extra : bool
         Whether to include extra fields set on the existing model.
+    empty_ok: bool
+        Whether to allow the update to be empty. If False, an error will be raised
+        if no parameters are provided to update.
 
     Returns
     -------
@@ -100,7 +104,7 @@ def create_updated_model(
         The updated model.
     """
     params = model_params_from_ctx(ctx, new)
-    if not params:
+    if not params and not empty_ok:
         exit_err("No parameters provided to update")
 
     # Cast existing model to dict, update it with the new values

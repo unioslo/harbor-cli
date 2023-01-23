@@ -11,6 +11,7 @@ from harborapi.models.models import ProjectMetadata
 from harborapi.models.models import ProjectReq
 
 from ...logs import logger
+from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
 from ...utils import inject_help
@@ -312,8 +313,8 @@ def update_project(
     """Update project information. [bold red]UNTESTED![/]"""
     req_params = model_params_from_ctx(ctx, ProjectReq)
     metadata_params = model_params_from_ctx(ctx, ProjectMetadata)
-    if not req_params or not metadata_params:
-        raise typer.BadParameter("No parameters provided.")
+    if not req_params and not metadata_params:
+        exit_err("No parameters provided.")
 
     arg = get_project_arg(project_name_or_id, is_id)
     project = get_project(arg)
@@ -321,8 +322,18 @@ def update_project(
         project.metadata = ProjectMetadata()
 
     # Create updated models from params
-    req = create_updated_model(project, ProjectReq, ctx)
-    metadata = create_updated_model(project.metadata, ProjectMetadata, ctx)
+    req = create_updated_model(
+        project,
+        ProjectReq,
+        ctx,
+        empty_ok=True,
+    )
+    metadata = create_updated_model(
+        project.metadata,
+        ProjectMetadata,
+        ctx,
+        empty_ok=True,
+    )
     req.metadata = metadata
 
     state.run(state.client.update_project(arg, req), f"Updating project...")
