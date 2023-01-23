@@ -31,6 +31,8 @@ def model_params_from_ctx(
     ----------
     ctx : typer.Context
         The Typer context.
+    model : Type[BaseModel]
+        The model to get the parameters for.
     filter_none : bool
         Whether to filter out None values, by default True
 
@@ -42,7 +44,7 @@ def model_params_from_ctx(
     return {
         key: value
         for key, value in ctx.params.items()
-        if key in model.__fields__ and value is not None
+        if key in model.__fields__ and (not filter_none or value is not None)
     }
 
 
