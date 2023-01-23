@@ -16,6 +16,7 @@ from ...output.render import render_result
 from ...state import state
 from ...utils import inject_help
 from ...utils import inject_resource_options
+from ...utils.args import create_updated_model
 from ...utils.args import model_params_from_ctx
 
 # Create a command group
@@ -26,8 +27,12 @@ app = typer.Typer(
 )
 
 
+def get_registry(registry_id: int) -> Registry:
+    return state.run(state.client.get_registry(registry_id), "Fetching registry...")
+
+
 @app.command("get", no_args_is_help=True)
-def get_registry(
+def get_registry_cmd(
     ctx: typer.Context,
     registry_id: int = typer.Argument(
         ...,
@@ -35,7 +40,7 @@ def get_registry(
     ),
 ) -> None:
     """Fetch a registry."""
-    registry = state.run(state.client.get_registry(registry_id), "Fetching registry...")
+    registry = get_registry(registry_id)
     render_result(registry, ctx)
 
 
@@ -102,12 +107,12 @@ def update_registry(
         ...,
         help="ID of registry to update.",
     ),
-    name: str = typer.Option(
-        ...,
+    name: Optional[str] = typer.Option(
+        None,
         "--name",
     ),
-    url: str = typer.Option(
-        ...,
+    url: Optional[str] = typer.Option(
+        None,
         "--url",
     ),
     description: str = typer.Option(
@@ -133,18 +138,9 @@ def update_registry(
     # status omitted
 ) -> None:
     """Update a registry."""
-    registry = RegistryUpdate(
-        name=name,
-        url=url,
-        description=description,
-        credential_type=credential_type,
-        access_key=access_key,
-        access_secret=access_secret,
-        insecure=insecure,
-    )
-    state.run(
-        state.client.update_registry(registry_id, registry), f"Updating registry..."
-    )
+    registry = get_registry(registry_id)
+    req = create_updated_model(registry, RegistryUpdate, ctx)
+    state.run(state.client.update_registry(registry_id, req), f"Updating registry...")
     logger.info("Registry updated successfully.")
 
 
