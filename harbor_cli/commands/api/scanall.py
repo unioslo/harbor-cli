@@ -6,11 +6,13 @@ import typer
 from harborapi.models import Schedule
 from harborapi.models import ScheduleObj
 
-from ...exceptions import HarborCLIError
 from ...logs import logger
+from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
 from ...utils import inject_help
+from ...utils.args import create_updated_model
+from ...utils.args import model_params_from_ctx
 
 # Create a command group
 app = typer.Typer(
@@ -36,62 +38,57 @@ def get_scanall_metrics(ctx: typer.Context) -> None:
     render_result(metrics, ctx)
 
 
-# HarborAsyncClient.get_scan_all_schedule()
-@schedule_cmd.command("get")
-def get_scanall_schedule(ctx: typer.Context) -> None:
-    """Get the current 'Scan All' schedule."""
-    schedule = state.run(
+def get_scanall_schedule() -> Schedule:
+    return state.run(
         state.client.get_scan_all_schedule(), "Fetching 'Scan All' schedule..."
     )
+
+
+# HarborAsyncClient.get_scan_all_schedule()
+@schedule_cmd.command("get")
+def get_scanall_schedule_cmd(ctx: typer.Context) -> None:
+    """Get the current 'Scan All' schedule."""
+    schedule = get_scanall_schedule()
     render_result(schedule, ctx)
 
 
-# TODO: deduplicate all code involving Schedule and ScheduleObj
-#       (see harbor_cli/commands/api/gc.py)
-#       This is basically a copy-paste of the code from gc.py
-
-
+@schedule_cmd.command("create")
 @inject_help(Schedule)
 @inject_help(ScheduleObj)
-def _do_handle_schedule_modification_command(
+def create_scanall_schedule(
     ctx: typer.Context,
-    type: Optional[str] = typer.Option(None, "--type"),
-    cron: Optional[str] = typer.Option(None, "--cron"),
+    type: Optional[str] = typer.Option(None),
+    cron: Optional[str] = typer.Option(None),
 ) -> None:
-    schedule_obj = ScheduleObj(
-        type=type,
-        cron=cron,
+    params = model_params_from_ctx(ctx, ScheduleObj)
+    schedule = Schedule(schedule=ScheduleObj(**params))
+    state.run(
+        state.client.create_scan_all_schedule(schedule),
+        "Creating 'Scan All' schedule...",
     )
-    schedule = Schedule(schedule=schedule_obj)
-    if ctx.command.name == "create":
-        state.run(
-            state.client.create_scan_all_schedule(schedule),
-            "Creating 'Scan All' schedule...",
-        )
-        logger.info(f"'Scan All' schedule created.")
-    elif ctx.command.name == "update":
-        state.run(
-            state.client.create_scan_all_schedule(schedule),
-            f"Updating 'Scan All' schedule...",
-        )
-        logger.info(f"'Scan All' schedule updated.")
-    else:
-        raise HarborCLIError(f"Unknown command {ctx.command.name}")
+    logger.info(f"'Scan All' schedule created.")
 
 
-# 'scan-all schedule create' and 'scan-all schedule update' take the same parameters,
-# and only differ in which method is called on the client. To simplify
-# the code, we use a single function to handle both commands.
+@schedule_cmd.command("update")
+@inject_help(Schedule)
+@inject_help(ScheduleObj)
+def update_scanall_schedule(
+    ctx: typer.Context,
+    type: Optional[str] = typer.Option(None),
+    cron: Optional[str] = typer.Option(None),
+    # TODO: 'parameters' field for Schedule
+) -> None:
+    schedule = get_scanall_schedule()
+    if not schedule.schedule:
+        exit_err("No existing 'Scan All' schedule found.")
+    schedule_obj = create_updated_model(schedule.schedule, ScheduleObj, ctx)
+    schedule.schedule = schedule_obj
+    state.run(
+        state.client.update_scan_all_schedule(schedule),
+        "Updating 'Scan All' schedule...",
+    )
+    logger.info(f"'Scan All' schedule created.")
 
-
-# HarborAsyncClient.create_scan_all_schedule()
-schedule_cmd.command("create", help="Create a new Garbage Collection schedule.")(
-    _do_handle_schedule_modification_command
-)
-# HarborAsyncClient.update_scan_all_schedule()
-schedule_cmd.command("update", help="Update existing Garbage Collection schedule.")(
-    _do_handle_schedule_modification_command
-)
 
 # HarborAsyncClient.stop_scan_all_job()
 @app.command("stop")
