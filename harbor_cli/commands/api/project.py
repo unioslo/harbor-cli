@@ -6,6 +6,7 @@ from typing import Optional
 from typing import overload
 
 import typer
+from harborapi.models.models import Project
 from harborapi.models.models import ProjectMetadata
 from harborapi.models.models import ProjectReq
 
@@ -15,8 +16,9 @@ from ...state import state
 from ...utils import inject_help
 from ...utils import inject_resource_options
 from ...utils import parse_commalist
-from ...utils import parse_key_value_args
+from ...utils.args import create_updated_model
 from ...utils.args import model_params_from_ctx
+from ...utils.args import parse_key_value_args
 
 # Create a command group
 app = typer.Typer(
@@ -43,6 +45,11 @@ metadata_cmd.add_typer(metadata_field_cmd)
 app.add_typer(scanner_cmd)
 app.add_typer(metadata_cmd)
 
+
+def get_project(name_or_id: str | int) -> Project:
+    return state.run(state.client.get_project(name_or_id), "Fetching project...")
+
+
 # HarborAsyncClient.get_project()
 @app.command("get", no_args_is_help=True)
 def get_project_info(
@@ -59,11 +66,8 @@ def get_project_info(
 ) -> None:
     """Get information about a project."""
     arg = get_project_arg(project_name_or_id, is_id)
-    project_repr = get_project_repr(arg)
-    project_info = state.run(
-        state.client.get_project(arg), f"Fetching project info for {project_repr}..."
-    )
-    render_result(project_info, ctx)
+    project = get_project(arg)
+    render_result(project, ctx)
 
 
 # HarborAsyncClient.get_project_logs()
@@ -163,9 +167,9 @@ def create_project(
         None,
         "--auto-scan",
     ),
-    reuse_sys_cve_whitelist: Optional[str] = typer.Option(
+    reuse_sys_cve_allowlist: Optional[str] = typer.Option(
         None,
-        "--reuse-sys-cve-whitelist",
+        "--reuse-sys-cve-allowlist",
     ),
     retention_id: Optional[str] = typer.Option(
         None,
@@ -188,7 +192,7 @@ def create_project(
             prevent_vul=prevent_vul,
             severity=severity,
             auto_scan=auto_scan,
-            reuse_sys_cve_whitelist=reuse_sys_cve_whitelist,
+            reuse_sys_cve_allowlist=reuse_sys_cve_allowlist,
             retention_id=retention_id,
         ),
     )
@@ -246,7 +250,7 @@ def list_projects(
 
 
 # HarborAsyncClient.update_project()
-@app.command("update", help="Update project information", no_args_is_help=True)
+@app.command("update", no_args_is_help=True)
 @inject_help(ProjectReq)
 @inject_help(
     ProjectMetadata
@@ -271,61 +275,58 @@ def update_project(
         "--registry-id",
     ),
     # Options from the Metadata model
-    public: Optional[str] = typer.Option(
+    public: Optional[bool] = typer.Option(
         None,
-        "--public",
+        "--public/--no-public",
     ),
-    enable_content_trust: Optional[str] = typer.Option(
+    enable_content_trust: Optional[bool] = typer.Option(
         None,
-        "--enable-content-trust",
+        "--content-trust/--no-content-trust",
     ),
-    enable_content_trust_cosign: Optional[str] = typer.Option(
+    enable_content_trust_cosign: Optional[bool] = typer.Option(
         None,
-        "--enable-content-trust-cosign",
+        "--content-trust-cosign/--no-content-trust-cosign",
     ),
-    prevent_vul: Optional[str] = typer.Option(
+    prevent_vul: Optional[bool] = typer.Option(
         None,
-        "--prevent-vul",
+        "--prevent-vul/--no-prevent-vul",
     ),
     severity: Optional[str] = typer.Option(
         None,
         "--severity",
         # TODO: add custom help text? The original help text has some really broken English...
     ),
-    auto_scan: Optional[str] = typer.Option(
+    auto_scan: Optional[bool] = typer.Option(
         None,
-        "--auto-scan",
+        "--auto-scan/--no-auto-scan",
     ),
-    reuse_sys_cve_whitelist: Optional[str] = typer.Option(
+    reuse_sys_cve_allowlist: Optional[bool] = typer.Option(
         None,
-        "--reuse-sys-cve-whitelist",
+        "--reuse-sys-cve-allowlist/--no-reuse-sys-cve-allowlist",
     ),
     retention_id: Optional[str] = typer.Option(
         None,
         "--retention-id",
     ),
 ) -> None:
+    """Update project information. [bold red]UNTESTED![/]"""
+    req_params = model_params_from_ctx(ctx, ProjectReq)
+    metadata_params = model_params_from_ctx(ctx, ProjectMetadata)
+    if not req_params or not metadata_params:
+        raise typer.BadParameter("No parameters provided.")
+
     arg = get_project_arg(project_name_or_id, is_id)
-    project_repr = get_project_repr(arg)
-    project_req = ProjectReq(
-        project_name=arg if isinstance(arg, str) else None,
-        storage_limit=storage_limit,
-        registry_id=registry_id,
-        metadata=ProjectMetadata(
-            public=public,
-            enable_content_trust=enable_content_trust,
-            enable_content_trust_cosign=enable_content_trust_cosign,
-            prevent_vul=prevent_vul,
-            severity=severity,
-            auto_scan=auto_scan,
-            reuse_sys_cve_whitelist=reuse_sys_cve_whitelist,
-            retention_id=retention_id,
-        ),
-    )
-    state.run(
-        state.client.update_project(arg, project_req), f"Updating {project_repr}..."
-    )
-    logger.info(f"Updated {project_repr}")
+    project = get_project(arg)
+    if project.metadata is None:
+        project.metadata = ProjectMetadata()
+
+    # Create updated models from params
+    req = create_updated_model(project, ProjectReq, ctx)
+    metadata = create_updated_model(project.metadata, ProjectMetadata, ctx)
+    req.metadata = metadata
+
+    state.run(state.client.update_project(arg, req), f"Updating project...")
+    logger.info(f"Updated {get_project_repr(arg)}")
 
 
 # HarborAsyncClient.delete_project()
@@ -548,7 +549,7 @@ def set_project_metadata(
     auto_scan: Optional[str] = typer.Option(
         None,
     ),
-    reuse_sys_cve_whitelist: Optional[str] = typer.Option(
+    reuse_sys_cve_allowlist: Optional[str] = typer.Option(
         None,
     ),
     retention_id: Optional[int] = typer.Option(

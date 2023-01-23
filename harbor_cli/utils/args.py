@@ -47,7 +47,10 @@ def model_params_from_ctx(
 
 
 def create_updated_model(
-    existing: BaseModel, new: Type[BaseModelType], ctx: typer.Context
+    existing: BaseModel,
+    new: Type[BaseModelType],
+    ctx: typer.Context,
+    extra: bool = False,
 ) -> BaseModelType:
     """Given a BaseModel and a new model type, create a new model
     from the fields of the existing model combined with the arguments given
@@ -77,6 +80,8 @@ def create_updated_model(
     >>> foo_update = create_updated_model(foo, FooUpdateReq, ctx)
     >>> foo_update
     FooUpdateReq(a=2, b='bar', c=True, insecure=False)
+    >>> #        ^^^  ^^^^^^^
+    >>> # We created a FooUpdateReq with the new values from the context
 
     Parameters
     ----------
@@ -86,6 +91,8 @@ def create_updated_model(
         The new model type to construct.
     ctx : typer.Context
         The Typer context to get the updated model parameters from.
+    extra : bool, optional
+        Whether to include extra fields set on the existing model.
 
     Returns
     -------
@@ -95,9 +102,11 @@ def create_updated_model(
     params = model_params_from_ctx(ctx, new)
     if not params:
         exit_err("No parameters provided to update")
-    d = existing.dict()
+
     # Cast existing model to dict, update it with the new values
+    d = existing.dict(include=None if extra else existing.__fields_set__)
     d.update(params)
+
     # Parse it back to the new model
     new_model = new.parse_obj(d)
     return new_model
@@ -131,9 +140,42 @@ def parse_commalist(arg: List[str]) -> List[str]:
     """Parses an argument that can be specified multiple times,
     or as a comma-separated list, into a list of strings.
 
+    `harbor subcmd --arg foo --arg bar,baz`
+    will be parsed as: `["foo", "bar", "baz"]`
+
     Examples
     -------
-    `my_app --arg foo --arg bar,baz`
-    will be parsed as: `["foo", "bar", "baz"]`
+    >>> parse_commalist(["foo", "bar,baz"])
+    ["foo", "bar", "baz"]
     """
     return [item for arg_list in arg for item in arg_list.split(",")]
+
+
+def parse_key_value_args(arg: list[str]) -> dict[str, str]:
+    """Parses a list of key=value arguments.
+
+    Examples
+    -------
+    >>> parse_key_value_args(["foo=bar", "baz=qux"])
+    {'foo': 'bar', 'baz': 'qux'}
+
+    Parameters
+    ----------
+    arg
+        A list of key=value arguments.
+
+    Returns
+    -------
+    dict[str, str]
+        A dictionary mapping keys to values.
+    """
+    metadata = {}
+    for item in arg:
+        try:
+            key, value = item.split("=", maxsplit=1)
+        except ValueError:
+            raise typer.BadParameter(
+                f"Invalid metadata item {item!r}. Expected format: key=value"
+            )
+        metadata[key] = value
+    return metadata
