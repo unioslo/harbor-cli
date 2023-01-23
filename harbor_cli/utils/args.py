@@ -108,12 +108,10 @@ def create_updated_model(
         exit_err("No parameters provided to update")
 
     # Cast existing model to dict, update it with the new values
-    d = existing.dict(include=None if extra else existing.__fields_set__)
+    d = existing.dict(include=None if extra else set(new.__fields__))
     d.update(params)
 
-    # Parse it back to the new model
-    new_model = new.parse_obj(d)
-    return new_model
+    return new.parse_obj(d)
 
 
 def parse_harbor_bool_arg(arg: str | None) -> bool | None:
