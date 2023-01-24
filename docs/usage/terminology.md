@@ -43,9 +43,9 @@ The final subcommand is the _action_ to perform on the resource, such as `create
 * `delete` - Delete a resource
     * Prompts for confirmation unless `--force` is specified.
 * `list` - List resources (optionally filtered by a query)
-* `update` - Perform a (partial) update of a resource.
+* `update` - Update a resource.
     * The default behavior is similar to a PATCH request. Performs a partial update with only the given parameters (corresponding to the resource's fields) being updated on the resource.
-    * **FLAG** `--replace`:  Replace the existing resource with a new resource using the provided data. Similar to a PUT request.
+    * The CLI diverges from the API spec here, since the spec only defines PUT operations (which replaces a given resource with a new resource definition). To improve the ergonomics of the interface for users, the CLI first retrieves the existing resource and only replaces the fields the user wants to update.
 * `set` - Set the value of a specific field on a resource.
     * Used for setting single values, such as setting default project scanner.
 * `add` - Add a value or reference to a resource to a resource
