@@ -17,6 +17,7 @@ from . import repository as repository
 from . import scan as scan
 from . import scanall as scanall
 from . import scanner as scanner
+from . import search as search  # no subcommands
 from . import system as system
 from . import user as user
 from . import vulnerabilities as vulnerabilities
