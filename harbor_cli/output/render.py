@@ -14,7 +14,8 @@ from .console import console
 from .format import OutputFormat
 from .schema import Schema
 from .table import BuiltinTypeException
-from .table import get_render_function
+from .table import EmptySequenceError
+from .table import get_renderable
 
 T = TypeVar("T")
 
@@ -45,10 +46,8 @@ def render_table(result: T | Sequence[T], ctx: typer.Context | None = None) -> N
             render_table_compact(result)
         except NotImplementedError as e:
             logger.debug(f"Unable to render compact table: {e}")
-        except ValueError:
-            pass  # empty sequence (nothing to render)
-        except BuiltinTypeException:
-            pass  # builtin types will be rendered by render_table_full
+        except (EmptySequenceError, BuiltinTypeException):
+            pass  # can't render these types
         else:
             return
 
@@ -59,9 +58,8 @@ def render_table(result: T | Sequence[T], ctx: typer.Context | None = None) -> N
 
 def render_table_compact(result: T | Sequence[T]) -> None:
     """Render the result of a command as a compact table."""
-    func = get_render_function(result)
-    table = func(result)
-    console.print(table)
+    renderable = get_renderable(result)
+    console.print(renderable)
 
 
 def render_table_full(result: T | Sequence[T]) -> None:

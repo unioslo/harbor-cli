@@ -17,10 +17,8 @@ class AnySequence(BaseModel):
     values: Sequence[Any]
 
 
-def anysequence_table(s: AnySequence | list[AnySequence]) -> Table:
+def anysequence_table(s: Sequence[AnySequence]) -> Table:
     """Renders an AnySequence as a table."""
-    if isinstance(s, AnySequence):
-        s = [s]
     table = Table(show_header=True, header_style="bold magenta")
     try:
         title = s[0].title

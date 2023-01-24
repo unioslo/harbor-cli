@@ -16,49 +16,72 @@ a rich.table.Table object.
 """
 from __future__ import annotations
 
+from typing import Any
 from typing import Callable
 from typing import Sequence
 from typing import TypeVar
 
 from harborapi.ext.artifact import ArtifactInfo
+from harborapi.models.models import Project
 from harborapi.models.models import Repository
+from harborapi.models.models import Search
 from harborapi.models.models import SystemInfo
+from rich.panel import Panel
 from rich.table import Table
 
 from ...utils._types import is_builtin_obj
 from .anysequence import AnySequence
 from .anysequence import anysequence_table
 from .artifact import artifactinfo_table
+from .project import project_table
 from .repository import repository_table
+from .search import search_panel
 from .system import systeminfo_table
 
 T = TypeVar("T")
 
 
 RENDER_FUNCTIONS = {
-    Repository: repository_table,
-    ArtifactInfo: artifactinfo_table,
-    SystemInfo: systeminfo_table,
     AnySequence: anysequence_table,
-}
+    ArtifactInfo: artifactinfo_table,
+    Project: project_table,
+    Repository: repository_table,
+    SystemInfo: systeminfo_table,
+    Search: search_panel,
+}  # type: dict[type, Callable[[Any], Table | Panel]]
+# TODO: improve type annotation of this dict
 
 
 class BuiltinTypeException(TypeError):
     pass
 
 
-def get_render_function(obj: T | list[T]) -> Callable[[T | list[T]], Table]:
+class EmptySequenceError(ValueError):
+    pass
+
+
+def get_render_function(
+    obj: T | Sequence[T],
+) -> Callable[[Sequence[T]], Table | Panel]:
     """Get the render function for a given object."""
 
     if isinstance(obj, Sequence):
         if not obj:
-            raise ValueError("Cannot render empty sequence.")
+            raise EmptySequenceError("Cannot render empty sequence.")
         obj = obj[0]
     try:
-        return RENDER_FUNCTIONS[obj.__class__]  # type: ignore # TODO: fix typing
+        return RENDER_FUNCTIONS[obj.__class__]
     except KeyError:
         if is_builtin_obj(obj):
             raise BuiltinTypeException(
                 "Builtin types cannot be rendered as a compact table."
             )
         raise NotImplementedError(f"{type(obj)} not implemented.")
+
+
+def get_renderable(obj: T | Sequence[T]) -> Table | Panel:
+    """Get the renderable for a given object."""
+    render_function = get_render_function(obj)
+    if not isinstance(obj, Sequence):
+        obj = [obj]
+    return render_function(obj)

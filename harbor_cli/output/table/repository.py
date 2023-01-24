@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+from typing import Sequence
+
 from harborapi.models.models import Repository
 from rich.table import Table
 
 from ..formatting.dates import datetime_str
 
 
-def repository_table(r: Repository | list[Repository]) -> Table:
+def repository_table(r: Repository | Sequence[Repository]) -> Table:
     """Display one or more repositories in a table."""
     if isinstance(r, Repository):
         r = [r]

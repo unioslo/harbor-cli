@@ -1,14 +1,14 @@
 from __future__ import annotations
 
+from typing import Sequence
+
 from harborapi.ext.artifact import ArtifactInfo
 from harborapi.models.models import Artifact
 from rich.table import Table
 
 
-def artifact_table(r: Artifact | list[Artifact]) -> Table:
+def artifact_table(r: Sequence[Artifact]) -> Table:
     """Display one or more repositories in a table."""
-    if isinstance(r, Artifact):
-        r = [r]
     table = Table(show_header=True, header_style="bold magenta")
     table.add_column("ID")
     table.add_column("Project ID")
@@ -28,10 +28,8 @@ def artifact_table(r: Artifact | list[Artifact]) -> Table:
     return table
 
 
-def artifactinfo_table(a: list[ArtifactInfo] | ArtifactInfo):
+def artifactinfo_table(a: Sequence[ArtifactInfo]):
     """Display one or more artifacts in a table."""
-    if isinstance(a, ArtifactInfo):
-        a = [a]
     table = Table(show_header=True, header_style="bold magenta")
     table.add_column("Project")
     table.add_column("Repository")
