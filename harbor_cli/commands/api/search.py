@@ -10,10 +10,8 @@ from ...state import state
 @app.command()
 def search(
     ctx: typer.Context,
-    query: str = typer.Argument(
-        ..., help="The search query. Can be a project or repository name."
-    ),
+    query: str = typer.Argument(..., help="The search query."),
 ) -> None:
-    """Search for projects and repositories."""
+    """Search for projects, repositories and charts."""
     results = state.run(state.client.search(query), "Searching...")
     render_result(results, ctx)
