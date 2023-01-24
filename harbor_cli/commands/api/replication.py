@@ -229,9 +229,21 @@ def create_replication_policy(
         "--filter-resource",
         help="Filter the resource type to replicate.",
     ),
-    replicate_deletion: Optional[bool] = typer.Option(None),
-    override: Optional[bool] = typer.Option(None),
-    enabled: Optional[bool] = typer.Option(None),
+    replicate_deletion: Optional[bool] = typer.Option(
+        None,
+        "--replicate-deletion",
+        is_flag=False,
+    ),
+    override: Optional[bool] = typer.Option(
+        None,
+        "--override",
+        is_flag=False,
+    ),
+    enabled: Optional[bool] = typer.Option(
+        None,
+        "--enabled",
+        is_flag=False,
+    ),
     speed: Optional[int] = typer.Option(None, "--speed-limit"),
 ) -> None:
     """Create a replication policy."""

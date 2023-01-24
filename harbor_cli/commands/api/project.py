@@ -143,34 +143,40 @@ def create_project(
         "--registry-id",
     ),
     # Options from the Metadata model
-    public: Optional[str] = typer.Option(
+    public: Optional[bool] = typer.Option(
         None,
         "--public",
+        is_flag=False,
     ),
-    enable_content_trust: Optional[str] = typer.Option(
+    enable_content_trust: Optional[bool] = typer.Option(
         None,
-        "--enable-content-trust",
+        "--content-trust",
+        is_flag=False,
     ),
-    enable_content_trust_cosign: Optional[str] = typer.Option(
+    enable_content_trust_cosign: Optional[bool] = typer.Option(
         None,
-        "--enable-content-trust-cosign",
+        "--content-trust-cosign",
+        is_flag=False,
     ),
-    prevent_vul: Optional[str] = typer.Option(
+    prevent_vul: Optional[bool] = typer.Option(
         None,
         "--prevent-vul",
+        is_flag=False,
     ),
     severity: Optional[str] = typer.Option(
         None,
         "--severity",
         # TODO: add custom help text? The original help text has some really broken English...
     ),
-    auto_scan: Optional[str] = typer.Option(
+    auto_scan: Optional[bool] = typer.Option(
         None,
         "--auto-scan",
+        is_flag=False,
     ),
-    reuse_sys_cve_allowlist: Optional[str] = typer.Option(
+    reuse_sys_cve_allowlist: Optional[bool] = typer.Option(
         None,
         "--reuse-sys-cve-allowlist",
+        is_flag=False,
     ),
     retention_id: Optional[str] = typer.Option(
         None,
@@ -278,19 +284,23 @@ def update_project(
     # Options from the Metadata model
     public: Optional[bool] = typer.Option(
         None,
-        "--public/--no-public",
+        "--public",
+        is_flag=False,
     ),
     enable_content_trust: Optional[bool] = typer.Option(
         None,
-        "--content-trust/--no-content-trust",
+        "--content-trust",
+        is_flag=False,
     ),
     enable_content_trust_cosign: Optional[bool] = typer.Option(
         None,
-        "--content-trust-cosign/--no-content-trust-cosign",
+        "--content-trust-cosign",
+        is_flag=False,
     ),
     prevent_vul: Optional[bool] = typer.Option(
         None,
-        "--prevent-vul/--no-prevent-vul",
+        "--prevent-vul",
+        is_flag=False,
     ),
     severity: Optional[str] = typer.Option(
         None,
@@ -299,11 +309,13 @@ def update_project(
     ),
     auto_scan: Optional[bool] = typer.Option(
         None,
-        "--auto-scan/--no-auto-scan",
+        "--auto-scan",
+        is_flag=False,
     ),
     reuse_sys_cve_allowlist: Optional[bool] = typer.Option(
         None,
-        "--reuse-sys-cve-allowlist/--no-reuse-sys-cve-allowlist",
+        "--reuse-sys-cve-allowlist",
+        is_flag=False,
     ),
     retention_id: Optional[str] = typer.Option(
         None,
@@ -541,27 +553,39 @@ def set_project_metadata(
         "--is-id",
         help="Whether the argument is a project ID or name (by default name)",
     ),
-    public: Optional[str] = typer.Option(
+    public: Optional[bool] = typer.Option(
         None,
+        "--public",
+        is_flag=False,
     ),
-    enable_content_trust: Optional[str] = typer.Option(
+    enable_content_trust: Optional[bool] = typer.Option(
         None,
+        "--content-trust",
+        is_flag=False,
     ),
-    enable_content_trust_cosign: Optional[str] = typer.Option(
+    content_trust_cosign: Optional[bool] = typer.Option(
         None,
+        "--content-trust-cosign",
+        is_flag=False,
     ),
-    prevent_vul: Optional[str] = typer.Option(
+    prevent_vul: Optional[bool] = typer.Option(
         None,
+        "--prevent-vul",
+        is_flag=False,
     ),
     severity: Optional[str] = typer.Option(
         None,
         "--severity",
     ),
-    auto_scan: Optional[str] = typer.Option(
+    auto_scan: Optional[bool] = typer.Option(
         None,
+        "--auto-scan",
+        is_flag=False,
     ),
-    reuse_sys_cve_allowlist: Optional[str] = typer.Option(
+    reuse_sys_cve_allowlist: Optional[bool] = typer.Option(
         None,
+        "--reuse-sys-cve-allowlist",
+        is_flag=False,
     ),
     retention_id: Optional[int] = typer.Option(
         None,

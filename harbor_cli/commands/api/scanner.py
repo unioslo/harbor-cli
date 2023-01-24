@@ -65,13 +65,18 @@ def create_scanner(
     ),
     skip_cert_verify: Optional[bool] = typer.Option(
         None,
+        "--skip-cert-verify",
+        is_flag=False,
     ),
     use_internal_addr: Optional[bool] = typer.Option(
         None,
+        "--use-internal-addr",
+        is_flag=False,
     ),
     disabled: Optional[bool] = typer.Option(
         None,
-        "--disabled/--enabled",
+        "--disabled",
+        is_flag=False,
     ),
 ) -> None:
     """Create a new scanner."""
@@ -110,13 +115,18 @@ def update_scanner(
     ),
     skip_cert_verify: Optional[bool] = typer.Option(
         None,
+        "--skip-cert-verify",
+        is_flag=False,
     ),
     use_internal_addr: Optional[bool] = typer.Option(
         None,
+        "--use-internal-addr",
+        is_flag=False,
     ),
     disabled: Optional[bool] = typer.Option(
         False,
-        "--disabled/--enabled",
+        "--disabled",
+        is_flag=False,
     ),
 ) -> None:
     """Update a scanner."""

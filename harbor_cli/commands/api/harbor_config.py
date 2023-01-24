@@ -113,6 +113,8 @@ def update_config(
     ),
     email_insecure: Optional[bool] = typer.Option(
         None,
+        "--email-insecure",
+        is_flag=False,
     ),
     email_password: Optional[str] = typer.Option(
         None,
@@ -124,6 +126,8 @@ def update_config(
     ),
     email_ssl: Optional[bool] = typer.Option(
         None,
+        "--email-ssl",
+        is_flag=False,
     ),
     email_username: Optional[str] = typer.Option(
         None,
@@ -183,6 +187,8 @@ def update_config(
     ),
     ldap_verify_cert: Optional[bool] = typer.Option(
         None,
+        "--ldap-verify-cert",
+        is_flag=False,
     ),
     ldap_group_membership_attribute: Optional[str] = typer.Option(
         None,
@@ -194,9 +200,13 @@ def update_config(
     ),
     read_only: Optional[bool] = typer.Option(
         None,
+        "--read-only",
+        is_flag=False,
     ),
     self_registration: Optional[bool] = typer.Option(
         None,
+        "--self-registration",
+        is_flag=False,
     ),
     token_expiration: Optional[int] = typer.Option(
         None,
@@ -216,6 +226,8 @@ def update_config(
     ),
     uaa_verify_cert: Optional[bool] = typer.Option(
         None,
+        "--uaa-verify-cert",
+        is_flag=False,
     ),
     http_authproxy_endpoint: Optional[str] = typer.Option(
         None,
@@ -239,9 +251,13 @@ def update_config(
     ),
     http_authproxy_verify_cert: Optional[bool] = typer.Option(
         None,
+        "--http-authproxy-verify-cert",
+        is_flag=False,
     ),
     http_authproxy_skip_search: Optional[bool] = typer.Option(
         None,
+        "--http-authproxy-skip-search",
+        is_flag=False,
     ),
     http_authproxy_server_certificate: Optional[str] = typer.Option(
         None,
@@ -281,9 +297,13 @@ def update_config(
     ),
     oidc_verify_cert: Optional[bool] = typer.Option(
         None,
+        "--oidc-verify-cert",
+        is_flag=False,
     ),
     oidc_auto_onboard: Optional[bool] = typer.Option(
         None,
+        "--oidc-auto-onboard",
+        is_flag=False,
     ),
     # TODO: fix spelling when we add alias in harborapi
     oidc_extra_redirect_parms: Optional[str] = typer.Option(
@@ -303,9 +323,13 @@ def update_config(
     ),
     notification_enable: Optional[bool] = typer.Option(
         None,
+        "--notifications",
+        is_flag=False,
     ),
     quota_per_project_enable: Optional[bool] = typer.Option(
         None,
+        "--quota-per-project",
+        is_flag=False,
     ),
     storage_per_project: Optional[int] = typer.Option(
         None,
@@ -317,6 +341,8 @@ def update_config(
     ),
     skip_audit_log_database: Optional[bool] = typer.Option(
         None,
+        "--skip-audit-log-database",
+        is_flag=False,
     ),
 ) -> None:
     """Update the configuration of Harbor."""

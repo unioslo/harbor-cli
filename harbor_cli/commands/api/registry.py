@@ -224,6 +224,8 @@ def check_registry_status(
     ),
     insecure: Optional[bool] = typer.Option(
         None,
+        "--insecure",
+        is_flag=False,
     ),
 ) -> None:
     """Ping a registry to see if it's reachable."""
