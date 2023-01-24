@@ -20,9 +20,16 @@ app = typer.Typer(
 )
 
 
+def get_repository(project: str, repository_name: str) -> Repository:
+    return state.run(
+        state.client.get_repository(project, repository_name),
+        "Fetching repository...",
+    )
+
+
 # HarborAsyncClient.get_repository()
 @app.command("get", no_args_is_help=True)
-def get_repo(
+def get_reposity_command(
     ctx: typer.Context,
     project: str = typer.Argument(
         ...,
@@ -34,16 +41,8 @@ def get_repo(
     ),
 ) -> None:
     """Fetch a repository."""
-
     # TODO: accept single arg like in `harbor-cli artifact get`?
-
-    repo = state.run(
-        state.client.get_repository(
-            project,
-            repository,
-        ),
-        "Fetching repository...",
-    )
+    repo = get_repository(project, repository)
     render_result(repo, ctx)
 
 
@@ -89,11 +88,11 @@ def update_repository(
     ctx: typer.Context,
     project: str = typer.Argument(
         ...,
-        help="Name of the project the repository belongs to.",
+        help="Project name of repository to update.",
     ),
     repository: str = typer.Argument(
         ...,
-        help="Name of the repository to get.",
+        help="Name of the repository to update.",
     ),
     description: Optional[str] = typer.Option(None),
 ) -> None:
@@ -101,13 +100,9 @@ def update_repository(
 
     As of now, only the description can be updated (if the Web UI is to be trusted).
     """
-    state.run(
-        state.client.update_repository(
-            project,
-            repository,
-            Repository(description=description),
-        )
-    )
+    repo = get_repository(project, repository)
+    repo.description = description
+    state.run(state.client.update_repository(project, repository, repo))
     logger.info(f"Updated {project}/{repository}.")
 
 

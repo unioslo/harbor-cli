@@ -4,6 +4,7 @@ from typing import List
 from typing import Optional
 
 import typer
+from harborapi.models.models import Quota
 from harborapi.models.models import QuotaUpdateReq
 
 from ...logs import logger
@@ -11,6 +12,7 @@ from ...output.render import render_result
 from ...state import state
 from ...utils import inject_resource_options
 from ...utils.args import parse_commalist
+from ...utils.args import parse_key_value_args
 
 # Create a command group
 app = typer.Typer(
@@ -20,8 +22,13 @@ app = typer.Typer(
 )
 
 
+def get_quota(quota_id: int) -> Quota:
+    """Fetch a quota."""
+    return state.run(state.client.get_quota(quota_id), "Fetching quota...")
+
+
 @app.command("get", no_args_is_help=True)
-def get_quota(
+def get_quota_cmd(
     ctx: typer.Context,
     quota_id: int = typer.Argument(
         ...,
@@ -29,7 +36,7 @@ def get_quota(
     ),
 ) -> None:
     """Fetch a quota."""
-    quota = state.run(state.client.get_quota(quota_id), "Fetching quota...")
+    quota = get_quota(quota_id)
     render_result(quota, ctx)
 
 
@@ -49,21 +56,19 @@ def update_quota(
     )
     # status omitted
 ) -> None:
-    """Update a registry."""
-    props = {}
-    for prop in properties:
-        try:
-            key, value = prop.split("=")
-        except ValueError:
-            raise typer.BadParameter(
-                f"Invalid property format: {prop}. Expected format: key=value."
-            )
-        props[key] = value
+    """Update a quota."""
+    props = parse_key_value_args(properties)
     if not props:
         raise typer.BadParameter("No properties provided.")
+
+    # quota = get_quota(quota_id)
+    # FIXME: how to use existing quota?
+
     req = QuotaUpdateReq(hard=props)
     state.run(state.client.update_quota(quota_id, req), f"Updating quota...")
-    render_result(req, ctx)  # is this allowed?
+
+    # TODO: render quotas before and after update
+    render_result(req, ctx)  # is this a good idea?
     logger.info("Quota updated successfully.")
 
 

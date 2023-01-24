@@ -8,6 +8,7 @@ from harborapi.models import Configurations
 from harborapi.models import ConfigurationsResponse
 
 from ...logs import logger
+from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
 from ...utils import inject_help
@@ -94,11 +95,6 @@ def get_config(
 @inject_help(Configurations)
 def update_config(
     ctx: typer.Context,
-    replace: bool = typer.Option(
-        False,
-        "--replace",
-        help="Replace the entire configuration with the provided values. Omitted values are set to `None`.",
-    ),
     auth_mode: Optional[str] = typer.Option(
         None,
         "--auth-mode",
@@ -117,6 +113,8 @@ def update_config(
     ),
     email_insecure: Optional[bool] = typer.Option(
         None,
+        "--email-insecure",
+        is_flag=False,
     ),
     email_password: Optional[str] = typer.Option(
         None,
@@ -128,6 +126,8 @@ def update_config(
     ),
     email_ssl: Optional[bool] = typer.Option(
         None,
+        "--email-ssl",
+        is_flag=False,
     ),
     email_username: Optional[str] = typer.Option(
         None,
@@ -187,6 +187,8 @@ def update_config(
     ),
     ldap_verify_cert: Optional[bool] = typer.Option(
         None,
+        "--ldap-verify-cert",
+        is_flag=False,
     ),
     ldap_group_membership_attribute: Optional[str] = typer.Option(
         None,
@@ -198,9 +200,13 @@ def update_config(
     ),
     read_only: Optional[bool] = typer.Option(
         None,
+        "--read-only",
+        is_flag=False,
     ),
     self_registration: Optional[bool] = typer.Option(
         None,
+        "--self-registration",
+        is_flag=False,
     ),
     token_expiration: Optional[int] = typer.Option(
         None,
@@ -220,6 +226,8 @@ def update_config(
     ),
     uaa_verify_cert: Optional[bool] = typer.Option(
         None,
+        "--uaa-verify-cert",
+        is_flag=False,
     ),
     http_authproxy_endpoint: Optional[str] = typer.Option(
         None,
@@ -243,9 +251,13 @@ def update_config(
     ),
     http_authproxy_verify_cert: Optional[bool] = typer.Option(
         None,
+        "--http-authproxy-verify-cert",
+        is_flag=False,
     ),
     http_authproxy_skip_search: Optional[bool] = typer.Option(
         None,
+        "--http-authproxy-skip-search",
+        is_flag=False,
     ),
     http_authproxy_server_certificate: Optional[str] = typer.Option(
         None,
@@ -285,9 +297,13 @@ def update_config(
     ),
     oidc_verify_cert: Optional[bool] = typer.Option(
         None,
+        "--oidc-verify-cert",
+        is_flag=False,
     ),
     oidc_auto_onboard: Optional[bool] = typer.Option(
         None,
+        "--oidc-auto-onboard",
+        is_flag=False,
     ),
     # TODO: fix spelling when we add alias in harborapi
     oidc_extra_redirect_parms: Optional[str] = typer.Option(
@@ -307,9 +323,13 @@ def update_config(
     ),
     notification_enable: Optional[bool] = typer.Option(
         None,
+        "--notifications",
+        is_flag=False,
     ),
     quota_per_project_enable: Optional[bool] = typer.Option(
         None,
+        "--quota-per-project",
+        is_flag=False,
     ),
     storage_per_project: Optional[int] = typer.Option(
         None,
@@ -321,25 +341,27 @@ def update_config(
     ),
     skip_audit_log_database: Optional[bool] = typer.Option(
         None,
+        "--skip-audit-log-database",
+        is_flag=False,
     ),
 ) -> None:
     """Update the configuration of Harbor."""
     logger.info("Updating configuration...")
     params = model_params_from_ctx(ctx, Configurations)
-    if replace:
-        c = params
-    else:
-        # get_config fetches a ConfigurationsResponse object, but we need
-        # to pass a Configurations object to update_config. To get the
-        # correct parameters to pass to Configurations, we need to flatten
-        # the dict representation of the ConfigurationsResponse object
-        # to create a dict of key:ConfigItem.value.
-        current_config = state.run(
-            state.client.get_config(),
-            "Fetching current configuration...",
-        )
-        c = flatten_config_response(current_config)
-        c.update(params)
+    if not params:
+        exit_err("No configuration parameters provided.")
+
+    current_config = state.run(
+        state.client.get_config(),
+        "Fetching current configuration...",
+    )
+    # get_config fetches a ConfigurationsResponse object, but we need
+    # to pass a Configurations object to update_config. To get the
+    # correct parameters to pass to Configurations, we need to flatten
+    # the dict representation of the ConfigurationsResponse object
+    # to create a dict of key:ConfigItem.value.
+    c = flatten_config_response(current_config)
+    c.update(params)
 
     configuration = Configurations.parse_obj(c)
 

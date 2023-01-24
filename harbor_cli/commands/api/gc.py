@@ -7,13 +7,13 @@ from harborapi.models.models import Schedule
 from harborapi.models.models import ScheduleObj
 from harborapi.models.models import Type as ScheduleType
 
-from ...exceptions import HarborCLIError
 from ...logs import logger
+from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
 from ...utils import inject_help
 from ...utils import inject_resource_options
-from ...utils.args import model_params_from_ctx
+from ...utils.args import create_updated_model
 
 # Create a command group
 app = typer.Typer(
@@ -71,11 +71,6 @@ def create_gc_schedule(
 @inject_help(Schedule)
 def update_gc_schedule(
     ctx: typer.Context,
-    replace: bool = typer.Option(
-        False,
-        "--replace",
-        help="Replace the existing schedule with the new one.",
-    ),
     type: Optional[ScheduleType] = typer.Option(
         None,
         "--type",
@@ -84,27 +79,20 @@ def update_gc_schedule(
         None,
         "--cron",
     ),
+    # NOTE: should we add ScheduleObj.next_scheduled_time as an option?
+    # it doesn't seem like something that should be set manually?
+    # TODO: add delete untagged artifacts option
 ) -> None:
-    obj_params = model_params_from_ctx(ctx, ScheduleObj)
-    # schedule_params = model_params_from_ctx(ctx, Schedule)
-    if replace:
-        schedule_obj = ScheduleObj(
-            type=type,
-            cron=cron,
+    schedule = state.run(state.client.get_gc_schedule(), "Fetching current schedule...")
+    if schedule.schedule is None:
+        exit_err(
+            "No existing schedule to update. Use `harbor gc schedule create` to create a new schedule."
         )
-        schedule = Schedule(schedule=schedule_obj)
-    else:
-        schedule = state.run(state.client.get_gc_schedule())
-        if schedule.schedule is None:
-            raise HarborCLIError(
-                "No existing schedule to update. Use `harbor gc schedule create` to create a new schedule."
-            )
-        # this is kind of convoluted. generalize?
-        schedule_obj_dict = schedule.schedule.dict()
-        schedule_obj_dict.update(obj_params)
-        schedule.schedule = ScheduleObj.parse_obj(schedule_obj_dict)
-
+    # The actual schedule is stored in the `schedule` field of the `Schedule` model
+    new_schedule = create_updated_model(schedule.schedule, ScheduleObj, ctx)
+    schedule.schedule = new_schedule
     # TODO: investigate which parameters the `parameters` field takes
+    # And whether or not that is something we can/want to update
     state.run(
         state.client.update_gc_schedule(schedule),
         f"Updating Garbage Collection schedule...",

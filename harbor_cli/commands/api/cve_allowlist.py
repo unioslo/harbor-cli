@@ -7,6 +7,7 @@ from harborapi.models.models import CVEAllowlist
 from harborapi.models.models import CVEAllowlistItem
 
 from ...logs import logger
+from ...output.console import exit
 from ...output.render import render_result
 from ...state import state
 from ...utils import parse_commalist
@@ -32,61 +33,69 @@ def update_allowlist(
     cves: List[str] = typer.Option(
         [],
         "--cve",
-        help="CVE to add to the allowlist. Can be a comma-separated list, or specified multiple times.",
+        help="CVE IDs to add/remove. Can be a comma-separated list, or specified multiple times.",
         callback=parse_commalist,
     ),
-    replace: bool = typer.Option(
+    remove: bool = typer.Option(
         False,
-        "--replace",
-        help="Replace the existing list with new CVEs. Otherwise, add to the existing list.",
+        "--remove",
+        help="Remove the given CVE IDs from the allowlist instead of adding them.",
     ),
 ) -> None:
-    """Add CVE IDs to the CVE allowlist."""
-    current_list = state.run(state.client.get_cve_allowlist())
+    """Add/remove CVE IDs to the CVE allowlist."""
+    current = state.run(state.client.get_cve_allowlist())
 
-    cve_items = [CVEAllowlistItem(cve_id=cve_id) for cve_id in cves]
-    if replace:
-        current_list.items = cve_items
+    # Check if the current allowlist is defined
+    if current.items is None:
+        if remove:
+            exit("CVE allowlist is empty, nothing to remove.")
+        current.items = []
+
+    if remove:
+        current.items = [item for item in current.items if item.cve_id not in cves]
     else:
-        # TODO: deduplicate CVEs
-        if current_list.items is None:
-            current_list.items = []
-        current_list.items += cve_items
+        # Make a list of all CVE IDs in the current allowlist
+        current_ids = [item.cve_id for item in current.items if item.cve_id is not None]
+        # Create new CVEAllowListItem objects for each CVE ID
+        to_add = [
+            CVEAllowlistItem(cve_id=cve_id)
+            for cve_id in cves
+            if cve_id not in current_ids
+        ]
+        current.items.extend(to_add)
 
-    state.run(
-        state.client.update_cve_allowlist(current_list), "Updating CVE allowlist..."
-    )
-    if replace:
-        logger.info(f"Replaced CVE allowlist with {len(cves)} CVEs.")
+    state.run(state.client.update_cve_allowlist(current), "Updating CVE allowlist...")
+    if remove:
+        logger.info(
+            f"Removed {len(cves)} CVEs from CVE allowlist. Total: {len(current.items)}"
+        )
     else:
         logger.info(
-            f"Added {len(cves)} CVEs to CVE allowlist. Total: {len(current_list.items)}"
+            f"Added {len(cves)} CVEs to CVE allowlist. Total: {len(current.items)}"
         )
 
 
 @app.command("clear")
 def clear_allowlist(
     ctx: typer.Context,
-    full: bool = typer.Option(
+    full_clear: bool = typer.Option(
         False,
         "--full",
         help="Also clear the allowlist of all metadata (such as project ID, expiration, etc).",
     ),
 ) -> None:
     """Clear the current CVE allowlist of all CVEs, and optionally all metadata as well."""
-    if not full:
-        current_list = state.run(
+    if full_clear:
+        allowlist = CVEAllowlist(items=[])  # create a whole new allowlist
+    else:
+        # Fetch existing allowlist to preserve metadata
+        allowlist = state.run(
             state.client.get_cve_allowlist(), "Fetching current allowlist..."
         )
-        current_list.items = []
-        state.run(
-            state.client.update_cve_allowlist(current_list),
-            "Clearing CVEs from allowlist...",
-        )
-        logger.info("Cleared CVE allowlist of CVEs.")
-    else:
-        new_list = CVEAllowlist(items=[])
-        state.run(
-            state.client.update_cve_allowlist(new_list), "Clearing CVE allowlist..."
-        )
-        logger.info("Cleared CVE allowlist of CVEs and metadata.")
+        allowlist.items = []
+
+    state.run(state.client.update_cve_allowlist(allowlist), "Clearing CVE allowlist...")
+    msg = "Cleared CVE allowlist of CVEs."
+    if full_clear:
+        msg += " Also cleared metadata."
+    logger.info(msg)

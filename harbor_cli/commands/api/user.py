@@ -13,6 +13,7 @@ from ...logs import logger
 from ...output.render import render_result
 from ...state import state
 from ...utils import inject_resource_options
+from ...utils.args import create_updated_model
 
 # Create a command group
 app = typer.Typer(
@@ -47,7 +48,9 @@ def user_from_username(username: str) -> UserResp:
         The user object.
     """
     try:
-        user_resp = state.run(state.client.get_user_by_username(username))
+        user_resp = state.run(
+            state.client.get_user_by_username(username), "Fetching user..."
+        )
     except NotFound:
         raise HarborCLIError(f"User {username!r} not found.")
     return user_resp
@@ -139,29 +142,11 @@ def update_user(
     ),
 ) -> None:
     """Update an existing user."""
-    if is_id is not None:
-        uid = convert_uid(username_or_id)
-    elif username_or_id:
-        # Search for user by username to get ID
-        uid = uid_from_username(username_or_id)
-    else:
-        raise HarborCLIError("The first argument must a username or id.")
-
-    # Set these fields individually, so when we exclude unset fields when
-    # serializing, we don't overwrite existing values in DB with None.
-    # Example:
-    # UserProfile(email=None, realname=None, comment=None) -> {"email": None, "realname": None, "comment": None}
-    # UserProfile(email="foo")-> {"email": "foo"}
-    user_profile = UserProfile()
-    if email is not None:
-        user_profile.email = email
-    if realname is not None:
-        user_profile.realname = realname
-    if comment is not None:
-        user_profile.comment = comment
-
-    state.run(state.client.update_user(uid, user_profile), "Updating user...")
-    logger.info(f"Updated user with ID {uid}.")
+    user = get_user(username_or_id, is_id)
+    assert user.user_id is not None, "User ID is None"
+    req = create_updated_model(user, UserProfile, ctx)
+    state.run(state.client.update_user(user.user_id, req), "Updating user...")
+    logger.info(f"Updated user.")
 
 
 # HarborAsyncClient.delete_user()
@@ -382,14 +367,25 @@ def get_current_user_permissions(
     render_result(permissions, ctx)
 
 
+def get_user(username_or_id: str, is_id: bool = False) -> UserResp:
+    """Get a user by username or ID."""
+    msg = "Fetching user..."
+    if is_id:
+        uid = convert_uid(username_or_id)
+        user_info = state.run(state.client.get_user(uid), msg)
+    else:
+        user_info = state.run(state.client.get_user_by_username(username_or_id), msg)
+    return user_info
+
+
 # HarborAsyncClient.get_user()
 # HarborAsyncClient.get_user_by_username()
 @app.command("get")
-def get_user(
+def get_user_command(
     ctx: typer.Context,
     username_or_id: str = typer.Argument(
-        "",
-        help="Username of user to update. Add the --id flag to update by ID.",
+        ...,
+        help="Username or ID of user to update. Add the --id flag to update by ID.",
     ),
     is_id: bool = typer.Option(
         False,
@@ -399,13 +395,11 @@ def get_user(
 ) -> None:
     """Get information about a specific user."""
     msg = "Fetching user..."
-    if username_or_id is not None:
-        user_info = state.run(state.client.get_user_by_username(username_or_id), msg)
-    elif is_id is not None:
+    if is_id:
         uid = convert_uid(username_or_id)
         user_info = state.run(state.client.get_user(uid), msg)
-    else:
-        raise typer.BadParameter("First argument must be a username or ID.")
+    elif is_id is not None:
+        user_info = state.run(state.client.get_user_by_username(username_or_id), msg)
 
     render_result(user_info, ctx)
 

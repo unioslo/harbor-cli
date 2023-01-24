@@ -1,3 +1,5 @@
+"""Utility functions that can't be neatly categorized, or are so niche
+that they don't need their own module."""
 from __future__ import annotations
 
 import inspect
@@ -26,36 +28,6 @@ def replace_none(d: dict[str, Any], replacement: Any = "") -> dict[str, Any]:
         elif value is None:
             d[key] = replacement
     return d
-
-
-def parse_key_value_args(arg: list[str]) -> dict[str, str]:
-    """Parses a list of key=value arguments.
-
-    Examples
-    -------
-    >>> parse_key_value_args(["foo=bar", "baz=qux"])
-    {'foo': 'bar', 'baz': 'qux'}
-
-    Parameters
-    ----------
-    arg
-        A list of key=value arguments.
-
-    Returns
-    -------
-    dict[str, str]
-        A dictionary mapping keys to values.
-    """
-    metadata = {}
-    for item in arg:
-        try:
-            key, value = item.split("=", maxsplit=1)
-        except ValueError:
-            raise typer.BadParameter(
-                f"Invalid metadata item {item!r}. Expected format: key=value"
-            )
-        metadata[key] = value
-    return metadata
 
 
 def inject_help(
