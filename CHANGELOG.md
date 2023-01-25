@@ -10,7 +10,12 @@ The **third number** is the patch version (bug fixes)
 
 <!-- changelog follows -->
 
-<!-- ## [Unreleased] -->
+## [Unreleased]
+
+### Added
+
+- `find`: Search for commands by name or description.
+
 ## [0.1.0](https://github.com/pederhan/harbor-cli/tree/harbor-cli-v0.1.0)
 
 ### Changed

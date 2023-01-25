@@ -29,10 +29,12 @@ from harborapi.models.models import SystemInfo
 from rich.panel import Panel
 from rich.table import Table
 
+from ...models import CommandSummary
 from ...utils._types import is_builtin_obj
 from .anysequence import AnySequence
 from .anysequence import anysequence_table
 from .artifact import artifactinfo_table
+from .commandsummary import commandsummary_table
 from .project import project_table
 from .repository import repository_table
 from .search import search_panel
@@ -44,6 +46,7 @@ T = TypeVar("T")
 RENDER_FUNCTIONS = {
     AnySequence: anysequence_table,
     ArtifactInfo: artifactinfo_table,
+    CommandSummary: commandsummary_table,
     Project: project_table,
     Repository: repository_table,
     SystemInfo: systeminfo_table,

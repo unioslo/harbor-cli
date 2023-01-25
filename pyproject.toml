@@ -29,6 +29,8 @@ dependencies = [
   "rich",
   "loguru",
   "click-repl>=0.2.0",
+  "fuzzywuzzy>=0.18.0",
+  "python-Levenshtein>=0.20.9",
 ]
 dynamic = ["version", "readme"]
 
