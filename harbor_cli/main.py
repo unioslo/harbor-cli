@@ -30,7 +30,11 @@ def main_callback(
     ctx: typer.Context,
     # Configuration options
     config_file: Optional[Path] = typer.Option(
-        None, "--config", "-c", help="Path to config file."
+        None,
+        "--config",
+        "-c",
+        help="Path to config file.",
+        envvar="HARBOR_CLI_CONFIG",
     ),
     # Harbor options
     harbor_url: Optional[str] = typer.Option(
