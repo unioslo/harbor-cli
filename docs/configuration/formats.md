@@ -93,38 +93,3 @@ harbor --format json system volumes
   ]
 }
 ```
-
-## JSON with schema: `jsonschema`
-
-Data from API + metadata as JSON. The intention with this format is to be able to load the data into a Python object of the correct type. Whereas the regular JSON format contains no information about the data structure, the JSON schema format contains metadata about the data structure, and the data itself.
-
-The intention behind this format is to be able to save it as a JSON file, and then later be able load it and deserialize it back into its original [`harborapi`](https://github.com/pederhan/harborapi) model. This allows us to load results from previous invocations of the tool and display them as tables, or use any special methods that the model may have. See [harbor_cli.output.schema][] for more information.
-
-```toml title="config.toml"
-[output]
-format = "jsonschema"
-```
-
-``` title="CLI"
-harbor --format jsonschema system volumes
-```
-
-```json
-{
-  "version": "1.0.0",
-  "type": "SystemInfo",
-  "module": "harborapi.models.models",
-  "data": {
-    "storage": [
-      {
-        "total": 912470835200,
-        "free": 102376873984
-      }
-    ]
-  }
-}
-```
-
-The data returned by the API is stored under the `"data"` key and should be identical to the data displayed when using the `json` format. Schema metadata is stored under the `"version"`, `"type"`, and `"module"` keys. More metadata fields may be added in the future.
-
-This feature is under development, and there is currently no functionality in place for utilizing this. The functionality for loading from a schema file is defined by [harbor_cli.output.schema.Schema.from_file][].

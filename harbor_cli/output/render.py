@@ -12,7 +12,6 @@ from ..logs import logger
 from ..state import state
 from .console import console
 from .format import OutputFormat
-from .schema import Schema
 from .table import BuiltinTypeException
 from .table import EmptySequenceError
 from .table import get_renderable
@@ -29,8 +28,6 @@ def render_result(result: T, ctx: typer.Context | None = None) -> None:
         render_table(result, ctx)
     elif fmt == OutputFormat.JSON:
         render_json(result, ctx)
-    elif fmt == OutputFormat.JSONSCHEMA:
-        render_jsonschema(result, ctx)
     else:
         raise ValueError(f"Unknown output format {fmt!r}.")
 
@@ -114,25 +111,3 @@ def render_json(result: T | Sequence[T], ctx: typer.Context | None = None) -> No
         # rich.console.Console.print_json() ignores the indent of
         # the string passed to it.
         console.print_json(o_json, indent=indent)
-
-
-def render_jsonschema(
-    result: T | Sequence[T], ctx: typer.Context | None = None
-) -> None:
-    """Render the result of a command as JSON with metadata."""
-    p = state.options.output_file
-    with_stdout = state.options.with_stdout
-    no_overwrite = state.options.no_overwrite
-    indent = state.config.output.JSON.indent
-    # sort_keys = state.config.output.JSON.sort_keys
-
-    # TODO: add switch to print to file and stdout at the same time
-    schema = Schema(data=result)  # type: Schema[T | list[T]]
-    schema_json = schema.json(indent=indent)
-    if p:
-        if p.exists() and no_overwrite:
-            raise FileExistsError(f"File {p} exists.")
-        with open(p, "w") as f:
-            f.write(schema_json)
-    if not p or with_stdout:
-        console.print_json(schema_json, indent=indent)

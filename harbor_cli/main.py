@@ -67,12 +67,12 @@ def main_callback(
     json_indent: Optional[int] = typer.Option(
         None,
         "--json-indent",
-        help="Indentation level for JSON output. Affects JSON and JSON schema.",
+        help="Indentation level for JSON output. Affects JSON.",
     ),
     json_sort_keys: Optional[bool] = typer.Option(
         None,
         "--json-sort-keys/--no-json-sort-keys",
-        help="Sort keys in JSON output. Affects JSON and JSON schema.",
+        help="Sort keys in JSON output. Affects JSON.",
     ),
     # Output options
     output_format: Optional[OutputFormat] = typer.Option(

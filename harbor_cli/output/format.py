@@ -11,7 +11,6 @@ class OutputFormat(Enum):
 
     TABLE = "table"
     JSON = "json"
-    JSONSCHEMA = "jsonschema"
     # others...?
 
 
@@ -20,13 +19,11 @@ class OutputFormat(Enum):
 OUTPUTFORMAT_REPR = {
     OutputFormat.TABLE: "table",
     OutputFormat.JSON: "JSON",
-    OutputFormat.JSONSCHEMA: "JSON+Schema",
 }
 
 OUTPUTFORMAT_EMOJI = {
     OutputFormat.TABLE: ":page_facing_up:",
     OutputFormat.JSON: ":package:",
-    OutputFormat.JSONSCHEMA: ":package:+:memo:",
 }
 
 

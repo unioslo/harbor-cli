@@ -92,7 +92,6 @@ nav:
           - "reference/output/format.md"
           - "reference/output/prompts.md"
           - "reference/output/render.md"
-          - "reference/output/schema.md"
           - "Formatting":
               - "reference/output/formatting/index.md"
               - "reference/output/formatting/bytes.md"

@@ -22,7 +22,6 @@ The configuration file is divided into the following tables:
 - [output](#output)
 - [output.table](#outputtable)
 - [output.JSON](#outputjson)
-- [output.schema](#outputschema)
 
 ### `harbor`
 

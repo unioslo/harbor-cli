@@ -205,8 +205,6 @@ def init_output_settings(config: HarborCLIConfig) -> None:
             _init_output_json_settings(config)
         elif fmt == OutputFormat.TABLE:
             _init_output_table_settings(config)
-        elif fmt == OutputFormat.JSONSCHEMA:
-            _init_output_jsonschema_settings(config)
         else:
             logger.error(f"Unknown configuration format {fmt.value}")
 
@@ -265,12 +263,6 @@ def _init_output_table_settings(config: HarborCLIConfig) -> None:
         default=oconf.compact,
         show_default=True,
     )
-
-
-def _init_output_jsonschema_settings(config: HarborCLIConfig) -> None:
-    """Initialize JSON Schema output settings."""
-    pass
-    # TODO: Implement this if we get JSON Schema-specific settings
 
 
 def _print_output_title(fmt: OutputFormat) -> None:
