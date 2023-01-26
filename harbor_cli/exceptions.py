@@ -15,9 +15,6 @@ from harborapi.exceptions import StatusError
 from harborapi.exceptions import Unauthorized
 from harborapi.exceptions import UnsupportedMediaType
 
-from .logs import logger
-from .output.console import exit_err
-
 
 class HarborCLIError(Exception):
     """Base class for all exceptions."""
@@ -87,6 +84,9 @@ def handle_status_error(e: StatusError) -> NoReturn:
     """Handles an HTTP status error from the Harbor API and exits with
     the appropriate message.
     """
+    from .output.console import exit_err  # avoid circular import
+    from .logs import logger
+
     # It's not _guaranteed_ that the StatusError has a __cause__, but
     # in practice it should always have one. It is up to harborapi to
     # ensure that this is the case, but it's currently not guaranteed.
