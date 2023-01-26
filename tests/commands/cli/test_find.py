@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 import typer
 
-from ...utils import Parameter
+from ..._utils import Parameter
 from harbor_cli.commands.cli.find import _do_find
 from harbor_cli.commands.cli.find import MatchStrategy
 from harbor_cli.models import CommandSummary
