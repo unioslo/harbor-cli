@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from functools import partial
+from pathlib import Path
 from typing import Any
 from typing import IO
 from typing import Mapping
@@ -12,6 +13,7 @@ import typer
 from typer.testing import CliRunner
 from typer.testing import Result
 
+from harbor_cli.config import HarborCLIConfig
 from harbor_cli.main import app as main_app
 from harbor_cli.output.format import OutputFormat
 
@@ -38,10 +40,24 @@ class PartialInvoker(Protocol):
         ...
 
 
+@pytest.fixture()
+def config_file(tmp_path: Path) -> Path:  # type: ignore
+    """Setup the CLI config for testing."""
+    conf_path = tmp_path / "config.toml"
+    conf = HarborCLIConfig.from_file(conf_path, create=True)
+    # These are required to run commands
+    conf.harbor.url = "https://harbor.example.com"
+    conf.harbor.username = "admin"
+    conf.harbor.secret = "password"
+    conf.save(conf_path)
+    yield conf_path
+
+
 @pytest.fixture
-def invoke(app) -> PartialInvoker:
-    """Partial function for invoking a CLI command with the app as the entrypoint."""
-    p = partial(runner.invoke, app)
+def invoke(app, config_file: Path) -> PartialInvoker:
+    """Partial function for invoking a CLI command with the app as the entrypoint,
+    and the temp config as the config file."""
+    p = partial(runner.invoke, app, env={"HARBOR_CLI_CONFIG": str(config_file)})
     return p
 
 
