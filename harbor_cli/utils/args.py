@@ -116,30 +116,6 @@ def create_updated_model(
     return new.parse_obj(d)
 
 
-def parse_harbor_bool_arg(arg: str | None) -> bool | None:
-    """Parse a boolean argument for use with Harbor API models
-    that have string fields but only accept "true" or "false".
-
-    Parameters
-    ----------
-    arg : str | None
-        The argument to parse.
-
-    Returns
-    -------
-    bool | None
-        The parsed argument. Returns None if the argument is None.
-    """
-    if arg is None:
-        return arg
-    if arg.lower() in ["true", "yes", "y"]:
-        return True
-    elif arg.lower() in ["false", "no", "n"]:
-        return False
-    else:
-        raise ValueError("Cannot parse argument as boolean: {}".format(arg))
-
-
 def parse_commalist(arg: List[str]) -> List[str]:
     """Parses an argument that can be specified multiple times,
     or as a comma-separated list, into a list of strings.
