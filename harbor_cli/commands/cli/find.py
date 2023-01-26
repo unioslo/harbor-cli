@@ -35,7 +35,7 @@ def get_match_func(strategy: MatchStrategy) -> Callable[[str, str], int]:
     elif strategy == MatchStrategy.TOKEN_SET_RATIO:
         return fuzz.token_set_ratio
     else:
-        raise ValueError(f"Unknown match strategy: {strategy}")
+        raise ValueError(f"Unknown match strategy: {strategy}")  # pragma: no cover
 
 
 def match_commands(
@@ -106,6 +106,27 @@ def find_command(
     ),
 ) -> None:
     """Search commands based on names and descriptions."""
+    matches = _do_find(
+        ctx=ctx,
+        query=query,
+        limit=limit,
+        min_score=min_score,
+        names=names,
+        descriptions=descriptions,
+        strategy=strategy,
+    )
+    render_result(matches, ctx)
+
+
+def _do_find(
+    ctx: typer.Context,
+    query: List[str],
+    limit: Optional[int],
+    min_score: int,
+    names: bool,
+    descriptions: bool,
+    strategy: MatchStrategy,
+) -> list[CommandSummary]:
     # Join arguments to a single string
     q = " ".join(query)
 
@@ -121,4 +142,4 @@ def find_command(
     if limit is not None and len(matches) > limit:
         logger.warning(f"{len(matches) - limit} results omitted.")
         matches = matches[:limit]
-    render_result(matches, ctx)
+    return matches
