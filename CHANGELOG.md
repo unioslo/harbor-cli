@@ -16,6 +16,15 @@ The **third number** is the patch version (bug fixes)
 
 - `find`: Search for commands by name or description.
 
+
+### Fixed
+
+- Use of Python3.10 style annotations in class definitions, causing the program to not run on Python3.9 and below.
+
+### Removed
+
+- JSONSchema output format. Back to the drawing board on this one. [16b4ae6](https://github.com/pederhan/harbor-cli/commit/16b4ae608dfd41ea4dc9b94df1952d35aa2fd7b2)
+
 ## [0.1.0](https://github.com/pederhan/harbor-cli/tree/harbor-cli-v0.1.0)
 
 ### Changed
