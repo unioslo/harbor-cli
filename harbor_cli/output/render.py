@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Sequence
 from typing import TypeVar
+from typing import Union
 
 import typer
 from harborapi.models.base import BaseModel as HarborBaseModel
@@ -94,7 +95,7 @@ def render_json(result: T | Sequence[T], ctx: typer.Context | None = None) -> No
     # as the root value of the JSON object:
     # Output(__root__={"foo": "bar"}).json() -> '{"foo": "bar"}'
     class Output(BaseModel):
-        __root__: T | list[T]
+        __root__: Union[T, list[T]]
 
     o = Output(__root__=result)
     o_json = o.json(indent=indent)
