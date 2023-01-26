@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 from typing import NamedTuple
+from typing import Optional
 
 
 class Parameter(NamedTuple):
     param: str
-    value: str | None = None
+    value: Optional[str] = None
     ok: bool = True
 
     @property
