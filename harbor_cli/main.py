@@ -10,11 +10,11 @@ from . import commands
 from . import harbor
 from .app import app
 from .config import HarborCLIConfig
-from .exceptions import exit_err
 from .exceptions import HarborCLIError
 from .logs import disable_logging
 from .logs import logger
 from .logs import setup_logging
+from .output.console import exit_err
 from .output.console import success
 from .output.format import OutputFormat
 from .output.formatting.path import path_link
