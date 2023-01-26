@@ -13,8 +13,10 @@ import typer
 from typer.testing import CliRunner
 from typer.testing import Result
 
+from harbor_cli.main import app as main_app  # noreorder
+
+# We can't import these before main is imported, because of circular imports
 from harbor_cli.config import HarborCLIConfig
-from harbor_cli.main import app as main_app
 from harbor_cli.output.format import OutputFormat
 
 runner = CliRunner()
