@@ -1,13 +1,20 @@
 from __future__ import annotations
 
+from typing import Optional
+
 import click
+import pytest
 import typer
+from pydantic import BaseModel
+from pydantic import Field
 from typer import Context
 from typer.models import CommandInfo
 
 from harbor_cli.utils.commands import get_app_commands
 from harbor_cli.utils.commands import get_command_help
 from harbor_cli.utils.commands import get_parent_ctx
+from harbor_cli.utils.commands import inject_help
+from harbor_cli.utils.commands import inject_resource_options
 
 
 def test_get_parent_ctx() -> None:
@@ -102,3 +109,139 @@ def test_get_app_commands() -> None:
     # After we are done recursing, we should be at the top-level app again
     assert commands[2].name == "top-app-command"
     assert commands[2].help == "Top-level app command."
+
+
+def test_inject_help() -> None:
+    class TestModel(BaseModel):
+        field1: str = Field(..., description="This is field 1.")
+        field2: int = Field(..., description="This is field 2.")
+        field3: bool = Field(..., description="This is field 3.")
+
+    app = typer.Typer()
+
+    @app.command(name="some-command")
+    @inject_help(TestModel)
+    def some_command(
+        field1: str = typer.Option(...),
+        field2: int = typer.Option(...),
+        field3: bool = typer.Option(...),
+    ) -> None:
+        pass
+
+    defaults = some_command.__defaults__
+    assert defaults is not None
+    assert len(defaults) == 3
+    assert defaults[0].help == "This is field 1."
+    assert defaults[1].help == "This is field 2."
+    assert defaults[2].help == "This is field 3."
+
+
+def test_inject_help_no_defaults() -> None:
+    class TestModel(BaseModel):
+        field1: str = Field(..., description="This is field 1.")
+        field2: int = Field(..., description="This is field 2.")
+        field3: bool = Field(..., description="This is field 3.")
+
+    app = typer.Typer()
+
+    @app.command(name="some-command")
+    @inject_help(TestModel)
+    def some_command(
+        field1: str,
+        field2: int,
+        field3: bool,
+    ) -> None:
+        pass
+
+    defaults = some_command.__defaults__
+    assert defaults is None
+
+
+def test_inject_resource_options() -> None:
+    app = typer.Typer()
+
+    @app.command(name="some-command")
+    @inject_resource_options
+    def some_command(
+        query: Optional[str],
+        sort: Optional[str],
+        page: Optional[int],
+        # with parameter default
+        page_size: Optional[int] = typer.Option(123),
+        # ellipsis signifies that we should inject the default
+        retrieve_all: Optional[bool] = ...,
+    ) -> None:
+        pass
+
+    parameters = some_command.__signature__.parameters
+    assert len(parameters) == 5
+    assert parameters["query"].default.help == "Query parameters to filter the results."
+    assert (
+        parameters["sort"].default.help
+        == "Sorting order of the results. Example: [green]'name,-id'[/] to sort by name ascending and id descending."
+    )
+    assert parameters["page"].default.help == "(Advanced) Page to begin fetching from."
+    assert (
+        parameters["page_size"].default.help
+        == "(Advanced) Number of results to fetch per API call."
+    )
+    assert parameters["page_size"].default.default == 123
+    assert (
+        parameters["retrieve_all"].default.help
+        == "(Advanced) Fetch all matches instead of only first <page_size> matches."
+    )
+    assert (
+        parameters["retrieve_all"].default.default is True
+    )  # ellipsis means default (True)
+
+
+def test_inject_resource_options_partial_params() -> None:
+    app = typer.Typer()
+
+    @app.command(name="some-command")
+    @inject_resource_options
+    def some_command(
+        query: Optional[str],
+        page_size: Optional[int] = typer.Option(123),
+    ) -> None:
+        pass
+
+    parameters = some_command.__signature__.parameters
+    assert len(parameters) == 2
+    # can test more granularly if needed
+
+
+def test_inject_resource_options_strict() -> None:
+    app = typer.Typer()
+
+    # Missing parameters will raise an error in strict mode
+    with pytest.raises(ValueError):
+
+        @app.command(name="some-command")
+        @inject_resource_options(strict=True)
+        def some_command(
+            query: Optional[str],
+            page_size: Optional[int] = typer.Option(123),
+        ) -> None:
+            pass
+
+
+def test_inject_resource_options_no_defaults() -> None:
+    app = typer.Typer()
+
+    @app.command(name="some-command")
+    @inject_resource_options(use_defaults=False)
+    def some_command(
+        page_size: Optional[int] = typer.Option(123),
+    ) -> None:
+        pass
+
+    parameters = some_command.__signature__.parameters
+    assert len(parameters) == 1
+    assert parameters["page_size"].default.default != 123
+    assert parameters["page_size"].default.default == 10
+
+    # can test more granularly if needed
+
+
+# TODO: test each resource injection function individually
