@@ -49,7 +49,7 @@ def test_get_renderable_empty_sequence() -> None:
         get_renderable([])
 
 
-@pytest.mark.parametrize("obj", [1, "str", object()])
+@pytest.mark.parametrize("obj", [1, "str", object(), dict()])
 @pytest.mark.parametrize("as_sequence", [True, False])
 def test_get_renderable_builtin(obj: Any, as_sequence: bool) -> None:
     if as_sequence:
