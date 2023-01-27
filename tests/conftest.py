@@ -27,6 +27,19 @@ def app():
     return main_app
 
 
+@pytest.fixture()
+def config_file(tmp_path: Path) -> Path:  # type: ignore
+    """Setup the CLI config for testing."""
+    conf_path = tmp_path / "config.toml"
+    conf = HarborCLIConfig.from_file(conf_path, create=True)
+    # These are required to run commands
+    conf.harbor.url = "https://harbor.example.com"
+    conf.harbor.username = "admin"
+    conf.harbor.secret = "password"
+    conf.save(conf_path)
+    yield conf_path
+
+
 class PartialInvoker(Protocol):
     """Protocol for a partial function that invokes a CLI command."""
 
@@ -42,21 +55,8 @@ class PartialInvoker(Protocol):
         ...
 
 
-@pytest.fixture()
-def config_file(tmp_path: Path) -> Path:  # type: ignore
-    """Setup the CLI config for testing."""
-    conf_path = tmp_path / "config.toml"
-    conf = HarborCLIConfig.from_file(conf_path, create=True)
-    # These are required to run commands
-    conf.harbor.url = "https://harbor.example.com"
-    conf.harbor.username = "admin"
-    conf.harbor.secret = "password"
-    conf.save(conf_path)
-    yield conf_path
-
-
 @pytest.fixture
-def invoke(app, config_file: Path) -> PartialInvoker:
+def invoke(app: typer.Typer, config_file: Path) -> PartialInvoker:
     """Partial function for invoking a CLI command with the app as the entrypoint,
     and the temp config as the config file."""
     p = partial(runner.invoke, app, env={"HARBOR_CLI_CONFIG": str(config_file)})
@@ -71,9 +71,11 @@ def mock_ctx() -> typer.Context:
 
 @pytest.fixture(name="output_format", scope="function", params=list(OutputFormat))
 def _output_format(request: pytest.FixtureRequest) -> OutputFormat:
+    """Fixture for testing all output formats."""
     return request.param
 
 
 @pytest.fixture(scope="function", params=list(OutputFormat))
 def output_format_arg(output_format: OutputFormat) -> list[str]:
+    """Parametrized fixture that returns the CLI argument for all output formats."""
     return ["--format", output_format.value]
