@@ -113,7 +113,7 @@ def main_callback(
 
     # These commands don't require state management
     # and can be run without a config file or client.
-    if ctx.invoked_subcommand in ["sample-config", "init"]:
+    if ctx.invoked_subcommand in ["sample-config", "init", "find"]:
         return
 
     # TODO: find a better way to do this
