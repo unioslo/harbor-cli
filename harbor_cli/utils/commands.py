@@ -47,7 +47,11 @@ def get_app_commands(
             continue
         t = group.typer_instance
         if current == "":
-            new_current = t.info.name or ""
+            # Prioritize direct name of typer instance over group name (?)
+            new_current = t.info.name or group.name
+            if isinstance(new_current, typer.models.DefaultPlaceholder):
+                new_current = new_current.value
+            new_current = new_current or ""  # guarantee not None
         else:
             new_current = f"{current} {t.info.name or ''}"
         get_app_commands(t, cmds, current=new_current)
