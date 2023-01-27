@@ -14,7 +14,7 @@ class AnySequence(BaseModel):
     each row consists of 1 column showing 1 value."""
 
     title: str = "Values"
-    values: Sequence[Any]
+    values: Sequence[Any] = []
 
 
 def anysequence_table(s: Sequence[AnySequence]) -> Table:
