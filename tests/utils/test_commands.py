@@ -165,11 +165,11 @@ def test_inject_resource_options() -> None:
     def some_command(
         query: Optional[str],
         sort: Optional[str],
-        page: Optional[int],
+        page: int,
         # with parameter default
-        page_size: Optional[int] = typer.Option(123),
+        page_size: int = typer.Option(123),
         # ellipsis signifies that we should inject the default
-        retrieve_all: Optional[bool] = ...,
+        retrieve_all: bool = ...,
     ) -> None:
         pass
 
@@ -202,7 +202,7 @@ def test_inject_resource_options_partial_params() -> None:
     @inject_resource_options
     def some_command(
         query: Optional[str],
-        page_size: Optional[int] = typer.Option(123),
+        page_size: int = typer.Option(123),
     ) -> None:
         pass
 
@@ -221,7 +221,7 @@ def test_inject_resource_options_strict() -> None:
         @inject_resource_options(strict=True)
         def some_command(
             query: Optional[str],
-            page_size: Optional[int] = typer.Option(123),
+            page_size: int = typer.Option(123),
         ) -> None:
             pass
 
@@ -232,7 +232,7 @@ def test_inject_resource_options_no_defaults() -> None:
     @app.command(name="some-command")
     @inject_resource_options(use_defaults=False)
     def some_command(
-        page_size: Optional[int] = typer.Option(123),
+        page_size: int = typer.Option(123),
     ) -> None:
         pass
 
