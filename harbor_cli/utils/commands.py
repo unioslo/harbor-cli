@@ -264,7 +264,7 @@ def inject_query(
 ) -> Any:
     def decorator(func: Any) -> Any:
         option = typer.Option(
-            None, "--query", help="Query parameters to filter the results. "
+            None, "--query", help="Query parameters to filter the results."
         )
         return _patch_param(func, "query", option, strict, use_default)
 
@@ -282,7 +282,7 @@ def inject_sort(
         option = typer.Option(
             None,
             "--sort",
-            help="Sorting order of the results. Example: [green]'name,-id'[/] to sort by name ascending and id descending. ",
+            help="Sorting order of the results. Example: [green]'name,-id'[/] to sort by name ascending and id descending.",
         )
         return _patch_param(func, "sort", option, strict, use_default)
 
@@ -300,7 +300,7 @@ def inject_page_size(
         option = typer.Option(
             10,
             "--page-size",
-            help="(Advanced) Number of results to fetch per API call. ",
+            help="(Advanced) Number of results to fetch per API call.",
         )
         return _patch_param(func, "page_size", option, strict, use_default)
 
@@ -316,7 +316,7 @@ def inject_page(
 ) -> Any:
     def decorator(func: Any) -> Any:
         option = typer.Option(
-            1, "--page", help="(Advanced) Page to begin fetching from. "
+            1, "--page", help="(Advanced) Page to begin fetching from."
         )
         return _patch_param(func, "page", option, strict, use_default)
 
@@ -334,7 +334,7 @@ def inject_retrieve_all(
         option = typer.Option(
             True,
             "--all",
-            help="(Advanced) Fetch all matches instead of only first <page_size> matches. ",
+            help="(Advanced) Fetch all matches instead of only first <page_size> matches.",
         )
         return _patch_param(func, "retrieve_all", option, strict, use_default)
 
