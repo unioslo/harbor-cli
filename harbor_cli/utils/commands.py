@@ -127,7 +127,7 @@ def inject_help(
                 addition = field_additions.get(field_name, "")
                 if addition:
                     addition = f" {addition}"  # add leading space
-                param.default.help = f"{field.field_info.description}{addition}"
+                param.default.help = f"{field.field_info.description or ''}{addition}"
         return func
 
     return decorator
