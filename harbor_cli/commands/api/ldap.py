@@ -7,8 +7,8 @@ from harborapi.models.models import LdapConf
 
 from ...output.render import render_result
 from ...state import state
-from ...utils import inject_help
 from ...utils.args import model_params_from_ctx
+from ...utils.commands import inject_help
 
 # Create a command group
 app = typer.Typer(

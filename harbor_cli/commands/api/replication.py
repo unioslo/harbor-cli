@@ -13,8 +13,8 @@ from ...logs import logger
 from ...output.render import render_result
 from ...state import state
 from ...utils.args import model_params_from_ctx
-from ...utils.utils import inject_help
-from ...utils.utils import inject_resource_options
+from ...utils.commands import inject_help
+from ...utils.commands import inject_resource_options
 
 # Create a command group
 app = typer.Typer(

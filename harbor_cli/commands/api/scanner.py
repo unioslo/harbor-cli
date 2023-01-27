@@ -9,10 +9,10 @@ from harborapi.models.models import ScannerRegistrationReq
 from ...logs import logger
 from ...output.render import render_result
 from ...state import state
-from ...utils import inject_help
-from ...utils import inject_resource_options
 from ...utils.args import create_updated_model
 from ...utils.args import model_params_from_ctx
+from ...utils.commands import inject_help
+from ...utils.commands import inject_resource_options
 
 # Create a command group
 app = typer.Typer(

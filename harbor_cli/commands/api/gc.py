@@ -11,9 +11,9 @@ from ...logs import logger
 from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
-from ...utils import inject_help
-from ...utils import inject_resource_options
 from ...utils.args import create_updated_model
+from ...utils.commands import inject_help
+from ...utils.commands import inject_resource_options
 
 # Create a command group
 app = typer.Typer(

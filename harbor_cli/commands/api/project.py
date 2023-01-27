@@ -14,12 +14,12 @@ from ...logs import logger
 from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
-from ...utils import inject_help
-from ...utils import inject_resource_options
 from ...utils import parse_commalist
 from ...utils.args import create_updated_model
 from ...utils.args import model_params_from_ctx
 from ...utils.args import parse_key_value_args
+from ...utils.commands import inject_help
+from ...utils.commands import inject_resource_options
 
 # Create a command group
 app = typer.Typer(

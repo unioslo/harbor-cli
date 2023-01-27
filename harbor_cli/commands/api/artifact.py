@@ -16,7 +16,7 @@ from ...output.console import exit
 from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
-from ...utils import inject_resource_options
+from ...utils.commands import inject_resource_options
 from ..help import ARTIFACT_HELP_STRING
 
 

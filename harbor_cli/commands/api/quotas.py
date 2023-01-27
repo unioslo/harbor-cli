@@ -10,9 +10,9 @@ from harborapi.models.models import QuotaUpdateReq
 from ...logs import logger
 from ...output.render import render_result
 from ...state import state
-from ...utils import inject_resource_options
 from ...utils.args import parse_commalist
 from ...utils.args import parse_key_value_args
+from ...utils.commands import inject_resource_options
 
 # Create a command group
 app = typer.Typer(
