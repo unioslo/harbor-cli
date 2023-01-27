@@ -30,17 +30,6 @@ def get_app_commands(
     if cmds is None:
         cmds = []
 
-    # When we have commands, we don't need to go deeper and are done.
-    # We can now construct the CommandSummary objects.
-    for command in app.registered_commands:
-        if not command.name:
-            continue
-        if current:
-            name = f"{current} {command.name}"
-        else:
-            name = command.name
-        cmds.append(CommandSummary(name=name, help=get_command_help(command)))
-
     # If we have subcommands, we need to go deeper.
     for group in app.registered_groups:
         if not group.typer_instance:
@@ -55,5 +44,16 @@ def get_app_commands(
         else:
             new_current = f"{current} {t.info.name or ''}"
         get_app_commands(t, cmds, current=new_current)
+
+    # When we have commands, we don't need to go deeper and are done.
+    # We can now construct the CommandSummary objects.
+    for command in app.registered_commands:
+        if not command.name:
+            continue
+        if current:
+            name = f"{current} {command.name}"
+        else:
+            name = command.name
+        cmds.append(CommandSummary(name=name, help=get_command_help(command)))
 
     return sorted(cmds, key=lambda x: x.name)
