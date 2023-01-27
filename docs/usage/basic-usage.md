@@ -9,7 +9,7 @@ Most of the global options listed in [Help output](#help-output) are overrides f
 
 Global options must be specified before the command to run, e.g.:
 
-```bash
+```
 harbor --format json project list
 ```
 
