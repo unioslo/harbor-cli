@@ -29,16 +29,21 @@ def app():
     return main_app
 
 
-@pytest.fixture()
-def config_file(tmp_path: Path) -> Path:  # type: ignore
-    """Setup the CLI config for testing."""
-    conf_path = tmp_path / "config.toml"
-    conf = HarborCLIConfig.from_file(conf_path, create=True)
+@pytest.fixture(scope="session")
+def config() -> HarborCLIConfig:
+    conf = HarborCLIConfig()
     # These are required to run commands
     conf.harbor.url = "https://harbor.example.com"
     conf.harbor.username = "admin"
     conf.harbor.secret = "password"
-    conf.save(conf_path)
+    return conf
+
+
+@pytest.fixture()
+def config_file(tmp_path: Path, config: HarborCLIConfig) -> Path:  # type: ignore
+    """Setup the CLI config for testing."""
+    conf_path = tmp_path / "config.toml"
+    config.save(conf_path)
     yield conf_path
 
 
