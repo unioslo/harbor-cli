@@ -39,9 +39,9 @@ def app():
 def dumb_terminal():
     """Test in a dumb terminal, so that we don't get ANSI escape codes in the output."""
     os.environ["TERM"] = "dumb"
+    os.environ["NO_COLOR"] = "1"
     os.environ.pop("COLORTERM", None)
     os.environ.pop("FORCE_COLOR", None)
-    os.environ.pop("NO_COLOR", None)
 
 
 @pytest.fixture(scope="session")
