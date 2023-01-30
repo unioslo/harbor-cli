@@ -21,7 +21,7 @@ classifiers = [
 ]
 dependencies = [
   "typer",
-  "harborapi @ git+https://github.com/pederhan/harborapi",
+  "harborapi>=0.6.0",
   "pydantic",
   "platformdirs",
   "tomli",
