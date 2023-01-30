@@ -3,6 +3,10 @@ from __future__ import annotations
 from typing import NamedTuple
 from typing import Optional
 
+from pydantic import ValidationError
+
+from harbor_cli.output.table import RENDER_FUNCTIONS
+
 
 class Parameter(NamedTuple):
     param: str
@@ -14,3 +18,12 @@ class Parameter(NamedTuple):
         if self.value is None:
             return [self.param]
         return [self.param, str(self.value)]
+
+
+compact_renderables = []
+for model in RENDER_FUNCTIONS.keys():
+    try:
+        obj = model()
+    except ValidationError:
+        continue
+    compact_renderables.append(model)

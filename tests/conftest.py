@@ -10,6 +10,7 @@ from typing import Protocol
 import click
 import pytest
 import typer
+from pydantic import BaseModel
 from typer.testing import CliRunner
 from typer.testing import Result
 
@@ -18,6 +19,7 @@ from harbor_cli.main import app as main_app  # noreorder
 # We can't import these before main is imported, because of circular imports
 from harbor_cli.config import HarborCLIConfig
 from harbor_cli.output.format import OutputFormat
+from ._utils import compact_renderables
 
 runner = CliRunner()
 
@@ -79,3 +81,9 @@ def _output_format(request: pytest.FixtureRequest) -> OutputFormat:
 def output_format_arg(output_format: OutputFormat) -> list[str]:
     """Parametrized fixture that returns the CLI argument for all output formats."""
     return ["--format", output_format.value]
+
+
+@pytest.fixture(scope="function", params=compact_renderables)
+def compact_table_renderable(request: pytest.FixtureRequest) -> BaseModel:
+    """Fixture for testing compact table renderables that can be instantiated with no arguments."""
+    return request.param()
