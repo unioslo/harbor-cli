@@ -166,21 +166,32 @@ class TableSettings(BaseModel):
     """Settings for the table output format."""
 
     description: bool = False
-    max_depth: Optional[int] = -1
+    max_depth: int = 0
     compact: bool = True
     # TODO: table style
 
     @validator("max_depth", pre=True)
-    def negative_is_none(cls, v: int | None) -> int | None:
+    def check_max_depth(cls, v: Any) -> Any:
         """TOML has no None type, so we interpret negative values as None.
         This validator converts negative values to None.
 
         TODO: convert None to -1 when writing to TOML!
         """
         if v is None:
-            return v
-        elif v < 0:
-            return None
+            return 0
+        try:
+            v = int(v)
+        except ValueError:
+            raise ValueError("max_depth must be an integer")
+        # We used to accept negative integers, and to avoid breaking
+        # existing configs immediately, we just check if the value is negative,
+        # and if so, return 0.
+        # In the future, we will use Field(..., ge=0) to enforce it.
+        if v < 0:
+            logger.warning(
+                "max_depth will stop accepting negative values in a future version. Use 0 instead."
+            )
+            return 0
         return v
 
 
