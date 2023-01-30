@@ -63,6 +63,7 @@ path = "harbor_cli/__about__.py"
 dependencies = [
   "pytest>=7.2.0",
   "pytest-cov>=4.0.0",
+  "pytest-mock>=3.10.0",
   "mypy>=0.991",
   "black>=22.10.0",
   "hypothesis>=6.62.1",
@@ -93,7 +94,12 @@ parallel = true
 omit = ["harbor_cli/__about__.py"]
 
 [tool.coverage.report]
-exclude_lines = ["no cov", "if __name__ == .__main__.:", "if TYPE_CHECKING:"]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+  "pass",
+]
 
 [tool.ruff]
 ignore = [
