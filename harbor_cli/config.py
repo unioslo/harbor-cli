@@ -96,10 +96,14 @@ class HarborSettings(BaseModel):
     username: str = ""
     secret: str = ""
     basicauth: str = ""
-    credentials_file: Optional[Path] = None
+    credentials_file: Optional[Path] = ""  # type: ignore # validator below
 
     @validator("credentials_file", pre=True)
     def _empty_string_is_none(cls, v: Any) -> Any:
+        """We can't serialize None to TOML, so we convert it to an empty string.
+        However, passing an empty string to Path() will return the current working
+        directory, so we need to convert it back to None."""
+        # I really wish TOML had a None type...
         if v == "":
             return None
         return v
@@ -277,10 +281,13 @@ class HarborCLIConfig(BaseModel):
         """
         tomli_kwargs = tomli_kwargs or {}
         return tomli_w.dumps(
-            replace_none(  # replace None values with empty strings (???)
+            # replace None values with empty strings
+            # we want to show the user that they can set these values
+            # but we can't serialize None values to TOML. Very nice!
+            replace_none(
                 json.loads(
                     self.json(**kwargs),
-                )
+                ),
             ),
             **tomli_kwargs,
         )
