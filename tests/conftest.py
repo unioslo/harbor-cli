@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+from copy import copy
 from functools import partial
 from pathlib import Path
 from typing import Any
+from typing import Generator
 from typing import IO
 from typing import Mapping
 from typing import Protocol
@@ -19,6 +21,7 @@ from harbor_cli.main import app as main_app  # noreorder
 # We can't import these before main is imported, because of circular imports
 from harbor_cli.config import HarborCLIConfig
 from harbor_cli.output.format import OutputFormat
+from harbor_cli import state
 from ._utils import compact_renderables
 
 runner = CliRunner()
@@ -86,6 +89,16 @@ def _output_format(request: pytest.FixtureRequest) -> OutputFormat:
 def output_format_arg(output_format: OutputFormat) -> list[str]:
     """Parametrized fixture that returns the CLI argument for all output formats."""
     return ["--format", output_format.value]
+
+
+_ORIGINAL_STATE = copy(state.state)
+
+
+@pytest.fixture(scope="function", autouse=True)
+def revert_state() -> Generator[None, None, None]:
+    """Reverts the global state back to its original value after the test is run."""
+    yield
+    state.state = _ORIGINAL_STATE
 
 
 @pytest.fixture(scope="function", params=compact_renderables)
