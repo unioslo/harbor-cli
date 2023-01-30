@@ -90,11 +90,19 @@ def render_json(result: T | Sequence[T], ctx: typer.Context | None = None) -> No
     indent = state.config.output.JSON.indent
     # sort_keys = state.config.output.JSON.sort_keys
 
-    # To make the JSON serialization more compatible with Pydantic
-    # models and data types, we wrap the data in a Pydantic model
-    # with a single field named __root__, which renders the data
-    # as the root value of the JSON object:
+    # We need to convert the types to JSON serializable types (base types)
+    # Pydantic can handle this for us to some extent.
+    # https://twitter.com/samuel_colvin/status/1617531798367645696
+    #
+    # To make the JSON serialization compatible with a wider range of
+    # data types, we wrap the data in a Pydantic model with a single field
+    # named __root__, which renders the data as the root value of the JSON object:
     # Output(__root__={"foo": "bar"}).json() -> '{"foo": "bar"}'
+    # This is especially useful for serializing types like Paths and Timestamps.
+    #
+    # In pydantic v2, the __root__ field is going away, and we will
+    # be able to serialize/marshal any data type directly.
+
     class Output(BaseModel):
         __root__: Union[T, List[T]]
 
@@ -106,10 +114,10 @@ def render_json(result: T | Sequence[T], ctx: typer.Context | None = None) -> No
         with open(p, "w") as f:
             f.write(o_json)
             logger.info(f"Output written to {p.resolve()}")
+
     # Print to stdout if no output file is specified or if the
     # --with-stdout flag is set.
     if not p or with_stdout:
-        # We have to specify indent again here, because
-        # rich.console.Console.print_json() ignores the indent of
-        # the string passed to it.
+        # We have to specify indent again here, because print_json()
+        # ignores the indent of the JSON string passed to it.
         console.print_json(o_json, indent=indent)
