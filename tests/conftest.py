@@ -24,12 +24,22 @@ from harbor_cli.output.format import OutputFormat
 from harbor_cli import state
 from ._utils import compact_renderables
 
+import os
+
+
 runner = CliRunner()
 
 
 @pytest.fixture(scope="session")
 def app():
     return main_app
+
+
+@pytest.fixture(scope="session", autouse=True)
+def dumb_terminal():
+    """Test in a dumb terminal, so that we don't get ANSI escape codes in the output."""
+    os.environ["TERM"] = "dumb"
+    os.environ["FORCE_COLOR"] = "0"
 
 
 @pytest.fixture(scope="session")
