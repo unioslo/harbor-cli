@@ -75,6 +75,7 @@ nav:
       - "reference/config.md"
       - "reference/dirs.md"
       - "reference/exceptions.md"
+      - "reference/format.md"
       - "reference/logs.md"
       - "reference/main.md"
       - "reference/state.md"
@@ -89,7 +90,6 @@ nav:
       - "Output":
           - "reference/output/index.md"
           - "reference/output/console.md"
-          - "reference/output/format.md"
           - "reference/output/prompts.md"
           - "reference/output/render.md"
           - "Formatting":
