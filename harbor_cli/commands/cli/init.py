@@ -4,9 +4,6 @@ from pathlib import Path
 from typing import Optional
 
 import typer
-from rich.prompt import Confirm
-from rich.prompt import IntPrompt
-from rich.prompt import Prompt
 
 from ...app import app
 from ...config import create_config
@@ -24,6 +21,8 @@ from ...logs import LogLevel
 from ...output.console import console
 from ...output.console import success
 from ...output.formatting import path_link
+from ...output.prompts import bool_prompt
+from ...output.prompts import int_prompt
 from ...output.prompts import path_prompt
 from ...output.prompts import str_prompt
 
@@ -67,7 +66,7 @@ def init(
         console.print(
             f"WARNING: Config file already exists ({path_link(p)})", style="yellow"
         )
-        wizard = Confirm.ask(
+        wizard = bool_prompt(
             "Are you sure you want to run the configuration wizard?",
             default=False,
         )
@@ -96,16 +95,16 @@ def run_config_wizard(config_path: Optional[Path] = None) -> None:
     # file existed prior to running wizard.
     # Otherwise, we force the user to configure Harbor settings, because
     # we can't do anything without them.
-    if not conf_exists or Confirm.ask("\nConfigure harbor settings?", default=False):
+    if not conf_exists or bool_prompt("\nConfigure harbor settings?", default=False):
         init_harbor_settings(config)
         console.print()
 
     # These categories are optional, and as such we always ask the user
-    if Confirm.ask("Configure output settings?", default=False):
+    if bool_prompt("Configure output settings?", default=False):
         init_output_settings(config)
         console.print()
 
-    if Confirm.ask("Configure logging settings?", default=False):
+    if bool_prompt("Configure logging settings?", default=False):
         init_logging_settings(config)
         console.print()
 
@@ -122,7 +121,7 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
     console.print("\n:ship: Harbor Configuration", style=TITLE_STYLE)
 
     hconf = config.harbor
-    config.harbor.url = Prompt.ask(
+    config.harbor.url = str_prompt(
         "Harbor API URL (e.g. https://harbor.example.com/api/v2.0)",
         default=hconf.url,
         show_default=True,
@@ -131,7 +130,7 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
     base_msg = "Authentication method [bold magenta](\[u]sername/password, \[b]asic auth, \[f]ile, \[s]kip)[/]"
     choices = ["u", "b", "f", "s"]
 
-    auth_method = Prompt.ask(base_msg, choices=choices, default="s", show_choices=False)
+    auth_method = str_prompt(base_msg, choices=choices, default="s", show_choices=False)
     if auth_method == "u":
         hconf.username = str_prompt(
             "Harbor username",
@@ -175,11 +174,11 @@ def init_logging_settings(config: HarborCLIConfig) -> None:
 
     lconf = config.logging
 
-    lconf.enabled = Confirm.ask(
+    lconf.enabled = bool_prompt(
         "Enable logging?", default=lconf.enabled, show_default=True
     )
 
-    loglevel = Prompt.ask(
+    loglevel = str_prompt(
         "Logging level",
         choices=[lvl.value.lower() for lvl in LogLevel],
         default=lconf.level.value.lower(),  # use lower to match choices
@@ -198,14 +197,14 @@ def init_output_settings(config: HarborCLIConfig) -> None:
     # so we delegate to a separate function.
     _init_output_format(config)
 
-    oconf.paging = Confirm.ask(
+    oconf.paging = bool_prompt(
         "Show output in pager? (requires 'less' or other pager to be installed and configured)",
         default=oconf.paging,
         show_default=True,
     )
     # Custom pager support NYI (see: OutputSettings)
     if False and oconf.paging:
-        use_custom = Confirm.ask(
+        use_custom = bool_prompt(
             "Use custom pager command?", default=False, show_default=True
         )
         if use_custom:
@@ -219,7 +218,7 @@ def init_output_settings(config: HarborCLIConfig) -> None:
 
 def _init_output_format(config: HarborCLIConfig) -> None:
     oconf = config.output
-    fmt_in = Prompt.ask(
+    fmt_in = str_prompt(
         "Default output format",
         choices=[f.value for f in OutputFormat],
         default=oconf.format.value,
@@ -240,9 +239,8 @@ def _init_output_format(config: HarborCLIConfig) -> None:
     # Optionally configure other formats afterwards
     formats = [f for f in OutputFormat if f != oconf.format]
     for fmt in formats:
-        if Confirm.ask(
-            f"\nConfigure {output_format_repr(fmt)} output settings?",
-            default=False,
+        if bool_prompt(
+            f"Configure {output_format_repr(fmt)} output settings?", default=False
         ):
             conf_fmt(fmt)
 
@@ -253,13 +251,13 @@ def _init_output_json_settings(config: HarborCLIConfig) -> None:
 
     oconf = config.output.JSON
 
-    oconf.indent = IntPrompt.ask(
+    oconf.indent = int_prompt(
         "Indentation",
         default=oconf.indent,
         show_default=True,
     )
 
-    oconf.sort_keys = Confirm.ask(
+    oconf.sort_keys = bool_prompt(
         "Sort keys",
         default=oconf.sort_keys,
         show_default=True,
@@ -272,19 +270,19 @@ def _init_output_table_settings(config: HarborCLIConfig) -> None:
 
     oconf = config.output.table
 
-    oconf.max_depth = IntPrompt.ask(
+    oconf.max_depth = int_prompt(
         "Max number of subtables [bold magenta](0 or omit for unlimited)[/]",
         default=oconf.max_depth,
         show_default=True,
     )
 
-    oconf.description = Confirm.ask(
+    oconf.description = bool_prompt(
         "Show descriptions",
         default=oconf.description,
         show_default=True,
     )
 
-    oconf.compact = Confirm.ask(
+    oconf.compact = bool_prompt(
         "Compact tables",
         default=oconf.compact,
         show_default=True,

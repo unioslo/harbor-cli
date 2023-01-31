@@ -6,10 +6,12 @@ from typing import Any
 from typing import overload
 from typing import Type
 
+from rich.prompt import Confirm
 from rich.prompt import FloatPrompt
 from rich.prompt import IntPrompt
 from rich.prompt import Prompt
 
+from .console import console
 from .console import err_console
 from .formatting import path_link
 
@@ -19,6 +21,7 @@ def str_prompt(
     default: Any = ...,
     password: bool = False,
     show_default: bool = True,
+    choices: list[str] | None = None,
     empty_ok: bool = False,
     **kwargs: Any,
 ) -> str:
@@ -57,9 +60,11 @@ def str_prompt(
     while not inp:
         inp = Prompt.ask(
             f"{prompt}{_add_str}",
+            console=console,
             password=password,
             show_default=show_default,
             default=default,
+            choices=choices,
             **kwargs,
         )
         if empty_ok:  # nothing else to check
@@ -175,6 +180,7 @@ def _number_prompt(
     while True:
         val = prompt_type.ask(
             prompt,
+            console=console,
             default=default_arg,
             show_default=show_default,
             **kwargs,
@@ -195,6 +201,21 @@ def _number_prompt(
             err_console.print(f"Value must be less than or equal to {max}")
             continue
         return val
+
+
+def bool_prompt(
+    prompt: str,
+    default: Any = ...,
+    show_default: bool = True,
+    **kwargs: Any,
+) -> bool:
+    return Confirm.ask(
+        prompt,
+        console=console,
+        show_default=show_default,
+        default=default,
+        **kwargs,
+    )
 
 
 def path_prompt(
