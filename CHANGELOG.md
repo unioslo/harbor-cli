@@ -17,6 +17,10 @@ The **third number** is the patch version (bug fixes)
 - `find`: Search for commands by name or description.
 
 
+### Changed
+
+- Global option `--format` is now case-insensitive.
+
 ### Fixed
 
 - Use of Python3.10 style annotations in class definitions, causing the program to not run on Python3.9 and below.

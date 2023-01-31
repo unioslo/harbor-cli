@@ -84,6 +84,7 @@ def main_callback(
         "--format",
         "-f",
         help=f"Output format.",
+        case_sensitive=False,
     ),
     output_file: Optional[Path] = typer.Option(
         None,
