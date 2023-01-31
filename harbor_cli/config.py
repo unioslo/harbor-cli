@@ -209,7 +209,16 @@ class JSONSettings(BaseModel):
 
 class OutputSettings(BaseModel):
     format: OutputFormat = OutputFormat.TABLE
-    # Don't shadow the built-in .json() method
+    paging: bool = Field(
+        False,
+        description="Show output in pager (if supported). Does not support color output currently.",
+    )
+
+    # Custom pager support in Rich doesn't seem very mature out of the box,
+    # and it would require us to write a custom pager class to support it.
+    # pager: Optional[str] = Field(None, description="Pager to use if paging is enabled.")
+
+    # Naming: Don't shadow the built-in .json() method
     # The config file can still use the key "json" because of the alias
     table: TableSettings = Field(default_factory=TableSettings)
     JSON: JSONSettings = Field(default_factory=JSONSettings, alias="json")

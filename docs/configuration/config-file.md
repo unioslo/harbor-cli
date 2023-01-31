@@ -139,6 +139,26 @@ See [Formats](/configuration/formats) for more information on the different outp
 format = "table"
 ```
 
+#### `output.paging`
+
+Show the output in a pager (less, etc.). The default is `false`.
+
+```toml
+[output]
+paging = false
+```
+
+<!--
+#### `output.pager`
+
+The pager to use. No value means that the default Rich pager will be used. Has no effect if `output.paging` is `false`.
+
+```toml
+[output]
+pager = "less"
+```
+-->
+
 #### `output.table`
 
 The `output.table` table contains settings related to the `table` output format.

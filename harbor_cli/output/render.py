@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import nullcontext
 from typing import List
 from typing import Sequence
 from typing import TypeVar
@@ -26,12 +27,16 @@ T = TypeVar("T")
 def render_result(result: T, ctx: typer.Context | None = None) -> None:
     """Render the result of a command."""
     fmt = state.config.output.format
-    if fmt == OutputFormat.TABLE:
-        render_table(result, ctx)
-    elif fmt == OutputFormat.JSON:
-        render_json(result, ctx)
-    else:
-        raise ValueError(f"Unknown output format {fmt!r}.")
+    paging = state.config.output.paging
+
+    ctx_manager = console.pager() if paging else nullcontext()
+    with ctx_manager:  # type: ignore # not quite sure why mypy is complaining here
+        if fmt == OutputFormat.TABLE:
+            render_table(result, ctx)
+        elif fmt == OutputFormat.JSON:
+            render_json(result, ctx)
+        else:
+            raise ValueError(f"Unknown output format {fmt!r}.")
 
 
 def render_table(result: T | Sequence[T], ctx: typer.Context | None = None) -> None:

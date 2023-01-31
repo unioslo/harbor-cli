@@ -193,6 +193,32 @@ def init_output_settings(config: HarborCLIConfig) -> None:
     console.print("\n:desktop_computer: Output Configuration", style=TITLE_STYLE)
 
     oconf = config.output
+
+    # Output format configuration has numerous sub-options,
+    # so we delegate to a separate function.
+    _init_output_format(config)
+
+    oconf.paging = Confirm.ask(
+        "Show output in pager? (requires 'less' or other pager to be installed and configured)",
+        default=oconf.paging,
+        show_default=True,
+    )
+    # Custom pager support NYI (see: OutputSettings)
+    if False and oconf.paging:
+        use_custom = Confirm.ask(
+            "Use custom pager command?", default=False, show_default=True
+        )
+        if use_custom:
+            oconf.pager = str_prompt(
+                "Pager command",
+                default=oconf.pager,
+                show_default=True,
+                empty_ok=False,
+            )
+
+
+def _init_output_format(config: HarborCLIConfig) -> None:
+    oconf = config.output
     fmt_in = Prompt.ask(
         "Default output format",
         choices=[f.value for f in OutputFormat],
@@ -247,7 +273,7 @@ def _init_output_table_settings(config: HarborCLIConfig) -> None:
     oconf = config.output.table
 
     oconf.max_depth = IntPrompt.ask(
-        "Max number of subtables [bold magenta](-1 or empty for unlimited)[/]",
+        "Max number of subtables [bold magenta](0 or omit for unlimited)[/]",
         default=oconf.max_depth,
         show_default=True,
     )
