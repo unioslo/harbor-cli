@@ -11,7 +11,7 @@ from ..formatting.bytes import bytesize_str
 
 
 def systeminfo_table(systeminfo: Sequence[SystemInfo]) -> Table:
-    """Display one or more repositories in a table."""
+    """Display system info in a table."""
     if len(systeminfo) > 1:
         # should never happen
         logger.warning("Can only display one system info at a time.")
