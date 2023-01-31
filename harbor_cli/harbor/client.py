@@ -6,7 +6,6 @@ from harborapi import HarborAsyncClient
 
 from ..logs import logger
 from ..output.prompts import str_prompt
-from ..state import State
 
 if TYPE_CHECKING:
     from ..config import HarborCLIConfig
@@ -24,10 +23,8 @@ def get_client(config: HarborCLIConfig) -> HarborAsyncClient:
     return _CLIENTS[config.harbor.url]
 
 
-def setup_client(state: State) -> None:
+def setup_client(config: HarborCLIConfig) -> HarborAsyncClient:
     """Setup the HarborAsyncClient for the application."""
-    config = state.config
-
     # We want to log all problems before prompting for input,
     # so we do these checks pre-emptively
     has_url = True if config.harbor.url else False
@@ -48,6 +45,6 @@ def setup_client(state: State) -> None:
         if not config.harbor.username:
             config.harbor.username = str_prompt("Username")
         if not config.harbor.secret:
-            config.harbor.secret = str_prompt("Password", password=True)
+            config.harbor.secret = str_prompt("Password", password=True)  # type: ignore # pydantic.SecretStr
 
-    state.client = get_client(config)
+    return get_client(config)

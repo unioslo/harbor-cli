@@ -143,14 +143,14 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
             default=hconf.secret,
             password=True,
             empty_ok=False,
-        )
+        )  # type: ignore # pydantic.SecretStr
     elif auth_method == "b":
         hconf.basicauth = str_prompt(
             f"Harbor Base64 Basic Auth token",
             default=hconf.basicauth,
             password=True,
             empty_ok=False,
-        )
+        )  # type: ignore # pydantic.SecretStr
     elif auth_method == "f":
         hconf.credentials_file = path_prompt(
             "Harbor credentials file",

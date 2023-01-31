@@ -6,16 +6,18 @@ from typing import Awaitable
 from typing import Optional
 from typing import Tuple
 from typing import Type
+from typing import TYPE_CHECKING
 from typing import TypeVar
+
+if TYPE_CHECKING:
+    from rich.console import Console
 
 from harborapi import HarborAsyncClient
 from harborapi.exceptions import StatusError
 from pydantic import BaseModel
-from pydantic import Field
 
 from .config import HarborCLIConfig
 from .exceptions import handle_status_error
-from .output.console import console
 
 T = TypeVar("T")
 
@@ -37,7 +39,7 @@ class CommonOptions(BaseModel):
         extra = "allow"
 
 
-class State(BaseModel):
+class State:
     """Class used to manage the state of the program.
 
     It is used as a singleton shared between all commands.
@@ -45,18 +47,39 @@ class State(BaseModel):
     command, but is instead accessed via the global state variable.
     """
 
-    config: HarborCLIConfig = Field(default_factory=HarborCLIConfig)
-    client: HarborAsyncClient = None  # type: ignore # will be patched by the callback
-    loop: asyncio.AbstractEventLoop = Field(default_factory=asyncio.get_event_loop)
-    options: CommonOptions = Field(default_factory=CommonOptions)
+    config: HarborCLIConfig
+    client: HarborAsyncClient
+    loop: asyncio.AbstractEventLoop
+    options: CommonOptions
     repl: bool = False
     config_loaded: bool = False
+    console: Optional[Console]
 
-    class Config:
-        keep_untouched = (asyncio.AbstractEventLoop,)
-        arbitrary_types_allowed = True  # HarborAsyncClient
-        validate_assignments = True
-        extra = "allow"
+    def __init__(self) -> None:
+        """Initialize the state object."""
+        self.config = HarborCLIConfig()
+        self.client = None  # type: ignore # will be patched by init_state
+        self.loop = asyncio.get_event_loop()
+        self.options = CommonOptions()
+        self.console = None
+
+    def add_config(self, config: "HarborCLIConfig") -> None:
+        """Add a config object to the state."""
+        self.config = config
+        self.config_loaded = True
+
+    def add_client(self, client: HarborAsyncClient) -> None:
+        """Add a client object to the state."""
+        self.client = client
+
+    def _init_console(self) -> None:
+        """Import the console object if it hasn't been imported yet.
+        We do this here, so that we don't create a circular import
+        between the state module and the output module."""
+        # fmt: off
+        from .output.console import console
+        self.console = console
+        # fmt: on
 
     def run(
         self,
@@ -75,6 +98,10 @@ class State(BaseModel):
             should not be passed to the default exception handler.
             Exceptions of this type will be raised as-is.
         """
+        if self.console is None:
+            self._init_console()
+            assert self.console is not None
+
         if not status:
             status = "Working..."
         if not status.endswith("..."):  # aesthetic :)
@@ -82,7 +109,7 @@ class State(BaseModel):
 
         try:
             # show spinner when running a coroutine
-            with console.status(status):
+            with self.console.status(status):
                 resp = self.loop.run_until_complete(coro)
         except StatusError as e:
             if no_handle and isinstance(e, no_handle):

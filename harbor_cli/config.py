@@ -174,6 +174,8 @@ class TableSettings(BaseModel):
     max_depth: int = 0
     compact: bool = True
     # TODO: table style
+    # max_width: Optional[int] = None
+    # max_lines: Optional[int] = None
 
     @validator("max_depth", pre=True)
     def check_max_depth(cls, v: Any) -> Any:

@@ -117,7 +117,7 @@ def main_callback(
         return
 
     # TODO: find a better way to do this
-    # We don't want to run the rest of the callback if the useris asking
+    # We don't want to run the rest of the callback if the user is asking
     # for help, so we check for the help option names and exit early if
     # any are present. The problem is that if the --help option is passed
     # to a subcommand, we can't access it through the ctx object here,
@@ -125,20 +125,20 @@ def main_callback(
     if any(help_arg in sys.argv for help_arg in ctx.help_option_names):
         return
 
-    # if we're in the REPL, we don't want to load again
+    # if we're in the REPL, we don't want to load config again
     if not state.config_loaded:
         try:
-            state.config = HarborCLIConfig.from_file(config_file)
+            conf = HarborCLIConfig.from_file(config_file)
         except FileNotFoundError:
             # Create a new config file, but don't run wizard
             logger.info("Config file not found. Creating new config file.")
-            state.config = HarborCLIConfig.from_file(config_file, create=True)
-            if state.config.config_file is None:
+            conf = HarborCLIConfig.from_file(config_file, create=True)
+            if conf.config_file is None:
                 exit_err("Unable to create config file.")
-            success(f"Created config file at {path_link(state.config.config_file)}")
+            success(f"Created config file at {path_link(conf.config_file)}")
             logger.info("Proceeding with default configuration.")
             logger.info("Run 'harbor init' to configure Harbor CLI. ")
-        state.config_loaded = True
+        state.add_config(conf)
 
     # Set config overrides
     if compact is not None:
@@ -161,7 +161,8 @@ def main_callback(
     state.options.with_stdout = with_stdout
 
     # Instantiate the client
-    harbor.setup_client(state)
+    client = harbor.setup_client(state.config)
+    state.add_client(client)
 
     # Run configuration based on config file
     configure_from_config(state.config)
