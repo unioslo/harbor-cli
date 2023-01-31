@@ -7,7 +7,7 @@ from harborapi.models.models import SystemInfo
 from rich.table import Table
 
 from ...logs import logger
-from ..formatting.bytes import bytes_to_str
+from ..formatting.bytes import bytesize_str
 
 
 def systeminfo_table(systeminfo: Sequence[SystemInfo]) -> Table:
@@ -35,8 +35,8 @@ def systeminfo_table(systeminfo: Sequence[SystemInfo]) -> Table:
         free = storage.free or 0
         used = total - free
         table.add_row(
-            bytes_to_str(total),
-            bytes_to_str(free),
-            bytes_to_str(used),
+            bytesize_str(total),
+            bytesize_str(free),
+            bytesize_str(used),
         )
     return table
