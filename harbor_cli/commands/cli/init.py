@@ -16,13 +16,13 @@ from ...config import load_config
 from ...config import save_config
 from ...exceptions import ConfigError
 from ...exceptions import OverwriteError
+from ...format import output_format_emoji
+from ...format import output_format_repr
+from ...format import OutputFormat
 from ...logs import logger
 from ...logs import LogLevel
 from ...output.console import console
 from ...output.console import success
-from ...output.format import output_format_emoji
-from ...output.format import output_format_repr
-from ...output.format import OutputFormat
 from ...output.formatting import path_link
 from ...output.prompts import path_prompt
 from ...output.prompts import str_prompt

@@ -10,10 +10,10 @@ from harborapi.models.base import BaseModel as HarborBaseModel
 from pydantic import BaseModel
 
 from ..exceptions import OverwriteError
+from ..format import OutputFormat
 from ..logs import logger
 from ..state import state
 from .console import console
-from .format import OutputFormat
 from .table import BuiltinTypeException
 from .table import EmptySequenceError
 from .table import get_renderable

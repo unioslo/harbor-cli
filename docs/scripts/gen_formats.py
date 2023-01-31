@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import yaml
+import yaml  # type: ignore
 from common import DATA_PATH
 
-from harbor_cli.output.format import OutputFormat
+from harbor_cli.format import OutputFormat
 
 
 fmts = [fmt.value for fmt in OutputFormat]

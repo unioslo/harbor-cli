@@ -20,7 +20,7 @@ from harbor_cli.main import app as main_app  # noreorder
 
 # We can't import these before main is imported, because of circular imports
 from harbor_cli.config import HarborCLIConfig
-from harbor_cli.output.format import OutputFormat
+from harbor_cli.format import OutputFormat
 from harbor_cli import state
 from ._utils import compact_renderables
 

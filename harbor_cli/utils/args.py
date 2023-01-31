@@ -8,8 +8,6 @@ from typing import TypeVar
 import typer
 from pydantic import BaseModel
 
-from ..output.console import exit_err
-
 BaseModelType = TypeVar("BaseModelType", bound=BaseModel)
 
 
@@ -105,6 +103,8 @@ def create_updated_model(
     BaseModelType
         The updated model.
     """
+    from ..output.console import exit_err
+
     params = model_params_from_ctx(ctx, new)
     if not params and not empty_ok:
         exit_err("No parameters provided to update")

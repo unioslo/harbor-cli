@@ -7,8 +7,8 @@ from pydantic import BaseModel
 from pytest import CaptureFixture
 from pytest_mock import MockerFixture
 
+from harbor_cli.format import OutputFormat
 from harbor_cli.output import render
-from harbor_cli.output.format import OutputFormat
 from harbor_cli.output.render import render_json
 from harbor_cli.output.render import render_result
 from harbor_cli.output.render import render_table

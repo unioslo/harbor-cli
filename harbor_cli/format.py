@@ -1,9 +1,13 @@
-"""Output format of the command result."""
+"""Output format of command results.
+
+Not a part of the output module to avoid circular imports caused by the
+instantiation of the global state object, which imports other modules
+that rely on output formats."""
 from __future__ import annotations
 
 from enum import Enum
 
-from ..logs import logger
+from .logs import logger
 
 
 class OutputFormat(Enum):

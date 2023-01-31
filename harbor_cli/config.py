@@ -19,8 +19,8 @@ from .exceptions import ConfigError
 from .exceptions import CredentialsError
 from .exceptions import HarborCLIError
 from .exceptions import OverwriteError
+from .format import OutputFormat
 from .logs import LogLevel
-from .output.format import OutputFormat
 from .utils import replace_none
 
 
