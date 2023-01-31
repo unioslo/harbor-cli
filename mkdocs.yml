@@ -26,6 +26,11 @@ plugins:
       include_yaml:
         - commandlist: "docs/data/commands.yaml"
         - formats: "docs/data/formats.yaml"
+  - gen-files:
+      scripts:
+        - docs/scripts/gen_ref_nav.py
+  - literate-nav:
+      nav_file: docs/reference/SUMMARY.txt
   - mkdocstrings:
       watch:
         - harbor_cli
@@ -71,34 +76,35 @@ nav:
           - usage/terminology.md
           # TODO: formats
   - "Reference":
-      - "reference/index.md"
-      - "reference/config.md"
-      - "reference/dirs.md"
-      - "reference/exceptions.md"
-      - "reference/format.md"
-      - "reference/logs.md"
-      - "reference/main.md"
-      - "reference/state.md"
-      - "Utils":
-          - "reference/utils/index.md"
-          - "reference/utils/args.md"
-          - "reference/utils/utils.md"
-      - "Harbor":
-          - "reference/harbor/index.md"
-          - "reference/harbor/artifact.md"
-          - "reference/harbor/client.md"
-      - "Output":
-          - "reference/output/index.md"
-          - "reference/output/console.md"
-          - "reference/output/prompts.md"
-          - "reference/output/render.md"
-          - "Formatting":
-              - "reference/output/formatting/index.md"
-              - "reference/output/formatting/bytes.md"
-              - "reference/output/formatting/path.md"
-          - "Tables":
-              - "reference/output/table/index.md"
-              - "reference/output/table/artifact.md"
-              - "reference/output/table/repository.md"
-              - "reference/output/table/system.md"
+      reference/
+      # - "reference/index.md"
+      # - "reference/config.md"
+      # - "reference/dirs.md"
+      # - "reference/exceptions.md"
+      # - "reference/format.md"
+      # - "reference/logs.md"
+      # - "reference/main.md"
+      # - "reference/state.md"
+      # - "Utils":
+      #     - "reference/utils/index.md"
+      #     - "reference/utils/args.md"
+      #     - "reference/utils/utils.md"
+      # - "Harbor":
+      #     - "reference/harbor/index.md"
+      #     - "reference/harbor/artifact.md"
+      #     - "reference/harbor/client.md"
+      # - "Output":
+      #     - "reference/output/index.md"
+      #     - "reference/output/console.md"
+      #     - "reference/output/prompts.md"
+      #     - "reference/output/render.md"
+      #     - "Formatting":
+      #         - "reference/output/formatting/index.md"
+      #         - "reference/output/formatting/bytes.md"
+      #         - "reference/output/formatting/path.md"
+      #     - "Tables":
+      #         - "reference/output/table/index.md"
+      #         - "reference/output/table/artifact.md"
+      #         - "reference/output/table/repository.md"
+      #         - "reference/output/table/system.md"
   - contributing.md
