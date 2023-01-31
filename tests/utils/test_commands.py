@@ -90,7 +90,10 @@ def test_get_app_commands() -> None:
 
     # Help text in decorator
     @subsub_app.command(name="sub-sub-app-command", help="Sub-sub-app command.")
-    def sub_sub_app_command() -> None:
+    def sub_sub_app_command(
+        argument: str = typer.Argument(..., help="Positional argument"),
+        option: Optional[int] = typer.Option(None, "-o", "--option", help="Option"),
+    ) -> None:
         pass
 
     app.add_typer(sub_app, name="sub-app")
@@ -99,14 +102,14 @@ def test_get_app_commands() -> None:
     commands = get_app_commands(app)
     assert len(commands) == 3
 
-    # Sub-app is found first, and its command is found before the sub-sub-app's
+    # The commands are returned in alphabetical order
+    # TODO: test command signature + params when added to CommandSummary
     assert commands[0].name == "sub-app sub-app-command"
     assert commands[0].help == "Sub-app command."
 
     assert commands[1].name == "sub-app sub-sub-app sub-sub-app-command"
     assert commands[1].help == "Sub-sub-app command."
 
-    # After we are done recursing, we should be at the top-level app again
     assert commands[2].name == "top-app-command"
     assert commands[2].help == "Top-level app command."
 
