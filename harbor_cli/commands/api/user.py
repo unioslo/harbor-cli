@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from enum import Enum
 from typing import Optional
 
 import typer
@@ -404,9 +405,30 @@ def get_user_command(
     render_result(user_info, ctx)
 
 
+class UserListSortMode(Enum):
+    """Sort modes for the user list command."""
+
+    ID = "id"
+    USERNAME = "username"
+    NAME = "name"
+
+
 # HarborAsyncClient.get_users()
 @app.command("list")
-def list_users(ctx: typer.Context) -> None:
+def list_users(
+    ctx: typer.Context,
+    sort: Optional[UserListSortMode] = typer.Option(
+        None,
+        case_sensitive=False,
+        help="Sort by field.",
+    ),
+) -> None:
     """List all users in the system."""
     users = state.run(state.client.get_users(), "Fetching users...")
+    if sort == UserListSortMode.ID:
+        users.sort(key=lambda u: u.user_id or "")
+    elif sort == UserListSortMode.USERNAME:
+        users.sort(key=lambda u: u.username or "")
+    elif sort == UserListSortMode.NAME:
+        users.sort(key=lambda u: u.realname or "")
     render_result(users, ctx)
