@@ -14,10 +14,10 @@ The **third number** is the patch version (bug fixes)
 
 ### Added
 
-- `find`: Search for commands by name or description.
+- Command `find`: Search for commands by name or description.
+- Command `commands`: list all available commands.
+- Option: `user list --sort [id|username|name]` option.
 - `UserResp` compact table format (used by `user list`).
-- `user list --sort [id|username|name]` option.
-- `commands` command to list all available commands.
 
 ### Changed
 
