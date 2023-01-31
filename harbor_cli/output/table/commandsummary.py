@@ -13,11 +13,15 @@ def commandsummary_table(c: Sequence[CommandSummary]) -> Table:
     table = Table(title="Results", show_header=True, header_style="bold magenta")
     table.add_column("Command")
     table.add_column("Description")
-    table.add_column("Match")
+
+    # If we got these commands from a search, we can show a score
+    has_score = any(cmd.score for cmd in c)
+    if has_score:
+        table.add_column("Match", justify="right")
+
     for cmd in c:
-        table.add_row(
-            cmd.name,
-            cmd.help,
-            int_str(cmd.score),
-        )
+        row = [cmd.name, cmd.help]
+        if has_score:
+            row.append(int_str(cmd.score))
+        table.add_row(*row)
     return table

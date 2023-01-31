@@ -143,3 +143,10 @@ def _do_find(
         logger.warning(f"{len(matches) - limit} results omitted.")
         matches = matches[:limit]
     return matches
+
+
+@app.command(name="commands")
+def list_commands(ctx: typer.Context) -> None:
+    """List all commands."""
+    commands = get_app_commands(app)
+    render_result(commands, ctx)

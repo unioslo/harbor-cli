@@ -8,7 +8,8 @@ from __future__ import annotations
 
 from harborapi.models.base import BaseModel
 
-
+# TODO: split up CommandSummary into CommandSummary and CommandSearchResult
+# so that the latter can have the score field
 class CommandSummary(BaseModel):
     name: str
     help: str
