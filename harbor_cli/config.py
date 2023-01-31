@@ -12,6 +12,7 @@ from harborapi.models.base import BaseModel as HarborBaseModel
 from loguru import logger
 from pydantic import Field
 from pydantic import root_validator
+from pydantic import SecretStr
 from pydantic import validator
 
 from .dirs import CONFIG_DIR
@@ -94,8 +95,8 @@ class HarborCredentialsKwargs(TypedDict):
 class HarborSettings(BaseModel):
     url: str = ""
     username: str = ""
-    secret: str = ""
-    basicauth: str = ""
+    secret: SecretStr = SecretStr("")
+    basicauth: SecretStr = SecretStr("")
     credentials_file: Optional[Path] = ""  # type: ignore # validator below
 
     @validator("credentials_file", pre=True)
@@ -154,8 +155,8 @@ class HarborSettings(BaseModel):
         return HarborCredentialsKwargs(
             url=self.url,
             username=self.username,
-            secret=self.secret,
-            credentials=self.basicauth,
+            secret=self.secret.get_secret_value(),
+            credentials=self.basicauth.get_secret_value(),
             credentials_file=self.credentials_file,
         )
 
@@ -222,6 +223,11 @@ class HarborCLIConfig(BaseModel):
     config_file: Optional[Path] = Field(
         None, exclude=True, description="Path to config file (if any)."
     )  # populated by CLI if loaded from file
+
+    class Config:
+        json_encoders = {
+            SecretStr: lambda v: v.get_secret_value() if v else None,
+        }
 
     @classmethod
     def from_file(

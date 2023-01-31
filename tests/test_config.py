@@ -112,6 +112,7 @@ def test_harbor_is_authable_username() -> None:
     assert h.has_auth_method
     assert h.credentials["username"] == "admin"
     assert h.credentials["secret"] == "password"
+    assert all(c == "*" for c in str(h.secret))  # secret string
     h.secret = ""  # both username and password is required
     assert not h.has_auth_method
 
