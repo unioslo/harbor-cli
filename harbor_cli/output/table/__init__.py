@@ -26,6 +26,7 @@ from harborapi.models.models import Project
 from harborapi.models.models import Repository
 from harborapi.models.models import Search
 from harborapi.models.models import SystemInfo
+from harborapi.models.models import UserResp
 from rich.panel import Panel
 from rich.table import Table
 
@@ -39,6 +40,7 @@ from .project import project_table
 from .repository import repository_table
 from .search import search_panel
 from .system import systeminfo_table
+from .user import userresp_table
 
 T = TypeVar("T")
 
@@ -51,6 +53,7 @@ RENDER_FUNCTIONS = {
     Repository: repository_table,
     SystemInfo: systeminfo_table,
     Search: search_panel,
+    UserResp: userresp_table,
 }  # type: dict[type, Callable[[Any], Table | Panel]]
 # TODO: improve type annotation of this dict
 

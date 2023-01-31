@@ -15,6 +15,7 @@ The **third number** is the patch version (bug fixes)
 ### Added
 
 - `find`: Search for commands by name or description.
+- `UserResp` compact table format (used by `user list`).
 
 
 ### Changed
