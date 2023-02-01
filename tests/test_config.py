@@ -159,3 +159,28 @@ def test_sample_config() -> None:
     s = sample_config()
     config_dict = tomli.loads(s)
     assert config_dict  # not empty, not None
+
+
+@pytest.mark.parametrize("expose_secrets", [True, False])
+def test_harbor_cli_config_toml_expose_secrets(
+    config: HarborCLIConfig, expose_secrets: bool, tmp_path: Path
+) -> None:
+    """Test that the toml() expose_secrets parameter works as expected."""
+    creds_file = tmp_path / "somefile"
+    creds_file.touch()
+
+    config.harbor.username = "someuser"
+    config.harbor.secret = "somepassword"
+    config.harbor.basicauth = "somebasicauth"
+    config.harbor.credentials_file = creds_file
+
+    toml_str = config.toml(expose_secrets=expose_secrets)
+    if expose_secrets:
+        assert "somepassword" in toml_str
+        assert "somebasicauth" in toml_str
+        assert "somefile" in toml_str
+    else:
+        assert "somepassword" not in toml_str
+        assert "somebasicauth" not in toml_str
+        assert "somefile" not in toml_str
+        assert "***" in toml_str  # don't be too specific about the number of stars

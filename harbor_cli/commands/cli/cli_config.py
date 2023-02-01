@@ -26,7 +26,7 @@ app = typer.Typer(
 
 def render_config(config: HarborCLIConfig, as_toml: bool) -> None:
     if as_toml:
-        console.print(config.toml(), markup=False)
+        console.print(config.toml(expose_secrets=False), markup=False)
     else:
         render_result(config)
 

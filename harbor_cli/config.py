@@ -277,13 +277,24 @@ class HarborCLIConfig(BaseModel):
         assert p is not None  # p shouldn't be None here! am i dumb???
         save_config(self, p)
 
-    def toml(self, tomli_kwargs: dict[str, Any] | None = {}, **kwargs: Any) -> str:
+    def toml(
+        self,
+        expose_secrets: bool = True,
+        tomli_kwargs: dict[str, Any] | None = {},
+        **kwargs: Any,
+    ) -> str:
         """Return a TOML representation of the config object.
         In order to serialize all types properly, the serialization takes
         a round-trip through the Pydantic JSON converter.
 
         Parameters
         ----------
+        expose_secrets : bool
+            If `True`, secrets will be included in the TOML output.
+            If `False`, secrets will be replaced with strings of asterisks.
+            By default, secrets are included.
+        tomli_kwargs : dict
+            Dict of keyword arguments passed to `tomli_w.dumps()`.
         **kwargs
             Keyword arguments passed to `BaseModel.json()`.
 
@@ -297,17 +308,23 @@ class HarborCLIConfig(BaseModel):
         `BaseModel.json()` <https://pydantic-docs.helpmanual.io/usage/exporting_models/#modeljson>
         """
         tomli_kwargs = tomli_kwargs or {}
-        return tomli_w.dumps(
-            # replace None values with empty strings
-            # we want to show the user that they can set these values
-            # but we can't serialize None values to TOML. Very nice!
-            replace_none(
-                json.loads(
-                    self.json(**kwargs),
-                ),
-            ),
-            **tomli_kwargs,
-        )
+
+        # Roundtrip through JSON to get dict of builtin types
+        #
+        # Also replace None values with empty strings, because:
+        # 1. TOML doesn't have a None type
+        # 2. Show users that these values _can_ be configured
+        dict_basic_types = replace_none(json.loads(self.json(**kwargs)))
+
+        if not expose_secrets:
+            for key in ["secret", "basicauth", "credentials_file"]:
+                if (
+                    key in dict_basic_types["harbor"]
+                    and dict_basic_types["harbor"][key]  # ignore empty values
+                ):
+                    dict_basic_types["harbor"][key] = "********"
+
+        return tomli_w.dumps(dict_basic_types)
 
 
 def create_config(config_path: Path | None, overwrite: bool = False) -> Path:
