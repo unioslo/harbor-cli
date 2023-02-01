@@ -6,6 +6,7 @@ from typing import Optional
 from typing import overload
 
 import typer
+from harborapi.models.base import BaseModel
 from harborapi.models.models import Project
 from harborapi.models.models import ProjectMetadata
 from harborapi.models.models import ProjectReq
@@ -123,6 +124,11 @@ def project_exists(
     raise SystemExit(0 if exists else 1)
 
 
+class ProjectCreateResult(BaseModel):
+    location: str
+    project: ProjectReq
+
+
 # HarborAsyncClient.create_project()
 @app.command("create", no_args_is_help=True)
 @inject_help(ProjectReq)
@@ -184,9 +190,6 @@ def create_project(
     ),
     # TODO: add support for adding CVE allowlist when creating a project
 ) -> None:
-    # TODO: allow passing 0 and 1, as well as "True" and "False" in addition to
-    # "true" and "false" for fields in the models that accept "true" and "false",
-    # but are str rather than bool (WHY, HARBOR?!)
     """Create a new project."""
     project_req = ProjectReq(
         project_name=project_name,
@@ -203,9 +206,13 @@ def create_project(
             retention_id=retention_id,
         ),
     )
-    project = state.run(state.client.create_project(project_req), "Creating project...")
-    logger.info(f"Created project {project_name}")
-    render_result(project, ctx)
+    location = state.run(
+        state.client.create_project(project_req), "Creating project..."
+    )
+    project_repr = get_project_repr(project_name)
+    logger.info(f"Created {project_repr}")
+    res = ProjectCreateResult(location=location, project=project_req)
+    render_result(res, ctx)
 
 
 # HarborAsyncClient.get_projects()
@@ -368,10 +375,9 @@ def delete_project(
 ) -> None:
     """Delete a project."""
     arg = get_project_arg(project_name_or_id, is_id)
-
     project_repr = get_project_repr(arg)
-
     state.run(state.client.delete_project(arg), f"Deleting {project_repr}...")
+    logger.info(f"Deleted {project_repr}.")
 
 
 # HarborAsyncClient.get_project_summary()
