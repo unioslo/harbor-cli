@@ -482,7 +482,7 @@ def get_project_repr(arg: str | int) -> str:
     if isinstance(arg, str):
         return f"project {arg!r}"
     else:
-        return f"project with ID {arg}"
+        return f"project (id={arg})"
 
 
 @overload
