@@ -1,7 +1,9 @@
 """Formatting functions for builtin types."""
 from __future__ import annotations
 
+from typing import Any
 from typing import Optional
+from typing import Sequence
 
 from .constants import NONE_STR
 
@@ -27,3 +29,13 @@ def int_str(value: Optional[int]) -> str:
     if value is None:
         return NONE_STR
     return str(value)
+
+
+def plural_str(value: str, sequence: Sequence[Any]) -> str:
+    """Format a string as a pluralized string if a given sequence is
+    not of length 1."""
+    if value.endswith("y"):
+        plural_value = value[:-1] + "ies"
+    else:
+        plural_value = value + "s"
+    return value if len(sequence) == 1 else f"{plural_value}"

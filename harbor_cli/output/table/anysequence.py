@@ -19,6 +19,7 @@ class AnySequence(BaseModel):
 
 def anysequence_table(s: Sequence[AnySequence]) -> Table:
     """Renders an AnySequence as a table."""
+    # No title here I think...?
     table = Table(show_header=True, header_style="bold magenta")
     try:
         title = s[0].title

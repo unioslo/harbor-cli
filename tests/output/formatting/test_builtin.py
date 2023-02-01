@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+from typing import Any
+from typing import Sequence
+
 import pytest
+from harborapi.models.base import BaseModel
 
 from harbor_cli.output.formatting.builtin import bool_str
 from harbor_cli.output.formatting.builtin import float_str
 from harbor_cli.output.formatting.builtin import int_str
 from harbor_cli.output.formatting.builtin import NONE_STR
+from harbor_cli.output.formatting.builtin import plural_str
 
 
 @pytest.mark.parametrize(
@@ -43,3 +48,29 @@ def test_float_str(inp: float, expected: str, precision: int) -> None:
 )
 def test_int_str(inp: int, expected: str) -> None:
     assert int_str(inp) == expected
+
+
+class TestModel(BaseModel):
+    a: str = "a"
+    b: int = 1
+
+
+@pytest.mark.parametrize(
+    "s, seq, expected",
+    [
+        ("item", [], "items"),
+        ("item", [1], "item"),
+        ("item", [1, 2], "items"),
+        ("letter", "", "letters"),
+        ("letter", "a", "letter"),
+        ("letter", "ab", "letters"),
+        ("model", [], "models"),
+        ("model", [TestModel()], "model"),
+        ("model", [TestModel(), TestModel()], "models"),
+        ("vulnerability", [], "vulnerabilities"),
+        ("vulnerability", ["HIGH"], "vulnerability"),
+        ("vulnerability", ["HIGH", "LOW"], "vulnerabilities"),
+    ],
+)
+def test_plural_str(s: str, seq: Sequence[Any], expected: str) -> None:
+    assert plural_str(s, seq) == expected

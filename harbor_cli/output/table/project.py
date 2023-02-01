@@ -5,12 +5,15 @@ from typing import Sequence
 from harborapi.models.models import Project
 from rich.table import Table
 
+from ..formatting.builtin import plural_str
 from ..formatting.dates import datetime_str
 
 
 def project_table(p: Sequence[Project]) -> Table:
     """Display one or more repositories in a table."""
-    table = Table(title="Projects", show_header=True, header_style="bold magenta")
+    table = Table(
+        title=plural_str("Project", p), show_header=True, header_style="bold magenta"
+    )
     table.add_column("Name")
     table.add_column("ID")
     table.add_column("Public")

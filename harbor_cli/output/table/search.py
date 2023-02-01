@@ -12,6 +12,7 @@ from rich.table import Table
 
 from ...logs import logger
 from ..formatting.builtin import bool_str
+from ..formatting.builtin import plural_str
 from .project import project_table
 
 
@@ -38,7 +39,11 @@ def search_panel(search: Sequence[Search]) -> Panel:
 
 
 def searchrepo_table(repos: Sequence[SearchRepository]) -> Table:
-    table = Table(show_header=True, title="Repositories", header_style="bold magenta")
+    table = Table(
+        title=plural_str("Repository", repos),
+        show_header=True,
+        header_style="bold magenta",
+    )
     table.add_column("Project")
     table.add_column("Name")
     table.add_column("Artifacts")
@@ -55,7 +60,11 @@ def searchrepo_table(repos: Sequence[SearchRepository]) -> Table:
 
 def searchresult_table(results: Sequence[SearchResult]) -> Table:
     """Table of Helm chart search results."""
-    table = Table(title="Charts", show_header=True, header_style="bold magenta")
+    table = Table(
+        title=plural_str("Chart", results),
+        show_header=True,
+        header_style="bold magenta",
+    )
     table.add_column("Project")
     table.add_column("Match")  # ??
     table.add_column("Digest")

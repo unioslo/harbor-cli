@@ -5,10 +5,14 @@ from typing import Sequence
 from harborapi.models.models import UserResp
 from rich.table import Table
 
+from ..formatting.builtin import plural_str
+
 
 def userresp_table(users: Sequence[UserResp]) -> Table:
     """Display one or more repositories in a table."""
-    table = Table(title="Users", show_header=True, header_style="bold magenta")
+    table = Table(
+        title=plural_str("User", users), show_header=True, header_style="bold magenta"
+    )
     table.add_column("ID")
     table.add_column("Username")
     table.add_column("Full Name")
