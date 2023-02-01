@@ -70,7 +70,7 @@ def render_table_full(result: T | Sequence[T]) -> None:
     show_description = state.config.output.table.description
     max_depth = state.config.output.table.max_depth
 
-    def print_item(item: T) -> None:
+    def print_item(item: T | str) -> None:
         """Prints a harbor base model as a table (optionally with description),
         if it is a harborapi BaseModel, otherwise just prints the item."""
         if isinstance(item, HarborBaseModel):
@@ -80,7 +80,7 @@ def render_table_full(result: T | Sequence[T]) -> None:
         else:
             console.print(item)
 
-    if isinstance(result, Sequence):
+    if isinstance(result, Sequence) and not isinstance(result, str):
         for item in result:
             print_item(item)
     else:
