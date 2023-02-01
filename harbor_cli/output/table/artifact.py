@@ -6,6 +6,8 @@ from harborapi.ext.artifact import ArtifactInfo
 from harborapi.models.models import Artifact
 from rich.table import Table
 
+from ..formatting.bytes import bytesize_str
+
 
 def artifact_table(r: Sequence[Artifact]) -> Table:
     """Display one or more repositories in a table."""
@@ -13,7 +15,7 @@ def artifact_table(r: Sequence[Artifact]) -> Table:
     table.add_column("ID")
     table.add_column("Project ID")
     table.add_column("Repository ID")
-    table.add_column("Digest")
+    table.add_column("Digest", overflow="fold")
     table.add_column("Created")
     table.add_column("Size")
     for artifact in r:
@@ -23,7 +25,7 @@ def artifact_table(r: Sequence[Artifact]) -> Table:
             str(artifact.repository_id),
             artifact.digest,
             str(artifact.push_time),
-            str(artifact.size),
+            bytesize_str(artifact.size or 0),
         )
     return table
 
@@ -44,7 +46,7 @@ def artifactinfo_table(a: Sequence[ArtifactInfo]):
             artifact.tags,
             artifact.artifact.digest,
             str(artifact.artifact.push_time),
-            str(artifact.artifact.size),
+            bytesize_str(artifact.artifact.size or 0),
         )
     return table
 
