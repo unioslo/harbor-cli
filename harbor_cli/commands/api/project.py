@@ -124,7 +124,7 @@ def project_exists(
 
 
 # HarborAsyncClient.create_project()
-@app.command("create")
+@app.command("create", no_args_is_help=True)
 @inject_help(ProjectReq)
 @inject_help(
     ProjectMetadata
