@@ -2,9 +2,11 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from .constants import NONE_STR
+
 
 def datetime_str(
-    d: datetime | None, with_time: bool = True, subsecond: bool = False
+    d: datetime | int | float | None, with_time: bool = True, subsecond: bool = False
 ) -> str:
     """Formats an optional datetime object as as a string.
 
@@ -19,7 +21,12 @@ def datetime_str(
         Has no effect if `with_time` is False.
     """
     if d is None:
-        return "-"
+        return NONE_STR
+    if isinstance(d, (int, float)):
+        try:
+            d = datetime.fromtimestamp(d)
+        except ValueError:
+            return NONE_STR
     fmt = "%Y-%m-%d"
     if with_time:
         fmt = f"{fmt} %H:%M:%S"
