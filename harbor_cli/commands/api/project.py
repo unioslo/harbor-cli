@@ -12,6 +12,7 @@ from harborapi.models.models import ProjectMetadata
 from harborapi.models.models import ProjectReq
 
 from ...logs import logger
+from ...models import ProjectExtended
 from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
@@ -69,7 +70,8 @@ def get_project_info(
     """Get information about a project."""
     arg = get_project_arg(project_name_or_id, is_id)
     project = get_project(arg)
-    render_result(project, ctx)
+    p = ProjectExtended(**project.dict())
+    render_result(p, ctx)
 
 
 # HarborAsyncClient.get_project_logs()
@@ -329,7 +331,7 @@ def update_project(
         "--retention-id",
     ),
 ) -> None:
-    """Update project information. [bold red]UNTESTED![/]"""
+    """Update project information."""
     req_params = model_params_from_ctx(ctx, ProjectReq)
     metadata_params = model_params_from_ctx(ctx, ProjectMetadata)
     if not req_params and not metadata_params:
