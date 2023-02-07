@@ -12,7 +12,9 @@ from rich.table import Table
 
 from ...logs import logger
 from ..formatting.builtin import bool_str
-from ..formatting.builtin import plural_str
+from ..formatting.builtin import int_str
+from ..formatting.builtin import str_str
+from ._utils import get_table
 from .project import project_table
 
 
@@ -39,11 +41,7 @@ def search_panel(search: Sequence[Search]) -> Panel:
 
 
 def searchrepo_table(repos: Sequence[SearchRepository]) -> Table:
-    table = Table(
-        title=plural_str("Repository", repos),
-        show_header=True,
-        header_style="bold magenta",
-    )
+    table = get_table("Repository", repos)
     table.add_column("Project")
     table.add_column("Name")
     table.add_column("Artifacts")
@@ -52,7 +50,7 @@ def searchrepo_table(repos: Sequence[SearchRepository]) -> Table:
         table.add_row(
             str(repo.project_name),
             str(repo.repository_name),
-            str(repo.artifact_count),
+            int_str(repo.artifact_count),
             bool_str(repo.project_public),
         )
     return table
@@ -60,11 +58,7 @@ def searchrepo_table(repos: Sequence[SearchRepository]) -> Table:
 
 def searchresult_table(results: Sequence[SearchResult]) -> Table:
     """Table of Helm chart search results."""
-    table = Table(
-        title=plural_str("Chart", results),
-        show_header=True,
-        header_style="bold magenta",
-    )
+    table = get_table("Chart", results)
     table.add_column("Project")
     table.add_column("Match")  # ??
     table.add_column("Digest")
@@ -73,8 +67,8 @@ def searchresult_table(results: Sequence[SearchResult]) -> Table:
         if not result.chart:
             result.chart = ChartVersion()
         table.add_row(
-            str(result.name),
-            str(result.score),
-            str(result.chart.digest),
+            str_str(result.name),
+            int_str(result.score),
+            str_str(result.chart.digest),
         )
     return table

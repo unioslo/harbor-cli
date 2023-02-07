@@ -6,11 +6,12 @@ from rich.table import Table
 
 from ...models import CommandSummary
 from ..formatting.builtin import int_str
+from ._utils import get_table
 
 
 def commandsummary_table(c: Sequence[CommandSummary]) -> Table:
     """Display summary of commands in a table."""
-    table = Table(title="Results", show_header=True, header_style="bold magenta")
+    table = get_table("Results", c)
     table.add_column("Command")
     table.add_column("Description")
 

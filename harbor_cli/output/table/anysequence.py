@@ -6,6 +6,8 @@ from typing import Sequence
 from harborapi.models.base import BaseModel
 from rich.table import Table
 
+from ._utils import get_table
+
 
 class AnySequence(BaseModel):
     """Pydantic model that can contain a sequence of any type.
@@ -20,7 +22,7 @@ class AnySequence(BaseModel):
 def anysequence_table(s: Sequence[AnySequence]) -> Table:
     """Renders an AnySequence as a table."""
     # No title here I think...?
-    table = Table(show_header=True, header_style="bold magenta")
+    table = get_table()
     try:
         title = s[0].title
     except IndexError:

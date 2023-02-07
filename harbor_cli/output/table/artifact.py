@@ -6,17 +6,17 @@ from harborapi.ext.artifact import ArtifactInfo
 from harborapi.models.models import Artifact
 from rich.table import Table
 
-from ..formatting.builtin import plural_str
+from ..formatting.builtin import float_str
+from ..formatting.builtin import int_str
+from ..formatting.builtin import str_str
 from ..formatting.bytes import bytesize_str
+from ..formatting.dates import datetime_str
+from ._utils import get_table
 
 
 def artifact_table(artifacts: Sequence[Artifact]) -> Table:
     """Display one or more repositories in a table."""
-    table = Table(
-        title=plural_str("Artifact", artifacts),
-        show_header=True,
-        header_style="bold magenta",
-    )
+    table = get_table("Artifact", artifacts)
     table.add_column("ID")
     table.add_column("Project ID")
     table.add_column("Repository ID")
@@ -25,11 +25,11 @@ def artifact_table(artifacts: Sequence[Artifact]) -> Table:
     table.add_column("Size")
     for artifact in artifacts:
         table.add_row(
-            str(artifact.id),
-            str(artifact.project_id),
-            str(artifact.repository_id),
-            artifact.digest,
-            str(artifact.push_time),
+            int_str(artifact.id),
+            int_str(artifact.project_id),
+            int_str(artifact.repository_id),
+            str_str(artifact.digest),
+            datetime_str(artifact.push_time),
             bytesize_str(artifact.size or 0),
         )
     return table
@@ -37,11 +37,7 @@ def artifact_table(artifacts: Sequence[Artifact]) -> Table:
 
 def artifactinfo_table(artifacts: Sequence[ArtifactInfo]):
     """Display one or more artifacts in a table."""
-    table = Table(
-        title=plural_str("Artifact", artifacts),
-        show_header=True,
-        header_style="bold magenta",
-    )
+    table = table = get_table("Artifact", artifacts)
     table.add_column("Project")
     table.add_column("Repository")
     table.add_column("Tags")
@@ -50,11 +46,11 @@ def artifactinfo_table(artifacts: Sequence[ArtifactInfo]):
     table.add_column("Size")
     for artifact in artifacts:
         table.add_row(
-            str(artifact.project_name),
-            str(artifact.repository_name),
-            str(artifact.tags),
-            str(artifact.artifact.digest),
-            str(artifact.artifact.push_time),
+            str_str(artifact.project_name),
+            str_str(artifact.repository_name),
+            str_str(artifact.tags),
+            str_str(artifact.artifact.digest),
+            datetime_str(artifact.artifact.push_time),
             bytesize_str(artifact.artifact.size or 0),
         )
     return table
@@ -62,12 +58,7 @@ def artifactinfo_table(artifacts: Sequence[ArtifactInfo]):
 
 def artifact_vulnerabilities_table(artifact: ArtifactInfo):
     vulns = artifact.report.vulnerabilities
-    table = Table(
-        title=plural_str("Vulnerability", vulns),
-        show_header=True,
-        header_style="bold magenta",
-        show_lines=True,
-    )
+    table = table = get_table("Vulnerability", vulns, show_lines=True)
     table.add_column("CVE ID")
     table.add_column("Severity")
     table.add_column("Score")
@@ -77,12 +68,12 @@ def artifact_vulnerabilities_table(artifact: ArtifactInfo):
     table.add_column("Description")
     for vulnerability in vulns:
         table.add_row(
-            str(vulnerability.id),
-            str(vulnerability.severity.value),
-            str(vulnerability.get_cvss_score()),
-            str(vulnerability.package),
-            str(vulnerability.version),
-            str(vulnerability.fix_version),
-            str(vulnerability.description),
+            str_str(vulnerability.id),
+            str_str(vulnerability.severity.value),
+            float_str(vulnerability.get_cvss_score()),
+            str_str(vulnerability.package),
+            str_str(vulnerability.version),
+            str_str(vulnerability.fix_version),
+            str_str(vulnerability.description),
         )
     return table

@@ -5,20 +5,23 @@ from typing import Sequence
 from harborapi.models.models import Repository
 from rich.table import Table
 
-from ..formatting.builtin import plural_str
 from ..formatting.dates import datetime_str
+from ._utils import get_table
 
 
 def repository_table(r: Sequence[Repository]) -> Table:
     """Display one or more repositories in a table."""
-    table = Table(
-        title=plural_str("Repository", r), show_header=True, header_style="bold magenta"
+    table = get_table(
+        "Repository",
+        r,
+        columns=[
+            "Project",
+            "Name",
+            "Artifacts",
+            "Created",
+            "Updated",
+        ],
     )
-    table.add_column("Project")
-    table.add_column("Name")
-    table.add_column("Artifacts")
-    table.add_column("Created")
-    table.add_column("Updated")
     for repo in r:
         table.add_row(
             repo.project_name,

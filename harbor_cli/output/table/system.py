@@ -8,6 +8,7 @@ from rich.table import Table
 
 from ...logs import logger
 from ..formatting.bytes import bytesize_str
+from ._utils import get_table
 
 
 # The ironic thing is that this is not actually system info, but storage info.
@@ -19,12 +20,7 @@ def systeminfo_table(systeminfo: Sequence[SystemInfo]) -> Table:
         logger.warning("Can only display one system info at a time.")
     info = systeminfo[0]
 
-    table = Table(
-        # No point in pluralizing this
-        title="Storage",
-        show_header=True,
-        header_style="bold magenta",
-    )
+    table = get_table("System Info", pluralize=False)
     table.add_column("Total Capacity")
     table.add_column("Free Space")
     table.add_column("Used Space")  # calculated
