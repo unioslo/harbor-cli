@@ -72,7 +72,7 @@ def uid_from_username(username: str) -> int:
     """
     user_resp = user_from_username(username)
     if user_resp.user_id is None:  # spec states ID can be None...
-        raise HarborCLIError(f"User with username {username!r} has no user ID.")
+        raise HarborCLIError(f"User {username!r} has no user ID.")
     return user_resp.user_id
 
 

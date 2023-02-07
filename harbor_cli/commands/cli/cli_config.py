@@ -8,6 +8,7 @@ import typer
 from pydantic import Extra
 
 from ...config import HarborCLIConfig
+from ...logs import logger
 from ...output.console import console
 from ...output.console import err_console
 from ...output.console import exit_err
@@ -42,6 +43,7 @@ def get_cli_config(
 ) -> None:
     """Show the current CLI configuration."""
     render_config(state.config, as_toml)
+    logger.info(f"Source: {state.config.config_file}")
 
 
 @app.command("keys")
@@ -142,3 +144,6 @@ def write_session_config(
         )
     state.config.save(path=save_path)
     success(f"Saved configuration to [green]{save_path}[/]")
+
+
+# TODO: reload config
