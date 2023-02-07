@@ -2,7 +2,11 @@ from __future__ import annotations
 
 from typing import Any
 from typing import Dict
+from typing import Mapping
 from typing import NoReturn
+from typing import Protocol
+from typing import runtime_checkable
+from typing import Type
 
 from harborapi.exceptions import BadRequest
 from harborapi.exceptions import Conflict
@@ -14,6 +18,7 @@ from harborapi.exceptions import PreconditionFailed
 from harborapi.exceptions import StatusError
 from harborapi.exceptions import Unauthorized
 from harborapi.exceptions import UnsupportedMediaType
+from pydantic import ValidationError
 
 
 class HarborCLIError(Exception):
@@ -115,3 +120,39 @@ def handle_status_error(e: StatusError) -> NoReturn:
         if template:
             msg = template.format_map(Default(url=url, method=method))
     exit_err(msg)
+
+
+class Exiter(Protocol):
+    def __call__(
+        self, msg: str, code: int = ..., prefix: str = ..., **extra: Any
+    ) -> NoReturn:
+        ...
+
+
+@runtime_checkable
+class HandleFunc(Protocol):
+    def __call__(self, e: Any, exiter: Exiter) -> NoReturn:
+        ...
+
+
+def handle_validationerror(e: ValidationError, exiter: Exiter) -> NoReturn:
+    """Handles a pydantic ValidationError and exits with the appropriate message."""
+    from .output.console import err_console
+
+    err_console.print("Failed to validate data from API.")
+    exiter(str(e), errors=e.errors())
+
+
+EXC_HANDLERS: Mapping[Type[Exception], HandleFunc] = {
+    ValidationError: handle_validationerror,
+}
+
+
+def handle_exception(e: Exception) -> NoReturn:
+    """Handles an exception and exits with the appropriate message."""
+    from .output.console import exit_err  # avoid circular import
+
+    handler = EXC_HANDLERS.get(type(e), None)
+    if not handler:
+        exit_err(str(e))
+    handler(e, exit_err)

@@ -10,6 +10,7 @@ from . import commands
 from . import harbor
 from .app import app
 from .config import HarborCLIConfig
+from .exceptions import handle_exception
 from .exceptions import HarborCLIError
 from .format import OutputFormat
 from .logs import disable_logging
@@ -188,3 +189,5 @@ def main() -> None:
         # we want to only display their message and exit with a
         # non-zero status code.
         exit_err(str(e))
+    except Exception as e:
+        handle_exception(e)

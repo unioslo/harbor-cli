@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Any
 from typing import NoReturn
 from typing import Optional
 
@@ -45,7 +46,7 @@ def exit(msg: Optional[str] = None, code: int = 0) -> NoReturn:
     raise SystemExit(code)
 
 
-def exit_err(msg: str, code: int = 1, prefix: str = "ERROR") -> NoReturn:
+def exit_err(msg: str, code: int = 1, prefix: str = "ERROR", **extra: Any) -> NoReturn:
     """Prints a message to the error console and exits with the given
     code (default: 1).
 
@@ -56,5 +57,5 @@ def exit_err(msg: str, code: int = 1, prefix: str = "ERROR") -> NoReturn:
     code : int, optional
         Exit code, by default 1
     """
-    logger.error(msg)
+    logger.bind(**extra).error(msg)
     raise SystemExit(code)
