@@ -50,7 +50,7 @@ def test_int_str(inp: int, expected: str) -> None:
     assert int_str(inp) == expected
 
 
-class TestModel(BaseModel):
+class SomeModel(BaseModel):
     a: str = "a"
     b: int = 1
 
@@ -65,8 +65,8 @@ class TestModel(BaseModel):
         ("letter", "a", "letter"),
         ("letter", "ab", "letters"),
         ("model", [], "models"),
-        ("model", [TestModel()], "model"),
-        ("model", [TestModel(), TestModel()], "models"),
+        ("model", [SomeModel()], "model"),
+        ("model", [SomeModel(), SomeModel()], "models"),
         ("vulnerability", [], "vulnerabilities"),
         ("vulnerability", ["HIGH"], "vulnerability"),
         ("vulnerability", ["HIGH", "LOW"], "vulnerabilities"),

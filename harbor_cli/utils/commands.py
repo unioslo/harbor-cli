@@ -64,6 +64,25 @@ def get_app_commands(
     return sorted(cmds, key=lambda x: x.name)
 
 
+def get_app_callback_options(app: typer.Typer) -> list[typer.models.OptionInfo]:
+    """Get the options of the main callback of a Typer app."""
+    options = []  # type: list[typer.models.OptionInfo]
+
+    if not app.registered_callback:
+        return options
+
+    callback = app.registered_callback.callback
+
+    if not callback:
+        return options
+    if not hasattr(callback, "__defaults__") or not callback.__defaults__:
+        return options
+
+    for option in callback.__defaults__:
+        options.append(option)
+    return options
+
+
 def inject_help(
     model: Type[BaseModel], strict: bool = False, **field_additions: str
 ) -> Any:

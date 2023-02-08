@@ -9,6 +9,7 @@ import typer
 from . import commands
 from . import harbor
 from .app import app
+from .config import env_var
 from .config import HarborCLIConfig
 from .exceptions import handle_exception
 from .exceptions import HarborCLIError
@@ -20,6 +21,7 @@ from .output.console import exit_err
 from .output.console import success
 from .output.formatting.path import path_link
 from .state import state
+from .style import help_config_override
 
 # Init subcommand groups here
 for group in commands.ALL_GROUPS:
@@ -35,56 +37,91 @@ def main_callback(
         "--config",
         "-c",
         help="Path to config file.",
-        envvar="HARBOR_CLI_CONFIG",
+        envvar=env_var("config"),
     ),
     # Harbor options
     harbor_url: Optional[str] = typer.Option(
-        None, "--harbor-url", "-u", help="Harbor URL."
+        None,
+        "--harbor-url",
+        "-u",
+        help=f"Harbor API URL. {help_config_override('harbor.url')}",
+        envvar=env_var("url"),
     ),
     harbor_username: Optional[str] = typer.Option(
-        None, "--harbor-username", "-U", help="Harbor username."
+        None,
+        "--harbor-username",
+        "-U",
+        help=f"Harbor username. {help_config_override('harbor.username')}",
+        envvar=env_var("username"),
     ),
     harbor_secret: Optional[str] = typer.Option(
-        None, "--harbor-secret", "-S", help="Harbor secret."
+        None,
+        "--harbor-secret",
+        "-S",
+        help=f"Harbor secret (password). {help_config_override('harbor.secret')}",
+        envvar=env_var("secret"),
     ),
-    harbor_credentials: Optional[str] = typer.Option(
-        None, "--credentials", "-C", help="Harbor basic access credentials (base64)."
+    harbor_basicauth: Optional[str] = typer.Option(
+        None,
+        "--basicauth",
+        "-B",
+        help=f"Harbor basic access credentials (base64). {help_config_override('harbor.basicauth')}",
+        envvar=env_var("basicauth"),
     ),
     harbor_credentials_file: Optional[Path] = typer.Option(
-        None, "--credentials-file", "-F", help="Harbor basic access credentials file."
+        None,
+        "--credentials-file",
+        "-F",
+        help=f"Path to Harbor JSON credentials file. {help_config_override('harbor.credentials_file')}",
+        envvar=env_var("credentials_file"),
     ),
     # Formatting
     show_description: Optional[bool] = typer.Option(
         None,
         "--table-description/--no-table-description",
-        help="Include field descriptions in tables. Only affects tables.",
+        help=(
+            "Include field descriptions in tables. "
+            f"{help_config_override('output.table.description')}"
+        ),
+        envvar=env_var("table_description"),
     ),
     max_depth: Optional[int] = typer.Option(
         None,
         "--table-max-depth",
-        help="Maximum depth to print nested objects. Only affects tables." "",
+        help=(
+            "Maximum depth to print nested objects in tables. "
+            f"{help_config_override('output.table.max_depth')}"
+        ),
+        envvar=env_var("table_max_depth"),
     ),
     compact: Optional[bool] = typer.Option(
         None,
         "--table-compact/--no-table-compact",
-        help="Compact table output. Only affects tables.",
+        help=(
+            "Compact table output. Has no effect on other formats. "
+            f"{help_config_override('output.table.compact')}"
+        ),
+        envvar=env_var("table_compact"),
     ),
     json_indent: Optional[int] = typer.Option(
         None,
         "--json-indent",
-        help="Indentation level for JSON output. Affects JSON.",
+        help=f"Indentation level for JSON output. {help_config_override('output.json.indent')}",
+        envvar=env_var("json_indent"),
     ),
     json_sort_keys: Optional[bool] = typer.Option(
         None,
         "--json-sort-keys/--no-json-sort-keys",
-        help="Sort keys in JSON output. Affects JSON.",
+        help=f"Sort keys in JSON output. {help_config_override('output.json.sort_keys')}",
+        envvar=env_var("json_sort_keys"),
     ),
     # Output options
     output_format: Optional[OutputFormat] = typer.Option(
         None,
         "--format",
         "-f",
-        help=f"Output format.",
+        help=f"Specifies the output format to use. {help_config_override('output.format')}",
+        envvar=env_var("output_format"),
         case_sensitive=False,
     ),
     output_file: Optional[Path] = typer.Option(
