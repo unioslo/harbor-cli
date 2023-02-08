@@ -121,6 +121,7 @@ def main_callback(
         "--format",
         "-f",
         help=f"Specifies the output format to use. {help_config_override('output.format')}",
+        envvar=env_var("output_format"),
         case_sensitive=False,
     ),
     output_file: Optional[Path] = typer.Option(
