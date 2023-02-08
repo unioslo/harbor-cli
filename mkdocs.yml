@@ -26,6 +26,7 @@ plugins:
       include_yaml:
         - commandlist: "docs/data/commands.yaml"
         - formats: "docs/data/formats.yaml"
+        - options: "docs/data/options.yaml"
   - mkdocstrings:
       watch:
         - harbor_cli
