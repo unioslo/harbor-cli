@@ -27,6 +27,18 @@ from .utils import replace_none
 
 DEFAULT_CONFIG_FILE = CONFIG_DIR / "config.toml"
 
+ENV_VAR_PREFIX = "HARBOR_CLI_"
+
+
+def config_env_var(key: str) -> str:
+    """Return the environment variable name for a config key."""
+    return ENV_VAR_PREFIX + key.upper().replace(".", "_")
+
+
+def env_var(option: str) -> str:
+    """Return the environment variable name for a CLI option."""
+    return ENV_VAR_PREFIX + option.upper().replace("-", "_")
+
 
 def load_toml_file(config_file: Path) -> dict[str, Any]:
     """Load a TOML file and return the contents as a dict.
