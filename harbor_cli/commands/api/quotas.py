@@ -95,7 +95,7 @@ def list_quotas(
     ),
     page: int = ...,  # type: ignore
     page_size: int = ...,  # type: ignore
-    retrieve_all: bool = ...,  # type: ignore
+    limit: Optional[int] = ...,  # type: ignore
 ) -> None:
     """List registries."""
     registries = state.run(
@@ -105,7 +105,7 @@ def list_quotas(
             sort=sort,
             page=page,
             page_size=page_size,
-            retrieve_all=retrieve_all,
+            limit=limit,
         ),
         "Fetching quotas...",
     )

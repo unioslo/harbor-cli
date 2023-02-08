@@ -253,7 +253,7 @@ def list_registries(
     sort: Optional[str],
     page: int,
     page_size: int,
-    retrieve_all: bool,
+    limit: Optional[int],
 ) -> None:
     """List registries."""
     registries = state.run(
@@ -262,7 +262,7 @@ def list_registries(
             sort=sort,
             page=page,
             page_size=page_size,
-            retrieve_all=retrieve_all,
+            limit=limit,
         ),
         "Fetching registries..",
     )

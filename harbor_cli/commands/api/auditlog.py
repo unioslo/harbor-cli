@@ -20,11 +20,11 @@ def list_audit_logs(
     sort: Optional[str],
     page: int,
     page_size: int,
-    retrieve_all: bool = typer.Option(True),
+    limit: Optional[int],
 ) -> None:
     """List audit logs for projects the current user has access to.
-    [bold red]WARNING:[/] This command can return a lot of data if no query
-    is specified.
+    [bold red]WARNING:[/] This command can return a lot of data if no query or limit
+    is specified. Use [bold]--retrieve-all[/] to fetch all pages.
     """
     logs = state.run(
         state.client.get_audit_logs(
@@ -32,7 +32,7 @@ def list_audit_logs(
             sort=sort,
             page=page,
             page_size=page_size,
-            retrieve_all=retrieve_all,
+            limit=limit,
         ),
         f"Fetching audit logs...",
     )

@@ -83,7 +83,7 @@ def get_project_logs(
     sort: Optional[str],
     page: int,
     page_size: int,
-    retrieve_all: bool,
+    limit: Optional[int],
     project_name: str = typer.Argument(
         ...,
         help="Project name to fetch logs for.",
@@ -98,7 +98,7 @@ def get_project_logs(
             sort=sort,
             page=page,
             page_size=page_size,
-            retrieve_all=retrieve_all,
+            limit=limit,
         ),
         f"Fetching logs for {project_repr}...",
     )
@@ -225,9 +225,7 @@ def list_projects(
     query: Optional[str],
     sort: Optional[str],
     page_size: int,
-    retrieve_all: bool = typer.Option(
-        True,
-    ),
+    limit: Optional[int],
     name: Optional[str] = typer.Option(
         None,
         "--name",
@@ -257,7 +255,7 @@ def list_projects(
             owner=owner,
             with_detail=with_detail,
             page_size=page_size,
-            retrieve_all=retrieve_all,
+            limit=limit,
         ),
         "Fetching projects...",
     )

@@ -195,7 +195,7 @@ def search_users(
     ctx: typer.Context,
     page: int,
     page_size: int,
-    retrieve_all: bool,
+    limit: Optional[int],
     username: str = typer.Argument(
         ...,
         help="Username or partial username to search for.",
@@ -204,7 +204,10 @@ def search_users(
     """Search for users by username."""
     users = state.run(
         state.client.search_users_by_username(
-            username, page=page, page_size=page_size, retrieve_all=retrieve_all
+            username,
+            page=page,
+            page_size=page_size,
+            limit=limit,
         ),
         "Searching...",
     )

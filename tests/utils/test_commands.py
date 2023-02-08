@@ -172,7 +172,7 @@ def test_inject_resource_options() -> None:
         # with parameter default
         page_size: int = typer.Option(123),
         # ellipsis signifies that we should inject the default
-        retrieve_all: bool = ...,
+        limit: Optional[int] = ...,
     ) -> None:
         pass
 
@@ -189,13 +189,10 @@ def test_inject_resource_options() -> None:
         == "(Advanced) Number of results to fetch per API call."
     )
     assert parameters["page_size"].default.default == 123
+    assert parameters["limit"].default.help == "Maximum number of results to fetch."
     assert (
-        parameters["retrieve_all"].default.help
-        == "(Advanced) Fetch all matches instead of only first <page_size> matches."
-    )
-    assert (
-        parameters["retrieve_all"].default.default is True
-    )  # ellipsis means default (True)
+        parameters["limit"].default.default is None
+    )  # ellipsis means default (None in this case) is injected
 
 
 def test_inject_resource_options_partial_params() -> None:

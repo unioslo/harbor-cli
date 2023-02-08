@@ -159,7 +159,7 @@ def inject_resource_options(
     f: Any = None, *, strict: bool = False, use_defaults: bool = True
 ) -> Any:
     """Decorator that calls inject_query, inject_sort, inject_page_size,
-    inject_page and inject_retrieve_all to inject typer.Option() defaults
+    inject_page and inject_limit to inject typer.Option() defaults
     for common options used when querying multiple resources.
 
     NOTE: needs to be specified BEFORE @app.command() in order to work!
@@ -169,14 +169,14 @@ def inject_resource_options(
 
     The decorated function should always declare the parameters in the following order
     if the parameters don't have defaults:
-    `query`, `sort`, `page`, `page_size`, `retrieve_all`
+    `query`, `sort`, `page`, `page_size`, `limit`
 
     Examples
     -------
     ```python
     @app.command()
     @inject_resource_options()
-    def my_command(query: str, sort: str, page: int, page_size: int, retrieve_all: bool):
+    def my_command(query: str, sort: str, page: int, page_size: int, limit: Optional[int]):
         ...
 
     # OK
@@ -216,7 +216,7 @@ def inject_resource_options(
         The function to decorate, by default None
     strict : bool, optional
         If True, fail if function is missing any of the injected parameters, by default False
-        E.g. all of `query`, `sort`, `page`, `page_size`, `retrieve_all` must be present
+        E.g. all of `query`, `sort`, `page`, `page_size`, `limit` must be present
     use_defaults : bool, optional
         If True, use the default value specified by a parameter's typer.Option() field
         as the default value for the parameter, by default True.
@@ -245,7 +245,7 @@ def inject_resource_options(
     def decorator(func: Any) -> Any:
         # Inject in reverse order, because parameters with defaults
         # can't be followed by parameters without defaults
-        func = inject_retrieve_all(func, strict=strict, use_default=use_defaults)
+        func = inject_limit(func, strict=strict, use_default=use_defaults)
         func = inject_page_size(func, strict=strict, use_default=use_defaults)
         func = inject_page(func, strict=strict, use_default=use_defaults)
         func = inject_sort(func, strict=strict, use_default=use_defaults)
@@ -327,16 +327,16 @@ def inject_page(
         return decorator
 
 
-def inject_retrieve_all(
+def inject_limit(
     f: Any = None, *, strict: bool = False, use_default: bool = False
 ) -> Any:
     def decorator(func: Any) -> Any:
         option = typer.Option(
-            True,
-            "--all",
-            help="(Advanced) Fetch all matches instead of only first <page_size> matches.",
+            None,
+            "--limit",
+            help="Maximum number of results to fetch.",
         )
-        return _patch_param(func, "retrieve_all", option, strict, use_default)
+        return _patch_param(func, "limit", option, strict, use_default)
 
     # Support using plain @inject_page or @inject_page()
     if callable(f):

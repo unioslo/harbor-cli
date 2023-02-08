@@ -119,7 +119,7 @@ def list_repos(
     sort: Optional[str] = None,
     page: int = 1,
     page_size: int = 10,
-    retrieve_all: bool = True,
+    limit: Optional[int] = ...,  # type: ignore
 ) -> None:
     """List repositories in all projects or a specific project."""
 
@@ -130,7 +130,7 @@ def list_repos(
             sort=sort,
             page=page,
             page_size=page_size,
-            retrieve_all=retrieve_all,
+            limit=limit,
         ),
         "Fetching repositories...",
     )
