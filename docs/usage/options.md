@@ -13,7 +13,7 @@ project list
 ```
 
 {% for option in options %}
-## `{{ option['params'] }}`
+## {{ option['params'] }}
 
 **Environment variable:** `{{ option['envvar'] }}`
 
