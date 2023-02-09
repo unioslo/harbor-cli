@@ -33,7 +33,7 @@ class OptInfo(NamedTuple):
     def to_dict(self) -> dict[str, str | None]:
         return {
             "params": ", ".join(f"`{p}`" for p in self.params),
-            "help": self.help,
+            "help": self.help or "",
             "envvar": maybe_list_to_str(self.envvar),
             "config_value": self.config_value,
             "fragment": self.fragment,
