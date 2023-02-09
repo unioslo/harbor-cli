@@ -30,10 +30,9 @@ class OptionInfo(_OptionInfo):
             self.help = h + help_config_override(self.config_override)
 
 
-def Option(*args, **kwargs) -> Any:
+def Option(*args, config_override: str | None = None, **kwargs: Any) -> Any:
     kwargs.setdefault("show_envvar", False)  # disable by default
     kwargs.setdefault("show_default", False)  # disable by default
-    config_override = kwargs.pop("config_override", None)
 
     # I'm sure this won't break in the future :)
     opt = typer.Option(*args, **kwargs)  # type: OptionInfo
