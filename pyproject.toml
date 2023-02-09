@@ -21,7 +21,7 @@ classifiers = [
 ]
 dependencies = [
   "typer",
-  "harborapi>=0.8.1",
+  "harborapi>=0.8.2",
   "pydantic",
   "platformdirs",
   "tomli",
