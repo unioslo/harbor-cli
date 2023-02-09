@@ -117,6 +117,17 @@ def test_harbor_is_authable_username() -> None:
     assert not h.has_auth_method
 
 
+def test_secretstr_assignment() -> None:
+    """We want to make sure assignment to SecretStr fields with regular
+    strings are still converted to SecretStr, so we don't leak credentials
+    that have been assigned to the field _after_ instantiation."""
+
+    h = HarborSettings(username="admin", secret="password")
+    assert all(c == "*" for c in str(h.secret))
+    h.secret = "newpassword"
+    assert all(c == "*" for c in str(h.secret))
+
+
 def test_harbor_is_authable_basicauth() -> None:
     h = HarborSettings(basicauth="dXNlcm5hbWU6cGFzc3dvcmQK")
     assert h.has_auth_method
