@@ -19,22 +19,23 @@ from .format import OutputFormat
 from .logs import disable_logging
 from .logs import logger
 from .logs import setup_logging
+from .option import Option
 from .output.console import exit_err
 from .output.console import success
 from .output.formatting.path import path_link
 from .state import state
-from .style import help_config_override
 
 # Init subcommand groups here
 for group in commands.ALL_GROUPS:
     app.add_typer(group)
+
 
 # The callback defines global command options
 @app.callback(no_args_is_help=True)
 def main_callback(
     ctx: typer.Context,
     # Configuration options
-    config_file: Optional[Path] = typer.Option(
+    config_file: Optional[Path] = Option(
         None,
         "--config",
         "-c",
@@ -42,109 +43,109 @@ def main_callback(
         envvar=env_var("config"),
     ),
     # Harbor options
-    harbor_url: Optional[str] = typer.Option(
+    harbor_url: Optional[str] = Option(
         None,
         "--url",
         "-u",
         Deprecated("--harbor-url", replacement="--url"),
-        help=f"Harbor API URL. {help_config_override('harbor.url')}",
+        help=f"Harbor API URL.",
         envvar=env_var("url"),
+        config_override="harbor.url",
     ),
-    harbor_username: Optional[str] = typer.Option(
+    harbor_username: Optional[str] = Option(
         None,
         "--username",
         "-U",
         Deprecated("--harbor-username", replacement="--username"),
-        help=f"Harbor username. {help_config_override('harbor.username')}",
+        help=f"Harbor username.",
         envvar=env_var("username"),
+        config_override="harbor.username",
     ),
-    harbor_secret: Optional[str] = typer.Option(
+    harbor_secret: Optional[str] = Option(
         None,
         "--secret",
         "-S",
         Deprecated("--harbor-secret", replacement="--secret"),
-        help=f"Harbor secret (password). {help_config_override('harbor.secret')}",
+        help=f"Harbor secret (password).",
         envvar=env_var("secret"),
+        config_override="harbor.secret",
     ),
-    harbor_basicauth: Optional[str] = typer.Option(
+    harbor_basicauth: Optional[str] = Option(
         None,
         "--basicauth",
         "-B",
-        help=f"Harbor basic access credentials (base64). {help_config_override('harbor.basicauth')}",
+        help=f"Harbor basic access credentials (base64).",
         envvar=env_var("basicauth"),
+        config_override="harbor.basicauth",
     ),
-    harbor_credentials_file: Optional[Path] = typer.Option(
+    harbor_credentials_file: Optional[Path] = Option(
         None,
         "--credentials-file",
         "-F",
-        help=f"Path to Harbor JSON credentials file. {help_config_override('harbor.credentials_file')}",
+        help=f"Path to Harbor JSON credentials file.",
         envvar=env_var("credentials_file"),
+        config_override="harbor.credentials_file",
     ),
     # Formatting
-    show_description: Optional[bool] = typer.Option(
+    show_description: Optional[bool] = Option(
         None,
         "--table-description/--no-table-description",
-        help=(
-            "Include field descriptions in tables. "
-            f"{help_config_override('output.table.description')}"
-        ),
+        help="Include field descriptions in tables.",
         envvar=env_var("table_description"),
+        config_override="output.table.description",
     ),
-    max_depth: Optional[int] = typer.Option(
+    max_depth: Optional[int] = Option(
         None,
         "--table-max-depth",
-        help=(
-            "Maximum depth to print nested objects in tables. "
-            f"{help_config_override('output.table.max_depth')}"
-        ),
+        help="Maximum depth to print nested objects in tables.",
         envvar=env_var("table_max_depth"),
+        config_override="output.table.max_depth",
     ),
-    compact: Optional[bool] = typer.Option(
+    compact: Optional[bool] = Option(
         None,
         "--table-compact/--no-table-compact",
-        help=(
-            "Compact table output. Has no effect on other formats. "
-            f"{help_config_override('output.table.compact')}"
-        ),
+        help="Compact table output. Has no effect on other formats. ",
         envvar=env_var("table_compact"),
+        config_override="output.table.compact",
     ),
-    json_indent: Optional[int] = typer.Option(
+    json_indent: Optional[int] = Option(
         None,
         "--json-indent",
-        help=f"Indentation level for JSON output. {help_config_override('output.json.indent')}",
+        help="Indentation level for JSON output.",
         envvar=env_var("json_indent"),
+        config_override="output.json.indent",
     ),
-    json_sort_keys: Optional[bool] = typer.Option(
+    json_sort_keys: Optional[bool] = Option(
         None,
         "--json-sort-keys/--no-json-sort-keys",
-        help=f"Sort keys in JSON output. {help_config_override('output.json.sort_keys')}",
+        help="Sort keys in JSON output.",
         envvar=env_var("json_sort_keys"),
+        config_override="output.json.sort_keys",
     ),
     # Output options
-    output_format: Optional[OutputFormat] = typer.Option(
+    output_format: Optional[OutputFormat] = Option(
         None,
         "--format",
         "-f",
-        help=f"Specifies the output format to use. {help_config_override('output.format')}",
+        help=f"Specifies the output format to use.",
         envvar=env_var("output_format"),
         case_sensitive=False,
+        config_override="output.format",
     ),
-    output_file: Optional[Path] = typer.Option(
+    output_file: Optional[Path] = Option(
         None,
         "--output",
         "-o",
         help="Output file, by default None, which means output to stdout. If the file already exists, it will be overwritten.",
     ),
-    no_overwrite: bool = typer.Option(
+    no_overwrite: bool = Option(
         False,
         "--no-overwrite",
         help="Do not overwrite the output file if it already exists.",
     ),
     # stdout/stderr options
-    verbose: bool = typer.Option(
-        False, "--verbose", "-v", help="Enable verbose output."
-    ),
-    with_stdout: bool = typer.Option(
+    verbose: bool = Option(False, "--verbose", "-v", help="Enable verbose output."),
+    with_stdout: bool = Option(
         False,
         "--with-stdout",
         help="Output to stdout in addition to the specified output file, if any. Has no effect if no output file is specified.",

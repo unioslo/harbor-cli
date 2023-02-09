@@ -5,27 +5,10 @@ from typing import Sequence
 
 import yaml  # type: ignore
 from common import DATA_PATH
-from rich.markup import render
-from rich.text import Text
 
 from harbor_cli.deprecation import Deprecated
 from harbor_cli.main import app
-from harbor_cli.style import STYLE_CONFIG_OPTION
 from harbor_cli.utils.commands import get_app_callback_options
-
-
-def text_as_md(text: Text) -> str:
-    """Very primitive function for rendering a Rich.text.Text span as a
-    markdown code span. Can be moved into the main codebase if needed."""
-    if not text.spans:
-        return text.plain
-    for span in text.spans:
-        if span.style != STYLE_CONFIG_OPTION:
-            continue
-        start, stop = span.start, span.end
-        p = text.plain
-        return p[:start] + f"`{p[start:stop]}`" + p[stop:]
-    return text.plain
 
 
 def maybe_list_to_str(text: str | list[str] | None) -> str:
@@ -34,31 +17,45 @@ def maybe_list_to_str(text: str | list[str] | None) -> str:
     return ", ".join(text)
 
 
-class OptionInfo(NamedTuple):
+# name it OptInfo to avoid confusion with typer.models.OptionInfo
+class OptInfo(NamedTuple):
     params: Sequence[str]
-    help: Text | None
+    help: str | None
     envvar: str | list[str] | None
+    config_value: str | None
+
+    @property
+    def fragment(self) -> str | None:
+        if self.config_value is None:
+            return None
+        return self.config_value.replace(".", "")
 
     def to_dict(self) -> dict[str, str | None]:
         return {
             "params": ", ".join(f"`{p}`" for p in self.params),
-            "help": text_as_md(self.help) if self.help else None,
+            "help": self.help,
             "envvar": maybe_list_to_str(self.envvar),
+            "config_value": self.config_value,
+            "fragment": self.fragment,
         }
 
 
 if __name__ == "__main__":
-    options = []  # type: list[OptionInfo]
+    options = []  # type: list[OptInfo]
     for option in get_app_callback_options(app):
         if not option.param_decls:
             continue
-        options.append(
-            OptionInfo(
-                params=[p for p in option.param_decls if not isinstance(p, Deprecated)],
-                help=render(option.help) if option.help else None,
-                envvar=option.envvar,
-            )
+        conf_value = None
+        if hasattr(option, "config_override"):
+            conf_value = option.config_override
+        h = option._help_original if hasattr(option, "_help_original") else option.help
+        o = OptInfo(
+            params=[p for p in option.param_decls if not isinstance(p, Deprecated)],
+            help=h,
+            envvar=option.envvar,
+            config_value=conf_value,
         )
+        options.append(o)
 
     to_dump = [o.to_dict() for o in options]
 
