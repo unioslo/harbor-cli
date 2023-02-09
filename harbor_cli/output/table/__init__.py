@@ -22,6 +22,7 @@ from typing import Sequence
 from typing import TypeVar
 
 from harborapi.ext.artifact import ArtifactInfo
+from harborapi.models.models import AuditLog
 from harborapi.models.models import Project
 from harborapi.models.models import Repository
 from harborapi.models.models import Search
@@ -36,6 +37,7 @@ from ...utils._types import is_builtin_obj
 from .anysequence import AnySequence
 from .anysequence import anysequence_table
 from .artifact import artifactinfo_table
+from .auditlog import auditlog_panel
 from .commandsummary import commandsummary_table
 from .project import project_extended_panel
 from .project import project_table
@@ -50,6 +52,7 @@ T = TypeVar("T")
 RENDER_FUNCTIONS = {
     AnySequence: anysequence_table,
     ArtifactInfo: artifactinfo_table,
+    AuditLog: auditlog_panel,
     CommandSummary: commandsummary_table,
     Project: project_table,
     ProjectExtended: project_extended_panel,

@@ -3,6 +3,9 @@ from __future__ import annotations
 from typing import Any
 from typing import Sequence
 
+from rich.console import Group
+from rich.console import RenderableType
+from rich.panel import Panel
 from rich.table import Table
 
 from ..formatting.builtin import plural_str
@@ -35,3 +38,12 @@ def get_table(
         for column in columns:
             table.add_column(column)
     return table
+
+
+def get_panel(
+    renderables: Sequence[RenderableType],
+    title: str | None = None,
+    expand: bool = True,
+) -> Panel:
+    """Get a panel with a title."""
+    return Panel(Group(*renderables), title=title, expand=expand)
