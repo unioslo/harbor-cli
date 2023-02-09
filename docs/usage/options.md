@@ -14,8 +14,9 @@ project list
 
 {% for option in options %}
 ## {{ option['params'] }}
-
+{% if option['envvar'] %}
 **Environment variable:** `{{ option['envvar'] }}`
+{%- endif %}
 {% if option['config_value'] %}
 **Configuration value:** [`{{ option['config_value'] }}`](/configuration/config-file#{{option['fragment']}})
 {%- endif %}

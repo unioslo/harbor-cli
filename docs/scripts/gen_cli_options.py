@@ -11,10 +11,10 @@ from harbor_cli.main import app
 from harbor_cli.utils.commands import get_app_callback_options
 
 
-def maybe_list_to_str(text: str | list[str] | None) -> str:
+def maybe_list_to_str(text: str | list[str] | None) -> str | None:
     if isinstance(text, str) or text is None:
-        return str(text)
-    return ", ".join(text)
+        return text
+    return ", ".join(text) or None
 
 
 # name it OptInfo to avoid confusion with typer.models.OptionInfo
