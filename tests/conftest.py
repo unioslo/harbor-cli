@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from copy import copy
 from functools import partial
 from pathlib import Path
@@ -12,6 +13,8 @@ from typing import Protocol
 import click
 import pytest
 import typer
+from _pytest.logging import LogCaptureFixture
+from loguru import logger
 from pydantic import BaseModel
 from typer.testing import CliRunner
 from typer.testing import Result
@@ -23,8 +26,6 @@ from harbor_cli.config import HarborCLIConfig
 from harbor_cli.format import OutputFormat
 from harbor_cli import state
 from ._utils import compact_renderables
-
-import os
 
 
 runner = CliRunner()
@@ -117,3 +118,10 @@ def revert_state() -> Generator[None, None, None]:
 def compact_table_renderable(request: pytest.FixtureRequest) -> BaseModel:
     """Fixture for testing compact table renderables that can be instantiated with no arguments."""
     return request.param()
+
+
+@pytest.fixture
+def caplog(caplog: LogCaptureFixture):
+    handler_id = logger.add(caplog.handler, format="{message}")
+    yield caplog
+    logger.remove(handler_id)

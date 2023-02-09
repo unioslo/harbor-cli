@@ -8,6 +8,7 @@ from common import DATA_PATH
 from rich.markup import render
 from rich.text import Text
 
+from harbor_cli.deprecation import Deprecated
 from harbor_cli.main import app
 from harbor_cli.style import STYLE_CONFIG_OPTION
 from harbor_cli.utils.commands import get_app_callback_options
@@ -53,7 +54,7 @@ if __name__ == "__main__":
             continue
         options.append(
             OptionInfo(
-                params=option.param_decls,
+                params=[p for p in option.param_decls if not isinstance(p, Deprecated)],
                 help=render(option.help) if option.help else None,
                 envvar=option.envvar,
             )
