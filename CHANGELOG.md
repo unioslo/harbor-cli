@@ -16,12 +16,13 @@ The **third number** is the patch version (bug fixes)
 
 - Command `find`: Search for commands by name or description.
 - Command `commands`: list all available commands.
-- Option: `user list --sort [id|username|name]` option.
+- Option: `user list --sort [id|username|name]`.
 - `UserResp` compact table format (used by `user list`).
 
 ### Changed
 
 - Global option `--format` is now case-insensitive.
+- Global options `--harbor-username`, `--harbor-secret` and `--harbor-url` have been deprecated in favor of `--username`, `--secret` and `--url`.
 
 ### Fixed
 

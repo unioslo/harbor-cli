@@ -12,6 +12,7 @@ from .app import app
 from .config import env_var
 from .config import HarborCLIConfig
 from .deprecation import check_deprecated_option
+from .deprecation import Deprecated
 from .exceptions import handle_exception
 from .exceptions import HarborCLIError
 from .format import OutputFormat
@@ -43,22 +44,25 @@ def main_callback(
     # Harbor options
     harbor_url: Optional[str] = typer.Option(
         None,
-        "--harbor-url",
+        "--url",
         "-u",
+        Deprecated("--harbor-url", replacement="--url"),
         help=f"Harbor API URL. {help_config_override('harbor.url')}",
         envvar=env_var("url"),
     ),
     harbor_username: Optional[str] = typer.Option(
         None,
-        "--harbor-username",
+        "--username",
         "-U",
+        Deprecated("--harbor-username", replacement="--username"),
         help=f"Harbor username. {help_config_override('harbor.username')}",
         envvar=env_var("username"),
     ),
     harbor_secret: Optional[str] = typer.Option(
         None,
-        "--harbor-secret",
+        "--secret",
         "-S",
+        Deprecated("--harbor-secret", replacement="--secret"),
         help=f"Harbor secret (password). {help_config_override('harbor.secret')}",
         envvar=env_var("secret"),
     ),
@@ -182,6 +186,16 @@ def main_callback(
         state.add_config(conf)
 
     # Set config overrides
+    if harbor_url is not None:
+        state.config.harbor.url = harbor_url
+    if harbor_username is not None:
+        state.config.harbor.username = harbor_username
+    if harbor_secret is not None:
+        state.config.harbor.secret = harbor_secret  # type: ignore
+    if harbor_basicauth is not None:
+        state.config.harbor.basicauth = harbor_basicauth  # type: ignore
+    if harbor_credentials_file is not None:
+        state.config.harbor.credentials_file = harbor_credentials_file
     if compact is not None:
         state.config.output.table.compact = compact
     if show_description is not None:

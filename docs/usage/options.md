@@ -6,9 +6,9 @@ Global options are options that apply to every command. They are usually overrid
 
 ```
 harbor \
---harbor-url https://my-harbor.com/api/v2.0 \
---harbor-username admin \
---harbor-secret my-secret \
+--url https://my-harbor.com/api/v2.0 \
+--username admin \
+--secret my-secret \
 project list
 ```
 
