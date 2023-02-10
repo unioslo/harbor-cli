@@ -38,7 +38,7 @@ from ...utils._types import is_builtin_obj
 from .anysequence import AnySequence
 from .anysequence import anysequence_table
 from .artifact import artifactinfo_table
-from .auditlog import auditlog_panel
+from .auditlog import auditlog_table
 from .commandsummary import commandsummary_table
 from .project import project_extended_panel
 from .project import project_table
@@ -54,7 +54,7 @@ T = TypeVar("T")
 RENDER_FUNCTIONS = {
     AnySequence: anysequence_table,
     ArtifactInfo: artifactinfo_table,
-    AuditLog: auditlog_panel,
+    AuditLog: auditlog_table,
     CommandSummary: commandsummary_table,
     Project: project_table,
     ProjectExtended: project_extended_panel,
