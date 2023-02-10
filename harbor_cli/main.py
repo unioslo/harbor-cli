@@ -132,6 +132,21 @@ def main_callback(
         case_sensitive=False,
         config_override="output.format",
     ),
+    paging: Optional[bool] = Option(
+        None,
+        "--paging/--no-paging",
+        help="Display output in a pager (less, etc.).",
+        envvar=env_var("paging"),
+        config_override="output.paging",
+    ),
+    pager: Optional[str] = Option(
+        None,
+        "--pager",
+        help="Pager command to use. The default Rich pager will be used.",
+        envvar=env_var("pager"),
+        config_override="output.pager",
+    ),
+    # Output options that don't belong to the config file
     output_file: Optional[Path] = Option(
         None,
         "--output",
@@ -209,6 +224,10 @@ def main_callback(
         state.config.output.JSON.sort_keys = json_sort_keys
     if output_format is not None:
         state.config.output.format = output_format
+    if paging is not None:
+        state.config.output.paging = paging
+    if pager is not None:
+        state.config.output.pager = pager
 
     # Set global options
     state.options.verbose = verbose

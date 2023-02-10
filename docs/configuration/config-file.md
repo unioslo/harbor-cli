@@ -148,16 +148,18 @@ Show the output in a pager (less, etc.). The default is `false`.
 paging = false
 ```
 
-<!--
+
 #### `output.pager`
 
-The pager to use. No value means that the default Rich pager will be used. Has no effect if `output.paging` is `false`.
+The pager to use. No value means that the default Rich pager will be used. Has no effect if `output.paging` is `false`. Equivalent to setting the `MANPAGER` and/or `PAGER` environment variables.
+
+Can be used to redirect output to any application you want, not just pagers, for example: `output.pager = "code -"` to redirect printing of results to VS Code.
 
 ```toml
 [output]
-pager = "less"
+pager = "less -r" # omit to use default
 ```
--->
+
 
 #### `output.table`
 

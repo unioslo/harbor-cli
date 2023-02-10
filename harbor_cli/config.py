@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 from typing import Any
 from typing import Optional
@@ -225,15 +226,25 @@ class OutputSettings(BaseModel):
         False,
         description="Show output in pager (if supported). Does not support color output currently.",
     )
-
     # Custom pager support in Rich doesn't seem very mature out of the box,
     # and it would require us to write a custom pager class to support it.
-    # pager: Optional[str] = Field(None, description="Pager to use if paging is enabled.")
+    pager: Optional[str] = Field(None, description="Pager to use if paging is enabled.")
 
     # Naming: Don't shadow the built-in .json() method
     # The config file can still use the key "json" because of the alias
     table: TableSettings = Field(default_factory=TableSettings)
     JSON: JSONSettings = Field(default_factory=JSONSettings, alias="json")
+
+    @validator("pager")
+    def set_pager(cls, v: Optional[str]) -> Optional[str]:
+        """Validator that sets the MANPAGER environment variable if a pager is set.
+        https://rich.readthedocs.io/en/stable/console.html#paging
+        """
+        if not v:
+            return v
+        os.environ["MANPAGER"] = v
+        os.environ["PAGER"] = v
+        return v
 
     class Config:
         allow_population_by_field_name = True
