@@ -70,6 +70,15 @@ class SomeModel(BaseModel):
         ("vulnerability", [], "vulnerabilities"),
         ("vulnerability", ["HIGH"], "vulnerability"),
         ("vulnerability", ["HIGH", "LOW"], "vulnerabilities"),
+        # Test providing plural form as input
+        # "*ies" case
+        ("vulnerabilities", [], "vulnerabilities"),
+        ("vulnerabilities", ["HIGH"], "vulnerability"),
+        ("vulnerabilities", ["HIGH", "LOW"], "vulnerabilities"),
+        # "*s" case
+        ("models", [], "models"),
+        ("models", [SomeModel()], "model"),
+        ("models", [SomeModel(), SomeModel()], "models"),
     ],
 )
 def test_plural_str(s: str, seq: Sequence[Any], expected: str) -> None:

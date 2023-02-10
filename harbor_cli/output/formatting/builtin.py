@@ -41,6 +41,12 @@ def plural_str(value: str, sequence: Sequence[Any]) -> str:
     not of length 1."""
     if value.endswith("y"):
         plural_value = value[:-1] + "ies"
+    elif value.endswith("ies"):
+        plural_value = value
+        value = value[:-3] + "y"
+    elif value.endswith("s"):
+        plural_value = value
+        value = value[:-1]
     else:
         plural_value = value + "s"
     return value if len(sequence) == 1 else f"{plural_value}"
