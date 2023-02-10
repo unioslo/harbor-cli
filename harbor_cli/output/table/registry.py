@@ -4,30 +4,28 @@ from typing import Sequence
 
 from harborapi.models.models import RegistryProviderInfo
 from harborapi.models.models import RegistryProviders
-from rich.panel import Panel
 from rich.table import Table
 
 from ...logs import logger
 from ..formatting.builtin import str_str
-from ._utils import get_panel
 from ._utils import get_table
 
 
-def registryproviders_panel(
+def registryproviders_table(
     providers: Sequence[RegistryProviders],
-) -> Panel:
+) -> Table:
     """Renders a list of RegistryProvider objects as individual tables in a panel."""
     if len(providers) > 1:
         logger.warning("Can only display one list of registry providers at a time")
-    tables = []
-    for name, provider in providers[0].providers.items():
-        tables.append(_registryproviderinfo_table(name, provider))
-    return get_panel(tables, title="Registry Providers", expand=True)
+    prov = providers[0]
+    table = get_table("Registry Providers", columns=["Name", "Info"], show_lines=True)
+    for name, provider in prov.providers.items():
+        table.add_row(name, _registryproviderinfo_table(provider))
+    return table
 
 
-def _registryproviderinfo_table(name: str, provider: RegistryProviderInfo) -> Table:
+def _registryproviderinfo_table(provider: RegistryProviderInfo) -> Table:
     table = get_table(
-        title=name,
         columns=[
             "Endpoint",
             "URL",

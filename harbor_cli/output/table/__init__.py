@@ -42,7 +42,7 @@ from .auditlog import auditlog_table
 from .commandsummary import commandsummary_table
 from .project import project_extended_panel
 from .project import project_table
-from .registry import registryproviders_panel
+from .registry import registryproviders_table
 from .repository import repository_table
 from .search import search_panel
 from .system import systeminfo_table
@@ -62,7 +62,7 @@ RENDER_FUNCTIONS = {
     SystemInfo: systeminfo_table,
     Search: search_panel,
     UserResp: userresp_table,
-    RegistryProviders: registryproviders_panel,
+    RegistryProviders: registryproviders_table,
 }  # type: dict[type, Callable[[Any], Table | Panel]]
 # TODO: improve type annotation of this dict
 
