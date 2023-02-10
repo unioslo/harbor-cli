@@ -172,7 +172,7 @@ def get_registry_info(
     render_result(registry_info, ctx)
 
 
-@app.command("adapters", no_args_is_help=True)
+@app.command("adapters")
 def get_registry_adapters(
     ctx: typer.Context,
 ) -> None:
@@ -183,7 +183,7 @@ def get_registry_adapters(
     render_result(registry_adapters, ctx)
 
 
-@app.command("providers", no_args_is_help=True)
+@app.command("providers")
 def get_registry_providers(
     ctx: typer.Context,
 ) -> None:
