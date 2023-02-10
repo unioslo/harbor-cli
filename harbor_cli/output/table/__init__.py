@@ -22,6 +22,7 @@ from typing import Sequence
 from typing import TypeVar
 
 from harborapi.ext.artifact import ArtifactInfo
+from harborapi.models import RegistryProviders
 from harborapi.models.models import AuditLog
 from harborapi.models.models import Project
 from harborapi.models.models import Repository
@@ -41,6 +42,7 @@ from .auditlog import auditlog_panel
 from .commandsummary import commandsummary_table
 from .project import project_extended_panel
 from .project import project_table
+from .registry import registryproviders_panel
 from .repository import repository_table
 from .search import search_panel
 from .system import systeminfo_table
@@ -60,6 +62,7 @@ RENDER_FUNCTIONS = {
     SystemInfo: systeminfo_table,
     Search: search_panel,
     UserResp: userresp_table,
+    RegistryProviders: registryproviders_panel,
 }  # type: dict[type, Callable[[Any], Table | Panel]]
 # TODO: improve type annotation of this dict
 
