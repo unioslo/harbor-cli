@@ -199,7 +199,7 @@ Style of table titles.
 
 ```toml
 [output.table.style]
-title = "bold green
+title = "bold green"
 ```
 
 #### `output.table.style.header`
@@ -208,7 +208,7 @@ Style of table headers.
 
 ```toml
 [output.table.style]
-header = "bold green
+header = "bold green"
 ```
 
 #### `output.table.style.rows`
@@ -235,7 +235,7 @@ Styling of border characters.
 
 ```toml
 [output.table.style]
-border = "bold green
+border = "bold green"
 ```
 
 #### `output.table.style.footer`
@@ -244,7 +244,7 @@ Styling of table footers.
 
 ```toml
 [output.table.style]
-footer = "bold green
+footer = "bold green"
 ```
 
 #### `output.table.style.caption`
@@ -253,5 +253,5 @@ Styling of table captions.
 
 ```toml
 [output.table.style]
-caption = "bold green
+caption = "bold green"
 ```
