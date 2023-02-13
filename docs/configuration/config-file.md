@@ -178,7 +178,7 @@ description = false
 
 #### `output.table.compact`
 
-Whether or not to use compact output tables. Mutually exclusive with [`output.table.description`](#outputtabledescription). The default is `false`. Takes precedence over [`output.table.description`](#outputtabledescription) if both are enabled.
+Whether or not to use compact output tables. Mutually exclusive with [`output.table.description`](#outputtabledescription). The default is `True`. Takes precedence over [`output.table.description`](#outputtabledescription) if both are enabled.
 
 ```toml
 [output.table]
