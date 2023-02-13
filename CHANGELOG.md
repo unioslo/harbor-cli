@@ -19,6 +19,7 @@ The **third number** is the patch version (bug fixes)
 - Option: `user list --sort [id|username|name]`.
 - `UserResp` compact table format (used by `user list`).
 - `--paging`, `--pager` options and corresponding config options for displaying results in a pager.
+- `[output.table.style]` config section for styling Rich tables.
 
 ### Changed
 

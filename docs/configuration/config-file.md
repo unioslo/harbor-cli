@@ -186,3 +186,72 @@ compact = false
 ```
 
 See [Formats: Compact Table](/configuration/formats/#compact-tables) for more information.
+
+
+### `output.table.style`
+
+Configuration for styling of Rich tables. Largely follows style options of [Rich tables](https://rich.readthedocs.io/en/stable/tables.html#table-options). Styles are specified as [Rich styles](https://rich.readthedocs.io/en/stable/style.html#styles).
+
+
+#### `output.table.style.title`
+
+Style of table titles.
+
+```toml
+[output.table.style]
+title = "bold green"
+```
+
+#### `output.table.style.header`
+
+Style of table headers.
+
+```toml
+[output.table.style]
+header = "bold green"
+```
+
+#### `output.table.style.rows`
+
+Style of table rows. Can be a list of two different styles, one for even rows and one for odd rows, or a string specifying a single style for all rows.
+
+To style alternating rows only, provide a list where one of the elements is an empty string. First element for odd rows, second element for even rows.
+
+
+```toml
+[output.table.style]
+rows = "black on white"
+# or (same as above)
+rows = ["black on white", "white on black"]
+# or (odd rows only)
+rows = ["black on white", ""]
+# or (even rows only)
+rows = ["", "black on white"]
+```
+
+#### `output.table.style.border`
+
+Styling of border characters.
+
+```toml
+[output.table.style]
+border = "bold green"
+```
+
+#### `output.table.style.footer`
+
+Styling of table footers.
+
+```toml
+[output.table.style]
+footer = "bold green"
+```
+
+#### `output.table.style.caption`
+
+Styling of table captions.
+
+```toml
+[output.table.style]
+caption = "bold green"
+```

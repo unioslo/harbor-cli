@@ -5,7 +5,10 @@ import os
 from pathlib import Path
 from typing import Any
 from typing import Optional
+from typing import Sequence
+from typing import Tuple
 from typing import TypedDict
+from typing import Union
 
 import tomli
 import tomli_w
@@ -23,6 +26,7 @@ from .exceptions import HarborCLIError
 from .exceptions import OverwriteError
 from .format import OutputFormat
 from .logs import LogLevel
+from .style import STYLE_TABLE_HEADER
 from .utils import replace_none
 
 
@@ -180,13 +184,78 @@ class LoggingSettings(BaseModel):
     level: LogLevel = LogLevel.INFO
 
 
+class TableStyleSettings(BaseModel):
+    title: Optional[str] = None
+    header: Optional[str] = STYLE_TABLE_HEADER
+    rows: Optional[Tuple[str, str]] = None
+    border: Optional[str] = None
+    footer: Optional[str] = None
+    caption: Optional[str] = None
+    # TODO: box
+
+    @validator("rows", pre=True)
+    def _validate_rows(
+        cls, v: Optional[Union[Tuple[str, str], str]]
+    ) -> Optional[Tuple[str, ...]]:
+        """Validates the rows field.
+
+        Strings are turned into tuples of length 2 where both elements
+        are the string value.
+
+        Sequences are truncated to length 2. If the sequence is length 1,
+        the first element is repeated.
+
+        None, empty strings, and empty sequences are converted to None.
+        """
+        # TODO: refactor this to separate function so it can be used by other
+        # validators, and so that we can have one central set of tests,
+        # that covers all validators using the function.
+
+        if not v:  # catches None, "", and empty sequence
+            return None
+        if isinstance(v, str):
+            return (v, v)
+        if not isinstance(v, Sequence):
+            raise TypeError("TableStyleSettings.rows must be a sequence.")
+
+        vv = tuple(v)
+
+        # If all elements are None or empty, return None
+        if all(not x for x in vv):
+            return None
+
+        # vv is guaranteed to be a non-empty tuple at this point
+        if len(vv) > 2:
+            vv = vv[:2]
+        elif len(vv) == 1:
+            vv = (vv[0], v[0])
+        return vv
+
+    def as_rich_kwargs(self) -> dict[str, Optional[Union[str, Tuple[str, str]]]]:
+        """Converts the TableStyleSettings to a dictionary that can be passed
+        to Rich's Table constructor.
+
+        Returns
+        -------
+        Dict[str, Optional[str]]
+            A dictionary of Rich Table style settings.
+        """
+        return {
+            "row_styles": self.rows,
+            "header_style": self.header,
+            "border_style": self.border,
+            "footer_style": self.footer,
+            "caption_style": self.caption,
+        }
+
+
 class TableSettings(BaseModel):
     """Settings for the table output format."""
 
     description: bool = False
     max_depth: int = 0
     compact: bool = True
-    # TODO: table style
+    style: TableStyleSettings = TableStyleSettings()
     # max_width: Optional[int] = None
     # max_lines: Optional[int] = None
 

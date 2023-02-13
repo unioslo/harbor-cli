@@ -8,6 +8,7 @@ from rich.console import RenderableType
 from rich.panel import Panel
 from rich.table import Table
 
+from ...state import state
 from ..formatting.builtin import plural_str
 
 
@@ -28,7 +29,10 @@ def get_table(
     # Set kwargs defaults (so we don't accidentally pass them twice)
     kwargs.setdefault("show_header", True)
     kwargs.setdefault("expand", True)
-    kwargs.setdefault("header_style", "bold magenta")
+    styleconf = state.config.output.table.style
+    style_kwargs = styleconf.as_rich_kwargs()
+    for k, v in style_kwargs.items():
+        kwargs.setdefault(k, v)
 
     table = Table(
         title=title,
@@ -45,5 +49,5 @@ def get_panel(
     title: str | None = None,
     expand: bool = True,
 ) -> Panel:
-    """Get a panel with a title."""
+    """Get a panel from a sequence of renderables."""
     return Panel(Group(*renderables), title=title, expand=expand)
