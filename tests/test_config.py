@@ -15,6 +15,7 @@ from harbor_cli.config import load_toml_file
 from harbor_cli.config import sample_config
 from harbor_cli.config import save_config
 from harbor_cli.config import TableSettings
+from harbor_cli.config import TableStyleSettings
 
 
 def test_save_config(tmp_path: Path, config: HarborCLIConfig) -> None:
@@ -164,6 +165,73 @@ def test_table_settings_max_depth_none() -> None:
 def test_table_settings_max_depth_nonnegative() -> None:
     t = TableSettings(max_depth=123)
     assert t.max_depth == 123
+
+
+def _write_table_style_rows(
+    path: Path, rows: list[str] | str | None
+) -> TableStyleSettings:
+    """Helper function for creating a config with the option
+    `output.table.style.rows` and returning the parsed TableStyleSettings
+    object."""
+    conf_path = path / "config.toml"
+    if rows is not None:
+        if isinstance(rows, str):
+            rows = f'rows = "{rows}"'
+        else:
+            rows = "rows = " + str(rows)  # str representation of list
+    else:
+        rows = ""
+    conf_path.write_text(f"[output.table.style]\n{rows}")
+    config = HarborCLIConfig.from_file(conf_path)
+    return config.output.table.style
+
+
+def test_tablestylesettings_rows_array(tmp_path: Path) -> None:
+    styleconf = _write_table_style_rows(tmp_path, ["blue", "red"])
+    assert styleconf.rows == ("blue", "red")
+
+
+def test_tablestylesettings_rows_array_size3(tmp_path: Path) -> None:
+    styleconf = _write_table_style_rows(tmp_path, ["blue", "red", "green"])
+    assert styleconf.rows == ("blue", "red")
+
+
+def test_tablestylesettings_rows_array_size1(tmp_path: Path) -> None:
+    styleconf = _write_table_style_rows(tmp_path, ["blue"])
+    assert styleconf.rows == ("blue", "blue")
+
+
+def test_tablestylesettings_rows_string(tmp_path: Path) -> None:
+    styleconf = _write_table_style_rows(tmp_path, "blue")
+    assert styleconf.rows == ("blue", "blue")
+
+
+def test_tablestylesettings_rows_emptystring(tmp_path: Path) -> None:
+    styleconf = _write_table_style_rows(tmp_path, "")
+    assert styleconf.rows is None
+
+
+def test_tablestylesettings_rows_emptyarray(tmp_path: Path) -> None:
+    styleconf = _write_table_style_rows(tmp_path, [])
+    assert styleconf.rows is None
+
+
+def test_tablestylesettings_rows_omit(tmp_path: Path) -> None:
+    styleconf = _write_table_style_rows(tmp_path, None)
+    assert styleconf.rows is None
+
+
+@given(st.one_of(st.none(), st.text(), st.lists(st.text(), min_size=1)))
+def test_tablestylesettings_fuzz(rows: list[str] | str | None) -> None:
+    """Fuzzing with hypothesis."""
+    styleconf = TableStyleSettings(rows=rows)
+    if rows and any(s for s in rows):
+        if isinstance(rows, list):
+            assert styleconf.rows == (rows[0], rows[1] if len(rows) > 1 else rows[0])
+        elif isinstance(rows, str):
+            assert styleconf.rows == (rows, rows)
+    else:
+        assert styleconf.rows is None
 
 
 def test_sample_config() -> None:

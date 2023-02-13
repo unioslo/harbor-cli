@@ -7,6 +7,8 @@ STYLE_CONFIG_OPTION = "italic yellow"
 STYLE_CLI_OPTION = "green"
 """The style used to signify a CLI option, e.g. --verbose."""
 
+STYLE_TABLE_HEADER = "bold green"
+
 
 def render_config_option(option: str) -> str:
     """Render a configuration file option/key/entry."""
