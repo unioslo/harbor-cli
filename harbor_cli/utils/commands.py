@@ -99,7 +99,7 @@ def check_enumeration_options(
     query: str | None = None,
     limit: int | None = None,
 ) -> None:
-    if state.config.output.confirm_enumeration and (not limit or not query):
+    if state.config.output.confirm_enumeration and not limit and not query:
         if not bool_prompt(
             f"Neither [{STYLE_CLI_OPTION}]--query[/] nor [{STYLE_CLI_OPTION}]--limit[/] is specified. "
             "This could result in a large amount of data being returned. "
