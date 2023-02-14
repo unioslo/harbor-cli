@@ -20,6 +20,7 @@ from ...utils import parse_commalist
 from ...utils.args import create_updated_model
 from ...utils.args import model_params_from_ctx
 from ...utils.args import parse_key_value_args
+from ...utils.commands import check_enumeration_options
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
 
@@ -89,7 +90,8 @@ def get_project_logs(
         help="Project name to fetch logs for.",
     ),
 ) -> None:
-    """Fetch recent logs for a project."""
+    """Fetch logs for a project."""
+    check_enumeration_options(state, query=query, limit=limit)
     project_repr = get_project_repr(project_name)
     logs = state.run(
         state.client.get_project_logs(

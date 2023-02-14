@@ -3,10 +3,19 @@ from __future__ import annotations
 import inspect
 from typing import Any
 from typing import Type
+from typing import TYPE_CHECKING
+
+
+if TYPE_CHECKING:
+    from ..state import State  # noqa
 
 import click
 import typer
 from pydantic import BaseModel
+
+from ..style import STYLE_CLI_OPTION
+
+from ..output.prompts import bool_prompt
 
 from ..models import CommandSummary
 
@@ -29,6 +38,8 @@ def get_command_help(command: typer.models.CommandInfo) -> str:
     return ""
 
 
+# TODO: apparently we can just refactor this to use typer.Context.to_info_dict()?
+#       We have to construct a new context to get the help text though
 def get_app_commands(
     app: typer.Typer, cmds: list[CommandSummary] | None = None, current: str = ""
 ) -> list[CommandSummary]:
@@ -81,6 +92,21 @@ def get_app_callback_options(app: typer.Typer) -> list[typer.models.OptionInfo]:
     for option in callback.__defaults__:
         options.append(option)
     return options
+
+
+def check_enumeration_options(
+    state: State,
+    query: str | None = None,
+    limit: int | None = None,
+) -> None:
+    if state.config.output.confirm_enumeration and (not limit or not query):
+        if not bool_prompt(
+            f"Neither [{STYLE_CLI_OPTION}]--query[/] nor [{STYLE_CLI_OPTION}]--limit[/] is specified. "
+            "This could result in a large amount of data being returned. "
+            "Do you want to continue?",
+            warning=True,
+        ):
+            exit()
 
 
 def inject_help(

@@ -11,6 +11,7 @@ from rich.prompt import FloatPrompt
 from rich.prompt import IntPrompt
 from rich.prompt import Prompt
 
+from ..style import render_warning
 from .console import console
 from .console import err_console
 from .formatting import path_link
@@ -207,8 +208,12 @@ def bool_prompt(
     prompt: str,
     default: Any = ...,
     show_default: bool = True,
+    warning: bool = False,
     **kwargs: Any,
 ) -> bool:
+    if warning:
+        prompt = render_warning(prompt)
+
     return Confirm.ask(
         prompt,
         console=console,

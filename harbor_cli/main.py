@@ -146,6 +146,13 @@ def main_callback(
         envvar=env_var("pager"),
         config_override="output.pager",
     ),
+    confirm_enumeration: Optional[bool] = Option(
+        None,
+        "--confirm-enumeration/--no-confirm-enumeration",
+        help="Confirm before enumerating all resources without a limit or query.",
+        envvar=env_var("confirm_enumeration"),
+        config_override="output.confirm_enumeration",
+    ),
     # Output options that don't belong to the config file
     output_file: Optional[Path] = Option(
         None,
@@ -228,6 +235,8 @@ def main_callback(
         state.config.output.paging = paging
     if pager is not None:
         state.config.output.pager = pager
+    if confirm_enumeration is not None:
+        state.config.output.confirm_enumeration = confirm_enumeration
 
     # Set global options
     state.options.verbose = verbose

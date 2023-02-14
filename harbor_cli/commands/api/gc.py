@@ -12,6 +12,7 @@ from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
 from ...utils.args import create_updated_model
+from ...utils.commands import check_enumeration_options
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
 
@@ -109,14 +110,17 @@ def get_gc_jobs(
     sort: Optional[str],
     page: int,
     page_size: int,
+    limit: Optional[int],
 ) -> None:
     """Get garbage collection jobs."""
+    check_enumeration_options(state, query=query, limit=limit)
     jobs = state.run(
         state.client.get_gc_jobs(
             query=query,
             sort=sort,
             page=page,
             page_size=page_size,
+            limit=limit,
         ),
         f"Fetching Garbage Collection jobs...",
     )

@@ -20,6 +20,7 @@ The **third number** is the patch version (bug fixes)
 - `UserResp` compact table format (used by `user list`).
 - `--paging`, `--pager` options and corresponding config options for displaying results in a pager.
 - `[output.table.style]` config section for styling Rich tables.
+- `--confirm-enumeration` option and corresponding config option `[output.confirm_enumeration]` for enabling/disabling confirmation before enumerating certain types of resources that can return a very large number of results without a limit or query.
 
 ### Changed
 
