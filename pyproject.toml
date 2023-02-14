@@ -20,14 +20,14 @@ classifiers = [
   "Programming Language :: Python :: Implementation :: PyPy",
 ]
 dependencies = [
-  "typer",
-  "harborapi>=0.8.2",
-  "pydantic",
-  "platformdirs",
-  "tomli",
-  "tomli-w",
-  "rich",
-  "loguru",
+  "typer>=0.7.0",
+  "harborapi>=0.8.3",
+  "pydantic>=1.10.2<2.0.0",     # not yet sure if we can use 2.0.0 out of the box
+  "platformdirs>=2.5.4",
+  "tomli>=2.0.1",
+  "tomli-w>=1.0.0",
+  "rich>=12.6.0",
+  "loguru>=0.6.0",
   "click-repl>=0.2.0",
   "fuzzywuzzy>=0.18.0",
   "python-Levenshtein>=0.20.9",
