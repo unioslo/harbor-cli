@@ -6,6 +6,7 @@ import typer
 
 from ...output.render import render_result
 from ...state import state
+from ...utils.commands import check_enumeration_options
 from ...utils.commands import inject_resource_options
 
 # Create a command group
@@ -24,8 +25,9 @@ def list_audit_logs(
 ) -> None:
     """List audit logs for projects the current user has access to.
     [bold red]WARNING:[/] This command can return a lot of data if no query or limit
-    is specified. Use [bold]--retrieve-all[/] to fetch all pages.
+    is specified.
     """
+    check_enumeration_options(state, query=query, limit=limit)
     logs = state.run(
         state.client.get_audit_logs(
             query=query,

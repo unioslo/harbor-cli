@@ -160,6 +160,23 @@ Can be used to redirect output to any application you want, not just pagers, for
 pager = "less -r" # omit to use default
 ```
 
+#### `output.confirm_enumeration`
+
+Show a confirmation prompt when enumerating resources (e.g. `harbor auditlog list`) without a limit and/or query. The default is `true`.
+
+
+Only affects the following commands:
+
+* `harbor auditlog list`
+* `harbor replication list`
+* `harbor gc jobs`
+* `harbor project logs`
+
+```toml
+[output]
+confirm_enumeration = true
+```
+
 
 #### `output.table`
 

@@ -13,6 +13,7 @@ from ...logs import logger
 from ...output.render import render_result
 from ...state import state
 from ...utils.args import model_params_from_ctx
+from ...utils.commands import check_enumeration_options
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
 
@@ -106,8 +107,11 @@ def list_replication_executions(
     ),
     page: int = 1,
     page_size: int = 10,
+    limit: Optional[int] = None,
 ) -> None:
     """List replication executions."""
+    # treat status as the query here
+    check_enumeration_options(state, query=status, limit=limit)
     executions = state.run(
         state.client.get_replications(
             sort=sort,
