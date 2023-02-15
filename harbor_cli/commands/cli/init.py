@@ -20,6 +20,7 @@ from ...logs import LogLevel
 from ...output.console import console
 from ...output.console import err_console
 from ...output.console import exit
+from ...output.console import exit_err
 from ...output.console import success
 from ...output.formatting import path_link
 from ...output.prompts import bool_prompt
@@ -47,7 +48,7 @@ def init(
     ),
     wizard: bool = typer.Option(
         True,
-        "--wizard",
+        "--wizard/--no-wizard",
         help="Run the configuration wizard after creating the config file.",
         is_flag=True,
     ),
@@ -61,13 +62,15 @@ def init(
     try:
         config_path = create_config(path, overwrite=overwrite)
     except OverwriteError:
-        if not wizard:
-            raise typer.Exit()
+
         # TODO: verify that this path is always correct
         p = path or DEFAULT_CONFIG_FILE
         console.print(
             f"WARNING: Config file already exists ({path_link(p)})", style="yellow"
         )
+        if not wizard:
+            exit_err("Cannot proceed without overwriting config file.")
+
         wizard = bool_prompt(
             "Are you sure you want to run the configuration wizard?",
             default=False,
