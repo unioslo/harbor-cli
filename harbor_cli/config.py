@@ -21,6 +21,7 @@ from pydantic import validator
 
 from .dirs import CONFIG_DIR
 from .exceptions import ConfigError
+from .exceptions import ConfigFileNotFoundError
 from .exceptions import CredentialsError
 from .exceptions import HarborCLIError
 from .exceptions import OverwriteError
@@ -362,8 +363,14 @@ class HarborCLIConfig(BaseModel):
             if create:
                 create_config(config_file)
             else:
-                raise FileNotFoundError(f"Config file {config_file} does not exist.")
-        config = load_toml_file(config_file)
+                raise ConfigFileNotFoundError(
+                    f"Config file {config_file} does not exist."
+                )
+        try:
+            config = load_toml_file(config_file)
+        except Exception as e:
+            logger.bind(exc=e).error("Failed to load config file")
+            raise ConfigError(f"Could not load config file {config_file}: {e}") from e
         return cls(**config, config_file=config_file)
 
     def save(self, path: Path | None = None) -> None:
