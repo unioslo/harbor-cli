@@ -22,13 +22,14 @@ from typing import Sequence
 from typing import TypeVar
 
 from harborapi.ext.artifact import ArtifactInfo
+from harborapi.models import Artifact
+from harborapi.models import AuditLog
+from harborapi.models import Project
 from harborapi.models import RegistryProviders
-from harborapi.models.models import AuditLog
-from harborapi.models.models import Project
-from harborapi.models.models import Repository
-from harborapi.models.models import Search
-from harborapi.models.models import SystemInfo
-from harborapi.models.models import UserResp
+from harborapi.models import Repository
+from harborapi.models import Search
+from harborapi.models import SystemInfo
+from harborapi.models import UserResp
 from rich.panel import Panel
 from rich.table import Table
 
@@ -37,6 +38,7 @@ from ...models import ProjectExtended
 from ...utils._types import is_builtin_obj
 from .anysequence import AnySequence
 from .anysequence import anysequence_table
+from .artifact import artifact_table
 from .artifact import artifactinfo_table
 from .auditlog import auditlog_table
 from .commandsummary import commandsummary_table
@@ -54,6 +56,7 @@ T = TypeVar("T")
 RENDER_FUNCTIONS = {
     AnySequence: anysequence_table,
     ArtifactInfo: artifactinfo_table,
+    Artifact: artifact_table,
     AuditLog: auditlog_table,
     CommandSummary: commandsummary_table,
     Project: project_table,

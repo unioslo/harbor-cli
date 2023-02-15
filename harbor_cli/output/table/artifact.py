@@ -20,14 +20,20 @@ def artifact_table(artifacts: Sequence[Artifact]) -> Table:
     table.add_column("ID")
     table.add_column("Project ID")
     table.add_column("Repository ID")
+    table.add_column("Tags")
     table.add_column("Digest", overflow="fold")
     table.add_column("Created")
     table.add_column("Size")
     for artifact in artifacts:
+        tags = []
+        if artifact.tags:
+            tags = [t.name for t in artifact.tags if t.name]
+        t = ", ".join(tags)
         table.add_row(
             int_str(artifact.id),
             int_str(artifact.project_id),
             int_str(artifact.repository_id),
+            str_str(t),
             str_str(artifact.digest),
             datetime_str(artifact.push_time),
             bytesize_str(artifact.size or 0),
