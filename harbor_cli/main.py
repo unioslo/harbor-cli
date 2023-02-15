@@ -86,6 +86,20 @@ def main_callback(
         envvar=env_var("credentials_file"),
         config_override="harbor.credentials_file",
     ),
+    harbor_validate: Optional[bool] = Option(
+        None,
+        "--harbor-validate/--no-harbor-validate",
+        help=f"Validate Harbor API response data. Forces JSON output format.",
+        envvar=env_var("harbor_validate_data"),
+        config_override="harbor.validate_data",
+    ),
+    harbor_raw_mode: Optional[bool] = Option(
+        None,
+        "--harbor-raw/--no-harbor-raw",
+        help=f"Return raw data from Harbor API. Ignores output format and formatting options.",
+        envvar=env_var("harbor_raw_mode"),
+        config_override="harbor.raw_mode",
+    ),
     # Formatting
     show_description: Optional[bool] = Option(
         None,
@@ -219,6 +233,10 @@ def main_callback(
         state.config.harbor.basicauth = harbor_basicauth  # type: ignore
     if harbor_credentials_file is not None:
         state.config.harbor.credentials_file = harbor_credentials_file
+    if harbor_validate is not None:
+        state.config.harbor.validate_data = harbor_validate
+    if harbor_raw_mode is not None:
+        state.config.harbor.raw_mode = harbor_raw_mode
     if compact is not None:
         state.config.output.table.compact = compact
     if show_description is not None:
@@ -259,6 +277,12 @@ def configure_from_config(config: HarborCLIConfig) -> None:
         setup_logging(config.logging.level)
     else:
         disable_logging()
+
+    if not config.harbor.validate_data:
+        logger.warning(
+            "Data validation is disabled. Forcing JSON output format. Change output mode to JSON in the config or via CLI options to suppress this warning."
+        )
+        config.output.format = OutputFormat.JSON
 
 
 def main() -> None:

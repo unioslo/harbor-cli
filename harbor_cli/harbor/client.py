@@ -19,7 +19,11 @@ _CLIENTS = {}  # type: dict[str, HarborAsyncClient]
 def get_client(config: HarborCLIConfig) -> HarborAsyncClient:
     if _CLIENTS.get(config.harbor.url) is None:
         # Instantiate harbor client with credentials dict from config
-        _CLIENTS[config.harbor.url] = HarborAsyncClient(**(config.harbor.credentials))
+        _CLIENTS[config.harbor.url] = HarborAsyncClient(
+            **(config.harbor.credentials),
+            validate=config.harbor.validate_data,
+            raw=config.harbor.raw_mode,
+        )
     return _CLIENTS[config.harbor.url]
 
 
