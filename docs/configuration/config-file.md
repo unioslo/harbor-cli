@@ -90,6 +90,28 @@ credentials_file = "/path/to/credentials.json"
 ```
 
 ----
+#### `harbor.validate_data`
+
+Controls whether or not the [harborapi](https://github.com/pederhan/harborapi) library  validates the data returned by the Harbor API.  Forces the output format to `json`. Not guaranteed to work with all commands. The default is `true`.
+
+
+```toml
+[harbor]
+validate_data = true
+```
+
+----
+#### `harbor.raw_mode`
+
+Controls whether or not the data from the API should be processed by the [harborapi](https://github.com/pederhan/harborapi) library before being returned. Overrides `harbor.validate_data`. Ignores output mode. Not guaranteed to work with all commands. The default is `false`.
+
+
+```toml
+[harbor]
+raw_mode = false
+```
+
+----
 
 ### `logging`
 

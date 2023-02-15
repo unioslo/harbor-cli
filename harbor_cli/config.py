@@ -116,6 +116,8 @@ class HarborSettings(BaseModel):
     secret: SecretStr = SecretStr("")
     basicauth: SecretStr = SecretStr("")
     credentials_file: Optional[Path] = ""  # type: ignore # validator below
+    validate_data: bool = Field(True, alias="validate")
+    raw_mode: bool = False
 
     @validator("credentials_file", pre=True)
     def _empty_string_is_none(cls, v: Any) -> Any:

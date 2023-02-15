@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from contextlib import nullcontext
+from typing import Any
 from typing import List
 from typing import Sequence
 from typing import TypeVar
@@ -28,10 +29,13 @@ def render_result(result: T, ctx: typer.Context | None = None) -> None:
     """Render the result of a command."""
     fmt = state.config.output.format
     paging = state.config.output.paging
+    raw_mode = state.config.harbor.raw_mode
 
     ctx_manager = console.pager() if paging else nullcontext()
     with ctx_manager:  # type: ignore # not quite sure why mypy is complaining here
-        if fmt == OutputFormat.TABLE:
+        if raw_mode:  # raw mode ignores output format
+            render_raw(result, ctx)
+        elif fmt == OutputFormat.TABLE:
             render_table(result, ctx)
         elif fmt == OutputFormat.JSON:
             render_json(result, ctx)
@@ -126,3 +130,8 @@ def render_json(result: T | Sequence[T], ctx: typer.Context | None = None) -> No
         # We have to specify indent again here, because print_json()
         # ignores the indent of the JSON string passed to it.
         console.print_json(o_json, indent=indent)
+
+
+def render_raw(result: Any, ctx: typer.Context | None = None) -> None:
+    """Render the result of data fetched in raw mode."""
+    console.print(result)
