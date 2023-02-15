@@ -278,9 +278,11 @@ def configure_from_config(config: HarborCLIConfig) -> None:
     else:
         disable_logging()
 
-    if not config.harbor.validate_data:
+    # Force JSON output format if validation==False and raw_mode==True
+    if not config.harbor.validate_data and not config.harbor.raw_mode:
         logger.warning(
-            "Data validation is disabled. Forcing JSON output format. Change output mode to JSON in the config or via CLI options to suppress this warning."
+            "Data validation is disabled. Forcing JSON output format. "
+            "Change output mode to JSON in the config or via CLI options to suppress this warning."
         )
         config.output.format = OutputFormat.JSON
 
