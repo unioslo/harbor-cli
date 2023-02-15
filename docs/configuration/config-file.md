@@ -207,7 +207,7 @@ See [Formats: Compact Table](/configuration/formats/#compact-tables) for more in
 
 ### `output.table.style`
 
-Configuration for styling of Rich tables. Largely follows style options of [Rich tables](https://rich.readthedocs.io/en/stable/tables.html#table-options). Styles are specified as [Rich styles](https://rich.readthedocs.io/en/stable/style.html#styles).
+Configuration for styling of Rich tables. Largely follows style options of [Rich tables](https://rich.readthedocs.io/en/stable/tables.html#table-options). Styles are specified as [Rich styles](https://rich.readthedocs.io/en/stable/style.html#styles). A list of colors can be found [here](https://rich.readthedocs.io/en/stable/appendix/colors.html).
 
 
 #### `output.table.style.title`
