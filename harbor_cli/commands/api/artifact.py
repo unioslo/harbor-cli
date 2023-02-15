@@ -130,7 +130,6 @@ def delete_artifact(
         state.run(
             state.client.delete_artifact(an.project, an.repository, an.reference),
             f"Deleting artifact {artifact}...",
-            no_handle=NotFound,
         )
     except NotFound:
         exit_err(f"Artifact {artifact} not found.")
@@ -169,7 +168,6 @@ def copy_artifact(
         resp = state.run(
             state.client.copy_artifact(project, repository, artifact),
             f"Copying artifact {artifact} to {project}/{repository}...",
-            no_handle=NotFound,
         )
     except NotFound:
         exit_err(f"Artifact {artifact} not found.")

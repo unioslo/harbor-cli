@@ -237,7 +237,6 @@ def check_registry_status(
         state.run(
             state.client.check_registry_status(ping),
             "Pinging registry...",
-            no_handle=NotFound,
         )
     except NotFound:
         exit_err(f"Registry (id={registry_id}) not found.")

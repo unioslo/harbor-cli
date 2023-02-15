@@ -13,11 +13,9 @@ if TYPE_CHECKING:
     from rich.console import Console
 
 from harborapi import HarborAsyncClient
-from harborapi.exceptions import StatusError
 from pydantic import BaseModel
 
 from .config import HarborCLIConfig
-from .exceptions import handle_status_error
 
 T = TypeVar("T")
 
@@ -107,14 +105,9 @@ class State:
         if not status.endswith("..."):  # aesthetic :)
             status += "..."
 
-        try:
-            # show spinner when running a coroutine
-            with self.console.status(status):
-                resp = self.loop.run_until_complete(coro)
-        except StatusError as e:
-            if no_handle and isinstance(e, no_handle):
-                raise
-            handle_status_error(e)
+        # show spinner when running a coroutine
+        with self.console.status(status):
+            resp = self.loop.run_until_complete(coro)
         return resp
 
 

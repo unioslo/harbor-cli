@@ -54,6 +54,34 @@ class ArtifactNameFormatError(HarborCLIError):
         )
 
 
+class Exiter(Protocol):
+    """Protocol class for exit function that can be passed to an
+    exception handler function.
+
+    See Also
+    --------
+    [harbor_cli.exceptions.HandleFunc][]
+    """
+
+    def __call__(
+        self, msg: str, code: int = ..., prefix: str = ..., **extra: Any
+    ) -> NoReturn:
+        ...
+
+
+@runtime_checkable
+class HandleFunc(Protocol):
+    """Interface for exception handler functions.
+
+    They take any exception and an Exiter function as the arguments
+    and exit with the appropriate message after running any necessary
+    cleanup and/or logging.
+    """
+
+    def __call__(self, e: Any, exiter: Exiter) -> NoReturn:
+        ...
+
+
 MESSAGE_BADREQUEST = "400 Bad request: {method} {url}. Check your input. If you think this is a bug, please report it."
 MESSAGE_UNAUTHORIZED = "401 Unauthorized: {method} {url}. Check your credentials."
 MESSAGE_FORBIDDEN = "403 Forbidden: {method} {url}. Make sure you have permissions to access the resource."
@@ -85,7 +113,7 @@ class Default(Dict[str, Any]):
         return "{" + key + "}"
 
 
-def handle_status_error(e: StatusError) -> NoReturn:
+def handle_status_error(e: StatusError, exiter: Exiter) -> NoReturn:
     """Handles an HTTP status error from the Harbor API and exits with
     the appropriate message.
     """
@@ -122,19 +150,6 @@ def handle_status_error(e: StatusError) -> NoReturn:
     exit_err(msg)
 
 
-class Exiter(Protocol):
-    def __call__(
-        self, msg: str, code: int = ..., prefix: str = ..., **extra: Any
-    ) -> NoReturn:
-        ...
-
-
-@runtime_checkable
-class HandleFunc(Protocol):
-    def __call__(self, e: Any, exiter: Exiter) -> NoReturn:
-        ...
-
-
 def handle_validationerror(e: ValidationError, exiter: Exiter) -> NoReturn:
     """Handles a pydantic ValidationError and exits with the appropriate message."""
     from .output.console import err_console
@@ -145,6 +160,7 @@ def handle_validationerror(e: ValidationError, exiter: Exiter) -> NoReturn:
 
 EXC_HANDLERS: Mapping[Type[Exception], HandleFunc] = {
     ValidationError: handle_validationerror,
+    StatusError: handle_status_error,
 }
 
 
