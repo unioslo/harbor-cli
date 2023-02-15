@@ -3,6 +3,7 @@ that they don't need their own module."""
 from __future__ import annotations
 
 from contextlib import contextmanager
+from itertools import chain
 from typing import Any
 from typing import Iterable
 from typing import Iterator
@@ -97,10 +98,8 @@ def forbid_extra(model: BaseModel) -> Iterator[None]:
     models = []  # type: list[tuple[BaseModel, Extra]]
 
     try:
-        # manually add the top-level model
-        models.append((model, model.__config__.extra))
-        # Iterate over all submodels in the model
-        for m in iter_submodels(model):
+        # Iterate over all submodels in the model + model itself
+        for m in chain(iter_submodels(model), [model]):
             original_extra = m.__config__.extra
             models.append((m, original_extra))
             m.__config__.extra = Extra.forbid
