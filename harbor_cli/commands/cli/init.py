@@ -9,7 +9,6 @@ from ...app import app
 from ...config import create_config
 from ...config import DEFAULT_CONFIG_FILE
 from ...config import HarborCLIConfig
-from ...config import load_config
 from ...config import save_config
 from ...exceptions import ConfigError
 from ...exceptions import OverwriteError
@@ -19,12 +18,15 @@ from ...format import OutputFormat
 from ...logs import logger
 from ...logs import LogLevel
 from ...output.console import console
+from ...output.console import err_console
+from ...output.console import exit
 from ...output.console import success
 from ...output.formatting import path_link
 from ...output.prompts import bool_prompt
 from ...output.prompts import int_prompt
 from ...output.prompts import path_prompt
 from ...output.prompts import str_prompt
+from ...style import STYLE_COMMAND
 
 
 TITLE_STYLE = "bold"  # Style for titles used by each config category
@@ -85,7 +87,15 @@ def run_config_wizard(config_path: Optional[Path] = None) -> None:
     the loaded config object in-place."""
     conf_exists = config_path is None
 
-    config = load_config(config_path)
+    try:
+        config = HarborCLIConfig.from_file(config_path)
+    except Exception as e:
+        err_console.print(f"Failed to load config: {e}")
+        err_console.print(
+            f"[white]Run [{STYLE_COMMAND}]harbor init --overwrite[/] to create a new config file.[/]"
+        )
+        exit(code=1)
+
     assert config.config_file is not None
 
     console.print()
