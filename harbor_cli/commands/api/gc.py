@@ -102,7 +102,7 @@ def update_gc_schedule(
 
 
 # HarborAsyncClient.get_gc_jobs()
-@app.command("jobs", no_args_is_help=True)
+@app.command("jobs")
 @inject_resource_options()
 def get_gc_jobs(
     ctx: typer.Context,
