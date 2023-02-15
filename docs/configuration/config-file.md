@@ -132,7 +132,7 @@ Harbor CLI currently supports {{ formats | length }} different output formats:
 - `{{ format }}`
 {% endfor %}
 
-See [Formats](/configuration/formats) for more information on the different output formats.
+See [Formats](./formats) for more information on the different output formats.
 
 ```toml
 [output]
@@ -182,7 +182,7 @@ confirm_enumeration = true
 
 The `output.table` table contains settings related to the `table` output format.
 
-See [Formats: Table](/configuration/formats/#table-table) for more information.
+See [Formats: Table](./formats/#table-table) for more information.
 
 #### `output.table.description`
 
@@ -202,7 +202,7 @@ Whether or not to use compact output tables. Mutually exclusive with [`output.ta
 compact = false
 ```
 
-See [Formats: Compact Table](/configuration/formats/#compact-tables) for more information.
+See [Formats: Compact Table](./formats/#compact-tables) for more information.
 
 
 ### `output.table.style`

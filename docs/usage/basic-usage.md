@@ -5,7 +5,7 @@ The application consists of several top-level commands pertaining to specific Ha
 
 ## Global options
 
-Most of the global options listed in [Help output](#help-output) are overrides for configuration file settings. These options can be used to override configuration options. See [Options](./options.md) for more information about each of the options. For persistent configuration of these options, see [Configuration](/configuration/config-file).
+Most of the global options listed in [Help output](#help-output) are overrides for configuration file settings. These options can be used to override configuration options. See [Options](./options.md) for more information about each of the options. For persistent configuration of these options, see [Configuration](../configuration/config-file).
 
 Global options must be specified before the command to run, e.g.:
 
