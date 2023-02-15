@@ -13,6 +13,9 @@ project list
 ```
 
 {% for option in options %}
+
+----
+
 ## {{ option['params'] }}
 {% if option['envvar'] %}
 **Environment variable:** `{{ option['envvar'] }}`
@@ -22,5 +25,4 @@ project list
 {%- endif %}
 
 {{ option['help'] }}
-
 {%- endfor %}
