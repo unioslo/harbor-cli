@@ -83,6 +83,7 @@ nav:
       - "Utils":
           - "reference/utils/index.md"
           - "reference/utils/args.md"
+          - "reference/utils/commands.md"
           - "reference/utils/utils.md"
       - "Harbor":
           - "reference/harbor/index.md"

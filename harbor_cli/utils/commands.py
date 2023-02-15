@@ -266,22 +266,26 @@ def inject_resource_options(
         If True, use the default value specified by a parameter's typer.Option() field
         as the default value for the parameter, by default True.
 
-        Example:
-        @inject_resource_options(use_defaults=True)
-        my_func(page_size: int = typer.Option(20)) -> None: ...
-
-        If use_defaults is True, the default value of page_size will be 20,
-        instead of 10, which is the value inject_page_size() would use by default.
-        NOTE: Only accepts defaults specified via typer.Option() and
-        typer.Argument() instances!
-
-        @inject_resource_options(use_default=True)
-        my_func(page_size: int = 20) -> None: ... # will fail (for now)
-
     Returns
     -------
     Any
         The decorated function
+
+    Examples
+    -------
+    ```python
+    @inject_resource_options(use_defaults=True)
+    my_func(page_size: int = typer.Option(20)) -> None: ...
+    ```
+    If use_defaults is True, the default value of page_size will be 20,
+    instead of 10, which is the value inject_page_size() would use by default.
+    !!! warning
+        `inject_resource_options()` only accepts parameter defaults specified with typer.Option() and typer.Argument()!
+
+    ```python
+    @inject_resource_options(use_default=True)
+    my_func(page_size: int = 20) -> None: ... # will fail (for now)
+    ```
     """
 
     # TODO: add check that the function signature is in the correct order
