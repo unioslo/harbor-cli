@@ -2,10 +2,15 @@
 that they don't need their own module."""
 from __future__ import annotations
 
+from contextlib import contextmanager
 from typing import Any
 from typing import Iterable
+from typing import Iterator
 from typing import MutableMapping
 from typing import TypeVar
+
+from pydantic import BaseModel
+from pydantic import Extra
 
 MappingType = TypeVar("MappingType", bound=MutableMapping[str, Any])
 
@@ -64,3 +69,42 @@ def replace_none(d: MappingType, replacement: Any = "") -> MappingType:
         elif value is None:
             d[key] = replacement
     return d
+
+
+def iter_submodels(model: BaseModel) -> Iterator[BaseModel]:
+    """Iterates recursively over a Pydantic model and returns all submodels."""
+    for field, field_info in model.__fields__.items():
+        try:
+            if field_info.type_ and issubclass(field_info.type_, BaseModel):
+                submodel = getattr(model, field)  # type: BaseModel
+                yield submodel
+                yield from iter_submodels(submodel)
+        except TypeError:
+            pass
+
+
+@contextmanager
+def forbid_extra(model: BaseModel) -> Iterator[None]:
+    """Context manager that temporarily forbids extra fields on a pydantic
+    model. Useful for any sort of modifications that require strict checking
+    of extra fields, where normally extra fields would be allowed.
+
+    See Also
+    --------
+    [harbor_cli.utils.iter_submodels][]
+    """
+    # A list of models and their pre-modification extra settings.
+    models = []  # type: list[tuple[BaseModel, Extra]]
+
+    try:
+        # manually add the top-level model
+        models.append((model, model.__config__.extra))
+        # Iterate over all submodels in the model
+        for m in iter_submodels(model):
+            original_extra = m.__config__.extra
+            models.append((m, original_extra))
+            m.__config__.extra = Extra.forbid
+        yield
+    finally:
+        for model, original_extra in models:
+            model.__config__.extra = original_extra

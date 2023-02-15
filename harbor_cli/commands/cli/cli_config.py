@@ -5,17 +5,16 @@ from typing import Any
 from typing import Optional
 
 import typer
-from pydantic import Extra
 
 from ...config import HarborCLIConfig
 from ...logs import logger
 from ...output.console import console
-from ...output.console import err_console
 from ...output.console import exit_err
 from ...output.console import success
 from ...output.render import render_result
 from ...output.table.anysequence import AnySequence
 from ...state import state
+from ...utils.utils import forbid_extra
 
 # Create a command group
 app = typer.Typer(
@@ -93,7 +92,7 @@ def set_cli_config(
     as_toml: bool = typer.Option(
         True,
         "--toml/--no-toml",
-        help="Render config as TOML if [green]--show[/] is set. Overrides [green]--format[/].",
+        help="Render updated config as TOML in terminal if [green]--show[/] is set. Overrides global option [green]--format[/].",
     ),
 ) -> None:
     """Set a key in the CLI configuration."""
@@ -101,23 +100,21 @@ def set_cli_config(
     if "." in key:
         attrs = key.split(".")
 
-    try:
-        # temporarily forbid extra fields, so typos raise an error
-        state.config.__config__.extra = Extra.forbid
-        if attrs:
-            obj = getattr(state.config, attrs[0])
-            for attr in attrs[1:-1]:
-                obj = getattr(obj, attr)
-            setattr(obj, attrs[-1], value)
-        else:
-            setattr(state.config, key, value)
-    except (
-        ValueError,  # pydantic raises ValueError for unknown fields
-        AttributeError,
-    ):
-        err_console.print(f"Invalid key: [red]{key}[/]")
-    finally:
-        state.config.__config__.extra = Extra.forbid
+    # Forbid extra temporarily so typos trigger errors
+    with forbid_extra(state.config):
+        try:
+            if attrs:
+                obj = getattr(state.config, attrs[0])
+                for attr in attrs[1:-1]:
+                    obj = getattr(obj, attr)
+                setattr(obj, attrs[-1], value)
+            else:
+                setattr(state.config, key, value)
+        except (
+            ValueError,  # pydantic raises ValueError for unknown fields
+            AttributeError,  # getattr call failed
+        ):
+            exit_err(f"Invalid config key: {key!r}")
 
     if not session:
         state.config.save(path=path)
