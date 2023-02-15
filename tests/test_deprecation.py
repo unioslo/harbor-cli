@@ -7,7 +7,7 @@ from pytest import LogCaptureFixture
 from pytest_mock import MockerFixture
 from typer.testing import CliRunner
 
-from harbor_cli.deprecation import check_deprecated_option
+from harbor_cli.deprecation import check_deprecated_options
 from harbor_cli.deprecation import Deprecated
 from harbor_cli.deprecation import get_deprecated_params
 from harbor_cli.deprecation import used_deprecated
@@ -16,7 +16,7 @@ app = typer.Typer()
 runner = CliRunner(mix_stderr=False)
 
 
-def test_check_deprecated_option(
+def test_check_deprecated_options(
     mocker: MockerFixture, caplog: LogCaptureFixture
 ) -> None:
     @app.command()
@@ -47,7 +47,7 @@ def test_check_deprecated_option(
         assert len(used) == 1
         assert used[0] == "--long-option1"
 
-        check_deprecated_option(ctx)
+        check_deprecated_options(ctx)
 
     args = ["--long-option1", "arg", "--long-option2", "arg"]
     # patch sys.argv to simulate the user passing in the deprecated option

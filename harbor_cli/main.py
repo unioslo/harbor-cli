@@ -11,7 +11,7 @@ from . import harbor
 from .app import app
 from .config import env_var
 from .config import HarborCLIConfig
-from .deprecation import check_deprecated_option
+from .deprecation import check_deprecated_options
 from .deprecation import Deprecated
 from .exceptions import handle_exception
 from .exceptions import HarborCLIError
@@ -177,7 +177,7 @@ def main_callback(
     Configuration options that affect all commands.
     """
     setup_logging()
-    check_deprecated_option(ctx)
+    check_deprecated_options(ctx)
 
     # These commands don't require state management
     # and can be run without a config file or client.
