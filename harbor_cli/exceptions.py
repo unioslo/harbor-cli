@@ -170,5 +170,5 @@ def handle_exception(e: Exception) -> NoReturn:
 
     handler = EXC_HANDLERS.get(type(e), None)
     if not handler:
-        exit_err(str(e))
+        exit_err(str(e), exception=e)
     handler(e, exit_err)
