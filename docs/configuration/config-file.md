@@ -33,6 +33,8 @@ The `harbor` table contains settings related to your Harbor instance. There are 
 
 The order in which they are specified here is also the order they are evaluated. If multiple methods are specified, the first one that is valid will be used.
 
+----
+
 
 #### `harbor.url`
 
@@ -43,6 +45,8 @@ The URL of your Harbor instance.
 url = "https://harbor.example.com"
 ```
 
+----
+
 #### `harbor.username`
 
 One of the 3 ways to authenticate with Harbor. The username to use when authenticating with Harbor. When `username` is specified, `secret` must also be specified.
@@ -51,6 +55,8 @@ One of the 3 ways to authenticate with Harbor. The username to use when authenti
 [harbor]
 username = "admin"
 ```
+
+----
 
 #### `harbor.secret`
 
@@ -61,6 +67,8 @@ The secret (password) to use when authentication with a username. When `secret` 
 secret = "password"
 ```
 
+----
+
 #### `harbor.basicauth`
 
 The Base64-encoded basic access credentials to use when authenticating with Harbor. When `basicauth` is specified, `username` and `secret` must not be specified.
@@ -69,6 +77,8 @@ The Base64-encoded basic access credentials to use when authenticating with Harb
 [harbor]
 basicauth="dXNlcm5hbWU6cGFzc3dvcmQ="
 ```
+
+----
 
 #### `harbor.credentials_file`
 
@@ -79,10 +89,13 @@ The path to the JSON credentials file to use when authenticating. Typically obta
 credentials_file = "/path/to/credentials.json"
 ```
 
+----
+
 ### `logging`
 
 The `logging` table contains settings related to configuring logging. Harbor CLI currently uses the [loguru](https://github.com/Delgan/loguru) logging library, but this might change in the future. None of the options pertain specifically to loguru, but are instead generic logging options.
 
+----
 
 #### `logging.enabled`
 
@@ -93,6 +106,8 @@ Whether or not to enable logging. The default is `true`.
 enabled = true
 ```
 
+----
+
 #### `logging.structlog`
 
 Whether or not to enable [structured logging](https://loguru.readthedocs.io/en/stable/overview.html#structured-logging-as-needed). The default is `false`.
@@ -101,6 +116,8 @@ Whether or not to enable [structured logging](https://loguru.readthedocs.io/en/s
 [logging]
 structlog = false
 ```
+
+----
 
 #### `logging.level`
 
@@ -119,10 +136,13 @@ The logging level to use. The default is `INFO`. The available logging levels ar
 level = "INFO"
 ```
 
+----
+
 ### `output`
 
 The `output` table contains settings related to the output of Harbor CLI.
 
+----
 
 #### `output.format`
 
@@ -139,6 +159,8 @@ See [Formats](./formats) for more information on the different output formats.
 format = "table"
 ```
 
+----
+
 #### `output.paging`
 
 Show the output in a pager (less, etc.). The default is `false`.
@@ -148,6 +170,7 @@ Show the output in a pager (less, etc.). The default is `false`.
 paging = false
 ```
 
+----
 
 #### `output.pager`
 
@@ -160,10 +183,11 @@ Can be used to redirect output to any application you want, not just pagers, for
 pager = "less -r" # omit to use default
 ```
 
+----
+
 #### `output.confirm_enumeration`
 
 Show a confirmation prompt when enumerating resources (e.g. `harbor auditlog list`) without a limit and/or query. The default is `true`.
-
 
 Only affects the following commands:
 
@@ -177,12 +201,15 @@ Only affects the following commands:
 confirm_enumeration = true
 ```
 
+----
 
 #### `output.table`
 
 The `output.table` table contains settings related to the `table` output format.
 
 See [Formats: Table](./formats/#table-table) for more information.
+
+----
 
 #### `output.table.description`
 
@@ -192,6 +219,8 @@ Whether or not to include the descriptions of each value in the output tables. M
 [output.table]
 description = false
 ```
+
+----
 
 #### `output.table.compact`
 
@@ -204,11 +233,14 @@ compact = false
 
 See [Formats: Compact Table](./formats/#compact-tables) for more information.
 
+----
 
 ### `output.table.style`
 
 Configuration for styling of Rich tables. Largely follows style options of [Rich tables](https://rich.readthedocs.io/en/stable/tables.html#table-options). Styles are specified as [Rich styles](https://rich.readthedocs.io/en/stable/style.html#styles). A list of colors can be found [here](https://rich.readthedocs.io/en/stable/appendix/colors.html).
 
+
+----
 
 #### `output.table.style.title`
 
@@ -219,6 +251,8 @@ Style of table titles.
 title = "bold green"
 ```
 
+----
+
 #### `output.table.style.header`
 
 Style of table headers.
@@ -227,6 +261,8 @@ Style of table headers.
 [output.table.style]
 header = "bold green"
 ```
+
+----
 
 #### `output.table.style.rows`
 
@@ -246,6 +282,8 @@ rows = ["black on white", ""]
 rows = ["", "black on white"]
 ```
 
+----
+
 #### `output.table.style.border`
 
 Styling of border characters.
@@ -255,6 +293,8 @@ Styling of border characters.
 border = "bold green"
 ```
 
+----
+
 #### `output.table.style.footer`
 
 Styling of table footers.
@@ -263,6 +303,8 @@ Styling of table footers.
 [output.table.style]
 footer = "bold green"
 ```
+
+----
 
 #### `output.table.style.caption`
 
