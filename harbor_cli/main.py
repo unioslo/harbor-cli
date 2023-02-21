@@ -29,6 +29,7 @@ from .state import state
 for group in commands.ALL_GROUPS:
     app.add_typer(group)
 
+_PRE_OVERRIDE_CONFIG = None  # type: HarborCLIConfig | None
 
 # The callback defines global command options
 @app.callback(no_args_is_help=True)
@@ -221,6 +222,15 @@ def main_callback(
             logger.info("Proceeding with default configuration.")
             logger.info("Run 'harbor init' to configure Harbor CLI. ")
         state.add_config(conf)
+
+    # If we're in the REPL, we want to save the original config before
+    # overriding, so that overrides specified in the REPL don't persist
+    # between commands.
+    global _PRE_OVERRIDE_CONFIG
+    if _PRE_OVERRIDE_CONFIG is not None:
+        state.config = _PRE_OVERRIDE_CONFIG
+    if state.repl:
+        _PRE_OVERRIDE_CONFIG = state.config.copy()
 
     # Set config overrides
     if harbor_url is not None:
