@@ -24,7 +24,15 @@ def get_client(config: HarborCLIConfig) -> HarborAsyncClient:
             validate=config.harbor.validate_data,
             raw=config.harbor.raw_mode,
         )
-    return _CLIENTS[config.harbor.url]
+    client = _CLIENTS[config.harbor.url]
+    # Ensure we use the latest config values (when running in REPL mode)
+    # When running in REPL mode, we re-use the same client instance, but
+    # we might pass in new config values
+    client.raw = config.harbor.raw_mode
+    client.validate = config.harbor.validate_data
+    # TODO: credentials are only handled on CLI startup, so we
+    # need to find a way to pass new credentials to the client
+    return client
 
 
 def setup_client(config: HarborCLIConfig) -> HarborAsyncClient:
