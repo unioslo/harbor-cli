@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import List
 from typing import Optional
 
 import typer
@@ -15,7 +16,10 @@ from ...output.console import console
 from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
+from ...utils.args import add_to_query
+from ...utils.args import parse_commalist
 from ...utils.commands import inject_resource_options
+from ...utils.prompts import check_enumeration_options
 from ...utils.prompts import delete_prompt
 from ..help import ARTIFACT_HELP_STRING
 
@@ -47,19 +51,22 @@ app.add_typer(label_cmd)
 @inject_resource_options()
 def list_artifacts(
     ctx: typer.Context,
-    query: Optional[str],
-    project: str = typer.Argument(
-        ...,
-        help="Name of project to fetch artifacts from.",
+    project: List[str] = typer.Option(
+        [],
+        help="Name of project to fetch artifacts from. Omit or pass '*' for all projects.",
+        callback=parse_commalist,
     ),
-    repo: Optional[str] = typer.Argument(
-        None,
-        help="Specific repository in project to fetch artifacts from.",
+    repo: List[str] = typer.Option(
+        [],
+        help="Specific repositor(y/ies) in project(s) to fetch artifacts from.",
+        callback=parse_commalist,
     ),
-    tag: Optional[str] = typer.Option(
-        None,
+    query: Optional[str] = ...,  # type: ignore
+    tag: List[str] = typer.Option(
+        [],
         "--tag",
-        help="Limit to artifacts with this tag (e.g. 'latest').",
+        help="Limit to artifacts with tag(s) (e.g. 'latest').",
+        callback=parse_commalist,
     ),
     with_report: bool = typer.Option(
         False,
@@ -77,24 +84,24 @@ def list_artifacts(
     # TODO: add ArtifactReport filtering options here
 ) -> None:
     """List artifacts in a project or in a specific repository."""
-    if "/" in project:
-        logger.debug("Interpreting argument format as <project>/<repo>.")
-        project, repo = project.split("/", 1)
+    # The presence of an asterisk trumps all other arguments
+    # None signals that we want to enumerate over all projects
+    if any(x == "*" for x in project) or not project:
+        project = None  # type: ignore
+    repositories = repo if repo else None
+    query = add_to_query(query, tags=tag)
 
-    # TODO: add pagination to output
-
-    if project and repo:
-        repositories = [repo]
-    else:
-        repositories = None  # all repos
+    # Confirm enumeration over all artifacts in all projects
+    if project is None and repositories is None:
+        check_enumeration_options(state, query=query, limit=None)
 
     artifacts = state.run(
         get_artifacts(
             state.client,
-            projects=[project],
+            projects=project,
             repositories=repositories,
-            tag=tag,
             query=query,
+            with_report=with_report,
         ),
         "Fetching artifacts...",
     )

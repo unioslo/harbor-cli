@@ -6,8 +6,8 @@ import typer
 
 from ...output.render import render_result
 from ...state import state
-from ...utils.commands import check_enumeration_options
 from ...utils.commands import inject_resource_options
+from ...utils.prompts import check_enumeration_options
 
 # Create a command group
 app = typer.Typer(name="auditlog", help="System information", no_args_is_help=True)

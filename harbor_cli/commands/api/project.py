@@ -20,9 +20,9 @@ from ...utils import parse_commalist
 from ...utils.args import create_updated_model
 from ...utils.args import model_params_from_ctx
 from ...utils.args import parse_key_value_args
-from ...utils.commands import check_enumeration_options
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
+from ...utils.prompts import check_enumeration_options
 from ...utils.prompts import delete_prompt
 
 # Create a command group

@@ -12,9 +12,9 @@ from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
 from ...utils.args import create_updated_model
-from ...utils.commands import check_enumeration_options
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
+from ...utils.prompts import check_enumeration_options
 
 # Create a command group
 app = typer.Typer(
