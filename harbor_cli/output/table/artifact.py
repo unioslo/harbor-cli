@@ -42,23 +42,36 @@ def artifact_table(artifacts: Sequence[Artifact]) -> Table:
 
 
 def artifactinfo_table(artifacts: Sequence[ArtifactInfo]):
-    """Display one or more artifacts in a table."""
+    """Display one or more artifacts (ArtifactInfo) in a table."""
     table = table = get_table("Artifact", artifacts)
     table.add_column("Project")
     table.add_column("Repository")
     table.add_column("Tags")
-    table.add_column("Digest")
+    table.add_column("Digest", overflow="fold")
+    severity = False
+    if artifacts and any(a.artifact.scan_overview for a in artifacts):
+        table.add_column("Severity")
+        severity = True
     table.add_column("Created")
     table.add_column("Size")
     for artifact in artifacts:
-        table.add_row(
+        rows = [
             str_str(artifact.project_name),
             str_str(artifact.repository_name),
             str_str(artifact.tags),
             str_str(artifact.artifact.digest),
             datetime_str(artifact.artifact.push_time),
             bytesize_str(artifact.artifact.size or 0),
-        )
+        ]
+        if severity:
+            sev = None
+            if artifact.artifact.scan_overview:
+                try:
+                    sev = artifact.artifact.scan_overview.severity  # type: ignore
+                except AttributeError:
+                    pass
+            rows.insert(4, str_str(sev))
+        table.add_row(*rows)
     return table
 
 
