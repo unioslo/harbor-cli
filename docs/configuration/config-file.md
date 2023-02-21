@@ -123,7 +123,7 @@ The `general` table contains general settings.
 
 #### `general.confirm_deletion`
 
-Whether or not to show a confirmation prompt when deleting resources. The default is `true`.--harbor-raw replication policy list
+Whether or not to show a confirmation prompt when deleting resources unless `--force` is passed in. The default is `true`.
 
 ```toml
 [general]
