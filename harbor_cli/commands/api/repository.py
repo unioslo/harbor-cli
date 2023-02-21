@@ -10,6 +10,7 @@ from ...output.render import render_result
 from ...state import state
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
+from ...utils.prompts import delete_prompt
 
 
 # Create a command group
@@ -61,16 +62,13 @@ def delete_artifact(
     force: bool = typer.Option(
         False,
         "--force",
-        "-f",
-        help="Skip confirmation prompt.",
+        help="Force deletion without confirmation.",
     ),
 ) -> None:
     """Delete a repository."""
-    if not force:
-        typer.confirm(
-            f"Are you sure you want to delete {project}/{repository}?",
-            abort=True,
-        )
+    delete_prompt(
+        state.config, force, resource="repository", name=f"{project}/{repository}"
+    )
     state.run(
         state.client.delete_repository(
             project,
