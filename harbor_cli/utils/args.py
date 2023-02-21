@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import Any
-from typing import List
 from typing import Type
 from typing import TypeVar
 
@@ -116,18 +115,26 @@ def create_updated_model(
     return new.parse_obj(d)
 
 
-def parse_commalist(arg: List[str]) -> List[str]:
-    """Parses an argument that can be specified multiple times,
-    or as a comma-separated list, into a list of strings.
+def parse_commalist(arg: list[str] | None) -> list[str]:
+    """Parses an optional argument that can be specified multiple times,
+    or as a comma-separated string, into a list of strings.
 
     `harbor subcmd --arg foo --arg bar,baz`
     will be parsed as: `["foo", "bar", "baz"]`
 
     Examples
     -------
+    ```py
     >>> parse_commalist(["foo", "bar,baz"])
     ["foo", "bar", "baz"]
+    >>> parse_commalist([])
+    []
+    >>> parse_commalist(None)
+    []
+    ```
     """
+    if arg is None:
+        return []
     return [item for arg_list in arg for item in arg_list.split(",")]
 
 

@@ -107,6 +107,7 @@ def test_create_updated_model(mock_ctx: typer.Context) -> None:
 @pytest.mark.parametrize(
     "arg,expected",
     [
+        (None, []),
         ([], []),
         (["foo"], ["foo"]),
         (["foo,bar"], ["foo", "bar"]),
@@ -114,7 +115,7 @@ def test_create_updated_model(mock_ctx: typer.Context) -> None:
         (["foo,bar", "baz,qux"], ["foo", "bar", "baz", "qux"]),
     ],
 )
-def test_parse_commalist(arg: list[str], expected: list[str]) -> None:
+def test_parse_commalist(arg: list[str] | None, expected: list[str]) -> None:
     assert parse_commalist(arg) == expected
 
 
