@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from contextlib import nullcontext
 from typing import Any
 from typing import List
@@ -134,4 +135,9 @@ def render_json(result: T | Sequence[T], ctx: typer.Context | None = None) -> No
 
 def render_raw(result: Any, ctx: typer.Context | None = None) -> None:
     """Render the result of data fetched in raw mode."""
-    console.print(result)
+    try:
+        result = json.dumps(result)
+        console.print_json(result, indent=state.config.output.JSON.indent)
+    except Exception as e:
+        logger.warning("Unable to render raw data as JSON", exception=e)
+        console.print(result)
