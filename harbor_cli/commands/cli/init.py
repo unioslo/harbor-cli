@@ -18,7 +18,7 @@ from ...format import OutputFormat
 from ...logs import logger
 from ...logs import LogLevel
 from ...output.console import console
-from ...output.console import err_console
+from ...output.console import error
 from ...output.console import exit
 from ...output.console import exit_err
 from ...output.console import success
@@ -93,8 +93,8 @@ def run_config_wizard(config_path: Optional[Path] = None) -> None:
     try:
         config = HarborCLIConfig.from_file(config_path)
     except Exception as e:
-        err_console.print(f"Failed to load config: {e}")
-        err_console.print(
+        error(f"Failed to load config: {e}")
+        error(
             f"[white]Run [{STYLE_COMMAND}]harbor init --overwrite[/] to create a new config file.[/]"
         )
         exit(code=1)

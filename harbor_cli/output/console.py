@@ -13,21 +13,45 @@ _exit = exit  # save the original exit function
 console = Console()
 err_console = Console(
     stderr=True,
-    style="red",
     highlight=False,
     soft_wrap=True,
 )
 
 
-def success(message: str) -> None:
-    """Prints a message to the default console.
+def _add_fix(message: str, prefix: str | None, suffix: str | None = None) -> str:
+    if prefix:
+        prefix = prefix.strip()
+        message = f"{prefix} {message}"
+    if suffix:
+        suffix = suffix.strip()
+        message = f"{message} {suffix}"
+    return message
 
-    Parameters
-    ----------
-    msg : str
-        Message to print.
-    """
-    console.print(message, style="green")
+
+def info(message: str, prefix: str | None = None, suffix: str | None = None) -> None:
+    """Prints an unstyled message to the stderr console."""
+    message = _add_fix(message, prefix, suffix)
+    err_console.print(message)
+
+
+def success(
+    message: str, prefix: str | None = None, suffix: str | None = ":white_check_mark:"
+) -> None:
+    """Prints a green message to the stderr console."""
+    message = _add_fix(message, prefix, suffix)
+    err_console.print(message, style="green")
+
+
+def warning(message: str, prefix: str = "WARNING: ", suffix: str | None = None) -> None:
+    """Prints a yellow message with a warning prefix to the stderr console."""
+    message = _add_fix(message, prefix, suffix)
+    err_console.print(message, style="yellow")
+
+
+def error(message: str, prefix: str = "ERROR: ", suffix: str | None = None) -> None:
+    """Prints a red message with an error prefix to the stderr console."""
+    message = _add_fix(message, prefix, suffix)
+    err_console.print(message, style="red")
 
 
 def exit(message: Optional[str] = None, code: int = 0) -> NoReturn:

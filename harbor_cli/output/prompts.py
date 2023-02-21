@@ -13,7 +13,7 @@ from rich.prompt import Prompt
 
 from ..style import render_warning
 from .console import console
-from .console import err_console
+from .console import error
 from .formatting import path_link
 
 
@@ -72,9 +72,9 @@ def str_prompt(
             break
 
         if not inp:
-            err_console.print("Input cannot be empty.")
+            error("Input cannot be empty.")
         elif inp.isspace() and inp != default:
-            err_console.print("Input cannot solely consist of whitespace.")
+            error("Input cannot solely consist of whitespace.")
         else:
             break
     return inp
@@ -190,16 +190,16 @@ def _number_prompt(
         # Shouldn't happen, but ask() returns DefaultType | int | float
         # so it thinks we could have an ellipsis here
         if not isinstance(val, (int, float)):
-            err_console.print("Value must be a number")
+            error("Value must be a number")
             continue
         if math.isnan(val):
-            err_console.print("Value can't be NaN")
+            error("Value can't be NaN")
             continue
         if min is not None and val < min:
-            err_console.print(f"Value must be greater or equal to {min}")
+            error(f"Value must be greater or equal to {min}")
             continue
         if max is not None and val > max:
-            err_console.print(f"Value must be less than or equal to {max}")
+            error(f"Value must be less than or equal to {max}")
             continue
         return val
 
@@ -248,8 +248,8 @@ def path_prompt(
         path = Path(path_str)
 
         if must_exist and not path.exists():
-            err_console.print(f"Path does not exist: {path_link(path)}")
+            error(f"Path does not exist: {path_link(path)}")
         elif not exist_ok and path.exists():
-            err_console.print(f"Path already exists: {path_link(path)}")
+            error(f"Path already exists: {path_link(path)}")
         else:
             return path

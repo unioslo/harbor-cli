@@ -153,9 +153,9 @@ def handle_status_error(e: StatusError, exiter: Exiter) -> NoReturn:
 
 def handle_validationerror(e: ValidationError, exiter: Exiter) -> NoReturn:
     """Handles a pydantic ValidationError and exits with the appropriate message."""
-    from .output.console import err_console
+    from .output.console import error
 
-    err_console.print("Failed to validate data from API.")
+    error("Failed to validate data from API.")
     exiter(str(e), errors=e.errors())
 
 
