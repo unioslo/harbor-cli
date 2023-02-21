@@ -19,7 +19,7 @@ err_console = Console(
 )
 
 
-def success(msg: str) -> None:
+def success(message: str) -> None:
     """Prints a message to the default console.
 
     Parameters
@@ -27,10 +27,10 @@ def success(msg: str) -> None:
     msg : str
         Message to print.
     """
-    console.print(msg, style="green")
+    console.print(message, style="green")
 
 
-def exit(msg: Optional[str] = None, code: int = 0) -> NoReturn:
+def exit(message: Optional[str] = None, code: int = 0) -> NoReturn:
     """Prints a message to the default console and exits with the given
     code (default: 0).
 
@@ -41,12 +41,14 @@ def exit(msg: Optional[str] = None, code: int = 0) -> NoReturn:
     code : int, optional
         Exit code, by default 0
     """
-    if msg:
-        logger.info(msg)
+    if message:
+        logger.info(message)
     raise SystemExit(code)
 
 
-def exit_err(msg: str, code: int = 1, prefix: str = "ERROR", **extra: Any) -> NoReturn:
+def exit_err(
+    message: str, code: int = 1, prefix: str = "ERROR", **extra: Any
+) -> NoReturn:
     """Prints a message to the error console and exits with the given
     code (default: 1).
 
@@ -57,5 +59,5 @@ def exit_err(msg: str, code: int = 1, prefix: str = "ERROR", **extra: Any) -> No
     code : int, optional
         Exit code, by default 1
     """
-    logger.bind(**extra).error(msg)
+    logger.bind(**extra).error(message)
     raise SystemExit(code)

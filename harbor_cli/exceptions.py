@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+from typing import cast
 from typing import Dict
 from typing import Mapping
 from typing import NoReturn
@@ -168,7 +169,9 @@ def handle_exception(e: Exception) -> NoReturn:
     """Handles an exception and exits with the appropriate message."""
     from .output.console import exit_err  # avoid circular import
 
+    exiter = cast(Exiter, exit_err)
+
     handler = EXC_HANDLERS.get(type(e), None)
     if not handler:
         exit_err(str(e), exception=e)
-    handler(e, exit_err)
+    handler(e, exiter)
