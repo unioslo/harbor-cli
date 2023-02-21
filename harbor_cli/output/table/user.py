@@ -3,23 +3,35 @@ from __future__ import annotations
 from typing import Sequence
 
 from harborapi.models.models import UserResp
+from harborapi.models.models import UserSearchRespItem
 from rich.table import Table
 
 from ._utils import get_table
 
 
 def userresp_table(users: Sequence[UserResp]) -> Table:
-    """Display one or more repositories in a table."""
-    table = get_table("User", users)
-    table.add_column("ID")
-    table.add_column("Username")
-    table.add_column("Full Name")
-
-    # One volume per row
+    """Display one or more users in a table."""
+    table = get_table(
+        "User",
+        users,
+        columns=["ID", "Username", "Full Name"],
+    )
     for user in users:
         table.add_row(
             str(user.user_id),
             str(user.username),
             str(user.realname),
+        )
+    return table
+
+
+def usersearchrespitem_table(users: Sequence[UserSearchRespItem]) -> Table:
+    """Display one or more users found in a user search."""
+    table = get_table("Results", columns=["ID", "Username"])
+
+    for user in users:
+        table.add_row(
+            str(user.user_id),
+            str(user.username),
         )
     return table

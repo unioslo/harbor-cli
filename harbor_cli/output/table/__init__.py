@@ -30,6 +30,7 @@ from harborapi.models import Repository
 from harborapi.models import Search
 from harborapi.models import SystemInfo
 from harborapi.models import UserResp
+from harborapi.models import UserSearchRespItem
 from rich.panel import Panel
 from rich.table import Table
 
@@ -49,6 +50,7 @@ from .repository import repository_table
 from .search import search_panel
 from .system import systeminfo_table
 from .user import userresp_table
+from .user import usersearchrespitem_table
 
 T = TypeVar("T")
 
@@ -65,6 +67,7 @@ RENDER_FUNCTIONS = {
     SystemInfo: systeminfo_table,
     Search: search_panel,
     UserResp: userresp_table,
+    UserSearchRespItem: usersearchrespitem_table,
     RegistryProviders: registryproviders_table,
 }  # type: dict[type, Callable[[Any], Table | Panel]]
 # TODO: improve type annotation of this dict
