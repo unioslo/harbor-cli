@@ -356,7 +356,7 @@ def get_current_user_permissions(
 ) -> None:
     """Get permissions for the currently authenticated user."""
     permissions = state.run(
-        state.client.get_current_user_permissions(),
+        state.client.get_current_user_permissions(scope=scope, relative=relative),
         "Fetching current user permissions...",
     )
     # TODO: print a message here if format is table and no permissions exist?
