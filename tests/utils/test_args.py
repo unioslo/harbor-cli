@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -9,7 +10,11 @@ import pytest
 import typer
 from pydantic import BaseModel
 
+from harbor_cli.utils.args import add_to_query
+from harbor_cli.utils.args import as_query
+from harbor_cli.utils.args import construct_query_list
 from harbor_cli.utils.args import create_updated_model
+from harbor_cli.utils.args import deconstruct_query_list
 from harbor_cli.utils.args import model_params_from_ctx
 from harbor_cli.utils.args import parse_commalist
 from harbor_cli.utils.args import parse_key_value_args
@@ -190,3 +195,78 @@ def test_parse_key_value_arg_with_comma(
     else:
         args = parse_commalist(arg)
         assert parse_key_value_args(args) == expected
+
+
+@pytest.mark.parametrize(
+    "kwargs,expected",
+    [
+        ({}, ""),
+        ({"foo": "bar"}, "foo=bar"),
+        ({"foo": "bar", "baz": "qux"}, "foo=bar,baz=qux"),
+        (
+            {"int": 1, "float": 3.14, "true": True, "false": False, "none": None},
+            "int=1,float=3.14,true=True,false=False,none=None",
+        ),
+    ],
+)
+def test_as_query(kwargs: dict[str, Any], expected: dict[str, str]) -> None:
+    assert as_query(**kwargs) == expected
+
+
+@pytest.mark.parametrize(
+    "values,expected",
+    [
+        ([], ""),
+        (["foo"], "foo"),
+        (["foo", "bar", "baz", "qux"], "foo bar baz qux"),
+    ],
+)
+@pytest.mark.parametrize("union", [True, False])
+def test_construct_query_list(values: List[str], expected: str, union: bool) -> None:
+    exp = f"{{{expected}}}" if union else f"({expected})"
+    assert construct_query_list(*values, union=union) == exp
+    assert deconstruct_query_list(exp) == values
+
+
+@pytest.mark.parametrize(
+    "kwargs,query,expected",
+    [
+        ({}, "", ""),
+        ({}, None, ""),
+        ({"foo": "bar"}, "", "foo=bar"),
+        ({"foo": "bar"}, "foo=bar", "foo={bar bar}"),  # duplicates for now
+        ({"foo": "bar", "baz": "gux"}, "", "foo=bar,baz=gux"),
+        ({"foo": "bar", "baz": "gux"}, "foo=bar", "foo={bar bar},baz=gux"),
+        (
+            {"foo": ["spam", "grok"], "baz": "gux"},
+            "foo=bar",
+            "foo={bar spam grok},baz=gux",
+        ),
+        # Empty list and query string
+        (
+            {"foo": [], "baz": "gux"},
+            "foo=bar",
+            "foo=bar,baz=gux",
+        ),
+        # Empty list and no query string
+        (
+            {"foo": [], "baz": "gux"},
+            "",
+            "baz=gux",
+        ),
+        # Single item list and no query string
+        (
+            {"foo": ["bar"], "baz": "gux"},
+            "",
+            "foo=bar,baz=gux",
+        ),
+        # Single item list and existing query string
+        (
+            {"foo": ["bar"], "baz": "gux"},
+            "foo=bar",
+            "foo={bar bar},baz=gux",
+        ),
+    ],
+)
+def test_add_to_query(kwargs: dict[str, Any], query: str | None, expected: str) -> None:
+    assert add_to_query(query, **kwargs) == expected

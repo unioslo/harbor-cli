@@ -166,3 +166,98 @@ def parse_key_value_args(arg: list[str]) -> dict[str, str]:
             )
         metadata[key] = value
     return metadata
+
+
+def as_query(**kwargs: Any) -> str:
+    """Converts keyword arguments into a query string.
+
+    Always returns a string, even if the resulting query string is empty.
+
+    Examples
+    --------
+    >>> as_query(foo="bar", baz="qux")
+    'foo=bar,baz=qux'
+    """
+    return ",".join(f"{k}={v}" for k, v in kwargs.items())
+
+
+# TODO: could we annotate this in a way where at least one value is required?
+def construct_query_list(*values: str, union: bool = True) -> str:
+    """Given a key and a list of values, returns a harbor API
+    query string with values as a list with union or intersection
+    relationship (default: union).
+
+    Examples
+    --------
+    >>> construct_query_list("foo", "bar", "baz", union=True)
+    '{foo bar baz}'
+    >>> construct_query_list("foo", "bar", "baz", union=False)
+    '(foo bar baz)'
+    """
+    start = "{" if union else "("
+    end = "}" if union else ")"
+    return f"{start}{' '.join(values)}{end}"
+
+
+def deconstruct_query_list(qlist: str) -> list[str]:
+    """Given a harbor API query string with values as a list (either union
+    and intersection), returns a list of values. Will break if values
+    contain spaces.
+
+    Examples
+    --------
+    >>> deconstruct_query_list("{foo bar baz}")
+    ['foo', 'bar', 'baz']
+    >>> deconstruct_query_list("(foo bar baz)")
+    ['foo', 'bar', 'baz']
+    >>> deconstruct_query_list("{}")
+    []
+    """
+    values = qlist.strip("{}()").split(" ")
+    return [v for v in values if v]
+
+
+def add_to_query(query: str | None, **kwargs: str | list[str] | None) -> str:
+    """Given a query string and a set of keyword arguments, returns a
+    new query string with the keyword arguments added to it. Keyword
+    arguments that are already present in the query string will be
+    overwritten.
+
+    Always returns a string, even if the resulting query string is empty.
+
+    Examples
+    --------
+    >>> add_to_query("foo=bar", baz="qux")
+    'foo=bar,baz=qux'
+    >>> add_to_query("foo=bar", foo="baz")
+    'foo=baz'
+    >>> add_to_query(None, foo="baz")
+    'foo=baz'
+    """
+    query_items = parse_commalist([query] if query else [])
+    query_dict = parse_key_value_args(query_items)
+    for k, v in kwargs.items():
+        # Empty string, empty list, None, etc. are all ignored
+        if not v:
+            continue
+
+        # When the query already has a value for the given key, we need to
+        # convert the value to a list if isn't already one.
+        # NOTE: not handling empty query lists here, but it's on the user
+        # to not pass empty lists.
+        if k in query_dict:
+            if isinstance(v, list):
+                query_dict[k] = construct_query_list(query_dict[k], *v)
+            else:
+                query_dict[k] = construct_query_list(
+                    *deconstruct_query_list(query_dict[k]),
+                    v,
+                )
+        else:  # doesn't exist in query
+            if isinstance(v, str):
+                query_dict[k] = v
+            elif len(v) > 1:
+                query_dict[k] = construct_query_list(*v)
+            else:
+                query_dict[k] = v[0]
+    return as_query(**query_dict)
