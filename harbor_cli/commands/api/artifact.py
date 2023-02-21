@@ -12,11 +12,11 @@ from harborapi.models import Tag
 from ...harbor.artifact import parse_artifact_name
 from ...logs import logger
 from ...output.console import console
-from ...output.console import exit
 from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
 from ...utils.commands import inject_resource_options
+from ...utils.prompts import delete_prompt
 from ..help import ARTIFACT_HELP_STRING
 
 
@@ -118,13 +118,8 @@ def delete_artifact(
     ),
 ) -> None:
     """Delete an artifact."""
+    delete_prompt(state.config, force, resource="artifact", name=artifact)
     an = parse_artifact_name(artifact)
-    if not force:
-        if not typer.confirm(
-            f"Are you sure you want to delete {artifact}?",
-            abort=True,
-        ):
-            exit()
 
     try:
         state.run(
@@ -264,14 +259,10 @@ def delete_artifact_tag(
     ),
 ) -> None:
     """Delete a tag for an artifact."""
+    delete_prompt(state.config, force, resource="tag", name=tag)
+
     an = parse_artifact_name(artifact)
     # NOTE: We might need to fetch repo and artifact IDs
-    if not force:
-        if not typer.confirm(
-            f"Are you sure you want to delete the tag {tag!r}?",
-            abort=True,
-        ):
-            exit()
 
     state.run(
         state.client.delete_artifact_tag(an.project, an.repository, an.reference, tag),
@@ -338,8 +329,14 @@ def delete_artifact_label(
         ...,
         help="ID of the label to delete.",
     ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Force deletion without confirmation.",
+    ),
 ) -> None:
     """Add a label to an artifact."""
+    delete_prompt(state.config, force, resource="label", name=str(label_id))
     an = parse_artifact_name(artifact)
     state.run(
         state.client.delete_artifact_label(

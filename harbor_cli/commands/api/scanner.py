@@ -13,6 +13,7 @@ from ...utils.args import create_updated_model
 from ...utils.args import model_params_from_ctx
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
+from ...utils.prompts import delete_prompt
 
 # Create a command group
 app = typer.Typer(
@@ -148,8 +149,14 @@ def delete_scanner(
         ...,
         help="ID of the scanner to delete.",
     ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Force deletion without confirmation.",
+    ),
 ) -> None:
     """Delete a scanner."""
+    delete_prompt(state.config, force, resource="scanner", name=str(scanner_id))
     state.run(state.client.delete_scanner(scanner_id), "Deleting scanner...")
     logger.info(f"Scanner with ID {scanner_id!r} deleted.")
 

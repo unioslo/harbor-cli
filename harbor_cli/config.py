@@ -326,8 +326,21 @@ class OutputSettings(BaseModel):
         allow_population_by_field_name = True
 
 
+class GeneralSettings(BaseModel):
+    """General settings for Harbor CLI."""
+
+    confirm_deletion: bool = Field(
+        True,
+        description=(
+            "Show confirmation prompt for resource deletion "
+            "commands. E.g. `project delete`"
+        ),
+    )
+
+
 class HarborCLIConfig(BaseModel):
     harbor: HarborSettings = Field(default_factory=HarborSettings)
+    general: GeneralSettings = Field(default_factory=GeneralSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     output: OutputSettings = Field(default_factory=OutputSettings)
     config_file: Optional[Path] = Field(

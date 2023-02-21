@@ -18,6 +18,7 @@ The configuration file is structured as a [TOML](https://toml.io/en/) file. The 
 The configuration file is divided into the following tables:
 
 - [harbor](#harbor)
+- [general](#general)
 - [logging](#logging)
 - [output](#output)
 - [output.table](#outputtable)
@@ -109,6 +110,23 @@ Controls whether or not the data from the API should be processed by the [harbor
 ```toml
 [harbor]
 raw_mode = false
+```
+
+----
+
+### `general`
+
+The `general` table contains general settings.
+
+----
+
+#### `general.confirm_deletion`
+
+Whether or not to show a confirmation prompt when deleting resources. The default is `true`.--harbor-raw replication policy list
+
+```toml
+[general]
+confirm_deletion = true
 ```
 
 ----

@@ -15,6 +15,7 @@ from ...output.render import render_result
 from ...state import state
 from ...utils.args import create_updated_model
 from ...utils.commands import inject_resource_options
+from ...utils.prompts import delete_prompt
 
 # Create a command group
 app = typer.Typer(
@@ -165,19 +166,11 @@ def delete_user(
     force: bool = typer.Option(
         False,
         "--force",
-        "-f",
-        help="Skip confirmation prompt.",
+        help="Force deletion without confirmation.",
     ),
 ) -> None:
     """Delete a user."""
-
-    # Always confirm deletions unless --force is used
-    if not force:
-        typer.confirm(
-            f"Are you sure you want to delete user {username_or_id!r}?",
-            default=False,
-            abort=True,
-        )
+    delete_prompt(state.config, force, resource="user", name=username_or_id)
 
     if is_id:
         uid = convert_uid(username_or_id)

@@ -16,6 +16,7 @@ from ...utils.args import model_params_from_ctx
 from ...utils.commands import check_enumeration_options
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
+from ...utils.prompts import delete_prompt
 
 # Create a command group
 app = typer.Typer(
@@ -335,8 +336,16 @@ def delete_replication_policy(
         ...,
         help="The ID of the replication policy.",
     ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Force deletion without confirmation.",
+    ),
 ) -> None:
     """Delete a replication policy."""
+    delete_prompt(
+        state.config, force, resource="replication policy", name=str(policy_id)
+    )
     state.run(
         state.client.delete_replication_policy(policy_id),
         f"Deleting replication policy with ID {policy_id}...",

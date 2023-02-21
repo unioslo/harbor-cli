@@ -23,6 +23,7 @@ from ...utils.args import parse_key_value_args
 from ...utils.commands import check_enumeration_options
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
+from ...utils.prompts import delete_prompt
 
 # Create a command group
 app = typer.Typer(
@@ -374,8 +375,16 @@ def delete_project(
         "--is-id",
         help="Whether the project name is an ID.",
     ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Skip deletion confirmation prompt.",
+    ),
 ) -> None:
     """Delete a project."""
+    delete_prompt(
+        config=state.config, force=force, resource="project", name=project_name_or_id
+    )
     arg = get_project_arg(project_name_or_id, is_id)
     project_repr = get_project_repr(arg)
     state.run(state.client.delete_project(arg), f"Deleting {project_repr}...")
@@ -715,8 +724,12 @@ def delete_project_metadata_field(
         "--is-id",
         help="Whether the argument is a project ID or name (by default name)",
     ),
+    force: bool = typer.Option(
+        False, "--force", help="Force deletion without confirmation."
+    ),
 ) -> None:
     """Delete a single field in the metadata for a project."""
+    delete_prompt(state.config, force, resource="metadata field", name=field)
     if field not in ProjectMetadata.__fields__:
         logger.warning(f"Field {field!r} is not a known project metadata field.")
 
