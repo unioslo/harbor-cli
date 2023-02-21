@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from typing import Any
+from typing import List
+from typing import Optional
 from typing import Type
 from typing import TypeVar
 
@@ -115,7 +117,7 @@ def create_updated_model(
     return new.parse_obj(d)
 
 
-def parse_commalist(arg: list[str] | None) -> list[str]:
+def parse_commalist(arg: Optional[List[str]]) -> List[str]:
     """Parses an optional argument that can be specified multiple times,
     or as a comma-separated string, into a list of strings.
 
