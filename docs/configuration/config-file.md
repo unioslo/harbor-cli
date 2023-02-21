@@ -22,6 +22,7 @@ The configuration file is divided into the following tables:
 - [logging](#logging)
 - [output](#output)
 - [output.table](#outputtable)
+- [output.table.style](#outputtablestyle)
 - [output.JSON](#outputjson)
 
 ### `harbor`
@@ -93,7 +94,7 @@ credentials_file = "/path/to/credentials.json"
 ----
 #### `harbor.validate_data`
 
-Controls whether or not the [harborapi](https://github.com/pederhan/harborapi) library  validates the data returned by the Harbor API.  Forces the output format to `json`. Not guaranteed to work with all commands. The default is `true`.
+Controls whether or not the [harborapi](https://github.com/pederhan/harborapi) library  validates the data returned by the Harbor API.  Forces the output format to `json` if `false`. Not guaranteed to work with all commands. The default is `true`.
 
 
 ```toml
@@ -231,10 +232,11 @@ Show a confirmation prompt when enumerating resources (e.g. `harbor auditlog lis
 
 Only affects the following commands:
 
-* `harbor auditlog list`
-* `harbor replication list`
-* `harbor gc jobs`
-* `harbor project logs`
+* `artifact list`
+* `auditlog list`
+* `replication list`
+* `gc jobs`
+* `project logs`
 
 ```toml
 [output]
