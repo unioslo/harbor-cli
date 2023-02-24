@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Any
 from typing import Sequence
 
 from rich.table import Table
@@ -9,12 +10,9 @@ from ..formatting.builtin import int_str
 from ._utils import get_table
 
 
-def commandsummary_table(c: Sequence[CommandSummary]) -> Table:
+def commandsummary_table(c: Sequence[CommandSummary], **kwargs: Any) -> Table:
     """Display summary of commands in a table."""
-    table = get_table("Results", c)
-    table.add_column("Command")
-    table.add_column("Description")
-
+    table = get_table("Results", c, columns=["Command", "Description"])
     # If we got these commands from a search, we can show a score
     has_score = any(cmd.score for cmd in c)
     if has_score:

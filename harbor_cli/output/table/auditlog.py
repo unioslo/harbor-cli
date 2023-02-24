@@ -3,6 +3,7 @@
 # vertical arrangement of the auto generated output.
 from __future__ import annotations
 
+from typing import Any
 from typing import Sequence
 
 from harborapi.models.models import AuditLog
@@ -14,7 +15,7 @@ from ..formatting.dates import datetime_str
 from ._utils import get_table
 
 
-def auditlog_table(logs: Sequence[AuditLog]) -> Table:
+def auditlog_table(logs: Sequence[AuditLog], **kwargs: Any) -> Table:
     table = get_table(
         "Audit Log",
         logs,

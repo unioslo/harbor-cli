@@ -26,8 +26,18 @@ T = TypeVar("T")
 # TODO: add ResultType = T | list[T] to types.py
 
 
-def render_result(result: T, ctx: typer.Context | None = None) -> None:
-    """Render the result of a command."""
+def render_result(result: T, ctx: typer.Context | None = None, **kwargs: Any) -> None:
+    """Render the result of a command stdout or file.
+
+    Parameters
+    ----------
+    result : T
+        The result of a command.
+    ctx : typer.Context, optional
+        The typer context from the command invocation, by default None
+    **kwargs
+        Additional keyword arguments to pass to the render function.
+    """
     fmt = state.config.output.format
     paging = state.config.output.paging
     raw_mode = state.config.harbor.raw_mode
@@ -35,16 +45,18 @@ def render_result(result: T, ctx: typer.Context | None = None) -> None:
     ctx_manager = console.pager() if paging else nullcontext()
     with ctx_manager:  # type: ignore # not quite sure why mypy is complaining here
         if raw_mode:  # raw mode ignores output format
-            render_raw(result, ctx)
+            render_raw(result, ctx, **kwargs)
         elif fmt == OutputFormat.TABLE:
-            render_table(result, ctx)
+            render_table(result, ctx, **kwargs)
         elif fmt == OutputFormat.JSON:
-            render_json(result, ctx)
+            render_json(result, ctx, **kwargs)
         else:
             raise ValueError(f"Unknown output format {fmt!r}.")
 
 
-def render_table(result: T | Sequence[T], ctx: typer.Context | None = None) -> None:
+def render_table(
+    result: T | Sequence[T], ctx: typer.Context | None = None, **kwargs: Any
+) -> None:
     """Render the result of a command as a table."""
     # TODO: handle "primitives" like strings and numbers
 
@@ -52,7 +64,7 @@ def render_table(result: T | Sequence[T], ctx: typer.Context | None = None) -> N
     compact = state.config.output.table.compact
     if compact:
         try:
-            render_table_compact(result)
+            render_table_compact(result, **kwargs)
         except NotImplementedError as e:
             logger.debug(f"Unable to render compact table: {e}")
         except (EmptySequenceError, BuiltinTypeException):
@@ -65,13 +77,13 @@ def render_table(result: T | Sequence[T], ctx: typer.Context | None = None) -> N
     render_table_full(result)
 
 
-def render_table_compact(result: T | Sequence[T]) -> None:
+def render_table_compact(result: T | Sequence[T], **kwargs) -> None:
     """Render the result of a command as a compact table."""
-    renderable = get_renderable(result)
+    renderable = get_renderable(result, **kwargs)
     console.print(renderable)
 
 
-def render_table_full(result: T | Sequence[T]) -> None:
+def render_table_full(result: T | Sequence[T], **kwargs) -> None:
     show_description = state.config.output.table.description
     max_depth = state.config.output.table.max_depth
 
@@ -92,7 +104,9 @@ def render_table_full(result: T | Sequence[T]) -> None:
         print_item(result)
 
 
-def render_json(result: T | Sequence[T], ctx: typer.Context | None = None) -> None:
+def render_json(
+    result: T | Sequence[T], ctx: typer.Context | None = None, **kwargs: Any
+) -> None:
     """Render the result of a command as JSON."""
     p = state.options.output_file
     with_stdout = state.options.with_stdout
@@ -133,7 +147,7 @@ def render_json(result: T | Sequence[T], ctx: typer.Context | None = None) -> No
         console.print_json(o_json, indent=indent)
 
 
-def render_raw(result: Any, ctx: typer.Context | None = None) -> None:
+def render_raw(result: Any, ctx: typer.Context | None = None, **kwargs: Any) -> None:
     """Render the result of data fetched in raw mode."""
     try:
         result = json.dumps(result)

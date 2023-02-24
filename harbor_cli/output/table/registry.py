@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Any
 from typing import Sequence
 
 from harborapi.models.models import RegistryProviderInfo
@@ -12,7 +13,7 @@ from ._utils import get_table
 
 
 def registryproviders_table(
-    providers: Sequence[RegistryProviders],
+    providers: Sequence[RegistryProviders], **kwargs: Any
 ) -> Table:
     """Renders a list of RegistryProvider objects as individual tables in a panel."""
     if len(providers) > 1:
@@ -24,7 +25,7 @@ def registryproviders_table(
     return table
 
 
-def _registryproviderinfo_table(provider: RegistryProviderInfo) -> Table:
+def _registryproviderinfo_table(provider: RegistryProviderInfo, **kwargs: Any) -> Table:
     table = get_table(
         columns=[
             "Endpoint",

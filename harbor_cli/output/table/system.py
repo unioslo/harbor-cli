@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Any
 from typing import Sequence
 
 from harborapi.models.models import Storage
@@ -13,7 +14,7 @@ from ._utils import get_table
 
 # The ironic thing is that this is not actually system info, but storage info.
 # GeneralInfo is the model used for general system info.
-def systeminfo_table(systeminfo: Sequence[SystemInfo]) -> Table:
+def systeminfo_table(systeminfo: Sequence[SystemInfo], **kwargs: Any) -> Table:
     """Display system info in a table."""
     if len(systeminfo) > 1:
         # should never happen

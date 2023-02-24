@@ -19,7 +19,7 @@ class AnySequence(BaseModel):
     values: Sequence[Any] = []
 
 
-def anysequence_table(s: Sequence[AnySequence]) -> Table:
+def anysequence_table(s: Sequence[AnySequence], **kwargs: Any) -> Table:
     """Renders an AnySequence as a table."""
     # No title here I think...?
     table = get_table()
