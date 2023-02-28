@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import typing
 from typing import NamedTuple
 from typing import Optional
 
@@ -26,4 +27,12 @@ for model in RENDER_FUNCTIONS.keys():
         obj = model()
     except ValidationError:
         continue
+    except TypeError:
+        try:
+            # hints = typing.get_type_hints(model)
+            # val = next(iter(hints.values()))
+            args = typing.get_args(model)
+            args[0]()
+        except ValidationError:
+            continue
     compact_renderables.append(model)

@@ -98,24 +98,6 @@ for function in _RENDER_FUNCTIONS:
     except TypeError:
         logger.warning("Could not add render function %s", function)
 
-# RENDER_FUNCTIONS = {
-#     AnySequence: anysequence_table,
-#     ArtifactInfo: artifactinfo_table,
-#     Artifact: artifact_table,
-#     AuditLog: auditlog_table,
-#     CommandSummary: commandsummary_table,
-#     HarborVulnerabilityReport: artifact_vulnerabilities_table,
-#     Project: project_table,
-#     ProjectExtended: project_extended_panel,
-#     Repository: repository_table,
-#     SystemInfo: systeminfo_table,
-#     Search: search_panel,
-#     UserResp: userresp_table,
-#     UserSearchRespItem: usersearchrespitem_table,
-#     RegistryProviders: registryproviders_table,
-# }  # type: dict[type, Callable[[Any], Table | Panel]]
-# # TODO: improve type annotation of this dict
-
 
 class BuiltinTypeException(TypeError):
     pass
@@ -130,7 +112,11 @@ def is_sequence_func(func: Callable[[Any], Any]) -> bool:
     if not hints:
         return False
     val = next(iter(hints.values()))
-    origin = typing.get_origin(val)
+    return is_sequence_annotation(val)
+
+
+def is_sequence_annotation(annotation: Any) -> bool:
+    origin = typing.get_origin(annotation)
     return origin in [Sequence, abc.Sequence, list, List]
 
 
@@ -139,7 +125,7 @@ def get_render_function(
 ) -> RENDER_FUNC_T:
     """Get the render function for a given object."""
 
-    if isinstance(obj, Sequence):
+    if isinstance(obj, Sequence) and not isinstance(obj, str):
         if len(obj) == 0:
             raise EmptySequenceError("Cannot render empty sequence.")
         t = Sequence[type(obj[0])]  # type: ignore # TODO: fix this
@@ -150,11 +136,12 @@ def get_render_function(
         try:
             return RENDER_FUNCTIONS[t]
         except KeyError:
+            # FIXME: handle list of builtins
             if is_builtin_obj(t):
                 raise BuiltinTypeException(
                     "Builtin types cannot be rendered as a compact table."
                 )
-            raise NotImplementedError(f"{type(obj)} not implemented.")
+            raise NotImplementedError(f"{t} not implemented.")
 
     try:
         return _get_render_func(t)

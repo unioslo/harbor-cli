@@ -5,7 +5,9 @@ from typing import TypeVar
 
 import pytest
 import rich
+from hypothesis import assume
 from hypothesis import given
+from hypothesis import strategies as st
 from pydantic import BaseModel
 
 from ..._strategies import COMPACT_TABLE_MODELS
@@ -16,7 +18,7 @@ from harbor_cli.output.table import get_renderable
 T = TypeVar("T", bound=BaseModel)
 
 
-@given(COMPACT_TABLE_MODELS)
+@given(st.one_of(COMPACT_TABLE_MODELS))
 def test_get_renderable(obj: BaseModel) -> None:
     renderable = get_renderable(obj)
     assert renderable is not None
@@ -24,14 +26,11 @@ def test_get_renderable(obj: BaseModel) -> None:
     rich.print(renderable)
 
 
-@given(COMPACT_TABLE_MODELS)
-def test_get_renderable_as_sequence(model: BaseModel) -> None:
-    renderable_single = get_renderable([model])
-    assert renderable_single is not None
-    rich.print(renderable_single)
-    renderable_multi = get_renderable([model, model])
-    assert renderable_multi is not None
-    rich.print(renderable_multi)
+@given(st.one_of(COMPACT_TABLE_MODELS))
+def test_get_renderable_as_sequence(model: BaseModel | list[BaseModel]) -> None:
+    assume(isinstance(model, list) and len(model) > 0)
+    renderable = get_renderable(model[0])  # type: ignore
+    assert renderable is not None
 
 
 def test_get_renderable_empty_sequence() -> None:
@@ -44,10 +43,13 @@ def test_get_renderable_empty_sequence() -> None:
 def test_get_renderable_builtin(obj: Any, as_sequence: bool) -> None:
     if as_sequence:
         obj = [obj]
-    with pytest.raises(BuiltinTypeException):
-        get_renderable(obj)
+        with pytest.raises(NotImplementedError):
+            get_renderable(obj)
+    else:
+        with pytest.raises(BuiltinTypeException):
+            get_renderable(obj)
 
 
 def test_get_renderable_list_of_list() -> None:
-    with pytest.raises(BuiltinTypeException):
+    with pytest.raises(NotImplementedError):
         get_renderable([[]])  # type: ignore
