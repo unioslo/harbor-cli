@@ -51,7 +51,7 @@ class ArtifactNameFormatError(HarborCLIError):
         super().__init__(
             self,
             f"Artifact string {s} is not in the correct format. "
-            "Expected format: [domain/]<project>/<repo>{@sha256:<digest>,:<tag>}",
+            "Expected format: [domain/]project/repo{@sha256:digest,:tag}",
         )
 
 
