@@ -25,8 +25,8 @@ from harbor_cli.main import app as main_app  # noreorder
 from harbor_cli.config import HarborCLIConfig
 from harbor_cli.format import OutputFormat
 from harbor_cli import state
-from ._utils import compact_renderables
 
+from ._strategies import COMPACT_TABLE_MODELS
 
 runner = CliRunner()
 
@@ -114,14 +114,16 @@ def revert_state() -> Generator[None, None, None]:
     state.state = _ORIGINAL_STATE
 
 
-@pytest.fixture(scope="function", params=compact_renderables)
-def compact_table_renderable(request: pytest.FixtureRequest) -> BaseModel:
-    """Fixture for testing compact table renderables that can be instantiated with no arguments."""
-    return request.param()
-
-
 @pytest.fixture
 def caplog(caplog: LogCaptureFixture):
     handler_id = logger.add(caplog.handler, format="{message}")
     yield caplog
     logger.remove(handler_id)
+
+
+@pytest.fixture(scope="function", params=COMPACT_TABLE_MODELS)
+def compact_table_renderable(request: pytest.FixtureRequest) -> BaseModel:
+    """Fixture for testing compact table renderables that can be instantiated with no arguments."""
+    # NOTE: kind of janky, but it lets us generate examples for functions that use
+    # pytest-mock's mocker fixture, which doesn't work when using hypothesis it seems?
+    return request.param.example()

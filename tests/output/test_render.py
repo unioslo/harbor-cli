@@ -103,10 +103,12 @@ def test_render_table_compact_fallback(mocker: MockerFixture) -> None:
 
 
 # TODO: fix not being able to combine mocker and hypothesis
+
+
 def test_render_table_full_mock(
     mocker: MockerFixture, compact_table_renderable: BaseModel
 ) -> None:
-    """Test that we can render a result as a compact table."""
+    """Test that we can render a result as a full table."""
     # FIXME: getting the following error when attempting to create mock
     # for render_table and render_table_compact:
     # TypeError: __name__ must be set to a string object

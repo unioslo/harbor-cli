@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Any
 from typing import Sequence
 
 from harborapi.models.models import UserResp
@@ -9,7 +10,7 @@ from rich.table import Table
 from ._utils import get_table
 
 
-def userresp_table(users: Sequence[UserResp]) -> Table:
+def userresp_table(users: Sequence[UserResp], **kwargs: Any) -> Table:
     """Display one or more users in a table."""
     table = get_table(
         "User",
@@ -25,7 +26,9 @@ def userresp_table(users: Sequence[UserResp]) -> Table:
     return table
 
 
-def usersearchrespitem_table(users: Sequence[UserSearchRespItem]) -> Table:
+def usersearchrespitem_table(
+    users: Sequence[UserSearchRespItem], **kwargs: Any
+) -> Table:
     """Display one or more users found in a user search."""
     table = get_table("Results", columns=["ID", "Username"])
 

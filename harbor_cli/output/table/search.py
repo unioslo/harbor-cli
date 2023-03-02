@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Any
 from typing import Sequence
 
 from harborapi.models.models import ChartVersion
@@ -18,7 +19,7 @@ from ._utils import get_table
 from .project import project_table
 
 
-def search_panel(search: Sequence[Search]) -> Panel:
+def search_panel(search: Sequence[Search], **kwargs: Any) -> Panel:
     """Display one or more repositories in a table."""
     if len(search) > 1:
         logger.warning("Can only display one search result at a time.")
@@ -40,7 +41,7 @@ def search_panel(search: Sequence[Search]) -> Panel:
     return Panel(Group(*tables), title=f"Search Results", expand=True)
 
 
-def searchrepo_table(repos: Sequence[SearchRepository]) -> Table:
+def searchrepo_table(repos: Sequence[SearchRepository], **kwargs: Any) -> Table:
     table = get_table("Repository", repos)
     table.add_column("Project")
     table.add_column("Name")
@@ -56,7 +57,7 @@ def searchrepo_table(repos: Sequence[SearchRepository]) -> Table:
     return table
 
 
-def searchresult_table(results: Sequence[SearchResult]) -> Table:
+def searchresult_table(results: Sequence[SearchResult], **kwargs: Any) -> Table:
     """Table of Helm chart search results."""
     table = get_table("Chart", results)
     table.add_column("Project")

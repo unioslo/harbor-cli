@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from typing import Any
 from typing import Sequence
 
 from harborapi.models.models import CVEAllowlist
@@ -17,7 +18,7 @@ from ..formatting.dates import datetime_str
 from ._utils import get_table
 
 
-def project_table(p: Sequence[Project]) -> Table:
+def project_table(p: Sequence[Project], **kwargs: Any) -> Table:
     """Display one or more projects in a table."""
     table = get_table("Project", p)
     table.add_column("ID")
@@ -36,7 +37,7 @@ def project_table(p: Sequence[Project]) -> Table:
     return table
 
 
-def project_extended_panel(p: Sequence[ProjectExtended]) -> Panel:
+def project_extended_panel(p: Sequence[ProjectExtended], **kwargs: Any) -> Panel:
     """Display extended information about one or more projects."""
     if len(p) > 1:
         logger.warning("This function should only be used to display a single project.")
@@ -47,7 +48,7 @@ def project_extended_panel(p: Sequence[ProjectExtended]) -> Panel:
     return Panel(Group(pt_table, pmt_table, cve_table), title=p[0].name, expand=True)
 
 
-def project_extended_table(p: Sequence[ProjectExtended]) -> Table:
+def project_extended_table(p: Sequence[ProjectExtended], **kwargs: Any) -> Table:
     table = get_table(
         "Project",
         p,
@@ -74,7 +75,7 @@ def project_extended_table(p: Sequence[ProjectExtended]) -> Table:
     return table
 
 
-def project_metadata_table(p: Sequence[ProjectMetadata]) -> Table:
+def project_metadata_table(p: Sequence[ProjectMetadata], **kwargs: Any) -> Table:
     table = get_table("Project Metadata", p)
     table.add_column("Public")
     table.add_column("Content Trust")
@@ -98,7 +99,7 @@ def project_metadata_table(p: Sequence[ProjectMetadata]) -> Table:
     return table
 
 
-def cveallowlist_table(c: Sequence[CVEAllowlist]) -> Table:
+def cveallowlist_table(c: Sequence[CVEAllowlist], **kwargs: Any) -> Table:
     table = get_table("CVE Allowlist", c)
     table.add_column("ID")
     table.add_column("Items")

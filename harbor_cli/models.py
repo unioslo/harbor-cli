@@ -7,7 +7,12 @@ Refactor to module (directory with __init__.py) if needed.
 from __future__ import annotations
 
 from harborapi.models import Project
-from harborapi.models.base import BaseModel
+from harborapi.models.base import BaseModel as HarborAPIBaseModel
+
+
+class BaseModel(HarborAPIBaseModel):
+    pass
+
 
 # TODO: split up CommandSummary into CommandSummary and CommandSearchResult
 # so that the latter can have the score field
