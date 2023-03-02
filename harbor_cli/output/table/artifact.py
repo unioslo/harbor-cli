@@ -8,6 +8,8 @@ from harborapi.models.models import Artifact
 from harborapi.models.scanner import HarborVulnerabilityReport
 from rich.table import Table
 
+from ...harbor.artifact import get_artifact_architecture
+from ...harbor.artifact import get_artifact_severity
 from ..formatting.builtin import float_str
 from ..formatting.builtin import int_str
 from ..formatting.builtin import str_str
@@ -51,35 +53,28 @@ def artifactinfo_table(artifacts: Sequence[ArtifactInfo], **kwargs: Any):
     table.add_column("Repository")
     table.add_column("Tags")
     table.add_column("Digest", overflow="fold")
-    severity = False
-    if artifacts and any(a.artifact.scan_overview for a in artifacts):
-        table.add_column("Severity")
-        severity = True
+    table.add_column("Arch")
+    table.add_column("Severity")
     table.add_column("Created")
     table.add_column("Size")
     for artifact in artifacts:
-        rows = [
+        table.add_row(
             str_str(artifact.project_name),
             str_str(artifact.repository_name),
             str_str(artifact.tags),
             str_str(artifact.artifact.digest),
+            str_str(get_artifact_architecture(artifact.artifact)),
+            str_str(get_artifact_severity(artifact.artifact)),
             datetime_str(artifact.artifact.push_time),
             bytesize_str(artifact.artifact.size or 0),
-        ]
-        if severity:
-            sev = None
-            if artifact.artifact.scan_overview:
-                try:
-                    sev = artifact.artifact.scan_overview.severity  # type: ignore
-                except AttributeError:
-                    pass
-            rows.insert(4, str_str(sev))
-        table.add_row(*rows)
+        )
     return table
 
 
 def artifactinfo_panel(artifact: ArtifactInfo, **kwargs: Any):
-    """Display one or more artifacts (ArtifactInfo) in a table."""
+    """Display an artifact (ArtifactInfo) in a panel.
+
+    The vulnerabilities of the artifact are shown separately from the artifact itself."""
 
     artifact_table = artifactinfo_table([artifact], **kwargs)
     vuln_table = artifact_vulnerabilities_table([artifact.report], **kwargs)

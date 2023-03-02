@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import NamedTuple
 
+from harborapi.models import Artifact
+
 from ..exceptions import ArtifactNameFormatError
 
 
@@ -49,3 +51,28 @@ def parse_artifact_name(s: str) -> ArtifactName:
         raise ArtifactNameFormatError(s)
 
     return ArtifactName(domain, project, repo, tag_or_digest)
+
+
+def get_artifact_architecture(artifact: Artifact) -> str | None:
+    # the ExtraAttrs model has no documented fields, so we just
+    # attempt to access the architecture field and return None if it
+    # doesn't exist
+    try:
+        return artifact.extra_attrs.architecture  # type: ignore
+    except AttributeError:
+        return None
+
+
+def get_artifact_severity(artifact: Artifact) -> str | None:
+    """Attempt to get the severity string for an artifact.
+    Not every artifact has a scan overview, and not every scan overview
+    has a severity string.
+
+    A scan overview may contain arbitrary fields OR be an instance of
+    NativeReportSummary, and in the latter case we can access the severity field.
+    (Yes, the Harbor API is a bit of mess in this regard.)
+    """
+    try:
+        return artifact.scan_overview.severity  # type: ignore
+    except AttributeError:
+        return None
