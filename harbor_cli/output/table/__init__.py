@@ -132,7 +132,7 @@ def get_render_function(
     else:
         t = type(obj)
 
-    def _get_render_func(t: Type[T]) -> RENDER_FUNC_T:
+    def _get_render_func(t: Any) -> RENDER_FUNC_T:
         try:
             return RENDER_FUNCTIONS[t]
         except KeyError:
@@ -143,15 +143,18 @@ def get_render_function(
                 )
             raise NotImplementedError(f"{t} not implemented.")
 
+    # try to get the single obj render func
     try:
         return _get_render_func(t)
+    # fall back on the sequence render func
     except NotImplementedError:
-        return _get_render_func(Sequence[t])  # type: ignore
+        return _get_render_func(Sequence[t])  # type: ignore # variable as type (mypy hates it)
 
 
 def get_renderable(obj: T | Sequence[T], **kwargs: Any) -> Table | Panel:
     """Get the renderable for a given object."""
     render_function = get_render_function(obj)
+    # wrap object in sequence if necessary (use sequence func if we cant find a single func)
     if is_sequence_func(render_function) and not isinstance(obj, Sequence):
         return render_function([obj], **kwargs)
     return render_function(obj, **kwargs)  # type: ignore
