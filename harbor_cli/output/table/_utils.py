@@ -27,8 +27,6 @@ def get_table(
         title = plural_str(title, data)
 
     # Set kwargs defaults (so we don't accidentally pass them twice)
-    kwargs.setdefault("show_header", True)
-    kwargs.setdefault("expand", True)
     styleconf = state.config.output.table.style
     style_kwargs = styleconf.as_rich_kwargs()
     for k, v in style_kwargs.items():

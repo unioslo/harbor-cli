@@ -194,6 +194,8 @@ class TableStyleSettings(BaseModel):
     border: Optional[str] = None
     footer: Optional[str] = None
     caption: Optional[str] = None
+    expand: bool = True
+    show_header: bool = True
     # TODO: box
 
     @validator("rows", pre=True)
@@ -234,7 +236,7 @@ class TableStyleSettings(BaseModel):
             vv = (vv[0], v[0])
         return vv
 
-    def as_rich_kwargs(self) -> dict[str, Optional[Union[str, Tuple[str, str]]]]:
+    def as_rich_kwargs(self) -> dict[str, Optional[Union[str, Tuple[str, str], bool]]]:
         """Converts the TableStyleSettings to a dictionary that can be passed
         to Rich's Table constructor.
 
@@ -249,6 +251,8 @@ class TableStyleSettings(BaseModel):
             "border_style": self.border,
             "footer_style": self.footer,
             "caption_style": self.caption,
+            "expand": self.expand,
+            "show_header": self.show_header,
         }
 
 
