@@ -356,3 +356,26 @@ Styling of table captions.
 [output.table.style]
 caption = "bold green"
 ```
+
+----
+
+#### `output.table.style.expand`
+
+Expand table to fill terminal width.
+
+
+```toml
+[output.table.style]
+expand = true
+```
+
+----
+
+#### `output.table.style.show_header`
+
+Display a header over each table. Typically states the type of resource being displayed.
+
+```toml
+[output.table.show_header]
+show_header = true
+```
