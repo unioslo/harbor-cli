@@ -10,7 +10,7 @@ on:
       - "mkdocs.yml"
       - ".github/workflows/docs.yml"
       - "pyproject.toml"
-      - "harbor_cli/commands/**"
+      - "harbor_cli/**"
 
 concurrency:
   group: docs-deploy
