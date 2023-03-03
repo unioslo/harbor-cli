@@ -44,7 +44,7 @@ The URL of your Harbor instance.
 
 ```toml
 [harbor]
-url = "https://harbor.example.com"
+url = "https://harbor.example.com/api/v2.0"
 ```
 
 ----

@@ -34,7 +34,7 @@ def test_load_config(tmp_path: Path, config: HarborCLIConfig) -> None:
 def test_load_toml_file(tmp_path: Path, config: HarborCLIConfig) -> None:
     contents = """\
 [harbor]
-url = "https://harbor.example.com"
+url = "https://harbor.example.com/api/v2.0"
 
 [output]
 format = "table"
@@ -43,7 +43,7 @@ format = "table"
     toml_file.write_text(contents)
     loaded = load_toml_file(toml_file)
     assert loaded == {
-        "harbor": {"url": "https://harbor.example.com"},
+        "harbor": {"url": "https://harbor.example.com/api/v2.0"},
         "output": {"format": "table"},
     }
 

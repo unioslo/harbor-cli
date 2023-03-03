@@ -49,7 +49,7 @@ def dumb_terminal():
 def config() -> HarborCLIConfig:
     conf = HarborCLIConfig()
     # These are required to run commands
-    conf.harbor.url = "https://harbor.example.com"
+    conf.harbor.url = "https://harbor.example.com/api/v2.0"
     conf.harbor.username = "admin"
     conf.harbor.secret = "password"
     return conf
