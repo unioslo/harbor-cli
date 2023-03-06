@@ -5,6 +5,7 @@ from typing import cast
 from typing import Dict
 from typing import Mapping
 from typing import NoReturn
+from typing import Optional
 from typing import Protocol
 from typing import runtime_checkable
 from typing import Type
@@ -165,13 +166,27 @@ EXC_HANDLERS: Mapping[Type[Exception], HandleFunc] = {
 }
 
 
+def get_exception_handler(type_: Type[Exception]) -> Optional[HandleFunc]:
+    """Returns the exception handler for the given exception type."""
+    handler = EXC_HANDLERS.get(type_, None)
+    if handler:
+        return handler
+    if type_.__bases__:
+        for base in type_.__bases__:
+            handler = get_exception_handler(base)
+            if handler:
+                return handler
+    return None
+
+
 def handle_exception(e: Exception) -> NoReturn:
     """Handles an exception and exits with the appropriate message."""
     from .output.console import exit_err  # avoid circular import
 
     exiter = cast(Exiter, exit_err)
 
-    handler = EXC_HANDLERS.get(type(e), None)
+    handler = get_exception_handler(type(e))
     if not handler:
+        # TODO: print traceback
         exit_err(str(e), exception=e)
     handler(e, exiter)

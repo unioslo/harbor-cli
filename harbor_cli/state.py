@@ -11,6 +11,7 @@ from pydantic import BaseModel
 from rich.console import Console
 
 from .config import HarborCLIConfig
+from .exceptions import handle_exception
 
 T = TypeVar("T")
 
@@ -102,6 +103,7 @@ class State:
         self,
         coro: Awaitable[T],
         status: Optional[str] = None,
+        no_handle: type[Exception] | tuple[type[Exception], ...] | None = None,
     ) -> T:
         """Run a coroutine in the event loop.
 
@@ -109,11 +111,21 @@ class State:
         ----------
         coro : Awaitable[T]
             The coroutine to run, which returns type T.
+        status : str, optional
+            The status message to display while the coroutine is running.
+        no_handle : type[Exception] | tuple[type[Exception], ...] | None
+            One or more Exception types to not handle.
+            If None, all exceptions will be handled using the default
+            exception handler.
 
         Returns
         -------
         T
             The return value of the coroutine.
+
+        See Also
+        --------
+        [harbor_cli.exceptions.handle_exception][]
         """
         if not self._console_loaded:
             self._init_console()
@@ -124,8 +136,13 @@ class State:
             status += "..."
 
         # show spinner when running a coroutine
-        with self.console.status(status):
-            resp = self.loop.run_until_complete(coro)
+        try:
+            with self.console.status(status):
+                resp = self.loop.run_until_complete(coro)
+        except Exception as e:
+            if no_handle and isinstance(e, no_handle):
+                raise e
+            handle_exception(e)
         return resp
 
 
