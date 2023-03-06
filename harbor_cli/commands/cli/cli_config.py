@@ -14,6 +14,8 @@ from ...output.console import success
 from ...output.render import render_result
 from ...output.table.anysequence import AnySequence
 from ...state import state
+from ...style import render_cli_value
+from ...style import render_config_option
 from ...utils.utils import forbid_extra
 
 # Create a command group
@@ -85,7 +87,7 @@ def set_cli_config(
         help="Set the value in the current session only. The value will not be saved to disk. Only useful in REPL mode.",
     ),
     show_config: bool = typer.Option(
-        True,
+        False,
         "--show/--no-show",
         help="Show the current configuration after setting the value.",
     ),
@@ -121,6 +123,7 @@ def set_cli_config(
 
     if show_config:
         render_config(state.config, as_toml)
+    success(f"Set {render_config_option(key)} to {render_cli_value(value)}")
 
 
 @app.command("write")
