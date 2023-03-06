@@ -23,6 +23,7 @@ from .option import Option
 from .output.console import exit_err
 from .output.console import success
 from .output.formatting.path import path_link
+from .state import State
 from .state import state
 
 # Init subcommand groups here
@@ -30,6 +31,27 @@ for group in commands.ALL_GROUPS:
     app.add_typer(group)
 
 _PRE_OVERRIDE_CONFIG = None  # type: HarborCLIConfig | None
+
+
+def _restore_config(state: State) -> None:
+    """Restore the config to the state before any overrides were applied.
+
+    By default, if you're in the REPL and run `--format json system info`,
+    the next command will also have use JSON format, even if not specified.
+    This command restores the original config before the override was applied.
+    """
+    global _PRE_OVERRIDE_CONFIG
+    if _PRE_OVERRIDE_CONFIG is not None:
+        state.config = _PRE_OVERRIDE_CONFIG
+    if state.repl:
+        # NOTE: when we copy a model, fields that are marked as "exclude"
+        # are _not_ copied, which is kind of insane? You would think
+        # "exclude" only affects dumping dict/JSON, as the docstring implies,
+        # but it also affects copying!
+        _PRE_OVERRIDE_CONFIG = state.config.copy(
+            update={"config_file": state.config.config_file}
+        )
+
 
 # The callback defines global command options
 @app.callback(no_args_is_help=True)
@@ -223,14 +245,7 @@ def main_callback(
             logger.info("Run 'harbor init' to configure Harbor CLI. ")
         state.add_config(conf)
 
-    # If we're in the REPL, we want to save the original config before
-    # overriding, so that overrides specified in the REPL don't persist
-    # between commands.
-    global _PRE_OVERRIDE_CONFIG
-    if _PRE_OVERRIDE_CONFIG is not None:
-        state.config = _PRE_OVERRIDE_CONFIG
-    if state.repl:
-        _PRE_OVERRIDE_CONFIG = state.config.copy()
+    _restore_config(state)  # necessary for overrides to to reset in REPL
 
     # Set config overrides
     if harbor_url is not None:
