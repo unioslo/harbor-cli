@@ -2,12 +2,15 @@
 that they don't need their own module."""
 from __future__ import annotations
 
+import string
 from contextlib import contextmanager
 from itertools import chain
 from typing import Any
 from typing import Iterable
 from typing import Iterator
 from typing import MutableMapping
+from typing import NamedTuple
+from typing import Optional
 from typing import TypeVar
 
 from pydantic import BaseModel
@@ -107,3 +110,64 @@ def forbid_extra(model: BaseModel) -> Iterator[None]:
     finally:
         for model, original_extra in models:
             model.__config__.extra = original_extra
+
+
+class PackageVersion(NamedTuple):
+    package: str
+    min_version: Optional[str] = None
+    max_version: Optional[str] = None
+    not_version: Optional[str] = None  # NYI
+
+
+def parse_version_string(package: str) -> PackageVersion:
+    """Parse a PEP 440 package version string into a PackageVersion tuple.
+
+    Must be in the form of <package_name>[{~=,==,!=,<=,>=,<,>}{x.y.z}][,][{~=,==,!=,<=,>=,<,>}{x.y.z}]
+
+    Examples:
+        - "foo"
+        - "foo==1.2.3"
+        - "foo>=1.2.3"
+        - "foo>=1.2.3,<=2.3.4"
+    """
+    # super dumb parsing, no regex for now
+    parts = package.replace(" ", "").split(",")
+    if len(parts) > 2:
+        raise ValueError("Invalid package version string")
+    package_name = parts[0]
+    min_version = None
+    max_version = None
+    not_version = None  # noqa # NYI
+
+    operators = ["~=", "==", "<=", ">=", "<", ">"]  # no != for now
+
+    p0 = parts[0]
+    for op in operators:
+        if op not in p0:
+            continue
+        package_name, version = p0.split(op)
+        package_name = package_name.strip(op)
+        if op in ["~=", "=="] and op in p0:
+            return PackageVersion(
+                package_name, min_version=version, max_version=version
+            )
+        elif op in ["<=", "<"] and op in p0:
+            max_version = version
+            break
+        elif op in [">=", ">"] and op in p0:
+            min_version = version
+            break
+    if len(parts) == 1:
+        return PackageVersion(
+            package_name, min_version=min_version, max_version=max_version
+        )
+
+    # max version
+    p1 = parts[1]
+    if p1 and p1[0] in operators:
+        if not any(p1.startswith(op) for op in ["<=", "<"]):
+            raise ValueError("Invalid package version string")
+        max_version = p1.strip(string.punctuation)
+    return PackageVersion(
+        package_name, min_version=min_version, max_version=max_version
+    )

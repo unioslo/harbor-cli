@@ -6,6 +6,8 @@ Refactor to module (directory with __init__.py) if needed.
 """
 from __future__ import annotations
 
+from enum import Enum
+
 from harborapi.models import Project
 from harborapi.models.base import BaseModel as HarborAPIBaseModel
 
@@ -26,3 +28,11 @@ class ProjectExtended(Project):
     """Signal to the render function that we want to print extended information about a project."""
 
     pass
+
+
+class Operator(Enum):
+    """Operator used to detmerine matching of multiple search criteria."""
+
+    AND = "and"
+    OR = "or"
+    XOR = "xor"

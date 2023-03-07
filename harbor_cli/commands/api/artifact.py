@@ -1,27 +1,58 @@
 from __future__ import annotations
 
+import re
+from datetime import datetime
+from enum import Enum
+from typing import Any
+from typing import cast
+from typing import Dict
+from typing import Iterable
 from typing import List
 from typing import Optional
+from typing import Set
+from typing import TYPE_CHECKING
 
 import typer
 from harborapi.exceptions import NotFound
 from harborapi.ext.api import get_artifact
+from harborapi.ext.api import get_artifact_vulnerabilities
 from harborapi.ext.api import get_artifacts
+from harborapi.ext.artifact import ArtifactInfo
+from harborapi.ext.report import ArtifactReport
 from harborapi.models import Label
+from harborapi.models import NativeReportSummary
 from harborapi.models import Tag
+from harborapi.models.scanner import Severity
+from pydantic import BaseModel as PydanticBaseModel
+from rich.table import Table
 
+from ...format import OutputFormat
+from ...harbor.artifact import get_artifact_architecture
 from ...harbor.artifact import parse_artifact_name
 from ...logs import logger
+from ...models import BaseModel
+from ...models import Operator
 from ...output.console import console
+from ...output.console import exit
 from ...output.console import exit_err
+from ...output.console import warning
+from ...output.prompts import bool_prompt
 from ...output.render import render_result
+from ...output.table._utils import get_table
 from ...state import state
+from ...style import render_cli_option
+from ...style import render_cli_value
+from ...style import render_warning
 from ...utils.args import add_to_query
 from ...utils.args import parse_commalist
 from ...utils.commands import inject_resource_options
 from ...utils.prompts import check_enumeration_options
 from ...utils.prompts import delete_prompt
+from ...utils.utils import parse_version_string
 from ..help import ARTIFACT_HELP_STRING
+
+if TYPE_CHECKING:
+    from ...utils.utils import PackageVersion  # noqa: F401
 
 
 # Create a command group
@@ -68,6 +99,12 @@ def list_artifacts(
         help="Limit to artifacts with tag(s) (e.g. 'latest').",
         callback=parse_commalist,
     ),
+    architecture: List[str] = typer.Option(
+        [],
+        "--arch",
+        help="Limit to artifacts with architecture(s) (e.g. 'amd64').",
+        callback=parse_commalist,
+    ),
     with_report: bool = typer.Option(
         False,
         "--with-report",
@@ -105,6 +142,17 @@ def list_artifacts(
         ),
         "Fetching artifacts...",
     )
+
+    # We have no way of filtering by architecture in the API itself, so we
+    # filter the results manually here by accessing the extra_attrs field.
+    if architecture:
+        results = []
+        for arch in architecture:
+            for artifact in artifacts:
+                if arch == get_artifact_architecture(artifact.artifact):
+                    results.append(artifact)
+        artifacts = results
+
     render_result(artifacts, ctx)
     logger.info(f"Fetched {len(artifacts)} artifact(s).")
 
@@ -190,17 +238,33 @@ def get(
         "--with-vuln",
         "-v",
     ),
+    with_vuln_descriptions: bool = typer.Option(
+        False,
+        "--with-vuln-desc",
+        "-d",
+    )
     # TODO: --tag
 ) -> None:
     """Get information about a specific artifact."""
 
     an = parse_artifact_name(artifact)
     # Just use normal endpoint method for a single artifact
-    artifact = state.run(
-        state.client.get_artifact(an.project, an.repository, an.reference),  # type: ignore
+    art = state.run(
+        get_artifact(state.client, an.project, an.repository, an.reference, with_report=with_vulnerabilities),  # type: ignore
         f"Fetching artifact(s)...",
     )
-    render_result(artifact, ctx)
+    # artifact = state.run(
+    #     state.client.get_artifact(an.project, an.repository, an.reference),  # type: ignore
+    #     f"Fetching artifact(s)...",
+    # )
+    render_result(art, ctx)
+
+    # Hack to render vulnerabilities after the artifact in table mode
+    # When we render in JSON mode we automatically render the report, but
+    # in table mode we don't render the report by default
+    # TODO: make this less hacky
+    if with_vulnerabilities and state.config.output.format == OutputFormat.TABLE:
+        render_result(art.report, ctx, with_description=with_vuln_descriptions)
 
 
 # HarborAsyncClient.get_artifact_tags()
@@ -392,19 +456,492 @@ def get_buildhistory(
     render_result(history, ctx)
 
 
+class DeletionReason(str, Enum):
+    """Reasons for deleting an artifact."""
+
+    AGE = "age"
+    SEVERITY = "severity"
+
+
+class ArtifactDeletion:
+    """Encapsulates artifaction deletion checks."""
+
+    deletion_time = datetime.now()
+
+    def __init__(
+        self,
+        artifact: ArtifactInfo,
+        operator: Operator,
+        age: int | None = None,
+        severity: Severity | None = None,
+        except_project: str | None = None,
+        except_repo: str | None = None,
+        except_tag: str | None = None,
+    ) -> None:
+        self.artifact = artifact
+        self.operator = operator
+        # Matching criteria
+        self.age = age
+        self.severity = severity
+        # Exclusion criteria
+        self.except_project = except_project
+        self.except_repo = except_repo
+        self.except_tag = except_tag
+
+        # Construct a dictionary from the criteria passed in
+        self.criteria = {}
+        if age is not None:
+            self.criteria[DeletionReason.AGE] = False
+        if severity is not None:
+            self.criteria[DeletionReason.SEVERITY] = False
+
+    @property
+    def reasons(self) -> list[DeletionReason]:
+        return [k for k, v in self.criteria.items() if v]
+
+    def should_delete(self) -> bool:
+        """Determines if the artifact should be deleted or not.
+        Returns a tuple of (should_delete, reason).
+
+        Returns
+        -------
+        bool
+            True if the artifact should be deleted, False otherwise.
+        """
+        a = self.artifact  # increase readability
+
+        # Check exclusions first
+        if self.except_project and re.search(self.except_project, a.project_name):
+            return False
+        if self.except_project and re.search(self.except_project, a.repository_name):
+            return False
+        if self.except_tag and a.artifact.tags:
+            if any(  # type: ignore # mypy can't infer the type of a.artifact.tags for some reason
+                re.search(self.except_tag, tag)
+                for tag in filter(None, (t.name for t in a.artifact.tags))
+            ):
+                return False
+
+        # Check potential matches
+        if self.age and self.exceeds_age():
+            self.criteria[DeletionReason.AGE] = True
+        if self.severity and self.exceeds_severity():
+            self.criteria[DeletionReason.SEVERITY] = True
+
+        # Check if we have any matches.
+        return self._check_criteria()
+
+    def exceeds_severity(self) -> bool:
+        if self.severity and self.artifact.artifact.scan_overview is not None:
+            overview = self.artifact.artifact.scan_overview
+            # As long as we do metaprogramming magic in the constructor of
+            # Artifact.scan_overview, we need to do this check.
+            if not hasattr(overview, "severity_enum"):
+                return False
+            o = cast(
+                NativeReportSummary, overview
+            )  # Not sure why mypy won't let us do this cast to the overview var
+            if not o.severity_enum:
+                return False
+            if o.severity_enum >= self.severity:
+                return True
+        return False
+
+    def exceeds_age(self) -> bool:
+        if self.age is not None and self.artifact.artifact.push_time is not None:
+            tz = self.artifact.artifact.push_time.tzinfo
+            now = datetime.now(tz=tz)
+            td = now - self.artifact.artifact.push_time
+            if td.days > self.age:
+                return True
+        return False
+
+    def _check_criteria(self) -> bool:
+        if self.operator == Operator.OR:
+            return any(self.criteria.values())
+        elif self.operator == Operator.AND:
+            return all(self.criteria.values())
+        elif self.operator == Operator.XOR:
+            return sum(self.criteria.values()) == 1
+        else:
+            raise ValueError(f"Unknown operator {self.operator}")
+
+
+# Declare this model here, so we can pass it directly to render_result,
+# which will call __rich_console__ on it.
+# It's an ad-hoc model that doesn't need its own entry in output/tables/__init__.py
+class ScheduledArtifactDeletion(PydanticBaseModel):
+    """Encapsulates an artifact deletion scheduled for a future time."""
+
+    artifacts: Dict[str, List[DeletionReason]]
+
+    def __rich_console__(self, console, options) -> Table:  # type: ignore
+        from ...output.table._utils import get_table
+
+        table = get_table(
+            "Artifact", list(self.artifacts.keys()), columns=["Artifact", "Reasons"]
+        )
+        for artifact, reasons in self.artifacts.items():
+            table.add_row(artifact, ", ".join(reasons))
+        yield table
+
+
+@app.command("clean")
+def cleanup_artifacts(
+    ctx: typer.Context,
+    # Target options
+    project: Optional[List[str]] = typer.Option(
+        None,
+        "--project",
+        help="Project(s) to delete from. If not specified, all projects will be considered.",
+        callback=parse_commalist,
+    ),
+    repository: Optional[List[str]] = typer.Option(
+        None,
+        "--repo",
+        help="Repository name(s) to delete from. If not specified, all repositories in the project(s) will be considered.",
+        callback=parse_commalist,
+    ),
+    # Matching options
+    age: Optional[int] = typer.Option(
+        None,
+        "--age",
+        help="Delete artifacts older than the specified number of days.",
+    ),
+    severity: Optional[Severity] = typer.Option(
+        None,
+        "--severity",
+        help="Delete all artifacts with the given severity or higher.",
+    ),
+    # Matching operator
+    operator: Operator = typer.Option(
+        Operator.AND.value,
+        "--operator",
+        help="Operator to use when matching multiple criteria. Defaults to AND.",
+    ),
+    # Exclusion options
+    except_project: Optional[str] = typer.Option(
+        None,
+        "--except-project",
+        help="Regex pattern for excluding artifacts from projects.",
+    ),
+    except_repo: Optional[str] = typer.Option(
+        None,
+        "--except-repo",
+        help="Regex pattern for excluding artifacts from repositories.",
+    ),
+    except_tag: Optional[str] = typer.Option(
+        None,
+        "--except-tag",
+        help="Regex pattern for artifacts with tags to exclude from deletion.",
+    ),
+    max_count: Optional[int] = typer.Option(
+        None,
+        "--max",
+        help="Abort deletion if this number of artifacts would be deleted.",
+    ),
+    dry_run: bool = typer.Option(
+        False,
+        "--dryrun",
+        help="Show which artifacts would be deleted, but don't do anything.",
+    ),
+    force: bool = typer.Option(
+        False,
+        "--force",
+        help="Don't ask for confirmation before deleting artifacts.",
+    ),
+    exit_on_error: bool = typer.Option(
+        False,
+        "--exit-on-error",
+        help="Abort the operation and exit with non-zero exit code if an artifact cannot be deleted.",
+    ),
+) -> None:
+    """Delete artifacts that don't match one or more conditions."""
+    if not project and not repository:
+        warning(
+            "Not specifying any projects or repositories could be very dangerous and slow."
+        )
+
+    artifacts = state.run(
+        get_artifacts(
+            state.client,
+            projects=project or None,
+            repositories=repository or None,
+        ),
+        "Fetching artifacts...",
+    )
+
+    to_delete = []  # type: list[ArtifactDeletion]
+
+    for artifact in artifacts:
+        d = ArtifactDeletion(
+            artifact=artifact,
+            operator=operator,
+            age=age,
+            severity=severity,
+            except_project=except_project,
+            except_repo=except_repo,
+            except_tag=except_tag,
+        )
+        if d.should_delete():
+            if not artifact.artifact.digest:
+                exit_err(
+                    "Artifact has no digest, this should not happen. Check the logs for more information.",
+                    artifact=artifact.dict(),
+                )
+
+            to_delete.append(d)
+            logger.debug(
+                f"Scheduling {artifact.name_with_digest} for deletion. Reason(s): {', '.join(reason.value for reason in d.reasons)}",
+                artifact=artifact.name_with_digest,
+                reasons=d.criteria,
+            )
+
+    if max_count and len(to_delete) > max_count:
+        exit_err(
+            f"Aborting. Would delete {len(to_delete)} artifacts, which is more than the maximum of {max_count}.",
+        )
+
+    res = ScheduledArtifactDeletion(
+        artifacts={
+            deletion.artifact.name_with_digest: deletion.reasons
+            for deletion in to_delete
+        }
+    )
+
+    logger.info(f"Will delete {len(to_delete)} artifacts:")
+    render_result(res, ctx)
+
+    if dry_run:
+        return  # exit early
+
+    # Show prompt after we have found the artifacts
+    delete_prompt(state.config, force=force, dry_run=dry_run, resource="artifacts")
+
+    for deletion in to_delete:
+        artifact = deletion.artifact
+        try:
+            state.run(
+                state.client.delete_artifact(
+                    project_name=artifact.project_name,
+                    repository_name=artifact.repository_name,
+                    reference=artifact.artifact.digest,  # type: ignore # we know this isn't None
+                ),
+                f"Deleting {deletion.artifact.name_with_digest}...",
+            )
+            logger.info(
+                f"Deleted {artifact.name_with_digest}",
+                artifact=artifact.name_with_digest,
+            )
+        except Exception as e:
+            msg = f"Failed to delete {artifact.name_with_digest}: {e}"
+            kwargs = {
+                "artifact": artifact.name_with_digest,
+                "error": str(e),
+            }
+            if exit_on_error:
+                exit_err(msg, **kwargs)  # type: ignore # wrong mypy err? this isn't argument 2
+            else:
+                logger.error(msg, **kwargs)
+
+
+class AffectedArtifact(BaseModel):
+    artifact: str
+    tags: List[str] = []
+    vulnerabilities: Set[str] = set()
+    packages: Set[str] = set()
+
+    @property
+    def vulnerabilities_str(self) -> str:
+        return ", ".join(self.vulnerabilities)
+
+    @property
+    def packages_str(self) -> str:
+        return ", ".join(self.packages)
+
+    @property
+    def tags_str(self) -> str:
+        return ", ".join(self.tags or [])
+
+
+def get_artifactinfo_name(artifact: ArtifactInfo) -> str:
+    return artifact.name_with_tag if artifact.tags else artifact.name_with_digest_full
+
+
+class AffectedArtifactList(BaseModel):
+    artifacts: Dict[str, AffectedArtifact] = {}
+
+    def add(
+        self,
+        artifacts: List[ArtifactInfo],
+        vulnerabilities: Optional[List[str]] = None,
+        packages: Optional[List[str]] = None,
+    ) -> None:
+        for artifact in artifacts:
+            # TODO: assert that either vulnerability or package is set
+            if artifact.artifact.tags:
+                tags = [tag.name for tag in artifact.artifact.tags if tag.name]
+            else:
+                tags = []
+            a = AffectedArtifact(
+                artifact=get_artifactinfo_name(artifact),
+                tags=tags,
+                vulnerabilities=vulnerabilities or [],
+                packages=packages or [],
+                # TODO: add exact package versions somehow
+            )
+            self.update(a)
+
+    def update(self, artifact: AffectedArtifact) -> None:
+        a = self.artifacts.get(artifact.artifact)
+        if not a:
+            self.artifacts[artifact.artifact] = artifact
+            return
+        a.vulnerabilities.update(artifact.vulnerabilities)
+        a.packages.update(artifact.packages)
+
+    def as_table(self, **kwargs: Any) -> Iterable[Table]:  # type: ignore
+        table = get_table("Artifacts")
+        table.add_column("Name", overflow="fold")
+        table.add_column("Tags")
+        table.add_column("Matches")
+        # table.add_column("Vulnerabilities")
+        # table.add_column("Packages")
+
+        for artifact in self.artifacts.values():
+            match_table = get_table(columns=["Vulnerabilities", "Packages"])
+            match_table.add_row(artifact.vulnerabilities_str, artifact.packages_str)
+            table.add_row(
+                artifact.artifact,
+                artifact.tags_str,
+                match_table,
+            )
+        yield table
+
+
 # harborapi.ext.api.get_artifact
 @app.command("vulnerabilities")
 def get_vulnerabilities(
     ctx: typer.Context,
-    artifact: str = typer.Argument(
-        ...,
-        help=ARTIFACT_HELP_STRING,
+    cve: List[str] = typer.Option(
+        [],
+        "--cve",
+        help="CVE(s) to get vulnerabilities for.",
+        callback=parse_commalist,
+    ),
+    package: List[str] = typer.Option(
+        [],
+        "--package",
+        # TODO: fix formatting of this message (very strange)
+        help=(
+            "Name of package(s) to check for vulnerabilities. "
+            "Can contain a semver min and max range, similar to PEP 440, e.g. "
+            f"{render_cli_value('foo>=1.0.0,<2.0.0')}. "
+            f"{render_warning('Minimum and maximum version limits are always inclusive (i.e. >= and > are the same)')}"
+        ),
+        # cant use parse_commalist here because the version strings can contain commas
+    ),
+    project: Optional[List[str]] = typer.Option(
+        None,
+        "--project",
+        "-p",
+        help="Project(s) to get vulnerabilities for. If not specified, all projects will be considered.",
+        callback=parse_commalist,
+    ),
+    repo: Optional[List[str]] = typer.Option(
+        None,
+        "--repo",
+        "-r",
+        help="Repository name(s) to get vulnerabilities for. If not specified, all repositories in the project(s) will be considered.",
+        callback=parse_commalist,
+    ),
+    tags: Optional[List[str]] = typer.Option(
+        None,
+        "--tag",
+        "-t",
+        help="Tag(s) to get vulnerabilities for. If not specified, all tags in the repository(s) will be considered.",
+        callback=parse_commalist,
+    ),
+    max_connections: int = typer.Option(
+        5,
+        "--max-connections",
+        help="Maximum number of concurrent connections to the Harbor API.",
+    ),
+    operator: Operator = typer.Option(
+        Operator.OR.value,
+        "--operator",
+        help="Operator to use when querying a combination of multiple CVEs or packages.",
     ),
 ) -> None:
-    """Get vulnerabilities for an artifact."""
-    an = parse_artifact_name(artifact)
-    a = state.run(
-        get_artifact(state.client, an.project, an.repository, an.reference),
-        f"Getting vulnerabilities for {artifact}...",
+    """Find artifacts affected by one or more vulnerabilities."""
+    # Check that we have at least one CVE or package
+    if not any([cve, package]):
+        exit_err("One or more CVEs or packages is required.")
+    if operator not in [Operator.AND, Operator.OR]:
+        exit_err(f"Unsupported operator: {operator.value!r}")
+
+    # Warning/prompting for large operations
+    if not project and not repo:
+        warning(
+            f"Retrieving vulnerabilities for all repositories in all projects can "
+            "take a long time (minutes to hours depending on the total number of artifacts). "
+            f"Use {render_cli_option('--project')} and {render_cli_option('--repo')} to limit the scope of the operation."
+        )
+        if not bool_prompt("Do you want to continue?", default=False):
+            exit()
+    elif not project:
+        warning("Fetching from all projects can be slow even with a repository filter.")
+
+    # Check our package versions for validity _before_ we fetch the artifacts
+    packages = []  # type: list[PackageVersion]
+    for package_version in package:
+        try:
+            pkg = parse_version_string(package_version)
+        except Exception as e:
+            exit_err(f"Invalid package version: {package_version}", exception=e)
+        packages.append(pkg)
+
+    artifacts = state.run(
+        get_artifact_vulnerabilities(
+            state.client, projects=project, repositories=repo, tags=tags
+        ),
+        f"Fetching artifacts...",
     )
-    render_result(a, ctx)
+
+    report = ArtifactReport(artifacts)
+
+    affected = AffectedArtifactList()
+    if operator == Operator.OR:
+        # Each match is added to the list of affected artifacts
+        # The list handles duplicates
+        for c in cve:
+            with_cve = report.with_cve(c).artifacts
+            affected.add(with_cve, vulnerabilities=[c])
+        for pkg in packages:
+            with_package = report.with_package(
+                pkg.package,
+                min_version=pkg.min_version,
+                max_version=pkg.max_version,
+                case_sensitive=False,
+            ).artifacts
+            affected.add(with_package, packages=[pkg.package])
+    elif operator == Operator.AND:
+        # We overwrite the report variable until we have exhausted all conditions
+        for c in cve:
+            report = report.with_cve(c)
+        for pkg in packages:
+            report = report.with_package(
+                pkg.package,
+                min_version=pkg.min_version,
+                max_version=pkg.max_version,
+                case_sensitive=False,
+            )
+        affected.add(
+            report.artifacts,
+            vulnerabilities=cve,
+            packages=[p.package for p in packages],
+        )
+    else:
+        exit_err(f"Unsupported: {operator}")  # same check as above for safety
+
+    render_result(affected, ctx)

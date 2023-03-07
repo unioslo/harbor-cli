@@ -4,6 +4,8 @@ from typing import Any
 
 import pytest
 
+from harbor_cli.utils.utils import PackageVersion
+from harbor_cli.utils.utils import parse_version_string
 from harbor_cli.utils.utils import replace_none
 
 
@@ -97,3 +99,26 @@ def test_replace_none_iterable(iterable_type: type) -> None:
 )
 def test_replace_none_replacement(replacement: Any) -> None:
     assert replace_none(None, replacement=replacement) == replacement  # type: ignore
+
+
+@pytest.mark.parametrize(
+    "package,expected",
+    [
+        (
+            "harbor-cli",
+            PackageVersion(package="harbor-cli", min_version=None, max_version=None),
+        ),
+        (
+            "harbor-cli>=0.1.0",
+            PackageVersion(package="harbor-cli", min_version="0.1.0", max_version=None),
+        ),
+        (
+            "harbor-cli>=0.1.0, <=1.0.0",
+            PackageVersion(
+                package="harbor-cli", min_version="0.1.0", max_version="1.0.0"
+            ),
+        ),
+    ],
+)
+def test_parse_version_string(package: str, expected: PackageVersion) -> None:
+    assert parse_version_string(package) == expected
