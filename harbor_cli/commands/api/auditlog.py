@@ -21,7 +21,9 @@ from ...utils.commands import inject_resource_options
 from ...utils.prompts import check_enumeration_options
 
 # Create a command group
-app = typer.Typer(name="auditlog", help="System information", no_args_is_help=True)
+app = typer.Typer(
+    name="auditlog", help="Audit log management and access", no_args_is_help=True
+)
 
 # harbor auditlog rotation <subcommand>
 rotation_cmd = typer.Typer(name="rotation", help="Log rotation", no_args_is_help=True)
