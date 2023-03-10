@@ -266,6 +266,17 @@ def test_construct_query_list(values: List[str], expected: str, union: bool) -> 
             "foo=bar",
             "foo={bar bar},baz=gux",
         ),
+        # Query string with no value
+        (
+            {"foo": ["bar", "baz"]},
+            "foo=",
+            "foo={bar baz}",
+        ),
+        (
+            {"foo": ["bar", "baz"], "qux": "quux"},
+            "foo=",
+            "foo={bar baz},qux=quux",
+        ),
     ],
 )
 def test_add_to_query(kwargs: dict[str, Any], query: str | None, expected: str) -> None:
