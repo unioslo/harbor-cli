@@ -184,10 +184,14 @@ def as_query(**kwargs: Any) -> str:
 
 
 # TODO: could we annotate this in a way where at least one value is required?
-def construct_query_list(*values: str, union: bool = True) -> str:
+def construct_query_list(
+    *values: str, union: bool = True, allow_empty: bool = False
+) -> str:
     """Given a key and a list of values, returns a harbor API
     query string with values as a list with union or intersection
     relationship (default: union).
+
+    Falsey values are ignored if allow_empty is False (default).
 
     Examples
     --------
@@ -195,10 +199,14 @@ def construct_query_list(*values: str, union: bool = True) -> str:
     '{foo bar baz}'
     >>> construct_query_list("foo", "bar", "baz", union=False)
     '(foo bar baz)'
+    >>> construct_query_list("", "bar", "baz")
+    '(bar baz)'
+    >>> construct_query_list("", "bar", "baz", allow_empty=True)
+    '( bar baz)'
     """
     start = "{" if union else "("
     end = "}" if union else ")"
-    return f"{start}{' '.join(values)}{end}"
+    return f"{start}{' '.join(v for v in values if v or allow_empty)}{end}"
 
 
 def deconstruct_query_list(qlist: str) -> list[str]:
@@ -226,6 +234,8 @@ def add_to_query(query: str | None, **kwargs: str | list[str] | None) -> str:
     overwritten.
 
     Always returns a string, even if the resulting query string is empty.
+
+    TODO: allow fuzzy matching, e.g. foo=~bar
 
     Examples
     --------
