@@ -36,3 +36,30 @@ class Operator(Enum):
     AND = "and"
     OR = "or"
     XOR = "xor"
+
+
+class UserGroupType(str, Enum):
+    LDAP = "LDAP"
+    HTTP = "HTTP"
+    OIDC = "OIDC"
+
+    @classmethod
+    def from_int(cls, value: int) -> UserGroupType:
+        if value == 1:
+            return cls.LDAP
+        elif value == 2:
+            return cls.HTTP
+        elif value == 3:
+            return cls.OIDC
+        else:
+            raise ValueError(f"Unknown group type: {value}")
+
+    def as_int(self) -> int:
+        if self == UserGroupType.LDAP:
+            return 1
+        elif self == UserGroupType.HTTP:
+            return 2
+        elif self == UserGroupType.OIDC:
+            return 3
+        else:
+            raise ValueError(f"Unknown group type: {self}")

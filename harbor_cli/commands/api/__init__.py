@@ -20,6 +20,7 @@ from . import scanner as scanner
 from . import search as search  # no subcommands
 from . import system as system
 from . import user as user
+from . import usergroup as usergroup
 from . import vulnerabilities as vulnerabilities
 from . import webhook as webhook
 
@@ -40,5 +41,6 @@ api_commands: list[typer.Typer] = [
     scanner.app,
     system.app,
     user.app,
+    usergroup.app,
     webhook.app,
 ]

@@ -61,7 +61,9 @@ from .search import search_panel
 from .system import systeminfo_table
 from .user import userresp_table
 from .user import usersearchrespitem_table
+from .usergroup import usergroupsearchitem_table
 from .webhook import supported_events_table
+
 
 T = TypeVar("T")
 
@@ -87,6 +89,7 @@ _RENDER_FUNCTIONS = [
     userresp_table,
     usersearchrespitem_table,
     registryproviders_table,
+    usergroupsearchitem_table,
 ]  # type: list[RENDER_FUNC_T]
 
 RENDER_FUNCTIONS = {}  # dict of functions + type of first argument
