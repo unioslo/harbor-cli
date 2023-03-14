@@ -4,6 +4,11 @@ username = ""
 secret = ""
 basicauth = ""
 credentials_file = ""
+validate_data = true
+raw_mode = false
+
+[general]
+confirm_deletion = true
 
 [logging]
 enabled = true
@@ -12,10 +17,24 @@ level = "INFO"
 
 [output]
 format = "table"
+paging = false
+pager = ""
+confirm_enumeration = true
 
 [output.table]
 description = false
-max_depth = -1
+max_depth = 0
+compact = true
+
+[output.table.style]
+title = ""
+header = "bold green"
+rows = ""
+border = ""
+footer = ""
+caption = ""
+expand = true
+show_header = true
 
 [output.JSON]
 indent = 2
