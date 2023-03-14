@@ -1,9 +1,7 @@
 from __future__ import annotations
 
 from typing import List
-from typing import Literal
 from typing import Optional
-from typing import overload
 
 import typer
 from harborapi.models.base import BaseModel
@@ -18,10 +16,13 @@ from ...output.render import render_result
 from ...state import state
 from ...utils import parse_commalist
 from ...utils.args import create_updated_model
+from ...utils.args import get_project_arg
 from ...utils.args import model_params_from_ctx
 from ...utils.args import parse_key_value_args
+from ...utils.commands import ARG_PROJECT_NAME
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
+from ...utils.commands import OPTION_PROJECT_ID
 from ...utils.prompts import check_enumeration_options
 from ...utils.prompts import delete_prompt
 
@@ -59,18 +60,11 @@ def get_project(name_or_id: str | int) -> Project:
 @app.command("get", no_args_is_help=True)
 def get_project_info(
     ctx: typer.Context,
-    project_name_or_id: str = typer.Argument(
-        ...,
-        help="Project name or ID to fetch info for. Numeric strings are interpreted as IDs.",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--is-id",
-        help="Whether the project name is an ID.",
-    ),
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    project_id: Optional[int] = OPTION_PROJECT_ID,
 ) -> None:
     """Get information about a project."""
-    arg = get_project_arg(project_name_or_id, is_id)
+    arg = get_project_arg(project_name, project_id)
     project = get_project(arg)
     p = ProjectExtended(**project.dict())
     render_result(p, ctx)
@@ -274,15 +268,8 @@ def list_projects(
 )  # inject this first so its "public" field takes precedence
 def update_project(
     ctx: typer.Context,
-    project_name_or_id: str = typer.Argument(
-        ...,
-        help="Name or ID of the project to delete (interpreted as name by default).",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--is-id",
-        help="Whether the project name is an ID.",
-    ),
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    project_id: Optional[int] = OPTION_PROJECT_ID,
     storage_limit: Optional[int] = typer.Option(
         None,
         "--storage-limit",
@@ -338,7 +325,7 @@ def update_project(
     if not req_params and not metadata_params:
         exit_err("No parameters provided.")
 
-    arg = get_project_arg(project_name_or_id, is_id)
+    arg = get_project_arg(project_name, project_id)
     project = get_project(arg)
     if project.metadata is None:
         project.metadata = ProjectMetadata()
@@ -366,15 +353,8 @@ def update_project(
 @app.command("delete")
 def delete_project(
     ctx: typer.Context,
-    project_name_or_id: str = typer.Argument(
-        ...,
-        help="Name or ID of the project to delete (interpreted as name by default).",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--is-id",
-        help="Whether the project name is an ID.",
-    ),
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    project_id: Optional[int] = OPTION_PROJECT_ID,
     force: bool = typer.Option(
         False,
         "--force",
@@ -382,10 +362,8 @@ def delete_project(
     ),
 ) -> None:
     """Delete a project."""
-    delete_prompt(
-        config=state.config, force=force, resource="project", name=project_name_or_id
-    )
-    arg = get_project_arg(project_name_or_id, is_id)
+    arg = get_project_arg(project_name, project_id)
+    delete_prompt(config=state.config, force=force, resource="project", name=str(arg))
     project_repr = get_project_repr(arg)
     state.run(state.client.delete_project(arg), f"Deleting {project_repr}...")
     logger.info(f"Deleted {project_repr}.")
@@ -395,18 +373,11 @@ def delete_project(
 @app.command("summary")
 def get_project_summary(
     ctx: typer.Context,
-    project_name_or_id: str = typer.Argument(
-        ...,
-        help="Name or ID of the project to delete (interpreted as name by default).",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--is-id",
-        help="Whether the project name is an ID.",
-    ),
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    project_id: Optional[int] = OPTION_PROJECT_ID,
 ) -> None:
     """Fetch project summary."""
-    arg = get_project_arg(project_name_or_id, is_id)
+    arg = get_project_arg(project_name, project_id)
     project_repr = get_project_repr(arg)
     summary = state.run(
         state.client.get_project_summary(arg), f"Fetching summary for {project_repr}..."
@@ -418,17 +389,10 @@ def get_project_summary(
 @scanner_cmd.command("get")
 def get_project_scanner(
     ctx: typer.Context,
-    project_name_or_id: str = typer.Argument(
-        ...,
-        help="Name or ID of the project to delete (interpreted as name by default).",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--is-id",
-        help="Whether the project name is an ID.",
-    ),
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    project_id: Optional[int] = OPTION_PROJECT_ID,
 ) -> None:
-    arg = get_project_arg(project_name_or_id, is_id)
+    arg = get_project_arg(project_name, project_id)
     scanner = state.run(state.client.get_project_scanner(arg))
     render_result(scanner, ctx)
 
@@ -437,21 +401,14 @@ def get_project_scanner(
 @scanner_cmd.command("set")
 def set_project_scanner(
     ctx: typer.Context,
-    project_name_or_id: str = typer.Argument(
-        ...,
-        help="Name or ID of the project to delete (interpreted as name by default).",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--is-id",
-        help="Whether the project name is an ID or not.",
-    ),
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    project_id: Optional[int] = OPTION_PROJECT_ID,
     scanner_id: str = typer.Argument(
         ...,
         help="ID of the scanner to set.",
     ),
 ) -> None:
-    arg = get_project_arg(project_name_or_id, is_id)
+    arg = get_project_arg(project_name, project_id)
     project_repr = get_project_repr(arg)
     scanner_repr = f"scanner with ID {scanner_id!r}"
     state.run(
@@ -469,17 +426,10 @@ def get_project_scanner_candidates(
     sort: Optional[str],
     page: int,
     page_size: int,
-    project_name_or_id: str = typer.Argument(
-        ...,
-        help="Name or ID of the project to delete (interpreted as name by default).",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--is-id",
-        help="Whether the project name is an ID or not.",
-    ),
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    project_id: Optional[int] = OPTION_PROJECT_ID,
 ) -> None:
-    arg = get_project_arg(project_name_or_id, is_id)
+    arg = get_project_arg(project_name, project_id)
     project_repr = get_project_repr(arg)
     candidates = state.run(
         state.client.get_project_scanner_candidates(
@@ -502,56 +452,17 @@ def get_project_repr(arg: str | int) -> str:
         return f"project (id={arg})"
 
 
-@overload
-def get_project_arg(arg: str, is_id: Literal[False]) -> str:
-    ...
-
-
-@overload
-def get_project_arg(arg: str, is_id: Literal[True]) -> int:
-    ...
-
-
-# this one looks unnecessary, but it isn't...
-@overload
-def get_project_arg(arg: str, is_id: bool) -> str | int:
-    ...
-
-
-def get_project_arg(arg: str, is_id: bool) -> str | int:
-    """Converts a project argument to the correct type based on the is_id flag.
-
-    We need to pass an int argument to harborapi if the project is specified by ID,
-    and likewise a string if it's specified by name. This function converts the
-    argument to the correct type based on the is_id flag.
-    """
-    if is_id:
-        try:
-            return int(arg)
-        except ValueError:
-            raise typer.BadParameter(f"Project ID {arg!r} is not an integer.")
-    else:
-        return arg
-
-
 # Metadata commands (which are in their own category in Harbor API)
 
 # HarborAsyncClient.get_project_metadata()
 @metadata_cmd.command("get")
 def get_project_metadata(
     ctx: typer.Context,
-    project_name_or_id: str = typer.Argument(
-        ...,
-        help="Name or ID of the project to delete (interpreted as name by default).",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--is-id",
-        help="Whether the project name is an ID or not.",
-    ),
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    project_id: Optional[int] = OPTION_PROJECT_ID,
 ) -> None:
     """Get metadata for a project."""
-    arg = get_project_arg(project_name_or_id, is_id)
+    arg = get_project_arg(project_name, project_id)
     metadata = state.run(state.client.get_project_metadata(arg), "Fetching metadata...")
     render_result(metadata, ctx)
 
@@ -561,15 +472,8 @@ def get_project_metadata(
 @inject_help(ProjectMetadata)
 def set_project_metadata(
     ctx: typer.Context,
-    project_name_or_id: str = typer.Argument(
-        ...,
-        help="Name or ID of the project (interpreted as name by default).",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--is-id",
-        help="Whether the argument is a project ID or name (by default name)",
-    ),
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    project_id: Optional[int] = OPTION_PROJECT_ID,
     public: Optional[bool] = typer.Option(
         None,
         "--public",
@@ -626,7 +530,7 @@ def set_project_metadata(
 
     # Extra metadata args
     extra_metadata = parse_key_value_args(extra)
-    arg = get_project_arg(project_name_or_id, is_id)
+    arg = get_project_arg(project_name, project_id)
 
     metadata = ProjectMetadata(
         **params,
@@ -645,22 +549,15 @@ def set_project_metadata(
 @metadata_field_cmd.command("get")
 def get_project_metadata_field(
     ctx: typer.Context,
-    project_name_or_id: str = typer.Argument(
-        ...,
-        help="Name or ID of the project to update (interpreted as name by default).",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--is-id",
-        help="Whether the argument is a project ID or name (by default name)",
-    ),
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    project_id: Optional[int] = OPTION_PROJECT_ID,
     field: str = typer.Argument(
         ...,
         help="The name of the field to get.",
     ),
 ) -> None:
     """Get a single field from the metadata for a project. NOTE: does not support table output currently."""
-    arg = get_project_arg(project_name_or_id, is_id)
+    arg = get_project_arg(project_name, project_id)
     project_repr = get_project_repr(arg)
     metadata = state.run(
         state.client.get_project_metadata_entry(arg, field),
@@ -673,15 +570,8 @@ def get_project_metadata_field(
 @metadata_field_cmd.command("set")
 def set_project_metadata_field(
     ctx: typer.Context,
-    project_name_or_id: str = typer.Argument(
-        ...,
-        help="Name or ID of the project to update (interpreted as name by default).",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--is-id",
-        help="Whether the argument is a project ID or name (by default name)",
-    ),
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    project_id: Optional[int] = OPTION_PROJECT_ID,
     field: str = typer.Argument(
         ...,
         help="The name of the field to set.",
@@ -695,7 +585,7 @@ def set_project_metadata_field(
     if field not in ProjectMetadata.__fields__:
         logger.warning(f"Field {field!r} is not a known project metadata field.")
 
-    arg = get_project_arg(project_name_or_id, is_id)
+    arg = get_project_arg(project_name, project_id)
     project_repr = get_project_repr(arg)
 
     metadata = ProjectMetadata.parse_obj({field: value})
@@ -711,18 +601,11 @@ def set_project_metadata_field(
 @metadata_field_cmd.command("delete")
 def delete_project_metadata_field(
     ctx: typer.Context,
-    project_name_or_id: str = typer.Argument(
-        ...,
-        help="Name or ID of the project (interpreted as name by default).",
-    ),
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    project_id: Optional[int] = OPTION_PROJECT_ID,
     field: str = typer.Argument(
         ...,
         help="The metadata field to delete.",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--is-id",
-        help="Whether the argument is a project ID or name (by default name)",
     ),
     force: bool = typer.Option(
         False, "--force", help="Force deletion without confirmation."
@@ -733,7 +616,7 @@ def delete_project_metadata_field(
     if field not in ProjectMetadata.__fields__:
         logger.warning(f"Field {field!r} is not a known project metadata field.")
 
-    arg = get_project_arg(project_name_or_id, is_id)
+    arg = get_project_arg(project_name, project_id)
 
     state.run(
         state.client.delete_project_metadata_entry(arg, field),

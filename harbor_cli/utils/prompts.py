@@ -18,7 +18,7 @@ def delete_prompt(
     resource: str | None = None,
     name: str | None = None,
 ) -> None:
-    """Prompt user to confirm deletion of artifact."""
+    """Prompt user to confirm deletion of a resource."""
     if dry_run:
         return
     if force:
