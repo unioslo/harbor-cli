@@ -18,6 +18,7 @@ from ...utils.args import create_updated_model
 from ...utils.args import model_params_from_ctx
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
+from ...utils.commands import OPTION_FORCE
 from ...utils.prompts import delete_prompt
 
 # Create a command group
@@ -152,11 +153,7 @@ def delete_registry(
         ...,
         help="ID of registry to delete.",
     ),
-    force: bool = typer.Option(
-        False,
-        "--force",
-        help="Force deletion without confirmation.",
-    ),
+    force: bool = OPTION_FORCE,
 ) -> None:
     """Delete a registry."""
     delete_prompt(state.config, force, resource="registry", name=str(registry_id))

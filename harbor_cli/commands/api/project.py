@@ -22,6 +22,7 @@ from ...utils.args import parse_key_value_args
 from ...utils.commands import ARG_PROJECT_NAME
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
+from ...utils.commands import OPTION_FORCE
 from ...utils.commands import OPTION_PROJECT_ID
 from ...utils.prompts import check_enumeration_options
 from ...utils.prompts import delete_prompt
@@ -355,11 +356,7 @@ def delete_project(
     ctx: typer.Context,
     project_name: Optional[str] = ARG_PROJECT_NAME,
     project_id: Optional[int] = OPTION_PROJECT_ID,
-    force: bool = typer.Option(
-        False,
-        "--force",
-        help="Skip deletion confirmation prompt.",
-    ),
+    force: bool = OPTION_FORCE,
 ) -> None:
     """Delete a project."""
     arg = get_project_arg(project_name, project_id)
@@ -607,9 +604,7 @@ def delete_project_metadata_field(
         ...,
         help="The metadata field to delete.",
     ),
-    force: bool = typer.Option(
-        False, "--force", help="Force deletion without confirmation."
-    ),
+    force: bool = OPTION_FORCE,
 ) -> None:
     """Delete a single field in the metadata for a project."""
     delete_prompt(state.config, force, resource="metadata field", name=field)

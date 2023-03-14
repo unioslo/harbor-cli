@@ -46,6 +46,7 @@ from ...style import render_warning
 from ...utils.args import add_to_query
 from ...utils.args import parse_commalist
 from ...utils.commands import inject_resource_options
+from ...utils.commands import OPTION_FORCE
 from ...utils.prompts import check_enumeration_options
 from ...utils.prompts import delete_prompt
 from ...utils.utils import parse_version_string
@@ -165,12 +166,7 @@ def delete_artifact(
         ...,
         help=ARTIFACT_HELP_STRING,
     ),
-    force: bool = typer.Option(
-        False,
-        "--force",
-        "-f",
-        help="Force deletion without confirmation.",
-    ),
+    force: bool = OPTION_FORCE,
 ) -> None:
     """Delete an artifact."""
     delete_prompt(state.config, force, resource="artifact", name=artifact)
@@ -322,12 +318,7 @@ def delete_artifact_tag(
         help=ARTIFACT_HELP_STRING,
     ),
     tag: str = typer.Argument(..., help="Name of the tag to delete."),
-    force: bool = typer.Option(
-        False,
-        "--force",
-        "-f",
-        help="Force deletion without confirmation.",
-    ),
+    force: bool = OPTION_FORCE,
 ) -> None:
     """Delete a tag for an artifact."""
     delete_prompt(state.config, force, resource="tag", name=tag)
@@ -400,11 +391,7 @@ def delete_artifact_label(
         ...,
         help="ID of the label to delete.",
     ),
-    force: bool = typer.Option(
-        False,
-        "--force",
-        help="Force deletion without confirmation.",
-    ),
+    force: bool = OPTION_FORCE,
 ) -> None:
     """Add a label to an artifact."""
     delete_prompt(state.config, force, resource="label", name=str(label_id))
@@ -645,11 +632,7 @@ def cleanup_artifacts(
         "--dryrun",
         help="Show which artifacts would be deleted, but don't do anything.",
     ),
-    force: bool = typer.Option(
-        False,
-        "--force",
-        help="Don't ask for confirmation before deleting artifacts.",
-    ),
+    force: bool = OPTION_FORCE,
     exit_on_error: bool = typer.Option(
         False,
         "--exit-on-error",

@@ -15,6 +15,7 @@ from ...state import state
 from ...utils.args import model_params_from_ctx
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
+from ...utils.commands import OPTION_FORCE
 from ...utils.prompts import check_enumeration_options
 from ...utils.prompts import delete_prompt
 
@@ -336,11 +337,7 @@ def delete_replication_policy(
         ...,
         help="The ID of the replication policy.",
     ),
-    force: bool = typer.Option(
-        False,
-        "--force",
-        help="Force deletion without confirmation.",
-    ),
+    force: bool = OPTION_FORCE,
 ) -> None:
     """Delete a replication policy."""
     delete_prompt(

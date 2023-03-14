@@ -215,6 +215,11 @@ ARG_PROJECT_NAME = typer.Argument(
     None,
     help="Name of the project to use.",
 )
+OPTION_FORCE = typer.Option(
+    False,
+    "--force",
+    help="Force deletion without confirmation.",
+)
 
 
 def inject_resource_options(
