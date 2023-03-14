@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 import inspect
 from typing import Any
 from typing import Type
@@ -446,6 +447,9 @@ def _patch_param(
 
     # Use defaults from the injected parameter if they exist
     if use_default:
+        # TODO: add some sort of copy-on-write here, so we don't
+        # we don't copy if we don't need to
+        value = copy.copy(value)
         if hasattr(to_replace.default, "default"):
             value.default = to_replace.default.default
         if hasattr(to_replace.default, "help") and to_replace.default.help:
