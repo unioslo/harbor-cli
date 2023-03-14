@@ -8,15 +8,19 @@ from harborapi.models.base import BaseModel
 from harborapi.models.models import Project
 from harborapi.models.models import ProjectMetadata
 from harborapi.models.models import ProjectReq
+from harborapi.models.models import RoleRequest
 
 from ...logs import logger
+from ...models import MemberRoleType
 from ...models import ProjectExtended
 from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
 from ...utils import parse_commalist
 from ...utils.args import create_updated_model
+from ...utils.args import get_ldap_group_arg
 from ...utils.args import get_project_arg
+from ...utils.args import get_user_arg
 from ...utils.args import model_params_from_ctx
 from ...utils.args import parse_key_value_args
 from ...utils.commands import ARG_PROJECT_NAME
@@ -48,9 +52,15 @@ metadata_field_cmd = typer.Typer(
     help="Manage project metadata fields.",
     no_args_is_help=True,
 )
+member_cmd = typer.Typer(
+    name="member",
+    help="Manage project members.",
+    no_args_is_help=True,
+)
 metadata_cmd.add_typer(metadata_field_cmd)
 app.add_typer(scanner_cmd)
 app.add_typer(metadata_cmd)
+app.add_typer(member_cmd)
 
 
 def get_project(name_or_id: str | int) -> Project:
@@ -618,3 +628,148 @@ def delete_project_metadata_field(
         f"Deleting metadata field {field!r}...",
     )
     logger.info(f"Deleted metadata field {field!r}.")
+
+
+# HarborAsyncClient.get_project_member()
+@member_cmd.command("get")
+def get_project_member(
+    ctx: typer.Context,
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    member_id: int = typer.Argument(..., help="The ID of the member to get."),
+    project_id: Optional[int] = OPTION_PROJECT_ID,
+) -> None:
+    arg = get_project_arg(project_name, project_id)
+    member = state.run(
+        state.client.get_project_member(arg, member_id),
+        f"Fetching member...",
+    )
+    render_result(member, ctx)
+
+
+# HarborAsyncClient.add_project_member() # NYI
+
+
+# HarborAsyncClient.add_project_member_user()
+@member_cmd.command("add-user")
+def add_project_member(
+    ctx: typer.Context,
+    # Required args
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    username: str = typer.Argument(..., help="The name of the user to add."),
+    role: MemberRoleType = typer.Argument(
+        ..., help="The type of role to give the user."
+    ),
+    # ID overrides options
+    project_id: Optional[int] = OPTION_PROJECT_ID,
+    user_id: Optional[int] = typer.Option(
+        ..., help="The ID of the user to add. Overrides username."
+    ),
+) -> None:
+    """Add a user as a member of a project."""
+    project_arg = get_project_arg(project_name, project_id)
+    user_arg = get_user_arg(username, user_id)
+    member = state.run(
+        state.client.add_project_member_user(project_arg, user_arg, role.as_int()),
+        f"Adding user member...",
+    )
+    render_result(member, ctx)
+
+
+# HarborAsyncClient.add_project_member_group()
+@member_cmd.command("add-group")
+def add_project_member_group(
+    ctx: typer.Context,
+    # Required args
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    ldap_group_dn: str = typer.Argument(..., help="The name of the user to add."),
+    role: MemberRoleType = typer.Argument(
+        ..., help="The type of role to give the user."
+    ),
+    # ID overrides options
+    project_id: Optional[int] = OPTION_PROJECT_ID,
+    group_id: Optional[int] = typer.Option(
+        ..., help="The ID of the user to add. Overrides username."
+    ),
+) -> None:
+    """Add a user as a member of a project."""
+    project_arg = get_project_arg(project_name, project_id)
+    group_arg = get_ldap_group_arg(ldap_group_dn, group_id)
+    member = state.run(
+        state.client.add_project_member_group(project_arg, group_arg, role.as_int()),
+        f"Adding group member...",
+    )
+    render_result(member, ctx)
+
+
+# HarborAsyncClient.update_project_member_role()
+@member_cmd.command("update-role")
+def update_project_member_role(
+    ctx: typer.Context,
+    # Required args
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    member_id: int = typer.Argument(..., help="The ID of the member to update."),
+    role: MemberRoleType = typer.Argument(
+        ..., help="The type of role to give the user."
+    ),
+    # ID overrides options
+    project_id: Optional[int] = OPTION_PROJECT_ID,
+) -> None:
+    """Add a user as a member of a project."""
+    project_arg = get_project_arg(project_name, project_id)
+    member = state.run(
+        state.client.update_project_member_role(
+            project_arg, member_id, RoleRequest(role_id=role.as_int())
+        ),
+        f"Updating member role...",
+    )
+    render_result(member, ctx)
+
+
+# HarborAsyncClient.remove_project_member()
+@member_cmd.command("remove")
+def remove_project_member(
+    ctx: typer.Context,
+    # Required args
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    member_id: int = typer.Argument(..., help="The ID of the member to remove."),
+    # ID overrides options
+    project_id: Optional[int] = OPTION_PROJECT_ID,
+) -> None:
+    project_arg = get_project_arg(project_name, project_id)
+    state.run(
+        state.client.remove_project_member(project_arg, member_id),
+        f"Removing member...",
+    )
+    logger.info(f"Removed member {member_id} from project {project_arg}.")
+
+
+# HarborAsyncClient.get_project_members()
+@member_cmd.command("list")
+@inject_resource_options()
+def list_project_members(
+    ctx: typer.Context,
+    # Required args
+    project_name: Optional[str] = ARG_PROJECT_NAME,
+    # Optional args
+    entity_name: Optional[str] = typer.Option(
+        None, "--entity", help="Entity name to search for."
+    ),
+    page: int = ...,  # type: ignore
+    page_size: int = ...,  # type: ignore
+    limit: Optional[int] = ...,  # type: ignore
+    # ID overrides options
+    project_id: Optional[int] = OPTION_PROJECT_ID,
+) -> None:
+    """List all members of a project."""
+    project_arg = get_project_arg(project_name, project_id)
+    members = state.run(
+        state.client.get_project_members(
+            project_arg,
+            entity_name=entity_name,
+            page=page,
+            page_size=page_size,
+            limit=limit,
+        ),
+        f"Fetching members...",
+    )
+    render_result(members, ctx)

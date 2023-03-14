@@ -63,3 +63,35 @@ class UserGroupType(str, Enum):
             return 3
         else:
             raise ValueError(f"Unknown group type: {self}")
+
+
+class MemberRoleType(Enum):
+    ADMIN = "admin"
+    DEVELOPER = "developer"
+    GUEST = "guest"
+    MAINTAINER = "maintainer"
+
+    @classmethod
+    def from_int(cls, value: int) -> MemberRoleType:
+        if value == 1:
+            return cls.ADMIN
+        elif value == 2:
+            return cls.DEVELOPER
+        elif value == 3:
+            return cls.GUEST
+        elif value == 4:
+            return cls.MAINTAINER
+        else:
+            raise ValueError(f"Unknown role type: {value}")
+
+    def as_int(self) -> int:
+        if self == MemberRoleType.ADMIN:
+            return 1
+        elif self == MemberRoleType.DEVELOPER:
+            return 2
+        elif self == MemberRoleType.GUEST:
+            return 3
+        elif self == MemberRoleType.MAINTAINER:
+            return 4
+        else:
+            raise ValueError(f"Unknown role type: {self}")

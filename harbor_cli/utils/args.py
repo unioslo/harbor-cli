@@ -298,30 +298,53 @@ def add_to_query(query: str | None, **kwargs: str | list[str] | None) -> str:
     return as_query(**query_dict)
 
 
+def _get_id_name_arg(
+    resource_type: str, resource_name: str | None, resource_id: int | None
+) -> str | int:
+    """
+    Helper function for getting a resource given its name or ID.
+
+    NOTE
+    ----
+    Why not just a single arg and check if all the characters are digits?
+    Because the resource name can be a string of digits, e.g. "1234", so
+    just checking if the string is all digits is not sufficient, and would
+    break access to those projects.
+    """
+    if resource_name is None and resource_id is None:
+        exit_err(
+            f"Must specify either {resource_type} name or project {resource_type}."
+        )
+    if resource_name is not None and resource_id is not None:
+        logger.warning(
+            f"{resource_type} name and ID both specified. Ignoring {resource_type} name."
+        )
+    if resource_id is not None:
+        return resource_id
+    elif resource_name is not None:
+        return resource_name
+    else:
+        # mypy doesn't like return resource_name if resource_name is not None else resource_name
+        raise ValueError("This should never happen")
+
+
 def get_project_arg(project_name: str | None, project_id: int | None) -> str | int:
     """Given a project name and project ID, returns the one that is not None.
     One of name or ID must be not None. Harbor API expects that int args are
     project IDs and string args are project names.
 
-    The ID will be returned if both are specified.
+    The ID will be returned if both are specified."""
+    return _get_id_name_arg("project", project_name, project_id)
 
-    NOTE
-    ----
-    Why not just a single arg and check if all the characters are digits?
-    Because the project name can be a string of digits, e.g. "1234", so
-    just checking if the string is all digits is not sufficient, and would
-    break access to those projects.
-    """
-    if project_name is None and project_id is None:
-        exit_err("Must specify either project name or project ID.")
-    if project_name is not None and project_id is not None:
-        logger.warning(
-            "Project name and project ID both specified. Ignoring project name."
-        )
-    if project_id is not None:
-        return project_id
-    elif project_name is not None:
-        return project_name
-    else:
-        # mypy doesn't like return project_id if project_id is not None else project_name
-        raise ValueError("This should never happen")
+
+def get_user_arg(username: str | None, user_id: int | None) -> str | int:
+    """Given a project name and project ID, returns the one that is not None.
+    One of name or ID must be not None. Harbor API expects that int args are
+    user IDs and string args are user names.
+
+    The ID will be returned if both are specified."""
+    return _get_id_name_arg("user", username, user_id)
+
+
+def get_ldap_group_arg(group_dn: str | None, group_id: int | None) -> str | int:
+    return _get_id_name_arg("LDAP Group", group_dn, group_id)
