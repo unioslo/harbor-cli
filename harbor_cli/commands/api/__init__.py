@@ -21,6 +21,7 @@ from . import search as search  # no subcommands
 from . import system as system
 from . import user as user
 from . import vulnerabilities as vulnerabilities
+from . import webhook as webhook
 
 api_commands: list[typer.Typer] = [
     artifact.app,
@@ -39,4 +40,5 @@ api_commands: list[typer.Typer] = [
     scanner.app,
     system.app,
     user.app,
+    webhook.app,
 ]

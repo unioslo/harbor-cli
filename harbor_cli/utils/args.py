@@ -9,6 +9,9 @@ from typing import TypeVar
 import typer
 from pydantic import BaseModel
 
+from ..logs import logger
+from ..output.console import exit_err
+
 BaseModelType = TypeVar("BaseModelType", bound=BaseModel)
 
 
@@ -273,3 +276,32 @@ def add_to_query(query: str | None, **kwargs: str | list[str] | None) -> str:
             else:
                 query_dict[k] = v[0]
     return as_query(**query_dict)
+
+
+def get_project_arg(project_name: str | None, project_id: int | None) -> str | int:
+    """Given a project name and project ID, returns the one that is not None.
+    One of name or ID must be not None. Harbor API expects that int args are
+    project IDs and string args are project names.
+
+    The ID will be returned if both are specified.
+
+    NOTE
+    ----
+    Why not just a single arg and check if all the characters are digits?
+    Because the project name can be a string of digits, e.g. "1234", so
+    just checking if the string is all digits is not sufficient, and would
+    break access to those projects.
+    """
+    if project_name is None and project_id is None:
+        exit_err("Must specify either project name or project ID.")
+    if project_name is not None and project_id is not None:
+        logger.warning(
+            "Project name and project ID both specified. Ignoring project name."
+        )
+    if project_id is not None:
+        return project_id
+    elif project_name is not None:
+        return project_name
+    else:
+        # mypy doesn't like return project_id if project_id is not None else project_name
+        raise ValueError("This should never happen")

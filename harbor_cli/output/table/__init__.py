@@ -61,6 +61,7 @@ from .search import search_panel
 from .system import systeminfo_table
 from .user import userresp_table
 from .user import usersearchrespitem_table
+from .webhook import supported_events_table
 
 T = TypeVar("T")
 
@@ -80,6 +81,7 @@ _RENDER_FUNCTIONS = [
     project_table,
     project_extended_panel,
     repository_table,
+    supported_events_table,
     systeminfo_table,
     search_panel,
     userresp_table,
