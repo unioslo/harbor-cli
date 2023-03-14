@@ -175,6 +175,46 @@ def inject_help(
 # Unlike most decorators, the function is not wrapped, but rather its
 # signature is modified in-place, and then the function is returned.
 
+OPTION_QUERY = typer.Option(
+    None,
+    "--query",
+    help="Query parameters to filter the results.",
+)
+OPTION_SORT = typer.Option(
+    None,
+    "--sort",
+    help="Sorting order of the results. Example: [green]'name,-id'[/] to sort by name ascending and id descending.",
+)
+OPTION_PAGE_SIZE = typer.Option(
+    10,
+    "--page-size",
+    help="(Advanced) Number of results to fetch per API call.",
+)
+OPTION_PAGE = typer.Option(
+    1,
+    "--page",
+    help="(Advanced) Page to begin fetching from.",
+)
+OPTION_LIMIT = typer.Option(
+    None,
+    "--limit",
+    help="Maximum number of results to fetch.",
+)
+OPTION_PROJECT_ID = typer.Option(
+    None,
+    "--project-id",
+    help="ID of the project to use. Overrides project name.",
+)
+OPTION_PROJECT_NAME = typer.Option(
+    None,
+    "--project",
+    help="Name of the project to use.",
+)
+ARG_PROJECT_NAME = typer.Argument(
+    None,
+    help="Name of the project to use.",
+)
+
 
 def inject_resource_options(
     f: Any = None, *, strict: bool = False, use_defaults: bool = True
@@ -288,10 +328,7 @@ def inject_query(
     f: Any = None, *, strict: bool = False, use_default: bool = True
 ) -> Any:
     def decorator(func: Any) -> Any:
-        option = typer.Option(
-            None, "--query", help="Query parameters to filter the results."
-        )
-        return _patch_param(func, "query", option, strict, use_default)
+        return _patch_param(func, "query", OPTION_QUERY, strict, use_default)
 
     # Support using plain @inject_query or @inject_query()
     if callable(f):
@@ -304,12 +341,7 @@ def inject_sort(
     f: Any = None, *, strict: bool = False, use_default: bool = True
 ) -> Any:
     def decorator(func: Any) -> Any:
-        option = typer.Option(
-            None,
-            "--sort",
-            help="Sorting order of the results. Example: [green]'name,-id'[/] to sort by name ascending and id descending.",
-        )
-        return _patch_param(func, "sort", option, strict, use_default)
+        return _patch_param(func, "sort", OPTION_SORT, strict, use_default)
 
     # Support using plain @inject_sort or @inject_sort()
     if callable(f):
@@ -322,12 +354,7 @@ def inject_page_size(
     f: Any = None, *, strict: bool = False, use_default: bool = True
 ) -> Any:
     def decorator(func: Any) -> Any:
-        option = typer.Option(
-            10,
-            "--page-size",
-            help="(Advanced) Number of results to fetch per API call.",
-        )
-        return _patch_param(func, "page_size", option, strict, use_default)
+        return _patch_param(func, "page_size", OPTION_PAGE_SIZE, strict, use_default)
 
     # Support using plain @inject_page_size or @inject_page_size()
     if callable(f):
@@ -340,10 +367,7 @@ def inject_page(
     f: Any = None, *, strict: bool = False, use_default: bool = True
 ) -> Any:
     def decorator(func: Any) -> Any:
-        option = typer.Option(
-            1, "--page", help="(Advanced) Page to begin fetching from."
-        )
-        return _patch_param(func, "page", option, strict, use_default)
+        return _patch_param(func, "page", OPTION_PAGE, strict, use_default)
 
     # Support using plain @inject_page or @inject_page()
     if callable(f):
@@ -356,14 +380,35 @@ def inject_limit(
     f: Any = None, *, strict: bool = False, use_default: bool = False
 ) -> Any:
     def decorator(func: Any) -> Any:
-        option = typer.Option(
-            None,
-            "--limit",
-            help="Maximum number of results to fetch.",
-        )
-        return _patch_param(func, "limit", option, strict, use_default)
+        return _patch_param(func, "limit", OPTION_LIMIT, strict, use_default)
 
     # Support using plain @inject_page or @inject_page()
+    if callable(f):
+        return decorator(f)
+    else:
+        return decorator
+
+
+def inject_project_name(
+    f: Any = None, *, strict: bool = False, use_default: bool = True
+) -> Any:
+    def decorator(func: Any) -> Any:
+        return _patch_param(func, "project_name", ARG_PROJECT_NAME, strict, use_default)
+
+    # Support using plain @inject_query or @inject_query()
+    if callable(f):
+        return decorator(f)
+    else:
+        return decorator
+
+
+def inject_project_id(
+    f: Any = None, *, strict: bool = False, use_default: bool = True
+) -> Any:
+    def decorator(func: Any) -> Any:
+        return _patch_param(func, "project_id", OPTION_PROJECT_ID, strict, use_default)
+
+    # Support using plain @inject_query or @inject_query()
     if callable(f):
         return decorator(f)
     else:
