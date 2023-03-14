@@ -188,7 +188,10 @@ def as_query(**kwargs: Any) -> str:
 
 # TODO: could we annotate this in a way where at least one value is required?
 def construct_query_list(
-    *values: str, union: bool = True, allow_empty: bool = False
+    *values: Any,
+    union: bool = True,
+    allow_empty: bool = False,
+    comma: bool = False,
 ) -> str:
     """Given a key and a list of values, returns a harbor API
     query string with values as a list with union or intersection
@@ -203,13 +206,18 @@ def construct_query_list(
     >>> construct_query_list("foo", "bar", "baz", union=False)
     '(foo bar baz)'
     >>> construct_query_list("", "bar", "baz")
-    '(bar baz)'
+    '{bar baz}'
     >>> construct_query_list("", "bar", "baz", allow_empty=True)
-    '( bar baz)'
+    '{ bar baz}'
+    >>> construct_query_list("", "bar", "baz", comma=True)
+    '{bar, baz}'
     """
+    if len(values) < 2:
+        return str(values[0] if values else "")
     start = "{" if union else "("
     end = "}" if union else ")"
-    return f"{start}{' '.join(v for v in values if v or allow_empty)}{end}"
+    sep = ", " if comma else " "
+    return f"{start}{sep.join(str(v) for v in values if v or allow_empty)}{end}"
 
 
 def deconstruct_query_list(qlist: str) -> list[str]:
@@ -226,6 +234,7 @@ def deconstruct_query_list(qlist: str) -> list[str]:
     >>> deconstruct_query_list("{}")
     []
     """
+    # TODO: add comma support
     values = qlist.strip("{}()").split(" ")
     return [v for v in values if v]
 

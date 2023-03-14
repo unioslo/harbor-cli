@@ -223,7 +223,10 @@ def test_as_query(kwargs: dict[str, Any], expected: dict[str, str]) -> None:
 )
 @pytest.mark.parametrize("union", [True, False])
 def test_construct_query_list(values: List[str], expected: str, union: bool) -> None:
-    exp = f"{{{expected}}}" if union else f"({expected})"
+    if len(values) < 2:
+        exp = expected
+    else:
+        exp = f"{{{expected}}}" if union else f"({expected})"
     assert construct_query_list(*values, union=union) == exp
     assert deconstruct_query_list(exp) == values
 
