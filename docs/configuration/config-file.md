@@ -379,3 +379,33 @@ Display a header over each table. Typically states the type of resource being di
 [output.table.show_header]
 show_header = true
 ```
+
+#### `output.JSON`
+
+The `output.JSON` table contains settings related to the `JSON` output format.
+
+See [Formats: JSON](./formats/#json-json) for more information.
+
+----
+
+#### `output.JSON.indent`
+
+Number of spaces to use for each level of indentation. The default is `2`.
+
+
+```toml
+[output.JSON]
+indent = 2
+```
+
+----
+
+#### `output.JSON.sort_keys`
+
+**NYI:** Sort JSON keys before printing. The default is `false`.
+
+
+```toml
+[output.JSON]
+sort_keys = false
+```
