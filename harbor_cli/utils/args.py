@@ -143,6 +143,17 @@ def parse_commalist(arg: Optional[List[str]]) -> List[str]:
     return [item for arg_list in arg for item in arg_list.split(",")]
 
 
+def parse_commalist_int(arg: Optional[List[str]]) -> List[int]:
+    """Parses a comma-separated list and converts the values to integers."""
+    int_list = []
+    for item in parse_commalist(arg):
+        try:
+            int_list.append(int(item))
+        except ValueError:
+            raise ValueError(f"Invalid integer value: {item!r}")
+    return int_list
+
+
 def parse_key_value_args(arg: list[str]) -> dict[str, str]:
     """Parses a list of key=value arguments.
 
