@@ -245,7 +245,7 @@ confirm_enumeration = true
 
 ----
 
-#### `output.table`
+### `output.table`
 
 The `output.table` table contains settings related to the `table` output format.
 
@@ -380,7 +380,7 @@ Display a header over each table. Typically states the type of resource being di
 show_header = true
 ```
 
-#### `output.JSON`
+### `output.JSON`
 
 The `output.JSON` table contains settings related to the `JSON` output format.
 
