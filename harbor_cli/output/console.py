@@ -60,7 +60,7 @@ def exit(message: Optional[str] = None, code: int = 0) -> NoReturn:
 
     Parameters
     ----------
-    msg : str
+    message : str
         Message to print.
     code : int, optional
         Exit code, by default 0
@@ -78,7 +78,7 @@ def exit_err(
 
     Parameters
     ----------
-    msg : str
+    message : str
         Message to print.
     code : int, optional
         Exit code, by default 1
