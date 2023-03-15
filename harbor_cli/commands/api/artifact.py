@@ -47,6 +47,7 @@ from ...utils.args import add_to_query
 from ...utils.args import parse_commalist
 from ...utils.commands import inject_resource_options
 from ...utils.commands import OPTION_FORCE
+from ...utils.commands import OPTION_QUERY
 from ...utils.prompts import check_enumeration_options
 from ...utils.prompts import delete_prompt
 from ...utils.utils import parse_version_string
@@ -74,9 +75,14 @@ label_cmd = typer.Typer(
     help="Artifact label commands",
     no_args_is_help=True,
 )
-
+vuln_cmd = typer.Typer(
+    name="vulnerabilities",
+    help="Artifact vulnerability commands",
+    no_args_is_help=True,
+)
 app.add_typer(tag_cmd)
 app.add_typer(label_cmd)
+app.add_typer(vuln_cmd)
 
 # get_artifacts()
 @app.command("list")
@@ -85,12 +91,14 @@ def list_artifacts(
     ctx: typer.Context,
     project: List[str] = typer.Option(
         [],
-        help="Name of project to fetch artifacts from. Omit or pass '*' for all projects.",
+        "--project",
+        help="Project name(s).",
         callback=parse_commalist,
     ),
     repo: List[str] = typer.Option(
         [],
-        help="Specific repositor(y/ies) in project(s) to fetch artifacts from.",
+        "--repo",
+        help="Repository name(s).",
         callback=parse_commalist,
     ),
     query: Optional[str] = ...,  # type: ignore
@@ -802,14 +810,89 @@ class AffectedArtifactList(BaseModel):
         yield table
 
 
+class ArtifactSummarySortOrder(str, Enum):
+    total = "total"
+    severity = "severity"
+    name = "name"
+    age = "age"
+
+
+@vuln_cmd.command("summary")
+def list_artifact_vulnerabilities_summary(
+    ctx: typer.Context,
+    project: List[str] = typer.Option(
+        [],
+        "--project",
+        help="Project name(s).",
+        callback=parse_commalist,
+    ),
+    repo: List[str] = typer.Option(
+        [],
+        "--repo",
+        help="Repository name(s).",
+        callback=parse_commalist,
+    ),
+    query: Optional[str] = OPTION_QUERY,
+    sort: ArtifactSummarySortOrder = typer.Option(
+        ArtifactSummarySortOrder.name,
+        "--sort",
+        help="Sort order of artifacts,",
+        case_sensitive=False,
+    ),
+    full_digest: bool = typer.Option(
+        False,
+        "--full-digest",
+        help="Show full digest instead of abbreviated digest.",
+    ),
+) -> None:
+    """Show a summary of vulnerabilities for artifacts in in a project or repository."""
+    result = state.run(
+        get_artifacts(
+            state.client,
+            projects=project if project else None,
+            repositories=repo if repo else None,
+            query=query,
+            with_report=True,
+        ),
+        "Fetching artifacts...",
+    )
+    # fmt: off
+    if sort == ArtifactSummarySortOrder.total:
+        def sort_key(a: ArtifactInfo) -> int:
+            try:
+                return a.artifact.scan_overview.summary.total or 0  # type: ignore
+            except AttributeError:
+                return 0
+    elif sort == ArtifactSummarySortOrder.severity:
+        def sort_key(a: ArtifactInfo) -> int:
+            try:
+                return a.artifact.scan_overview.summary.critical or 0  # type: ignore
+            except AttributeError:
+                return 0
+    elif sort == ArtifactSummarySortOrder.name:
+        def sort_key(a: ArtifactInfo) -> str: # type: ignore
+            return a.name_with_digest_full
+    elif sort == ArtifactSummarySortOrder.age:
+        def sort_key(a: ArtifactInfo) -> float: # type: ignore
+            try:
+                return a.artifact.push_time.timestamp()  # type: ignore
+            except AttributeError:
+                return 0.0
+    else:
+        raise ValueError(f"Unknown sort order {sort}")
+    # fmt: on
+    result = sorted(result, key=sort_key, reverse=True)
+    render_result(result, ctx, vuln_summary=True, full_digest=full_digest)
+
+
 # harborapi.ext.api.get_artifact
-@app.command("vulnerabilities")
+@vuln_cmd.command("find")
 def get_vulnerabilities(
     ctx: typer.Context,
     cve: List[str] = typer.Option(
         [],
         "--cve",
-        help="CVE(s) to get vulnerabilities for.",
+        help="CVE ID(s) to search for.",
         callback=parse_commalist,
     ),
     package: List[str] = typer.Option(
@@ -817,7 +900,7 @@ def get_vulnerabilities(
         "--package",
         # TODO: fix formatting of this message (very strange)
         help=(
-            "Name of package(s) to check for vulnerabilities. "
+            "Name of package(s) used by artifacts to search for. "
             "Can contain a semver min and max range, similar to PEP 440, e.g. "
             f"{render_cli_value('foo>=1.0.0,<2.0.0')}. "
             f"{render_warning('Minimum and maximum version limits are always inclusive (i.e. >= and > are the same)')}"
@@ -856,7 +939,7 @@ def get_vulnerabilities(
         help="Operator to use when querying a combination of multiple CVEs or packages.",
     ),
 ) -> None:
-    """Find artifacts affected by one or more vulnerabilities."""
+    """Find artifacts affected by vulnerable packages or CVEs."""
     # Check that we have at least one CVE or package
     if not any([cve, package]):
         exit_err("One or more CVEs or packages is required.")

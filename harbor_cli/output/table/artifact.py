@@ -1,14 +1,20 @@
 from __future__ import annotations
 
 from typing import Any
+from typing import Literal
 from typing import Sequence
+from typing import TypedDict
 
 from harborapi.ext.artifact import ArtifactInfo
+from harborapi.models import NativeReportSummary
+from harborapi.models import VulnerabilitySummary
 from harborapi.models.models import Artifact
 from harborapi.models.scanner import HarborVulnerabilityReport
+from rich import box
 from rich.table import Table
 
 from ...harbor.artifact import get_artifact_architecture
+from ...harbor.artifact import get_artifact_native_report_summary
 from ...harbor.artifact import get_artifact_severity
 from ..formatting.builtin import float_str
 from ..formatting.builtin import int_str
@@ -48,6 +54,10 @@ def artifact_table(artifacts: Sequence[Artifact], **kwargs: Any) -> Table:
 
 def artifactinfo_table(artifacts: Sequence[ArtifactInfo], **kwargs: Any):
     """Display one or more artifacts (ArtifactInfo) in a table."""
+    # Pass a kwarg to display a vulnerability summary table instead
+    if kwargs.get("vuln_summary", False):
+        return artifactinfo_vuln_summary_table(artifacts, **kwargs)
+
     table = get_table("Artifact", artifacts)
     table.add_column("Project")
     table.add_column("Repository")
@@ -67,6 +77,26 @@ def artifactinfo_table(artifacts: Sequence[ArtifactInfo], **kwargs: Any):
             str_str(get_artifact_severity(artifact.artifact)),
             datetime_str(artifact.artifact.push_time),
             bytesize_str(artifact.artifact.size or 0),
+        )
+    return table
+
+
+def artifactinfo_vuln_summary_table(artifacts: Sequence[ArtifactInfo], **kwargs: Any):
+    table = get_table("Artifacts")
+    table.add_column("Artifact", overflow="fold")
+    table.add_column("Tags", overflow="fold")
+    table.add_column("Vulnerabilities", overflow="fold")
+
+    full_digest = kwargs.pop("full_digest", False)
+    for artifact in artifacts:
+        name = (
+            artifact.name_with_digest_full if full_digest else artifact.name_with_digest
+        )
+        vulns = vuln_summary_table(artifact.artifact, **kwargs)
+        table.add_row(
+            name,
+            artifact.tags,
+            vulns,
         )
     return table
 
@@ -127,3 +157,43 @@ def artifact_vulnerabilities_table(
 #             str_str(",".join([r for r in artifact.reasons])),
 #         )
 #     return table
+
+
+class ColKwargs(TypedDict):  # mypy complains if we use a normal dict
+    min_width: int
+    max_width: int
+    justify: Literal["right", "left", "center"]
+
+
+def vuln_summary_table(artifact: Artifact, **kwargs: Any) -> Table:
+    """A single line table in the form of nC nH nM nL nU (total)
+    where each letter is a color coded severity level + count.
+    """
+    table = Table(
+        show_lines=False, show_header=False, show_edge=False, box=box.SIMPLE_HEAD
+    )
+    # NOTE: column is truncated if category has >9999 vulnerabilities, but that's unlikely
+    col_kwargs = ColKwargs(min_width=5, max_width=5, justify="right")
+    table.add_column("Critical", style="black on dark_red", **col_kwargs)
+    table.add_column("High", style="black on red", **col_kwargs)
+    table.add_column("Medium", style="black on orange3", **col_kwargs)
+    table.add_column("Low", style="black on green", **col_kwargs)
+
+    # not adding unknown for now
+    # TODO: add kwargs toggle for this
+    # table.add_column("Unknown", style="black on grey")
+    table.add_column("Total")  # no style, use default (respecting theme)
+    report = get_artifact_native_report_summary(artifact)
+    if not report:
+        report = NativeReportSummary()
+    if not report.summary:
+        report.summary = VulnerabilitySummary()
+
+    table.add_row(
+        f"{report.summary.critical or 0}C",
+        f"{report.summary.high or 0}H",
+        f"{report.summary.medium or 0}M",
+        f"{report.summary.low or 0}L",
+        f"({int_str(report.summary.total)})",
+    )  # might include unknown?
+    return table
