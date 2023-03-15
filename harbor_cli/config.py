@@ -20,6 +20,7 @@ from pydantic import SecretStr
 from pydantic import validator
 
 from .dirs import CONFIG_DIR
+from .dirs import DATA_DIR
 from .exceptions import ConfigError
 from .exceptions import ConfigFileNotFoundError
 from .exceptions import CredentialsError
@@ -32,6 +33,7 @@ from .utils import replace_none
 
 
 DEFAULT_CONFIG_FILE = CONFIG_DIR / "config.toml"
+DEFAULT_HISTORY_FILE = DATA_DIR / "history"
 
 ENV_VAR_PREFIX = "HARBOR_CLI_"
 
@@ -340,6 +342,23 @@ class GeneralSettings(BaseModel):
             "commands. E.g. `project delete`"
         ),
     )
+    history: bool = Field(True, description="Enable persistent history in the REPL.")
+    history_file: Path = Field(
+        DEFAULT_HISTORY_FILE,
+        description="Path to custom location of history file.",
+    )
+
+    @validator("history_file", always=True)
+    def _create_history_file_if_not_exists(
+        cls, v: Path, values: dict[str, Any]
+    ) -> Path:
+        history_enabled = values.get("history", False)
+        if not history_enabled:
+            return v
+        if not v.exists():
+            v.parent.mkdir(parents=True, exist_ok=True)
+            v.touch()
+        return v
 
 
 class HarborCLIConfig(BaseModel):

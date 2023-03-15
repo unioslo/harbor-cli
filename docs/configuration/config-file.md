@@ -131,6 +131,30 @@ confirm_deletion = true
 ```
 
 ----
+#### `general.history`
+
+Whether or not to enable command history in the REPL. The default is `true`.
+
+
+```toml
+[general]
+history = true
+```
+
+----
+
+
+#### `general.history_file`
+
+Custom path for the command history file. The default path is based on OS, and is determined by [platformdirs](https://pypi.org/project/platformdirs/).
+
+
+```toml
+[general]
+history_file = "/path/to/history_file"
+```
+
+----
 
 ### `logging`
 

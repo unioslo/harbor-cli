@@ -11,6 +11,7 @@ from .exceptions import DirectoryCreateError
 
 _PLATFORM_DIR = PlatformDirs(APP_NAME, AUTHOR)
 CONFIG_DIR = Path(_PLATFORM_DIR.user_config_dir)
+DATA_DIR = Path(_PLATFORM_DIR.user_data_dir)
 LOGS_DIR = Path(_PLATFORM_DIR.user_log_dir)
 
 
