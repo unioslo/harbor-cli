@@ -193,7 +193,7 @@ Harbor CLI currently supports {{ formats | length }} different output formats:
 - `{{ format }}`
 {% endfor %}
 
-See [Formats](./formats) for more information on the different output formats.
+See [Formats](formats.md) for more information on the different output formats.
 
 ```toml
 [output]
@@ -249,7 +249,7 @@ confirm_enumeration = true
 
 The `output.table` table contains settings related to the `table` output format.
 
-See [Formats: Table](./formats/#table-table) for more information.
+See [Formats: Table](formats.md#table-table) for more information.
 
 ----
 
@@ -273,7 +273,7 @@ Whether or not to use compact output tables. Mutually exclusive with [`output.ta
 compact = false
 ```
 
-See [Formats: Compact Table](./formats/#compact-tables) for more information.
+See [Formats: Compact Tables](formats.md#compact-tables) for more information.
 
 ----
 
@@ -384,7 +384,7 @@ show_header = true
 
 The `output.JSON` table contains settings related to the `JSON` output format.
 
-See [Formats: JSON](./formats/#json-json) for more information.
+See [Formats: JSON](formats.md#json-json) for more information.
 
 ----
 
