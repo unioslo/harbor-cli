@@ -342,6 +342,9 @@ class GeneralSettings(BaseModel):
             "commands. E.g. `project delete`"
         ),
     )
+
+
+class REPLSettings(BaseModel):
     history: bool = Field(True, description="Enable persistent history in the REPL.")
     history_file: Path = Field(
         DEFAULT_HISTORY_FILE,
@@ -364,6 +367,7 @@ class GeneralSettings(BaseModel):
 class HarborCLIConfig(BaseModel):
     harbor: HarborSettings = Field(default_factory=HarborSettings)
     general: GeneralSettings = Field(default_factory=GeneralSettings)
+    repl: REPLSettings = Field(default_factory=REPLSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     output: OutputSettings = Field(default_factory=OutputSettings)
     config_file: Optional[Path] = Field(

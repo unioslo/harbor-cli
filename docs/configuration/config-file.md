@@ -117,7 +117,7 @@ raw_mode = false
 
 ### `general`
 
-The `general` table contains general settings.
+The `general` table contains general CLI settings that don't fit into any other categories.
 
 ----
 
@@ -131,26 +131,32 @@ confirm_deletion = true
 ```
 
 ----
-#### `general.history`
+
+### `repl`
+
+The `repl` table contains settings related to the REPL.
+
+----
+
+#### `repl.history`
 
 Whether or not to enable command history in the REPL. The default is `true`.
 
 
 ```toml
-[general]
+[repl]
 history = true
 ```
 
 ----
 
-
-#### `general.history_file`
+#### `repl.history_file`
 
 Custom path for the command history file. The default path is based on OS, and is determined by [platformdirs](https://pypi.org/project/platformdirs/).
 
 
 ```toml
-[general]
+[repl]
 history_file = "/path/to/history_file"
 ```
 
