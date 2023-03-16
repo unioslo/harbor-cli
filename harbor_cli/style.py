@@ -36,4 +36,4 @@ def render_cli_value(value: str) -> str:
 
 def help_config_override(option: str) -> str:
     """Render a help string for a configuration file option/key/entry."""
-    return f"Overrides config value {render_config_option(option)}."
+    return f"Overrides config option {render_config_option(option)}."
