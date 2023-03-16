@@ -309,13 +309,6 @@ class OutputSettings(BaseModel):
     # The config file can still use the key "json" because of the alias
     table: TableSettings = Field(default_factory=TableSettings)
     JSON: JSONSettings = Field(default_factory=JSONSettings, alias="json")
-    confirm_enumeration: bool = Field(
-        True,
-        description=(
-            "Show confirmation prompt for certain resource enumeration "
-            "commands when invoked without a limit or filter. E.g. `auditlog list`"
-        ),
-    )
 
     @validator("pager")
     def set_pager(cls, v: Optional[str]) -> Optional[str]:
@@ -340,6 +333,13 @@ class GeneralSettings(BaseModel):
         description=(
             "Show confirmation prompt for resource deletion "
             "commands. E.g. `project delete`"
+        ),
+    )
+    confirm_enumeration: bool = Field(
+        True,
+        description=(
+            "Show confirmation prompt for certain resource enumeration "
+            "commands when invoked without a limit or filter. E.g. `auditlog list`"
         ),
     )
 

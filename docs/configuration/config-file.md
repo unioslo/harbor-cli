@@ -121,6 +121,25 @@ The `general` table contains general CLI settings that don't fit into any other 
 
 ----
 
+#### `general.confirm_enumeration`
+
+Show a confirmation prompt when enumerating resources (e.g. `harbor auditlog list`) without a limit and/or query. The default is `true`.
+
+Only affects the following commands:
+
+* `artifact list`
+* `auditlog list`
+* `replication list`
+* `gc jobs`
+* `project logs`
+
+```toml
+[general]
+confirm_enumeration = true
+```
+
+----
+
 #### `general.confirm_deletion`
 
 Whether or not to show a confirmation prompt when deleting resources unless `--force` is passed in. The default is `true`.
@@ -252,25 +271,6 @@ Can be used to redirect output to any application you want, not just pagers, for
 ```toml
 [output]
 pager = "less -r" # omit to use default
-```
-
-----
-
-#### `output.confirm_enumeration`
-
-Show a confirmation prompt when enumerating resources (e.g. `harbor auditlog list`) without a limit and/or query. The default is `true`.
-
-Only affects the following commands:
-
-* `artifact list`
-* `auditlog list`
-* `replication list`
-* `gc jobs`
-* `project logs`
-
-```toml
-[output]
-confirm_enumeration = true
 ```
 
 ----

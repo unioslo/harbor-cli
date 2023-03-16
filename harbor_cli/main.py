@@ -183,12 +183,20 @@ def main_callback(
         envvar=env_var("pager"),
         config_override="output.pager",
     ),
+    # General options
+    confirm_deletion: Optional[bool] = Option(
+        None,
+        "--confirm-deletion/--no-confirm-deletion",
+        help="Confirm before deleting resources..",
+        envvar=env_var("confirm_deletion"),
+        config_override="general.confirm_deletion",
+    ),
     confirm_enumeration: Optional[bool] = Option(
         None,
         "--confirm-enumeration/--no-confirm-enumeration",
         help="Confirm before enumerating all resources without a limit or query.",
         envvar=env_var("confirm_enumeration"),
-        config_override="output.confirm_enumeration",
+        config_override="general.confirm_enumeration",
     ),
     # Output options that don't belong to the config file
     output_file: Optional[Path] = Option(
@@ -248,6 +256,7 @@ def main_callback(
     _restore_config(state)  # necessary for overrides to to reset in REPL
 
     # Set config overrides
+    # Harbor
     if harbor_url is not None:
         state.config.harbor.url = harbor_url
     if harbor_username is not None:
@@ -262,6 +271,7 @@ def main_callback(
         state.config.harbor.validate_data = harbor_validate
     if harbor_raw_mode is not None:
         state.config.harbor.raw_mode = harbor_raw_mode
+    # Output
     if compact is not None:
         state.config.output.table.compact = compact
     if show_description is not None:
@@ -278,8 +288,11 @@ def main_callback(
         state.config.output.paging = paging
     if pager is not None:
         state.config.output.pager = pager
+    # General
     if confirm_enumeration is not None:
-        state.config.output.confirm_enumeration = confirm_enumeration
+        state.config.general.confirm_enumeration = confirm_enumeration
+    if confirm_deletion is not None:
+        state.config.general.confirm_deletion = confirm_deletion
 
     # Set global options
     state.options.verbose = verbose
