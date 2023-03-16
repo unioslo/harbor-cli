@@ -152,7 +152,7 @@ history = true
 
 #### `repl.history_file`
 
-Custom path for the command history file. The default path is based on OS, and is determined by [platformdirs](https://pypi.org/project/platformdirs/).
+Custom path for the command history file. The default path is based on OS, and is determined by [platformdirs.user_data_dir](https://pypi.org/project/platformdirs/).
 
 
 ```toml
