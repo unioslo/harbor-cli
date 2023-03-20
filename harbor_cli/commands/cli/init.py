@@ -215,8 +215,8 @@ def init_output_settings(config: HarborCLIConfig) -> None:
         default=oconf.paging,
         show_default=True,
     )
-    # Custom pager support NYI (see: OutputSettings)
-    if False and oconf.paging:
+
+    if oconf.paging:
         use_custom = bool_prompt(
             "Use custom pager command?", default=False, show_default=True
         )
