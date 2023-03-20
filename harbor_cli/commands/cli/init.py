@@ -22,6 +22,7 @@ from ...output.console import error
 from ...output.console import exit
 from ...output.console import exit_err
 from ...output.console import success
+from ...output.console import warning
 from ...output.formatting import path_link
 from ...output.prompts import bool_prompt
 from ...output.prompts import int_prompt
@@ -64,9 +65,7 @@ def init(
 
         # TODO: verify that this path is always correct
         p = path or DEFAULT_CONFIG_FILE
-        console.print(
-            f"WARNING: Config file already exists ({path_link(p)})", style="yellow"
-        )
+        warning(f"Config file already exists ({path_link(p)})")
         if not wizard:
             exit_err("Cannot proceed without overwriting config file.")
 
@@ -181,10 +180,9 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
 
     # Explain what will happen if no auth method is provided
     if not hconf.has_auth_method:
-        console.print(
+        warning(
             ":warning: No authentication info provided. "
             "You will be prompted for username and password when required.",
-            style="yellow",
         )
 
 
