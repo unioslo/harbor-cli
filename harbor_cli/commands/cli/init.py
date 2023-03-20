@@ -27,6 +27,7 @@ from ...output.prompts import bool_prompt
 from ...output.prompts import int_prompt
 from ...output.prompts import path_prompt
 from ...output.prompts import str_prompt
+from ...style import render_cli_option
 from ...style import STYLE_COMMAND
 
 
@@ -121,6 +122,10 @@ def run_config_wizard(config_path: Optional[Path] = None) -> None:
 
     if bool_prompt("Configure REPL settings?", default=False):
         init_repl_settings(config)
+        console.print()
+
+    if bool_prompt("Configure general settings?", default=False):
+        init_general_settings(config)
         console.print()
 
     conf_path = config_path or config.config_file
@@ -400,6 +405,20 @@ def init_repl_settings(config: HarborCLIConfig) -> None:
             show_default=True,
             empty_ok=False,
         )
+
+
+def init_general_settings(config: HarborCLIConfig) -> None:
+    conf = config.general
+
+    conf.confirm_enumeration = bool_prompt(
+        "Confirm unconstrained enumeration of resources",
+        default=conf.confirm_enumeration,
+    )
+
+    conf.confirm_deletion = bool_prompt(
+        f"Confirm deletion of resources when {render_cli_option('--force')} is omitted",
+        default=conf.confirm_deletion,
+    )
 
 
 def _print_output_title(fmt: OutputFormat) -> None:
