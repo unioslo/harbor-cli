@@ -274,11 +274,7 @@ class TableSettings(BaseModel):
 
     @validator("max_depth", pre=True)
     def check_max_depth(cls, v: Any) -> Any:
-        """TOML has no None type, so we interpret negative values as None.
-        This validator converts negative values to None.
-
-        TODO: convert None to -1 when writing to TOML!
-        """
+        """Converts max_depth to an integer, and checks that it is not negative."""
         if v is None:
             return 0
         try:
