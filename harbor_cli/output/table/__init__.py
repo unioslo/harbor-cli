@@ -44,6 +44,7 @@ from ...logs import logger
 from ...models import BaseModel
 from ...models import CommandSummary
 from ...models import ProjectExtended
+from ...types import is_sequence_func
 from ...utils._types import is_builtin_obj
 from .anysequence import AnySequence
 from .anysequence import anysequence_table
@@ -110,19 +111,6 @@ class BuiltinTypeException(TypeError):
 
 class EmptySequenceError(ValueError):
     pass
-
-
-def is_sequence_func(func: Callable[[Any], Any]) -> bool:
-    hints = typing.get_type_hints(func)
-    if not hints:
-        return False
-    val = next(iter(hints.values()))
-    return is_sequence_annotation(val)
-
-
-def is_sequence_annotation(annotation: Any) -> bool:
-    origin = typing.get_origin(annotation)
-    return origin in [Sequence, abc.Sequence, list, List]
 
 
 def get_render_function(
