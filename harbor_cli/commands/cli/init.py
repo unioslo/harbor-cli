@@ -321,6 +321,65 @@ def _init_output_table_settings(config: HarborCLIConfig) -> None:
         show_default=True,
     )
 
+    if bool_prompt("Configure table style?", default=False):
+        _init_output_table_style_settings(config)
+
+
+def _init_output_table_style_settings(config: HarborCLIConfig) -> None:
+    """Initialize table style settings."""
+    conf = config.output.table.style
+
+    conf.title = str_prompt(
+        "Title style",
+        default=conf.title,
+        empty_ok=True,
+    )
+    conf.header = str_prompt(
+        "Header style",
+        default=conf.header,
+        empty_ok=True,
+    )
+    # TODO: ensure this is odd and even (not vice versa)
+    odd_rows = str_prompt(
+        "Row style (odd rows)",
+        default=conf.rows[0] if conf.rows else "",
+        empty_ok=True,
+    )
+    even_rows = str_prompt(
+        "Row style (even rows)",
+        default=conf.rows[1] if conf.rows else "",
+        empty_ok=True,
+    )
+    conf.rows = (odd_rows, even_rows)
+
+    conf.border = str_prompt(
+        "Border style",
+        default=conf.border,
+        empty_ok=True,
+    )
+
+    conf.footer = str_prompt(
+        "Footer style",
+        default=conf.footer,
+        empty_ok=True,
+    )
+
+    conf.caption = str_prompt(
+        "Caption style",
+        default=conf.caption,
+        empty_ok=True,
+    )
+
+    conf.expand = bool_prompt(
+        "Expand tables to terminal width",
+        default=conf.expand,
+    )
+
+    conf.expand = bool_prompt(
+        "Show table headers",
+        default=conf.show_header,
+    )
+
 
 def _print_output_title(fmt: OutputFormat) -> None:
     fmt_repr = output_format_repr(fmt)
