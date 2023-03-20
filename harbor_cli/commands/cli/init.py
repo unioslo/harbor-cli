@@ -57,8 +57,6 @@ def init(
 
     Runs the configuration wizard by default unless otherwise specified.
     """
-
-    logger.debug("Initializing Harbor CLI...")
     try:
         config_path = create_config(path, overwrite=overwrite)
     except OverwriteError:
@@ -198,6 +196,28 @@ def init_logging_settings(config: HarborCLIConfig) -> None:
         show_default=True,
     )
     lconf.level = LogLevel(loglevel.upper())
+
+    lconf.directory = path_prompt(
+        "Log directory",
+        default=lconf.directory,
+        show_default=True,
+        exist_ok=True,
+        # NOTE: should we enforce that it exists?
+    )
+
+    lconf.filename = str_prompt(
+        "Log filename",
+        default=lconf.filename,
+        show_default=True,
+        empty_ok=False,
+    )
+
+    lconf.retention = int_prompt(
+        "Log retention (days)",
+        default=lconf.retention,
+        show_default=True,
+        min=1,
+    )
 
 
 def init_output_settings(config: HarborCLIConfig) -> None:

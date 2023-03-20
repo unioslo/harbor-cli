@@ -226,6 +226,37 @@ The logging level to use. The default is `INFO`. The available logging levels ar
 level = "INFO"
 ```
 
+#### `logging.directory`
+
+Custom directory to store logs in. Defaults to log directory, as determined by [platformdirs.user_log_dir](https://pypi.org/project/platformdirs/).
+
+```toml
+[logging]
+directory = "/path/to/logdir"
+```
+
+----
+
+#### `logging.filename`
+
+Filename to use for log files. Can be automatically timed by adding `{time}` to the filename. Defaults to `"harbor_cli_{time}.log"`.
+
+```toml
+[logging]
+filename = "harbor_cli_{time}.log"
+```
+
+----
+
+#### `logging.retention`
+
+Number of days to retain log files. Defaults to 30 days.
+
+```toml
+[logging]
+retention = 30
+```
+
 ----
 
 ### `output`

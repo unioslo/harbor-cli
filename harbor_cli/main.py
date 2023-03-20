@@ -221,7 +221,6 @@ def main_callback(
     """
     Configuration options that affect all commands.
     """
-    setup_logging()
     check_deprecated_options(ctx)
 
     # These commands don't require state management
@@ -312,7 +311,7 @@ def configure_from_config(config: HarborCLIConfig) -> None:
     """Configure the program from a config file."""
     # TODO: Include more setup here
     if config.logging.enabled:
-        setup_logging(config.logging.level)
+        setup_logging(config.logging)
     else:
         disable_logging()
 

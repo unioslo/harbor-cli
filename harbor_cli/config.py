@@ -21,6 +21,7 @@ from pydantic import validator
 
 from .dirs import CONFIG_DIR
 from .dirs import DATA_DIR
+from .dirs import LOGS_DIR
 from .exceptions import ConfigError
 from .exceptions import ConfigFileNotFoundError
 from .exceptions import CredentialsError
@@ -187,6 +188,9 @@ class LoggingSettings(BaseModel):
     enabled: bool = True
     structlog: bool = False
     level: LogLevel = LogLevel.INFO
+    directory: Path = LOGS_DIR
+    filename: str = "harbor_cli_{time}.log"
+    retention: int = 30
 
 
 class TableStyleSettings(BaseModel):
