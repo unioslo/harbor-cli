@@ -119,6 +119,10 @@ def run_config_wizard(config_path: Optional[Path] = None) -> None:
         init_logging_settings(config)
         console.print()
 
+    if bool_prompt("Configure REPL settings?", default=False):
+        init_repl_settings(config)
+        console.print()
+
     conf_path = config_path or config.config_file
     if not conf_path:
         raise ConfigError("Could not determine config file path.")
@@ -379,6 +383,23 @@ def _init_output_table_style_settings(config: HarborCLIConfig) -> None:
         "Show table headers",
         default=conf.show_header,
     )
+
+
+def init_repl_settings(config: HarborCLIConfig) -> None:
+    conf = config.repl
+
+    conf.history = bool_prompt(
+        "Enable REPL history",
+        default=conf.history,
+    )
+
+    if conf.history:
+        conf.history_file = path_prompt(
+            "REPL history file",
+            default=conf.history_file,
+            show_default=True,
+            empty_ok=False,
+        )
 
 
 def _print_output_title(fmt: OutputFormat) -> None:
