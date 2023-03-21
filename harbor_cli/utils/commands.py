@@ -26,7 +26,11 @@ def get_command_help(command: typer.models.CommandInfo) -> str:
     if command.help:
         return command.help
     if command.callback and command.callback.__doc__:
-        return command.callback.__doc__.strip().splitlines()[0]
+        lines = command.callback.__doc__.strip().splitlines()
+        if lines:
+            return lines[0]
+    if command.short_help:
+        return command.short_help
     return ""
 
 
