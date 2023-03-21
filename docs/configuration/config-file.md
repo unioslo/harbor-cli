@@ -19,11 +19,13 @@ The configuration file is divided into the following tables:
 
 - [harbor](#harbor)
 - [general](#general)
-- [logging](#logging)
 - [output](#output)
 - [output.table](#outputtable)
 - [output.table.style](#outputtablestyle)
 - [output.JSON](#outputjson)
+- [repl](#repl)
+- [cache](#cache)
+- [logging](#logging)
 
 ### `harbor`
 
@@ -127,6 +129,8 @@ Show a confirmation prompt when enumerating resources (e.g. `harbor auditlog lis
 
 Only affects the following commands:
 
+<!-- TODO: generate this list dynamically somehow -->
+
 * `artifact list`
 * `auditlog list`
 * `replication list`
@@ -147,114 +151,6 @@ Whether or not to show a confirmation prompt when deleting resources unless `--f
 ```toml
 [general]
 confirm_deletion = true
-```
-
-----
-
-### `repl`
-
-The `repl` table contains settings related to the REPL.
-
-----
-
-#### `repl.history`
-
-Whether or not to enable command history in the REPL. The default is `true`.
-
-
-```toml
-[repl]
-history = true
-```
-
-----
-
-#### `repl.history_file`
-
-Custom path for the command history file. The default path is based on OS, and is determined by [platformdirs.user_data_dir](https://pypi.org/project/platformdirs/).
-
-
-```toml
-[repl]
-history_file = "/path/to/history_file"
-```
-
-----
-
-### `logging`
-
-The `logging` table contains settings related to configuring logging. Harbor CLI currently uses the [loguru](https://github.com/Delgan/loguru) logging library, but this might change in the future. None of the options pertain specifically to loguru, but are instead generic logging options.
-
-----
-
-#### `logging.enabled`
-
-Whether or not to enable logging. The default is `true`.
-
-```toml
-[logging]
-enabled = true
-```
-
-----
-
-#### `logging.structlog`
-
-Whether or not to enable [structured logging](https://loguru.readthedocs.io/en/stable/overview.html#structured-logging-as-needed). The default is `false`.
-
-```toml
-[logging]
-structlog = false
-```
-
-----
-
-#### `logging.level`
-
-The logging level to use. The default is `INFO`. The available logging levels are:
-
-- `TRACE`
-- `DEBUG`
-- `INFO`
-- `SUCCESS`
-- `WARNING`
-- `ERROR`
-- `CRITICAL`
-
-```toml
-[logging]
-level = "INFO"
-```
-
-#### `logging.directory`
-
-Custom directory to store logs in. Defaults to log directory, as determined by [platformdirs.user_log_dir](https://pypi.org/project/platformdirs/).
-
-```toml
-[logging]
-directory = "/path/to/logdir"
-```
-
-----
-
-#### `logging.filename`
-
-Filename to use for log files. Can be automatically timed by adding `{time}` to the filename. Defaults to `"harbor_cli_{time}.log"`.
-
-```toml
-[logging]
-filename = "harbor_cli_{time}.log"
-```
-
-----
-
-#### `logging.retention`
-
-Number of days to retain log files. Defaults to 30 days.
-
-```toml
-[logging]
-retention = 30
 ```
 
 ----
@@ -469,4 +365,143 @@ indent = 2
 ```toml
 [output.JSON]
 sort_keys = false
+```
+
+----
+
+### `repl`
+
+The `repl` table contains settings related to the REPL.
+
+----
+
+#### `repl.history`
+
+Whether or not to enable command history in the REPL. The default is `true`.
+
+
+```toml
+[repl]
+history = true
+```
+
+----
+
+#### `repl.history_file`
+
+Custom path for the command history file. The default path is based on OS, and is determined by [platformdirs.user_data_dir](https://pypi.org/project/platformdirs/).
+
+
+```toml
+[repl]
+history_file = "/path/to/history_file"
+```
+
+
+----
+
+### `cache`
+
+The `cache` table contains settings related to caching of Harbor API responses.
+
+----
+
+#### `cache.enabled`
+
+Enable caching of Harbor API responses. Disabled by default.
+
+
+```toml
+[cache]
+enabled = false
+```
+
+----
+
+#### `cache.ttl`
+
+Time to Live (TTL) for cached responses. The default is `300` seconds (5 minutes).
+
+
+```toml
+[cache]
+ttl = 300
+```
+
+----
+
+### `logging`
+
+The `logging` table contains settings related to configuring logging. Harbor CLI currently uses the [loguru](https://github.com/Delgan/loguru) logging library, but this might change in the future. None of the options pertain specifically to loguru, but are instead generic logging options.
+
+----
+
+#### `logging.enabled`
+
+Whether or not to enable logging. The default is `true`.
+
+```toml
+[logging]
+enabled = true
+```
+
+----
+
+#### `logging.structlog`
+
+Whether or not to enable [structured logging](https://loguru.readthedocs.io/en/stable/overview.html#structured-logging-as-needed). The default is `false`.
+
+```toml
+[logging]
+structlog = false
+```
+
+----
+
+#### `logging.level`
+
+The logging level to use. The default is `INFO`. The available logging levels are:
+
+- `TRACE`
+- `DEBUG`
+- `INFO`
+- `SUCCESS`
+- `WARNING`
+- `ERROR`
+- `CRITICAL`
+
+```toml
+[logging]
+level = "INFO"
+```
+
+#### `logging.directory`
+
+Custom directory to store logs in. Defaults to application log directory determined by [platformdirs.user_log_dir](https://pypi.org/project/platformdirs/).
+
+```toml
+[logging]
+directory = "/path/to/logdir"
+```
+
+----
+
+#### `logging.filename`
+
+Filename to use for log files. Can be automatically timed by adding `{time}` to the filename. Defaults to `"harbor_cli_{time}.log"`.
+
+```toml
+[logging]
+filename = "harbor_cli_{time}.log"
+```
+
+----
+
+#### `logging.retention`
+
+Number of days to retain log files. Defaults to 30 days.
+
+```toml
+[logging]
+retention = 30
 ```

@@ -110,21 +110,25 @@ def run_config_wizard(config_path: Optional[Path] = None) -> None:
         init_harbor_settings(config)
         console.print()
 
+    if bool_prompt("Configure general settings?", default=False):
+        init_general_settings(config)
+        console.print()
+
     # These categories are optional, and as such we always ask the user
     if bool_prompt("Configure output settings?", default=False):
         init_output_settings(config)
-        console.print()
-
-    if bool_prompt("Configure logging settings?", default=False):
-        init_logging_settings(config)
         console.print()
 
     if bool_prompt("Configure REPL settings?", default=False):
         init_repl_settings(config)
         console.print()
 
-    if bool_prompt("Configure general settings?", default=False):
-        init_general_settings(config)
+    if bool_prompt("Configure cache settings?", default=False):
+        init_cache_settings(config)
+        console.print()
+
+    if bool_prompt("Configure logging settings?", default=False):
+        init_logging_settings(config)
         console.print()
 
     conf_path = config_path or config.config_file
@@ -137,7 +141,7 @@ def run_config_wizard(config_path: Optional[Path] = None) -> None:
 
 def init_harbor_settings(config: HarborCLIConfig) -> None:
     """Initialize Harbor settings."""
-    console.print("\n:ship: Harbor Configuration", style=TITLE_STYLE)
+    print_title("Harbor Settings", emoji=":ship:")
 
     hconf = config.harbor
     config.harbor.url = str_prompt(
@@ -188,7 +192,7 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
 
 def init_logging_settings(config: HarborCLIConfig) -> None:
     """Initialize logging settings."""
-    console.print("\n:mag: Logging Configuration", style=TITLE_STYLE)
+    print_title("Logging Settings", emoji=":mag:")
 
     lconf = config.logging
 
@@ -229,7 +233,7 @@ def init_logging_settings(config: HarborCLIConfig) -> None:
 
 def init_output_settings(config: HarborCLIConfig) -> None:
     """Initialize output settings."""
-    console.print("\n:desktop_computer: Output Configuration", style=TITLE_STYLE)
+    print_title("Output Settings", emoji=":desktop_computer:")
 
     oconf = config.output
 
@@ -391,6 +395,8 @@ def _init_output_table_style_settings(config: HarborCLIConfig) -> None:
 def init_repl_settings(config: HarborCLIConfig) -> None:
     conf = config.repl
 
+    print_title("REPL Settings", emoji=":arrows_counterclockwise:")
+
     conf.history = bool_prompt(
         "Enable REPL history",
         default=conf.history,
@@ -408,6 +414,8 @@ def init_repl_settings(config: HarborCLIConfig) -> None:
 def init_general_settings(config: HarborCLIConfig) -> None:
     conf = config.general
 
+    print_title("General Settings")
+
     conf.confirm_enumeration = bool_prompt(
         "Confirm unconstrained enumeration of resources",
         default=conf.confirm_enumeration,
@@ -419,10 +427,37 @@ def init_general_settings(config: HarborCLIConfig) -> None:
     )
 
 
-def _print_output_title(fmt: OutputFormat) -> None:
-    fmt_repr = output_format_repr(fmt)
-    emoji = output_format_emoji(fmt)
-    console.print(
-        f"\n:desktop_computer: {emoji} Output Configuration ({fmt_repr})",
-        style=TITLE_STYLE,
+def init_cache_settings(config: HarborCLIConfig) -> None:
+    conf = config.cache
+
+    print_title("Cache Settings", emoji=":floppy_disk:")
+
+    conf.enabled = bool_prompt(
+        "Enable caching",
+        default=conf.enabled,
     )
+
+    if conf.enabled:
+        conf.ttl = int_prompt(
+            "Cache Time-to-live (seconds)",
+            default=conf.ttl,
+            show_default=True,
+        )
+
+        # TODO: implement cache max size
+        # conf.max_size = int_prompt(
+        #     "Cache max size (bytes)",
+        #     default=conf.max_size,
+        #     show_default=True,
+        # )
+
+
+def print_title(title: str, emoji: str = ":gear:") -> None:
+    e = f"{emoji} " if emoji else ""
+    console.print(f"\n{e}{title}", style=TITLE_STYLE)
+
+
+def _print_output_title(fmt: OutputFormat) -> None:
+    title = f"Output Configuration ({output_format_repr(fmt)})"
+    emoji = f":desktop_computer: {output_format_emoji(fmt)}"
+    print_title(title, emoji=emoji)

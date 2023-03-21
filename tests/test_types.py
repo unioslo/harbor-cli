@@ -1,8 +1,13 @@
+"""We only use Python 3.8-compatible annotations in this module.
+
+When we drop 3.8, we can move on to using built-ins as generics.
+"""
 from __future__ import annotations
 
 from typing import Any
 from typing import Callable
 from typing import List
+from typing import Tuple
 from typing import Type
 
 import pytest
@@ -14,14 +19,23 @@ from harbor_cli.types import is_sequence_func
 @pytest.mark.parametrize(
     "value, expect_type",
     [
+        # Sequences
         (["foo"], List[str]),
+        pytest.param("foo", List[int], marks=pytest.mark.xfail),
         ([], List[str]),
         ([], List[Any]),
+        ((), Tuple[Any]),
+        ((1, 2), Tuple[int]),
+        pytest.param((1, 2), Tuple[str], marks=pytest.mark.xfail),
+        # "Primitives"
         ("foo", str),
         (123, int),
         (True, bool),
         (True, Any),
-        pytest.param("foo", List[int], marks=pytest.mark.xfail),
+        # None value should be any of these types
+        (None, None),
+        (None, Any),
+        (None, type(None)),
     ],
 )
 def test_assert_type(value: Any, expect_type: Type[Any]) -> None:

@@ -10,6 +10,7 @@ from harborapi import HarborAsyncClient
 from pydantic import BaseModel
 from rich.console import Console
 
+from .cache import Cache
 from .config import HarborCLIConfig
 from .exceptions import handle_exception
 
@@ -54,6 +55,7 @@ class State:
     options: CommonOptions = CommonOptions()
     repl: bool = False
     console: Console = Console()  # the default console
+    cache: Cache = Cache()
     _config_loaded: bool = False
     _console_loaded: bool = False
     _client_loaded: bool = False
@@ -89,10 +91,23 @@ class State:
         """Add a client object to the state."""
         self.client = client
 
+    def configure_cache(self) -> None:
+        """Configure the cache based on the config."""
+        self.cache.ttl = self.config.cache.ttl
+        self.cache.enabled = self.config.cache.enabled
+        # Start the cache flushing loop
+        self.loop.create_task(self.cache.start_flush_loop())
+
     def _init_console(self) -> None:
         """Import the console object if it hasn't been imported yet.
         We do this here, so that we don't create a circular import
         between the state module and the output module."""
+        # I really hate this, but due to the way the state object is
+        # globally instantiated, it's difficult to conceive a way to do
+        # this without creating a circular import _somewhere_.
+        # I suppose we could run some sort analysis tool to figure out
+        # the optimal way to structure the modules to accommodate this
+        # pattern, but I'm not sure it's worth the effort (yet).
         # fmt: off
         from .output.console import console
         self.console = console

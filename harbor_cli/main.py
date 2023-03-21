@@ -198,6 +198,21 @@ def main_callback(
         envvar=env_var("confirm_enumeration"),
         config_override="general.confirm_enumeration",
     ),
+    # Cache options
+    cache_enabled: Optional[bool] = Option(
+        None,
+        "--cache/--no-cache",
+        help="Enable caching of API responses.",
+        envvar=env_var("cache_enabled"),
+        config_override="cache.enabled",
+    ),
+    cache_ttl: Optional[int] = Option(
+        None,
+        "--cache-ttl",
+        help="Cache TTL in seconds.",
+        envvar=env_var("cache_ttl"),
+        config_override="cache.ttl",
+    ),
     # Output options that don't belong to the config file
     output_file: Optional[Path] = Option(
         None,
@@ -292,6 +307,12 @@ def main_callback(
         state.config.general.confirm_enumeration = confirm_enumeration
     if confirm_deletion is not None:
         state.config.general.confirm_deletion = confirm_deletion
+    # Cache
+    if cache_enabled is not None:
+        state.config.cache.enabled = cache_enabled
+    if cache_ttl is not None:
+        state.config.cache.ttl = cache_ttl
+    state.configure_cache()
 
     # Set global options
     state.options.verbose = verbose

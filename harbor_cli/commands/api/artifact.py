@@ -834,7 +834,7 @@ def list_artifact_vulnerabilities_summary(
     ),
     query: Optional[str] = OPTION_QUERY,
     sort: ArtifactSummarySortOrder = typer.Option(
-        ArtifactSummarySortOrder.name,
+        ArtifactSummarySortOrder.name.value,
         "--sort",
         help="Sort order of artifacts,",
         case_sensitive=False,
@@ -846,16 +846,23 @@ def list_artifact_vulnerabilities_summary(
     ),
 ) -> None:
     """Show a summary of vulnerabilities for artifacts in in a project or repository."""
-    result = state.run(
-        get_artifacts(
-            state.client,
-            projects=project if project else None,
-            repositories=repo if repo else None,
-            query=query,
-            with_report=True,
-        ),
-        "Fetching artifacts...",
-    )
+    ctx_key = f"{ctx.command_path} {sorted(ctx.params['project'])} {sorted(ctx.params['repo'])} {ctx.params['query']}"
+
+    if (cached := state.cache.get(ctx_key, List[ArtifactInfo])) is not None:
+        result = cached
+    else:
+        result = state.run(
+            get_artifacts(
+                state.client,
+                projects=project if project else None,
+                repositories=repo if repo else None,
+                query=query,
+                with_report=True,
+            ),
+            "Fetching artifacts...",
+        )
+        state.cache.set(ctx_key, result)
+
     # fmt: off
     if sort == ArtifactSummarySortOrder.total:
         def sort_key(a: ArtifactInfo) -> int:

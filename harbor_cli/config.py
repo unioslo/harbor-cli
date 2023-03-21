@@ -242,6 +242,8 @@ class TableStyleSettings(BaseModel):
             vv = (vv[0], v[0])
         return vv
 
+    # TODO add * validator that turns empty strings into None?
+
     def as_rich_kwargs(self) -> dict[str, Optional[Union[str, Tuple[str, str], bool]]]:
         """Converts the TableStyleSettings to a dictionary that can be passed
         to Rich's Table constructor.
@@ -364,12 +366,29 @@ class REPLSettings(BaseModel):
         return v
 
 
+class CacheSettings(BaseModel):
+    enabled: bool = Field(
+        False,
+        description="Enable in-memory caching of API responses. This can significantly speed up Harbor CLI, but should be considered experimental for now.",
+    )
+    ttl: int = Field(
+        300,
+        description="Time to live for cached responses, in seconds.",
+    )
+    # TODO: implement max_size
+    # max_size: int = Field(
+    #     1000,
+    #     description="Maximum number of cached responses.",
+    # )
+
+
 class HarborCLIConfig(BaseModel):
     harbor: HarborSettings = Field(default_factory=HarborSettings)
     general: GeneralSettings = Field(default_factory=GeneralSettings)
-    repl: REPLSettings = Field(default_factory=REPLSettings)
-    logging: LoggingSettings = Field(default_factory=LoggingSettings)
     output: OutputSettings = Field(default_factory=OutputSettings)
+    repl: REPLSettings = Field(default_factory=REPLSettings)
+    cache: CacheSettings = Field(default_factory=CacheSettings)
+    logging: LoggingSettings = Field(default_factory=LoggingSettings)
     config_file: Optional[Path] = Field(
         None, exclude=True, description="Path to config file (if any)."
     )  # populated by CLI if loaded from file
