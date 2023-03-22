@@ -7,9 +7,8 @@ import typer
 from ...output.render import render_result
 from ...state import state
 from ...utils.args import get_project_arg
-from ...utils.commands import ARG_PROJECT_NAME
+from ...utils.commands import ARG_PROJECT_NAME_OR_ID
 from ...utils.commands import inject_resource_options
-from ...utils.commands import OPTION_PROJECT_ID
 from ...utils.prompts import check_enumeration_options
 
 # Create a command group
@@ -24,12 +23,11 @@ app.add_typer(policy_cmd)
 @inject_resource_options()
 async def get_webhook_jobs(
     ctx: typer.Context,
-    project_name: Optional[str] = ARG_PROJECT_NAME,
+    project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
     policy_id: int = typer.Option(
         ...,
         help="ID of the webhook policy to list jobs for.",
     ),
-    project_id: Optional[int] = OPTION_PROJECT_ID,
     query: Optional[str] = ...,  # type: ignore
     sort: Optional[str] = ...,  # type: ignore
     page: int = ...,  # type: ignore
@@ -38,7 +36,7 @@ async def get_webhook_jobs(
 ) -> None:
     """Get project webhook jobs for a given policy."""
     check_enumeration_options(state, query=query, limit=limit)
-    project_arg = get_project_arg(project_name, project_id)
+    project_arg = get_project_arg(project_name_or_id)
     result = state.run(
         state.client.get_webhook_jobs(
             project_arg,
@@ -57,11 +55,10 @@ async def get_webhook_jobs(
 @app.command("triggers")
 def get_webhook_policy_last_trigger(
     ctx: typer.Context,
-    project_name: Optional[str] = ARG_PROJECT_NAME,
-    project_id: Optional[int] = OPTION_PROJECT_ID,
+    project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
 ) -> None:
     """Get the last triggers for a webhook policy."""
-    project_arg = get_project_arg(project_name, project_id)
+    project_arg = get_project_arg(project_name_or_id)
     result = state.run(state.client.get_webhook_policy_last_trigger(project_arg))
     render_result(result, ctx)
 
@@ -70,11 +67,10 @@ def get_webhook_policy_last_trigger(
 @app.command("events", no_args_is_help=True)
 def get_webhook_policy_(
     ctx: typer.Context,
-    project_name: Optional[str] = ARG_PROJECT_NAME,
-    project_id: Optional[int] = OPTION_PROJECT_ID,
+    project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
 ) -> None:
     """Get the supported webhook event types."""
-    project_arg = get_project_arg(project_name, project_id)
+    project_arg = get_project_arg(project_name_or_id)
     result = state.run(state.client.get_webhook_supported_events(project_arg))
     render_result(result, ctx)
 
@@ -84,8 +80,7 @@ def get_webhook_policy_(
 @inject_resource_options()
 def get_webhook_policies(
     ctx: typer.Context,
-    project_name: Optional[str] = ARG_PROJECT_NAME,
-    project_id: Optional[int] = OPTION_PROJECT_ID,
+    project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
     query: Optional[str] = ...,  # type: ignore
     sort: Optional[str] = ...,  # type: ignore
     page: int = ...,  # type: ignore
@@ -94,7 +89,7 @@ def get_webhook_policies(
 ) -> None:
     """List webhook policies."""
     check_enumeration_options(state, query=query, limit=limit)
-    project_arg = get_project_arg(project_name, project_id)
+    project_arg = get_project_arg(project_name_or_id)
     result = state.run(
         state.client.get_webhook_policies(
             project_arg,
@@ -112,12 +107,11 @@ def get_webhook_policies(
 @policy_cmd.command("get")
 def get_webhook_policy(
     ctx: typer.Context,
-    project_name: Optional[str] = ARG_PROJECT_NAME,
+    project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
     policy_id: int = typer.Option(..., help="ID of the webhook policy to get."),
-    project_id: Optional[int] = OPTION_PROJECT_ID,
 ) -> None:
     """Get a webhook policy."""
-    project_arg = get_project_arg(project_name, project_id)
+    project_arg = get_project_arg(project_name_or_id)
     result = state.run(state.client.get_webhook_policy(project_arg, policy_id))
     render_result(result, ctx)
 
@@ -128,7 +122,7 @@ def get_webhook_policy(
 # @inject_help(WebhookPolicy)
 # def create_webhook_policy(
 #     ctx: typer.Context,
-#     project_name: Optional[str] = ARG_PROJECT_NAME,
+#     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
 #     name: str = typer.Option(..., "--name"),
 #     description: Optional[str] = typer.Option(..., "--description"),
 # ) -> None:
@@ -142,11 +136,10 @@ def get_webhook_policy(
 @policy_cmd.command("delete")
 def delete_webhook_policy(
     ctx: typer.Context,
-    project_name: Optional[str] = ARG_PROJECT_NAME,
+    project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
     policy_id: int = typer.Option(..., help="ID of the webhook policy to delete."),
-    project_id: Optional[int] = OPTION_PROJECT_ID,
 ) -> None:
     """Delete a webhook policy."""
-    project_arg = get_project_arg(project_name, project_id)
+    project_arg = get_project_arg(project_name_or_id)
     result = state.run(state.client.delete_webhook_policy(project_arg, policy_id))
     render_result(result, ctx)

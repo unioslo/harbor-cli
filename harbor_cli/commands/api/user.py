@@ -14,8 +14,14 @@ from ...logs import logger
 from ...output.render import render_result
 from ...state import state
 from ...utils.args import create_updated_model
+from ...utils.args import get_user_arg
+from ...utils.commands import ARG_USERNAME_OR_ID
 from ...utils.commands import inject_resource_options
 from ...utils.commands import OPTION_FORCE
+from ...utils.commands import OPTION_LIMIT
+from ...utils.commands import OPTION_PAGE
+from ...utils.commands import OPTION_PAGE_SIZE
+from ...utils.commands import OPTION_QUERY
 from ...utils.prompts import delete_prompt
 
 # Create a command group
@@ -26,18 +32,58 @@ app = typer.Typer(
 )
 
 
-def convert_uid(uid: str | int) -> int:
-    """Utility function for converting a user ID to an integer for
-    commands that take a username or ID as it first argument."""
-    try:
-        return int(uid)
-    except ValueError:
-        raise HarborCLIError(
-            "The first argument must be an integer ID when --id is used."
-        )
+# NOTE: There's way too many similar convenience functions here,
+# can we combine them somehow?
 
 
-def user_from_username(username: str) -> UserResp:
+def uid_from_username_or_id(username_or_id: str | int) -> int:
+    """Fetches the User ID of a Harbor user given a username or ID.
+
+    Returns the ID if it is already an integer, otherwise calls
+    [uid_from_username()][harbor_cli.commands.api.user.uid_from_username]
+    to fetch the ID for the given username.
+
+    Parameters
+    ----------
+    username_or_id : str | int
+        The username or ID of the user to fetch ID of.
+
+    Returns
+    -------
+    int
+        The User ID of the user.
+    """
+    # First, check if a command has passed the arg without parsing it itself
+    # (e.g. `"id:123"` -> `123`).
+    if isinstance(username_or_id, str):
+        username_or_id = get_user_arg(username_or_id)
+
+    if isinstance(username_or_id, int):
+        return username_or_id
+    else:
+        return uid_from_username(username_or_id)
+
+
+def uid_from_username(username: str) -> int:
+    """Fetches the User ID of a Harbor user given a username.
+
+    Parameters
+    ----------
+    username : str
+        The username of the user to fetch.
+
+    Returns
+    -------
+    int
+        The User ID of the user.
+    """
+    user_resp = get_user_by_username(username)
+    if user_resp.user_id is None:  # spec states ID can be None...
+        raise HarborCLIError(f"User {username!r} has no user ID.")
+    return user_resp.user_id
+
+
+def get_user_by_username(username: str) -> UserResp:
     """Fetches a Harbor user given a username.
 
     Parameters
@@ -59,23 +105,45 @@ def user_from_username(username: str) -> UserResp:
     return user_resp
 
 
-def uid_from_username(username: str) -> int:
-    """Fetches the User ID of a Harbor user given a username.
+def get_user_by_id(user_id: int) -> UserResp:
+    """Fetches a Harbor user given a user ID.
 
     Parameters
     ----------
-    username : str
-        The username of the user to fetch.
+    user_id : int
+        The ID of the user to fetch.
 
     Returns
     -------
-    int
-        The User ID of the user.
+    UserResp
+        The user object.
     """
-    user_resp = user_from_username(username)
-    if user_resp.user_id is None:  # spec states ID can be None...
-        raise HarborCLIError(f"User {username!r} has no user ID.")
-    return user_resp.user_id
+    try:
+        user_resp = state.run(state.client.get_user(user_id), "Fetching user...")
+    except NotFound:
+        raise HarborCLIError(f"No user with ID {user_id} found.")
+    return user_resp
+
+
+def get_user(username_or_id: str | int) -> UserResp:
+    """Fetches a Harbor user given a username or ID.
+
+    Parameters
+    ----------
+    username_or_id : str | int
+        The username or ID of the user to fetch.
+        String arguments are treated as usernames.
+        Integer arguments are treated as user IDs.
+
+    Returns
+    -------
+    UserResp
+        The user object.
+    """
+    if isinstance(username_or_id, int):
+        return get_user_by_id(username_or_id)
+    else:
+        return get_user_by_username(username_or_id)
 
 
 # HarborAsyncClient.create_user()
@@ -122,15 +190,7 @@ def create_user(
 @app.command("update")
 def update_user(
     ctx: typer.Context,
-    username_or_id: str = typer.Argument(
-        ...,
-        help="Username or ID of user to update. Use --id to update by ID.",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--id",
-        help="Argument is a user ID.",
-    ),
+    username_or_id: str = ARG_USERNAME_OR_ID,
     email: Optional[str] = typer.Option(
         None,
         help="New email for the user.",
@@ -145,8 +205,11 @@ def update_user(
     ),
 ) -> None:
     """Update an existing user."""
-    user = get_user(username_or_id, is_id)
-    assert user.user_id is not None, "User ID is None"
+    user = get_user(username_or_id)  # check user exists
+    if user.user_id is None:
+        raise HarborCLIError(
+            "User Profile from API has no ID. This should never happen."
+        )
     req = create_updated_model(user, UserProfile, ctx)
     state.run(state.client.update_user(user.user_id, req), "Updating user...")
     logger.info(f"Updated user.")
@@ -155,25 +218,12 @@ def update_user(
 # HarborAsyncClient.delete_user()
 @app.command("delete")
 def delete_user(
-    username_or_id: str = typer.Argument(
-        ...,
-        help="Username or ID of user to delete. Use --id to delete by ID.",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--id",
-        help="Argument is a user ID.",
-    ),
+    username_or_id: str = ARG_USERNAME_OR_ID,
     force: bool = OPTION_FORCE,
 ) -> None:
     """Delete a user."""
     delete_prompt(state.config, force, resource="user", name=username_or_id)
-
-    if is_id:
-        uid = convert_uid(username_or_id)
-    else:
-        uid = uid_from_username(username_or_id)
-
+    uid = uid_from_username_or_id(username_or_id)
     state.run(state.client.delete_user(uid), "Deleting user...")
     logger.info(f"Deleted user with ID {uid}.")
 
@@ -207,22 +257,11 @@ def search_users(
 # HarborAsyncClient.set_user_admin()
 @app.command("set-admin")
 def set_user_admin(
-    username_or_id: str = typer.Argument(
-        ...,
-        help="Username or ID of user to set as admin. Use --id to set by ID.",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--id",
-        help="Argument is a user ID.",
-    ),
+    username_or_id: str = ARG_USERNAME_OR_ID,
 ) -> None:
     """Sets a user as admin."""
-    if is_id:
-        uid = convert_uid(username_or_id)
-    else:
-        uid = uid_from_username(username_or_id)
-
+    arg = get_user_arg(username_or_id)
+    uid = uid_from_username_or_id(arg)
     state.run(
         state.client.set_user_admin(uid, is_admin=True), "Setting user as admin..."
     )
@@ -231,22 +270,11 @@ def set_user_admin(
 
 @app.command("unset-admin")
 def unset_user_admin(
-    username_or_id: str = typer.Argument(
-        ...,
-        help="Username or ID of user to unset as admin. Use --id to set by ID.",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--id",
-        help="Argument is a user ID.",
-    ),
+    username_or_id: str = ARG_USERNAME_OR_ID,
 ) -> None:
     """Unsets a user as admin."""
-    if is_id:
-        uid = convert_uid(username_or_id)
-    else:
-        uid = uid_from_username(username_or_id)
-
+    arg = get_user_arg(username_or_id)
+    uid = uid_from_username_or_id(arg)
     state.run(
         state.client.set_user_admin(uid, is_admin=False), "Removing user as admin..."
     )
@@ -256,15 +284,7 @@ def unset_user_admin(
 # HarborAsyncClient.set_user_password()
 @app.command("set-password")
 def set_user_password(
-    username_or_id: str = typer.Argument(
-        ...,
-        help="Username or ID of user to set password for. Use --id to set by ID.",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--id",
-        help="Argument is a user ID.",
-    ),
+    username_or_id: str = ARG_USERNAME_OR_ID,
     old_password: str = typer.Option(
         ...,
         "--old-password",
@@ -282,10 +302,8 @@ def set_user_password(
     ),
 ) -> None:
     """Set a user's password."""
-    if is_id:
-        uid = convert_uid(username_or_id)
-    else:
-        uid = uid_from_username(username_or_id)
+    arg = get_user_arg(username_or_id)
+    uid = uid_from_username_or_id(arg)
 
     state.run(
         state.client.set_user_password(
@@ -301,10 +319,7 @@ def set_user_password(
 # HarborAsyncClient.set_user_cli_secret()
 @app.command("set-cli-secret")
 def set_user_cli_secret(
-    username_or_id: str = typer.Argument(
-        ...,
-        help="Username or ID of user to set CLI secret for. Use --id to set by ID.",
-    ),
+    username_or_id: str = ARG_USERNAME_OR_ID,
     secret: str = typer.Option(
         ...,
         help="CLI secret to set for user. If omitted, a prompt will be shown.",
@@ -312,18 +327,9 @@ def set_user_cli_secret(
         hide_input=True,
         confirmation_prompt=True,
     ),
-    is_id: bool = typer.Option(
-        False,
-        "--id",
-        help="Argument is a user ID.",
-    ),
 ) -> None:
     """Set a user's CLI secret."""
-    if is_id:
-        uid = convert_uid(username_or_id)
-    else:
-        uid = uid_from_username(username_or_id)
-
+    uid = uid_from_username_or_id(username_or_id)
     state.run(
         state.client.set_user_cli_secret(uid, secret), "Setting CLI secret for user..."
     )
@@ -361,41 +367,16 @@ def get_current_user_permissions(
     render_result(permissions, ctx)
 
 
-def get_user(username_or_id: str, is_id: bool = False) -> UserResp:
-    """Get a user by username or ID."""
-    msg = "Fetching user..."
-    if is_id:
-        uid = convert_uid(username_or_id)
-        user_info = state.run(state.client.get_user(uid), msg)
-    else:
-        user_info = state.run(state.client.get_user_by_username(username_or_id), msg)
-    return user_info
-
-
 # HarborAsyncClient.get_user()
 # HarborAsyncClient.get_user_by_username()
 @app.command("get")
 def get_user_command(
     ctx: typer.Context,
-    username_or_id: str = typer.Argument(
-        ...,
-        help="Username or ID of user to update. Add the --id flag to update by ID.",
-    ),
-    is_id: bool = typer.Option(
-        False,
-        "--id",
-        help="Argument is a user ID.",
-    ),
+    username_or_id: str = ARG_USERNAME_OR_ID,
 ) -> None:
     """Get information about a specific user."""
-    msg = "Fetching user..."
-    if is_id:
-        uid = convert_uid(username_or_id)
-        user_info = state.run(state.client.get_user(uid), msg)
-    elif is_id is not None:
-        user_info = state.run(state.client.get_user_by_username(username_or_id), msg)
-
-    render_result(user_info, ctx)
+    user = get_user(username_or_id)
+    render_result(user, ctx)
 
 
 class UserListSortMode(Enum):
@@ -410,14 +391,27 @@ class UserListSortMode(Enum):
 @app.command("list")
 def list_users(
     ctx: typer.Context,
+    query: Optional[str] = OPTION_QUERY,
     sort: Optional[UserListSortMode] = typer.Option(
         None,
         case_sensitive=False,
         help="Sort by field.",
     ),
+    page: int = OPTION_PAGE,
+    page_size: int = OPTION_PAGE_SIZE,
+    limit: int = OPTION_LIMIT,
 ) -> None:
     """List all users in the system."""
-    users = state.run(state.client.get_users(), "Fetching users...")
+    users = state.run(
+        state.client.get_users(
+            query=query,
+            # we do the sorting ourselves later
+            page=page,
+            page_size=page_size,
+            limit=limit,
+        ),
+        "Fetching users...",
+    )
     if sort == UserListSortMode.ID:
         users.sort(key=lambda u: u.user_id or "")
     elif sort == UserListSortMode.USERNAME:

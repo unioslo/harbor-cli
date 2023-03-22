@@ -15,6 +15,9 @@ from harbor_cli.utils.args import as_query
 from harbor_cli.utils.args import construct_query_list
 from harbor_cli.utils.args import create_updated_model
 from harbor_cli.utils.args import deconstruct_query_list
+from harbor_cli.utils.args import get_ldap_group_arg
+from harbor_cli.utils.args import get_project_arg
+from harbor_cli.utils.args import get_user_arg
 from harbor_cli.utils.args import model_params_from_ctx
 from harbor_cli.utils.args import parse_commalist
 from harbor_cli.utils.args import parse_key_value_args
@@ -284,3 +287,22 @@ def test_construct_query_list(values: List[str], expected: str, union: bool) -> 
 )
 def test_add_to_query(kwargs: dict[str, Any], query: str | None, expected: str) -> None:
     assert add_to_query(query, **kwargs) == expected
+
+
+@pytest.mark.parametrize(
+    "name_or_id,expected",
+    [
+        ("foo", "foo"),
+        ("0", "0"),
+        ("id:0", 0),
+        ("1", "1"),
+        ("id:1", 1),
+        ("123", "123"),
+        ("id:123", 123),
+    ],
+)
+def test__get_id_name_arg(name_or_id: str, expected: str | int) -> None:
+    # Test all functions that use _get_id_name_arg
+    assert get_project_arg(name_or_id) == expected
+    assert get_user_arg(name_or_id) == expected
+    assert get_ldap_group_arg(name_or_id) == expected
