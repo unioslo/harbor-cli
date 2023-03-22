@@ -9,8 +9,8 @@ from typing import TypeVar
 import typer
 from pydantic import BaseModel
 
-from ..logs import logger
 from ..output.console import exit_err
+from .commands import PREFIX_ID
 
 BaseModelType = TypeVar("BaseModelType", bound=BaseModel)
 
@@ -298,9 +298,7 @@ def add_to_query(query: str | None, **kwargs: str | list[str] | None) -> str:
     return as_query(**query_dict)
 
 
-def _get_id_name_arg(
-    resource_type: str, resource_name: str | None, resource_id: int | None
-) -> str | int:
+def _get_id_name_arg(resource_type: str, resource_name: str) -> str | int:
     """
     Helper function for getting a resource given its name or ID.
 
@@ -311,40 +309,33 @@ def _get_id_name_arg(
     just checking if the string is all digits is not sufficient, and would
     break access to those projects.
     """
-    if resource_name is None and resource_id is None:
-        exit_err(
-            f"Must specify either {resource_type} name or project {resource_type}."
-        )
-    if resource_name is not None and resource_id is not None:
-        logger.warning(
-            f"{resource_type} name and ID both specified. Ignoring {resource_type} name."
-        )
-    if resource_id is not None:
-        return resource_id
-    elif resource_name is not None:
-        return resource_name
+    if PREFIX_ID in resource_name:
+        resource_name.partition(PREFIX_ID)[2]
+        try:
+            return int(resource_name)
+        except ValueError:
+            exit_err(f"Invalid {resource_type} ID: {resource_name} is not an integer.")
     else:
-        # mypy doesn't like return resource_name if resource_name is not None else resource_name
-        raise ValueError("This should never happen")
+        return resource_name
 
 
-def get_project_arg(project_name: str | None, project_id: int | None) -> str | int:
+def get_project_arg(project_name_or_id: str) -> str | int:
     """Given a project name and project ID, returns the one that is not None.
     One of name or ID must be not None. Harbor API expects that int args are
     project IDs and string args are project names.
 
     The ID will be returned if both are specified."""
-    return _get_id_name_arg("project", project_name, project_id)
+    return _get_id_name_arg("project", project_name_or_id)
 
 
-def get_user_arg(username: str | None, user_id: int | None) -> str | int:
+def get_user_arg(username_or_id: str) -> str | int:
     """Given a project name and project ID, returns the one that is not None.
     One of name or ID must be not None. Harbor API expects that int args are
     user IDs and string args are user names.
 
     The ID will be returned if both are specified."""
-    return _get_id_name_arg("user", username, user_id)
+    return _get_id_name_arg("user", username_or_id)
 
 
-def get_ldap_group_arg(group_dn: str | None, group_id: int | None) -> str | int:
-    return _get_id_name_arg("LDAP Group", group_dn, group_id)
+def get_ldap_group_arg(group_dn_or_id: str) -> str | int:
+    return _get_id_name_arg("LDAP Group", group_dn_or_id)

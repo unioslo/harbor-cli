@@ -159,26 +159,7 @@ def inject_help(
     return decorator
 
 
-# NOTE: This injection seems too complicated...? Could maybe just create default
-# typer.Option() instances for each field in the model and use them as defaults?
-
-# '--sort' and '-query' are two parameters that are used in many commands
-# in order to not have to write out the same code over and over again,
-# we can use these decorators to inject the parameters (and their accompanying help text)
-# into a function, given that the function has a parameter with the same name,
-# (e.g. 'query', 'sort', etc.)
-#
-# NOTE: we COULD technically inject the parameter even if the function doesn't
-# already have it, but that is too magical, and does not play well with
-# static analysis tools like mypy.
-#
-# Fundamentally, we don't want to change the function signature, only set the
-# default value of the parameter to a typer.Option() instance.
-# This lets Typer pick it up and use it to display help text and create the
-# correct commandline option (--query, --sort, etc.)
-#
-# Unlike most decorators, the function is not wrapped, but rather its
-# signature is modified in-place, and then the function is returned.
+PREFIX_ID = "id:"
 
 OPTION_QUERY = typer.Option(
     None,
@@ -215,15 +196,51 @@ OPTION_PROJECT_NAME = typer.Option(
     "--project",
     help="Name of the project to use.",
 )
-ARG_PROJECT_NAME = typer.Argument(
-    None,
-    help="Name of the project to use.",
-)
 OPTION_FORCE = typer.Option(
     False,
     "--force",
     help="Force deletion without confirmation.",
 )
+ARG_PROJECT_NAME = typer.Argument(
+    None,
+    help="Name of the project to use.",
+)
+# TODO: when union types are supported, we can use `get_project_arg` as the callback
+# for this option. For now, we have to call the function manually inside each command.
+ARG_PROJECT_NAME_OR_ID = typer.Argument(
+    ...,
+    help=f"Name or ID of the project to use. Prefix with {PREFIX_ID!r} to use an ID.",
+)
+ARG_USERNAME_OR_ID = typer.Argument(
+    ...,
+    help=f"Username or ID of the user to use. Prefix with {PREFIX_ID!r} to use an ID.",
+)
+ARG_LDAP_GROUP_DN_OR_ID = typer.Argument(
+    ...,
+    help=f"LDAP Group DN or ID of the group to use. Prefix with {PREFIX_ID!r} to use an ID.",
+)
+
+
+# NOTE: This injection seems too complicated...? Could maybe just create default
+# typer.Option() instances for each field in the model and use them as defaults?
+
+# '--sort' and '-query' are two parameters that are used in many commands
+# in order to not have to write out the same code over and over again,
+# we can use these decorators to inject the parameters (and their accompanying help text)
+# into a function, given that the function has a parameter with the same name,
+# (e.g. 'query', 'sort', etc.)
+#
+# NOTE: we COULD technically inject the parameter even if the function doesn't
+# already have it, but that is too magical, and does not play well with
+# static analysis tools like mypy.
+#
+# Fundamentally, we don't want to change the function signature, only set the
+# default value of the parameter to a typer.Option() instance.
+# This lets Typer pick it up and use it to display help text and create the
+# correct commandline option (--query, --sort, etc.)
+#
+# Unlike most decorators, the function is not wrapped, but rather its
+# signature is modified in-place, and then the function is returned.
 
 
 def inject_resource_options(
@@ -404,19 +421,6 @@ def inject_project_name(
 ) -> Any:
     def decorator(func: Any) -> Any:
         return _patch_param(func, "project_name", ARG_PROJECT_NAME, strict, use_default)
-
-    # Support using plain @inject_query or @inject_query()
-    if callable(f):
-        return decorator(f)
-    else:
-        return decorator
-
-
-def inject_project_id(
-    f: Any = None, *, strict: bool = False, use_default: bool = True
-) -> Any:
-    def decorator(func: Any) -> Any:
-        return _patch_param(func, "project_id", OPTION_PROJECT_ID, strict, use_default)
 
     # Support using plain @inject_query or @inject_query()
     if callable(f):
