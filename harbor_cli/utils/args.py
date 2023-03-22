@@ -310,9 +310,9 @@ def _get_id_name_arg(resource_type: str, resource_name: str) -> str | int:
     break access to those projects.
     """
     if PREFIX_ID in resource_name:
-        resource_name.partition(PREFIX_ID)[2]
+        resource_id = resource_name.partition(PREFIX_ID)[2]
         try:
-            return int(resource_name)
+            return int(resource_id)
         except ValueError:
             exit_err(f"Invalid {resource_type} ID: {resource_name} is not an integer.")
     else:
