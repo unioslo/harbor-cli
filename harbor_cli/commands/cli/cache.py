@@ -5,6 +5,7 @@ from datetime import datetime
 from datetime import timedelta
 from typing import Any
 from typing import Iterable
+from typing import List
 
 import typer
 from pydantic import BaseModel
@@ -58,7 +59,7 @@ class CachedItemInfo(BaseModel):
 
 
 class CacheInfo(BaseModel):
-    commands: list[CachedItemInfo]
+    commands: List[CachedItemInfo]
 
     @property
     def empty(self) -> bool:
@@ -93,6 +94,7 @@ class CacheInfo(BaseModel):
 def cache_info(ctx: typer.Context) -> None:
     """Show information about the cache."""
     cache_info = CacheInfo.from_cache(state.cache)
+    # NOTE: why not just cache.empty?
     if cache_info.empty:
         info("Cache is empty.")
     render_result(cache_info, ctx)

@@ -4,6 +4,7 @@ import asyncio
 import threading
 import time
 from typing import Any
+from typing import Dict
 from typing import Iterable
 from typing import NamedTuple
 from typing import overload
@@ -31,7 +32,7 @@ class Cache:
     # Since this is a CLI application, it makes no sense to require/support
     # Redis or something similar.
 
-    _cache: dict[str, CachedItem]
+    _cache: Dict[str, CachedItem]
     _lock: threading.Lock
     _loop_running: bool = False
     enabled: bool = True
@@ -40,7 +41,7 @@ class Cache:
     def __init__(self, ttl: int = 300) -> None:
         """Initialize the cache."""
         self.ttl = ttl
-        self._cache: dict[str, CachedItem] = {}
+        self._cache: Dict[str, CachedItem] = {}
         self._lock = threading.Lock()
 
     def keys(self) -> list[str]:
