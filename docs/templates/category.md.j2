@@ -49,7 +49,7 @@
  See [harborapi docs](https://pederhan.github.io/harborapi/usage/methods/read/#query) for more information.
 {%- endif -%}
 <br />
-&nbsp;&nbsp;&nbsp;&nbsp;**Type:** {{ param.type}}<br />
+&nbsp;&nbsp;&nbsp;&nbsp;**Type:** `{{ param.type}}` {% if param.is_flag %}(flag){% endif %}<br />
 
 {%- if param.type == "choice" -%}
 &nbsp;&nbsp;&nbsp;&nbsp;**Choices:** {% for element in param.choices -%}{{ "`" + element + "`" if loop.first else ", `" + element + "`" }}{% endfor %}<br />
