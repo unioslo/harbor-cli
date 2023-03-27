@@ -37,17 +37,5 @@ jobs:
       - name: Install hatch
         run: pip install hatch
 
-      - name: Generate CLI output data for mkdocs
-        run: hatch run docs:python docs/scripts/gen_cli_data.py
-
-      - name: Generate list of output formats
-        run: hatch run docs:python docs/scripts/gen_formats.py
-
-      - name: Generate list of CLI commands
-        run: hatch run docs:python docs/scripts/gen_command_list.py
-
-      - name: Generate list of global CLI options
-        run: hatch run docs:python docs/scripts/gen_cli_options.py
-
       - name: Build documentation and publish
         run: hatch run docs:mkdocs gh-deploy --force

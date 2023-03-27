@@ -1,12 +1,23 @@
 from __future__ import annotations
 
+import sys
+from pathlib import Path
+
 import yaml  # type: ignore
-from common import DATA_PATH
 
 from harbor_cli.format import OutputFormat
 
+sys.path.append(Path(__file__).parent.as_posix())
 
-fmts = [fmt.value for fmt in OutputFormat]
+from common import DATA_DIR  # noqa
 
-with open(DATA_PATH / "formats.yaml", "w") as f:
-    yaml.dump(fmts, f, default_flow_style=False)
+
+def main() -> None:
+    fmts = [fmt.value for fmt in OutputFormat]
+
+    with open(DATA_DIR / "formats.yaml", "w") as f:
+        yaml.dump(fmts, f, default_flow_style=False)
+
+
+if __name__ == "__main__":
+    main()

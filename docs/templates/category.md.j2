@@ -1,0 +1,75 @@
+{# Takes in a category and a list of CommandSummary objects #}
+{% if category | length > 0 %}
+# {{ category }}
+
+{% else %}
+
+# Top-level commands
+
+{% endif %}
+
+{% for command in commands %}
+## {{ command.name }}
+
+
+```
+{{ command.usage }}
+```
+
+{{ command.help_plain }}
+
+{# Only show this section if we have arguments #}
+{% set argument_params = command.params | selectattr('is_argument', 'equalto', true) | list %}
+{% if argument_params | length > 0 %}
+**Arguments**
+
+{% for param in command.params if param.is_argument %}
+&nbsp;&nbsp;&nbsp;&nbsp;**`{{ param.human_readable_name }}`**
+<br />&nbsp;&nbsp;&nbsp;&nbsp;{{ param.help_plain}}
+
+{% endfor %}
+
+{# End argument listing #}
+{% endif %}
+
+{# Only show this section if we have options #}
+{% set option_params = command.params | selectattr('is_argument', 'equalto', false) | list %}
+
+{% if option_params | length > 0 %}
+
+**Options**
+
+
+{% for param in command.params if not param.is_argument %}
+{% if param.opts | length > 0 %}
+&nbsp;&nbsp;&nbsp;&nbsp;{% for param in param.opts %} `{{ param }}`{% if not loop.last %}, {% endif %}{% endfor %} {% if not param.is_flag %}`<{{ param.human_readable_name }}>`{% endif %}<br />
+{% endif -%}
+&nbsp;&nbsp;&nbsp;&nbsp;{{ param.help_plain }}
+{%- if param.name == "query" -%}
+ See [harborapi docs](https://pederhan.github.io/harborapi/usage/methods/read/#query) for more information.
+{%- endif -%}
+<br />
+&nbsp;&nbsp;&nbsp;&nbsp;**Type:** {{ param.type}}<br />
+
+{%- if param.type == "choice" -%}
+&nbsp;&nbsp;&nbsp;&nbsp;**Choices:** {% for element in param.choices -%}{{ "`" + element + "`" if loop.first else ", `" + element + "`" }}{% endfor %}<br />
+{% endif %}
+
+{%- if param.default is not none -%}
+&nbsp;&nbsp;&nbsp;&nbsp;**Default:** `{{ param.default }}`<br />
+{%- endif %}
+
+
+
+
+
+{# End param loop #}
+{% endfor %}
+
+{# End params listing #}
+{% endif %}
+
+----
+
+{# End category commands loop #}
+{% endfor %}

@@ -2,12 +2,15 @@ from __future__ import annotations
 
 import copy
 import inspect
+from functools import lru_cache
 from typing import Any
 from typing import Type
 
 import click
 import typer
 from pydantic import BaseModel
+from typer.core import TyperCommand
+from typer.core import TyperGroup
 
 from ..models import CommandSummary
 
@@ -34,39 +37,44 @@ def get_command_help(command: typer.models.CommandInfo) -> str:
     return ""
 
 
-# TODO: apparently we can just refactor this to use typer.Context.to_info_dict()?
-#       We have to construct a new context to get the help text though
-def get_app_commands(
-    app: typer.Typer, cmds: list[CommandSummary] | None = None, current: str = ""
+@lru_cache(maxsize=None)
+def get_app_commands(app: typer.Typer) -> list[CommandSummary]:
+    """Get a list of commands from a typer app."""
+    return _get_app_commands(app)
+
+
+def _get_app_commands(
+    app: typer.Typer | TyperGroup | TyperCommand,
+    cmds: list[CommandSummary] | None = None,
+    current: str = "",
 ) -> list[CommandSummary]:
     if cmds is None:
         cmds = []
 
-    # If we have subcommands, we need to go deeper.
-    for group in app.registered_groups:
-        if not group.typer_instance:
-            continue
-        t = group.typer_instance
-        if current == "":
-            # Prioritize direct name of typer instance over group name (?)
-            new_current = t.info.name or group.name
-            if isinstance(new_current, typer.models.DefaultPlaceholder):
-                new_current = new_current.value
-            new_current = new_current or ""  # guarantee not None
-        else:
-            new_current = f"{current} {t.info.name or ''}"
-        get_app_commands(t, cmds, current=new_current)
+    if isinstance(app, typer.Typer):
+        cmd = typer.main.get_command(app)
+    elif isinstance(app, (TyperGroup, TyperCommand)):
+        cmd = app
+    else:
+        raise TypeError(f"Unexpected type: {type(app)}")
 
-    # When we have commands, we don't need to go deeper and are done.
-    # We can now construct the CommandSummary objects.
-    for command in app.registered_commands:
-        if not command.name:
-            continue
-        if current:
-            name = f"{current} {command.name}"
+    try:
+        groups = cmd.commands  # type: ignore
+    except AttributeError:
+        groups = {}
+
+    # If we have subcommands, we need to go deeper.
+    for command in groups.values():
+        if current == "":
+            cmd_name = command.name or ""
         else:
-            name = command.name
-        cmds.append(CommandSummary(name=name, help=get_command_help(command)))
+            cmd_name = f"{current} {command.name}"
+        if isinstance(command, TyperGroup):
+            _get_app_commands(command, cmds, current=cmd_name)
+        else:
+            cmds.append(
+                CommandSummary.from_command(command, name=cmd_name, category=current)
+            )
 
     return sorted(cmds, key=lambda x: x.name)
 
@@ -337,11 +345,14 @@ def inject_resource_options(
     def decorator(func: Any) -> Any:
         # Inject in reverse order, because parameters with defaults
         # can't be followed by parameters without defaults
-        func = inject_limit(func, strict=strict, use_default=use_defaults)
-        func = inject_page_size(func, strict=strict, use_default=use_defaults)
-        func = inject_page(func, strict=strict, use_default=use_defaults)
-        func = inject_sort(func, strict=strict, use_default=use_defaults)
-        func = inject_query(func, strict=strict, use_default=use_defaults)
+        for inject in [
+            inject_limit,
+            inject_page_size,
+            inject_page,
+            inject_sort,
+            inject_query,
+        ]:
+            func = inject(func, strict=strict, use_default=use_defaults)
         return func
 
     # Support using plain @inject_resource_options or @inject_resource_options()
