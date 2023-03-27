@@ -180,7 +180,7 @@ def get_audit_log_rotation_schedule(
 
 def _get_schedule(
     cron: Optional[str],
-    audit_retention_hour: Optional[str],
+    audit_retention_hour: Optional[int],
     include_operations: Optional[str],
     dry_run: Optional[bool],
     type: Optional[str],
@@ -216,7 +216,7 @@ def create_audit_log_rotation_schedule(
     cron: Optional[str] = typer.Option(
         None, help=f"Cron expression, e.g. {render_cli_value('0 0 * * *')}"
     ),
-    audit_retention_hour: Optional[str] = typer.Option(
+    audit_retention_hour: Optional[int] = typer.Option(
         None,
         "--retention-hours",
         help=f"Number of hours to retain audit logs, e.g. {render_cli_value('168')}",
@@ -255,7 +255,7 @@ def update_audit_log_rotation_schedule(
     cron: Optional[str] = typer.Option(
         None, help=f"Cron expression, e.g. {render_cli_value('0 0 * * *')}"
     ),
-    audit_retention_hour: Optional[str] = typer.Option(
+    audit_retention_hour: Optional[int] = typer.Option(
         None,
         "--retention-hours",
         help=f"Number of hours to retain audit logs, e.g. {render_cli_value('168')}",
