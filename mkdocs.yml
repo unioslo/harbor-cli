@@ -17,19 +17,24 @@ theme:
     - navigation.expand
     - navigation.indexes
 
+watch:
+  - harbor_cli
+
 plugins:
   - search
   - autorefs
+  - mkdocs-simple-hooks:
+      hooks:
+        on_pre_build: docs.scripts.run:main
+  - literate-nav: # enhanced nav section (enables wildcards)
   - macros:
       on_error_fail: true
       include_dir: "docs/data"
       include_yaml:
-        - commandlist: "docs/data/commands.yaml"
+        - commandlist: "docs/data/commandlist.yaml"
         - formats: "docs/data/formats.yaml"
         - options: "docs/data/options.yaml"
   - mkdocstrings:
-      watch:
-        - harbor_cli
       enable_inventory: true
       handlers:
         python:
@@ -59,7 +64,6 @@ markdown_extensions:
 nav:
   - "Home":
       - index.md
-      # - configuration.md
       - "Configuration":
           - configuration/introduction.md
           - configuration/config-file.md
@@ -71,8 +75,11 @@ nav:
           - usage/repl.md
           - usage/terminology.md
           # TODO: formats
+  - "Commands":
+      - "commands/*.md"
   - "Reference":
       - "reference/index.md"
+      - "reference/*.md"
       - "reference/config.md"
       - "reference/dirs.md"
       - "reference/exceptions.md"

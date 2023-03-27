@@ -20,6 +20,7 @@ TODO
 
 # Auto generated files
 docs/data/**
+docs/commands/**
 
 # Overrides
 !tests/data/**

@@ -241,11 +241,13 @@ def get(
         False,
         "--with-vuln",
         "-v",
+        help="Include vulnerability report in output.",
     ),
     with_vuln_descriptions: bool = typer.Option(
         False,
         "--with-vuln-desc",
         "-d",
+        help="Include descriptions of each vulnerability in the output.",
     )
     # TODO: --tag
 ) -> None:
@@ -829,7 +831,7 @@ def list_artifact_vulnerabilities_summary(
     repo: List[str] = typer.Option(
         [],
         "--repo",
-        help="Repository name(s).",
+        help="Repository name(s). Should not include project name.",
         callback=parse_commalist,
     ),
     query: Optional[str] = OPTION_QUERY,

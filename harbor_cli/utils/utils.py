@@ -15,6 +15,7 @@ from typing import TypeVar
 
 from pydantic import BaseModel
 from pydantic import Extra
+from rich.text import Text
 
 MappingType = TypeVar("MappingType", bound=MutableMapping[str, Any])
 
@@ -171,3 +172,8 @@ def parse_version_string(package: str) -> PackageVersion:
     return PackageVersion(
         package_name, min_version=min_version, max_version=max_version
     )
+
+
+def markup_as_plain_text(s: str) -> str:
+    """Renders a string that might contain markup formatting as a plain text string."""
+    return Text.from_markup(s).plain

@@ -1,14 +1,18 @@
 from __future__ import annotations
 
+import sys
+from pathlib import Path
 from typing import NamedTuple
 from typing import Sequence
 
 import yaml  # type: ignore
-from common import DATA_PATH
 
 from harbor_cli.deprecation import Deprecated
 from harbor_cli.main import app
 from harbor_cli.utils.commands import get_app_callback_options
+
+sys.path.append(Path(__file__).parent.as_posix())
+from common import DATA_DIR  # noqa
 
 
 def maybe_list_to_str(text: str | list[str] | None) -> str | None:
@@ -40,7 +44,7 @@ class OptInfo(NamedTuple):
         }
 
 
-if __name__ == "__main__":
+def main() -> None:
     options = []  # type: list[OptInfo]
     for option in get_app_callback_options(app):
         if not option.param_decls:
@@ -59,5 +63,9 @@ if __name__ == "__main__":
 
     to_dump = [o.to_dict() for o in options]
 
-    with open(DATA_PATH / "options.yaml", "w") as f:
+    with open(DATA_DIR / "options.yaml", "w") as f:
         yaml.dump(to_dump, f, sort_keys=False)
+
+
+if __name__ == "__main__":
+    main()

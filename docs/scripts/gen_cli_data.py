@@ -8,9 +8,14 @@ from __future__ import annotations
 
 import os
 import subprocess
+import sys
+from pathlib import Path
 from typing import NamedTuple
 
-from common import DATA_PATH
+sys.path.append(Path(__file__).parent.as_posix())
+
+
+from common import DATA_DIR  # noqa
 
 # Set up environment variables for the CLI
 env = os.environ.copy()
@@ -27,12 +32,17 @@ class Command(NamedTuple):
 # List of commands to run
 COMMANDS = [
     Command(["harbor", "--help"], "help.txt"),
-    Command(["harbor", "scanner", "list", "--help"], "help_scanner.txt"),
     Command(["harbor", "sample-config"], "sample_config.toml"),
 ]
 
-if __name__ == "__main__":
+
+def main() -> None:
+    """Run the commands and save the output to files."""
     for cmd in COMMANDS:
         output = subprocess.check_output(cmd.command, env=env).decode("utf-8")
-        with open(DATA_PATH / cmd.filename, "w") as f:
+        with open(DATA_DIR / cmd.filename, "w") as f:
             f.write(output)
+
+
+if __name__ == "__main__":
+    main()

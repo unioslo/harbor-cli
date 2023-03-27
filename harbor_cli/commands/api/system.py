@@ -33,12 +33,10 @@ def volumeinfo(ctx: typer.Context) -> None:
 
 @app.command("health")
 def health(ctx: typer.Context) -> None:
-    """Get system health.
-
-    NOTE: this is under the /health endpoint, not /system/health
-    but it is still a system health check, hence why it is here,
-    and not in its own health.py file.
-    """
+    """Get system health."""
+    # NOTE: this is under the /health endpoint, not /system/health
+    # but it is still a system health check, hence why it is here,
+    # and not in its own health.py file.
     health_status = state.run(state.client.health_check(), "Fetching health info...")
     render_result(health_status, ctx)
 

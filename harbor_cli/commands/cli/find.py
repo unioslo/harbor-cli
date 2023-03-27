@@ -105,7 +105,7 @@ def find_command(
         ),
     ),
 ) -> None:
-    """Search commands based on names and descriptions."""
+    """Search for commands based on names and descriptions."""
     matches = _do_find(
         ctx=ctx,
         query=query,

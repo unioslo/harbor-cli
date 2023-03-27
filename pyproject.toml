@@ -80,6 +80,11 @@ dependencies = [
   "mkdocs-material",
   "mkdocstrings[python]",
   "mkdocs-macros-plugin",
+  "mkdocs-gen-files",
+  "mkdocs-literate-nav",
+  "mkdocs-simple-hooks",
+  "sanitize-filename",
+  "jinja2",
   "pyyaml",
 ]
 [tool.hatch.envs.docs.scripts]
