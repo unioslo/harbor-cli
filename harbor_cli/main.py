@@ -187,7 +187,7 @@ def main_callback(
     confirm_deletion: Optional[bool] = Option(
         None,
         "--confirm-deletion/--no-confirm-deletion",
-        help="Confirm before deleting resources..",
+        help="Confirm before deleting resources.",
         envvar=env_var("confirm_deletion"),
         config_override="general.confirm_deletion",
     ),
