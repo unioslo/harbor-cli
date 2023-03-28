@@ -14,6 +14,7 @@ from ...output.console import success
 from ...output.render import render_result
 from ...output.table.anysequence import AnySequence
 from ...state import state
+from ...style import render_cli_command
 from ...style import render_cli_value
 from ...style import render_config_option
 from ...utils.utils import forbid_extra
@@ -47,10 +48,11 @@ def get_cli_config(
     logger.info(f"Source: {state.config.config_file}")
 
 
-@app.command("keys")
+@app.command(
+    "keys",
+    help=f"Show all config keys that can be modified with {render_cli_command('cli-config set')}.",
+)
 def get_cli_config_keys(ctx: typer.Context) -> None:
-    """Show the current CLI configuration."""
-
     def get_fields(field: dict[str, Any], current: str) -> list[str]:
         fields = []
         if isinstance(field, dict):
@@ -72,7 +74,11 @@ def get_cli_config_keys(ctx: typer.Context) -> None:
     render_result(AnySequence(values=ff, title="Config Keys"))
 
 
-@app.command("set", no_args_is_help=True)
+@app.command(
+    "set",
+    no_args_is_help=True,
+    help=f"Modify a CLI configuration value. Use {render_cli_command('cli-config keys')} to see all available keys.",
+)
 def set_cli_config(
     ctx: typer.Context,
     key: str = typer.Argument(
@@ -97,7 +103,6 @@ def set_cli_config(
         help="Render updated config as TOML in terminal if [green]--show[/] is set. Overrides global option [green]--format[/].",
     ),
 ) -> None:
-    """Set a key in the CLI configuration."""
     attrs = []
     if "." in key:
         attrs = key.split(".")
@@ -126,17 +131,21 @@ def set_cli_config(
     success(f"Set {render_config_option(key)} to {render_cli_value(value)}")
 
 
-@app.command("write")
+@app.command(
+    "write",
+    help=(
+        "Write the current [bold]session[/] configuration to disk. "
+        f"Used to save changes made with {render_cli_command('cli-config set --session')} in REPL mode."
+    ),
+)
 def write_session_config(
     ctx: typer.Context,
     path: Optional[Path] = typer.Option(
         None,
         "--path",
-        help="Path to save configuration file. Overrides the config's current path.",
+        help="Path to save configuration file. Uses current config file path if not specified.",
     ),
 ) -> None:
-    """Write the current [bold]session[/] configuration to disk. Used to save
-    changes made with [green]harbor cli-config set --session[/] in REPL mode."""
     save_path = path or state.config.config_file
     if save_path is None:
         exit_err(

@@ -2,13 +2,16 @@
 from __future__ import annotations
 
 STYLE_CONFIG_OPTION = "italic yellow"
-"""Style used to signify a configuration file option/key/entry."""
+"""Used to signify a configuration file option/key/entry."""
 
 STYLE_CLI_OPTION = "green"
-"""Style used to signify a CLI option, e.g. --verbose."""
+"""Used to signify a CLI option, e.g. --verbose."""
 
 STYLE_CLI_VALUE = "bold magenta"
-"""Style used in command docstrings to signify a CLI value e.g. 'FILE'."""
+"""Used to signify a CLI value e.g. 'FILE'."""
+
+STYLE_CLI_COMMAND = "bold green"
+"""Used to signify a CLI command e.g. 'artifact get'."""
 
 STYLE_TABLE_HEADER = "bold green"
 STYLE_COMMAND = "bold italic green"
@@ -32,6 +35,11 @@ def render_cli_option(option: str) -> str:
 def render_cli_value(value: str) -> str:
     """Render a CLI value."""
     return f"[{STYLE_CLI_VALUE}]{value}[/]"
+
+
+def render_cli_command(value: str) -> str:
+    """Render a CLI command."""
+    return f"[{STYLE_CLI_COMMAND}]{value}[/]"
 
 
 def help_config_override(option: str) -> str:
