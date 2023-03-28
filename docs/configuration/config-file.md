@@ -33,7 +33,7 @@ The `harbor` table contains settings related to your Harbor instance. There are 
 
 1. Using a username and password
 2. Using Base64-encoded basic access credentials (`username:password` in Base64). This is not safer than using a username and password, as it only obscures the credentials, but does not encrypt them.
-3. Using a Harbor robot account with a JSON credentials file. See [Create Project Robot Accounts](https://goharbor.io/docs/2.5.0/working-with-projects/project-configuration/create-robot-accounts/) and [Create System Robot Accounts](https://goharbor.io/docs/2.2.0/administration/robot-accounts/) for more information on how to create robot accounts. Robot accounts can also be created through the API with the help of using `harborapi`, as described in [this](https://pederhan.github.io/harborapi/usage/creating-system-robot/) guide.
+3. Using a Harbor robot account with a JSON credentials file. See [Create Project Robot Accounts](https://goharbor.io/docs/2.5.0/working-with-projects/project-configuration/create-robot-accounts/) and [Create System Robot Accounts](https://goharbor.io/docs/2.2.0/administration/robot-accounts/) for more information on how to create robot accounts. Robot accounts can also be created through the API with the help of `harborapi`, as described in [this](https://pederhan.github.io/harborapi/usage/creating-system-robot/) guide.
 
 The order in which they are specified here is also the order they are evaluated. If multiple methods are specified, the first one that is valid will be used.
 
