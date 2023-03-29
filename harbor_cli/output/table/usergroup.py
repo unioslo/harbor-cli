@@ -6,6 +6,7 @@ from typing import Sequence
 from harborapi.models.models import UserGroupSearchItem
 from rich.table import Table
 
+from ...logs import logger
 from ...models import UserGroupType
 from ..formatting.builtin import int_str
 from ..formatting.builtin import str_str
@@ -27,7 +28,8 @@ def usergroupsearchitem_table(
     for usergroup in usergroups:
         try:
             group_type = UserGroupType.from_int(usergroup.group_type).name  # type: ignore
-        except ValueError:
+        except ValueError as e:
+            logger.warning(f"{e}")  # the exc message should be enough
             group_type = str(usergroup.group_type)
         table.add_row(
             int_str(usergroup.id),

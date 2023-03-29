@@ -192,6 +192,8 @@ class Operator(Enum):
     XOR = "xor"
 
 
+# We use this enum to provide choices in the CLI, but we also use it to determine
+# the integer value of the group type when we need to send it to the API.
 class UserGroupType(str, Enum):
     LDAP = "LDAP"
     HTTP = "HTTP"
@@ -199,26 +201,32 @@ class UserGroupType(str, Enum):
 
     @classmethod
     def from_int(cls, value: int) -> UserGroupType:
-        if value == 1:
-            return cls.LDAP
-        elif value == 2:
-            return cls.HTTP
-        elif value == 3:
-            return cls.OIDC
-        else:
-            raise ValueError(f"Unknown group type: {value}")
+        try:
+            return _USERGROUPTYPE_MAPPING[value]
+        except KeyError:
+            raise ValueError(f"Unknown user group type: {value}")
 
     def as_int(self) -> int:
-        if self == UserGroupType.LDAP:
-            return 1
-        elif self == UserGroupType.HTTP:
-            return 2
-        elif self == UserGroupType.OIDC:
-            return 3
-        else:
-            raise ValueError(f"Unknown group type: {self}")
+        try:
+            return _USERGROUPTYPE_MAPPING_REVERSE[self]
+        except KeyError:
+            raise ValueError(f"Unknown user group type: {self}")
 
 
+# NOTE: could replace with a bidict or similar
+_USERGROUPTYPE_MAPPING = {
+    1: UserGroupType.LDAP,
+    2: UserGroupType.HTTP,
+    3: UserGroupType.OIDC,
+}  # type: dict[int, UserGroupType]
+
+_USERGROUPTYPE_MAPPING_REVERSE = {
+    v: k for k, v in _USERGROUPTYPE_MAPPING.items()
+}  # type: dict[UserGroupType, int]
+
+
+# We use this enum to provide choices in the CLI, but we also use it to determine
+# the integer value of the role when we need to send it to the API.
 class MemberRoleType(Enum):
     ADMIN = "admin"
     DEVELOPER = "developer"
@@ -227,25 +235,25 @@ class MemberRoleType(Enum):
 
     @classmethod
     def from_int(cls, value: int) -> MemberRoleType:
-        if value == 1:
-            return cls.ADMIN
-        elif value == 2:
-            return cls.DEVELOPER
-        elif value == 3:
-            return cls.GUEST
-        elif value == 4:
-            return cls.MAINTAINER
-        else:
+        try:
+            return _MEMBERROLETYPE_MAPPING[value]
+        except KeyError:
             raise ValueError(f"Unknown role type: {value}")
 
     def as_int(self) -> int:
-        if self == MemberRoleType.ADMIN:
-            return 1
-        elif self == MemberRoleType.DEVELOPER:
-            return 2
-        elif self == MemberRoleType.GUEST:
-            return 3
-        elif self == MemberRoleType.MAINTAINER:
-            return 4
-        else:
+        try:
+            return _MEMBERROLETYPE_MAPPING_REVERSE[self]
+        except KeyError:
             raise ValueError(f"Unknown role type: {self}")
+
+
+_MEMBERROLETYPE_MAPPING = {
+    1: MemberRoleType.ADMIN,
+    2: MemberRoleType.DEVELOPER,
+    3: MemberRoleType.GUEST,
+    4: MemberRoleType.MAINTAINER,
+}  # type: dict[int, MemberRoleType]
+
+_MEMBERROLETYPE_MAPPING_REVERSE = {
+    v: k for k, v in _MEMBERROLETYPE_MAPPING.items()
+}  # type: dict[MemberRoleType, int]
