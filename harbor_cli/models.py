@@ -47,6 +47,8 @@ class ParamSummary(BaseModel):
     is_bool_flag: Optional[bool] = None
     is_flag: Optional[bool] = None
     is_option: Optional[bool]
+    max: Optional[int] = None
+    min: Optional[int] = None
     metavar: Optional[str]
     multiple: bool
     name: str
@@ -70,7 +72,6 @@ class ParamSummary(BaseModel):
 
         is_argument = isinstance(param, (Argument, TyperArgument))
         return cls(
-            argument=is_argument,
             allow_from_autoenv=get(param, "allow_from_autoenv"),
             confirmation_prompt=get(param, "confirmation_prompt"),
             count=get(param, "count"),
@@ -87,6 +88,8 @@ class ParamSummary(BaseModel):
             is_eager=param.is_eager,
             is_flag=get(param, "is_flag"),
             is_option=get(param, "is_option"),
+            max=get(param.type, "max"),
+            min=get(param.type, "min"),
             metavar=param.metavar,
             multiple=param.multiple,
             name=param.name,
