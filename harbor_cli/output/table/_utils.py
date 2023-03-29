@@ -42,10 +42,7 @@ def get_table(
     return table
 
 
-def get_panel(
-    renderables: Sequence[RenderableType],
-    title: str | None = None,
-    expand: bool = True,
-) -> Panel:
+def get_panel(renderables: Sequence[RenderableType], title: str | None = None) -> Panel:
     """Get a panel from a sequence of renderables."""
+    expand = state.config.output.table.style.expand
     return Panel(Group(*renderables), title=title, expand=expand)

@@ -386,7 +386,7 @@ def get_project_summary(
     summary = state.run(
         state.client.get_project_summary(arg), f"Fetching summary for {project_repr}..."
     )
-    render_result(summary, ctx)
+    render_result(summary, ctx, project_name=project_name_or_id)
 
 
 # HarborAsyncClient.get_project_scanner()

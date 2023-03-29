@@ -55,6 +55,7 @@ from .artifact import artifactinfo_table
 from .auditlog import auditlog_table
 from .commandsummary import commandsummary_table
 from .project import project_extended_panel
+from .project import project_summary_panel
 from .project import project_table
 from .registry import registryproviders_table
 from .repository import repository_table
@@ -83,6 +84,7 @@ _RENDER_FUNCTIONS = [
     artifact_vulnerabilities_table,
     project_table,
     project_extended_panel,
+    project_summary_panel,
     repository_table,
     supported_events_table,
     systeminfo_table,

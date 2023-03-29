@@ -6,6 +6,9 @@ from typing import Sequence
 from harborapi.models.models import CVEAllowlist
 from harborapi.models.models import Project
 from harborapi.models.models import ProjectMetadata
+from harborapi.models.models import ProjectSummary
+from harborapi.models.models import ProjectSummaryQuota
+from harborapi.models.models import ResourceList
 from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
@@ -14,8 +17,12 @@ from ...logs import logger
 from ...models import ProjectExtended
 from ..formatting.builtin import int_str
 from ..formatting.builtin import str_str
+from ..formatting.bytes import bytesize_str
+from ..formatting.constants import NONE_STR
 from ..formatting.dates import datetime_str
+from ._utils import get_panel
 from ._utils import get_table
+from .registry import registry_table
 
 
 def project_table(p: Sequence[Project], **kwargs: Any) -> Table:
@@ -121,4 +128,71 @@ def cveallowlist_table(c: Sequence[CVEAllowlist], **kwargs: Any) -> Table:
             datetime_str(allowlist.creation_time),
             datetime_str(allowlist.update_time),
         )
+    return table
+
+
+def _get_quota(resource: ResourceList | None) -> int | None:
+    try:
+        quota = resource.storage  # type: ignore
+        if quota is not None:
+            assert isinstance(quota, int)
+    except (AttributeError, AssertionError) as e:
+        if isinstance(e, AssertionError):
+            logger.error(f"Resource quota is not an integer: {resource}")
+        quota = None
+    return quota
+
+
+def project_summary_panel(p: ProjectSummary, **kwargs: Any) -> Panel:
+    """Panel showing summary of a project."""
+    tables = []  # type: list[Table]
+    counts_table = get_table(
+        columns=[
+            "# Repos",
+            "# Charts",
+            "# Admins",
+            "# Maintainers",
+            "# Developers",
+            "# Guests",
+            "# Limited Guests",
+        ],
+    )
+    counts_table.add_row(
+        # Makes no sense that some fields can be None and others 0,
+        # so we make them all 0 if they are None.
+        int_str(p.repo_count or 0),
+        int_str(p.chart_count or 0),
+        int_str(p.project_admin_count or 0),
+        int_str(p.maintainer_count or 0),
+        int_str(p.developer_count or 0),
+        int_str(p.guest_count or 0),
+        int_str(p.limited_guest_count or 0),
+    )
+
+    tables.append(counts_table)
+
+    if p.quota:
+        quota_table = project_summary_quota_table(p.quota)
+        tables.append(quota_table)
+
+    # TODO: ensure this actually works. None of our test projects have registries.
+    if p.registry:
+        reg_table = registry_table([p.registry])
+        tables.append(reg_table)
+
+    return get_panel(tables, title=kwargs.get("project_name", None))
+
+
+def project_summary_quota_table(p: ProjectSummaryQuota, **kwargs: Any) -> Table:
+    table = get_table("Quota", columns=["Limit", "Used"])
+    limit = _get_quota(p.hard)
+    if limit == -1 or limit is None:
+        limit_str = NONE_STR
+    else:
+        limit_str = bytesize_str(limit)
+
+    table.add_row(
+        limit_str,
+        bytesize_str(_get_quota(p.used) or 0),
+    )
     return table
