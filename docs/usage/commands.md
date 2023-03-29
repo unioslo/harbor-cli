@@ -8,7 +8,7 @@ For more information about a specific command, use:
 harbor <command> --help
 ```
 
-See [commands](../commands/index.md) for a list of all commands.
+See [Commands](../commands/index.md) for usage info of each command.
 
 
 ## Search for commands
