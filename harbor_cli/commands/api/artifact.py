@@ -866,22 +866,28 @@ def list_artifact_vulnerabilities_summary(
         state.cache.set(ctx_key, result)
 
     # fmt: off
+    sort_reverse = True # descending
     if sort == ArtifactSummarySortOrder.total:
+        # Most -> Least (total vulnerabilities)
         def sort_key(a: ArtifactInfo) -> int:
             try:
                 return a.artifact.scan_overview.summary.total or 0  # type: ignore
             except AttributeError:
                 return 0
     elif sort == ArtifactSummarySortOrder.severity:
+        # Number of critical vulnerabilities
         def sort_key(a: ArtifactInfo) -> int:
             try:
                 return a.artifact.scan_overview.summary.critical or 0  # type: ignore
             except AttributeError:
                 return 0
     elif sort == ArtifactSummarySortOrder.name:
+        # A -> Z
         def sort_key(a: ArtifactInfo) -> str: # type: ignore
             return a.name_with_digest_full
+        sort_reverse = False
     elif sort == ArtifactSummarySortOrder.age:
+        # new -> old
         def sort_key(a: ArtifactInfo) -> float: # type: ignore
             try:
                 return a.artifact.push_time.timestamp()  # type: ignore
@@ -890,7 +896,7 @@ def list_artifact_vulnerabilities_summary(
     else:
         raise ValueError(f"Unknown sort order {sort}")
     # fmt: on
-    result = sorted(result, key=sort_key, reverse=True)
+    result = sorted(result, key=sort_key, reverse=sort_reverse)
     render_result(result, ctx, vuln_summary=True, full_digest=full_digest)
 
 
