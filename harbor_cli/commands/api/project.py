@@ -468,7 +468,7 @@ def get_project_metadata(
 
 
 # HarborAsyncClient.set_project_metadata()
-@metadata_cmd.command("set", short_help="Set metadata for a project.")
+@metadata_cmd.command("set")
 @inject_help(ProjectMetadata)
 def set_project_metadata(
     ctx: typer.Context,
@@ -523,7 +523,7 @@ def set_project_metadata(
         callback=parse_commalist,
     ),
 ) -> None:
-    """Set metadata for a project. Until Harbor API spec"""
+    """Set metadata for a project."""
     # Model field args
     params = model_params_from_ctx(ctx, ProjectMetadata)
 

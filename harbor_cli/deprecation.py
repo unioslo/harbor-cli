@@ -26,7 +26,7 @@ class Deprecated(str):
 
 
 def get_deprecated_params(ctx: typer.Context) -> list[Deprecated]:
-    """Returnds a list of parameters that have been marked
+    """Returns a list of parameters that have been marked
     as deprecated for a given context.
 
     Parameters
