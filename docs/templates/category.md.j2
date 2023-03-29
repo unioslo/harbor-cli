@@ -1,4 +1,4 @@
-{# Takes in a category and a list of CommandSummary objects #}
+{# Template takes in a list of CommandSummary objects #}
 
 {% macro render_param(param) -%}
 {% if param.is_argument -%}
@@ -16,10 +16,13 @@
 {% endif %}<br />
 
 {%- if param.help_plain -%}
-{{ param.help_plain }}<br />
+{{ param.help_plain }}
 {%- endif -%}
+{%- if param.multiple -%}
+&nbsp;Can be specified multiple times.
+{%- endif -%}<br />
 
-{# bandaid to patch in harborapi query usage #}
+{#- bandaid to patch in harborapi query usage -#}
 {%- if not param.is_argument and param.name == "query" -%}
 See [harborapi docs](https://pederhan.github.io/harborapi/usage/methods/read/#query) for more information.<br />
 {%- endif -%}
@@ -40,10 +43,6 @@ See [harborapi docs](https://pederhan.github.io/harborapi/usage/methods/read/#qu
 
 {%- if param.default is not none -%}
 **Default:** `{{ param.default }}`<br />
-{%- endif -%}
-
-{%- if param.multiple -%}
-**Multiple:** `True`<br />
 {%- endif -%}
 
 {%- if param.required -%}
