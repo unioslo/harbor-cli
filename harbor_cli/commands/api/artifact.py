@@ -76,7 +76,7 @@ label_cmd = typer.Typer(
     no_args_is_help=True,
 )
 vuln_cmd = typer.Typer(
-    name="vulnerabilities",
+    name="vulnerability",
     help="Artifact vulnerability commands",
     no_args_is_help=True,
 )
