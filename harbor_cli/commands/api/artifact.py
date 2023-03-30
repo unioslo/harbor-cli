@@ -129,7 +129,7 @@ def list_artifacts(
     ),
     # TODO: add ArtifactReport filtering options here
 ) -> None:
-    """List artifacts in a project or in a specific repository."""
+    """List artifacts in one or more projects and/or repositories."""
     # The presence of an asterisk trumps all other arguments
     # None signals that we want to enumerate over all projects
     if any(x == "*" for x in project) or not project:
@@ -208,7 +208,7 @@ def copy_artifact(
         help="Destination repository (without project name).",
     ),
 ) -> None:
-    """Copy an artifact."""
+    """Copy an artifact to a different repository."""
 
     # Warn user if they pass a project name in the repository name
     # e.g. project="foo", repository="foo/bar"
@@ -403,7 +403,7 @@ def delete_artifact_label(
     ),
     force: bool = OPTION_FORCE,
 ) -> None:
-    """Add a label to an artifact."""
+    """Remove a label from an artifact."""
     delete_prompt(state.config, force, resource="label", name=str(label_id))
     an = parse_artifact_name(artifact)
     state.run(
@@ -442,7 +442,7 @@ def get_buildhistory(
         help=ARTIFACT_HELP_STRING,
     ),
 ) -> None:
-    """Get build history for an artifact."""
+    """Get the build history of an artifact."""
     an = parse_artifact_name(artifact)
     history = state.run(
         state.client.get_artifact_build_history(
@@ -603,18 +603,18 @@ def cleanup_artifacts(
     age: Optional[int] = typer.Option(
         None,
         "--age",
-        help="Delete artifacts older than the specified number of days.",
+        help="CRITERIA: Delete artifacts older than the specified number of days.",
     ),
     severity: Optional[Severity] = typer.Option(
         None,
         "--severity",
-        help="Delete all artifacts with the given severity or higher.",
+        help="CRITERIA: Delete all artifacts with the given severity or higher.",
     ),
     # Matching operator
     operator: Operator = typer.Option(
         Operator.AND.value,
         "--operator",
-        help="Operator to use when matching multiple criteria. Defaults to AND.",
+        help="Operator to use when matching multiple criteria.",
     ),
     # Exclusion options
     except_project: Optional[str] = typer.Option(
@@ -853,6 +853,7 @@ def list_artifact_vulnerabilities_summary(
     if (cached := state.cache.get(ctx_key, List[ArtifactInfo])) is not None:
         result = cached
     else:
+        # TODO: check_enumeration_options when no projects and no repos
         result = state.run(
             get_artifacts(
                 state.client,
@@ -933,14 +934,18 @@ def get_vulnerabilities(
         None,
         "--repo",
         "-r",
-        help="Repository name(s) to get vulnerabilities for. If not specified, all repositories in the project(s) will be considered.",
+        help=(
+            "Repositories to search in. "
+            "Can be either full name ('project/repo') or repo name only ('repo'). "
+            "If not specified, all repositories in the project(s) will be considered."
+        ),
         callback=parse_commalist,
     ),
     tags: Optional[List[str]] = typer.Option(
         None,
         "--tag",
         "-t",
-        help="Tag(s) to get vulnerabilities for. If not specified, all tags in the repository(s) will be considered.",
+        help="Artifact tag(s) to filter for. If not specified, all tags in the repository(s) will be considered.",
         callback=parse_commalist,
     ),
     max_connections: int = typer.Option(
@@ -954,7 +959,7 @@ def get_vulnerabilities(
         help="Operator to use when querying a combination of multiple CVEs or packages.",
     ),
 ) -> None:
-    """Find artifacts affected by vulnerable packages or CVEs."""
+    """Find artifacts affected by a given CVE or vulnerable package."""
     # Check that we have at least one CVE or package
     if not any([cve, package]):
         exit_err("One or more CVEs or packages is required.")

@@ -92,7 +92,7 @@ class CacheInfo(BaseModel):
 
 @app.command("info")
 def cache_info(ctx: typer.Context) -> None:
-    """Show information about the cache."""
+    """Show information about the internal CLI cache."""
     cache_info = CacheInfo.from_cache(state.cache)
     # NOTE: why not just cache.empty?
     if cache_info.empty:
@@ -102,6 +102,6 @@ def cache_info(ctx: typer.Context) -> None:
 
 @app.command("clear")
 def cache_clear(ctx: typer.Context) -> None:
-    """Clear the cache."""
+    """Clear the CLI's internal cache."""
     state.cache.clear()
     console.print("Cache cleared.")
