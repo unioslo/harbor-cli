@@ -962,13 +962,14 @@ def get_vulnerabilities(
         exit_err(f"Unsupported operator: {operator.value!r}")
 
     # Warning/prompting for large operations
-    if not project and not repo:
+    if (not project and not repo) and state.config.general.confirm_enumeration:
         warning(
-            f"Retrieving vulnerabilities for all repositories in all projects can "
-            "take a long time (minutes to hours depending on the total number of artifacts). "
-            f"Use {render_cli_option('--project')} and {render_cli_option('--repo')} to limit the scope of the operation."
+            f"Fetching vulnerabilities for every artifact in the registry can "
+            "take a long time (minutes to hours). "
+            f"Use {render_cli_option('--project')} and {render_cli_option('--repo')} "
+            "to limit the scope of the operation."
         )
-        if not bool_prompt("Do you want to continue?", default=False):
+        if not bool_prompt("Continue", default=False):
             exit()
     elif not project:
         warning("Fetching from all projects can be slow even with a repository filter.")
