@@ -901,7 +901,7 @@ def list_artifact_vulnerabilities_summary(
 
 
 # harborapi.ext.api.get_artifact
-@vuln_cmd.command("find")
+@vuln_cmd.command("find", hidden=True)
 def get_vulnerabilities(
     ctx: typer.Context,
     cve: List[str] = typer.Option(
