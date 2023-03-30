@@ -115,12 +115,16 @@ class ParamSummary(BaseModel):
 class CommandSummary(BaseModel):
     """Convenience class for accessing information about a command."""
 
-    name: str
-    category: Optional[str] = None
+    category: Optional[str] = None  # not part of TyperCommand
+    deprecated: bool
+    epilog: Optional[str]
     help: str
+    hidden: bool
+    name: str
     options_metavar: str
-    score: int = 0  # match score
     params: List[ParamSummary] = []
+    score: int = 0  # match score (not part of TyperCommand)
+    short_help: Optional[str]
 
     @classmethod
     def from_command(
@@ -128,11 +132,15 @@ class CommandSummary(BaseModel):
     ) -> CommandSummary:
         """Construct a new CommandSummary from a TyperCommand."""
         return cls(
-            name=name or command.name or "",
             category=category,
+            deprecated=command.deprecated,
+            epilog=command.epilog or "",
             help=command.help or "",
+            hidden=command.hidden,
+            name=name or command.name or "",
             options_metavar=command.options_metavar or "",
             params=[ParamSummary.from_param(p) for p in command.params],
+            short_help=command.short_help or "",
         )
 
     @property
