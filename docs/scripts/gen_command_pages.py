@@ -54,6 +54,8 @@ def gen_command_list(commands: list[CommandSummary]) -> None:
 def gen_command_pages(commands: list[CommandSummary]) -> None:
     categories: Dict[str, List[CommandSummary]] = {}
     for command in commands:
+        if command.hidden or command.deprecated:
+            continue
         category = command.category or command.name
         if category not in categories:
             categories[category] = []
