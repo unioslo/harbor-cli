@@ -15,6 +15,7 @@ from click.core import Argument
 from click.core import Parameter
 from harborapi.models import Project
 from harborapi.models.base import BaseModel as HarborAPIBaseModel
+from pydantic import root_validator
 from typer.core import TyperArgument
 from typer.core import TyperCommand
 
@@ -109,6 +110,18 @@ class ParamSummary(BaseModel):
     def help_plain(self) -> str:
         return markup_as_plain_text(self.help)
 
+    @root_validator
+    def _fmt_metavar(cls, values: dict[str, Any]) -> dict[str, Any]:
+        metavar = values.get("metavar") or values.get("human_readable_name", "")
+        assert isinstance(metavar, str)
+        metavar = metavar.upper()
+        if values.get("multiple"):
+            new_metavar = f"<{metavar},[{metavar}...]>"
+        else:
+            new_metavar = f"<{metavar}>"
+        values["metavar"] = new_metavar
+        return values
+
 
 # TODO: split up CommandSummary into CommandSummary and CommandSearchResult
 # so that the latter can have the score field
@@ -157,10 +170,7 @@ class CommandSummary(BaseModel):
         # Show required in angle brackets, optional in square brackets
         for arg in self.arguments:
             metavar = arg.metavar or arg.human_readable_name
-            if arg.required:
-                parts.append(f"<{metavar}>")
-            else:
-                parts.append(f"[{metavar}]")
+            parts.append(metavar)
 
         # Command with both required and optional options:
         # `command <required_option> [OPTIONS]`

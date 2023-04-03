@@ -11,7 +11,7 @@
 /{% for param in param.secondary_opts -%} **`{{ param }}`**{% if not loop.last %}, {% endif %}{% endfor -%}
 {% endif -%}
 {%- if not param.is_flag %}
-    `<{{ param.human_readable_name }}>`
+    `{{ param.metavar }}`
 {% endif -%}
 {% endif %}<br />
 
@@ -19,7 +19,8 @@
 {{ param.help_plain }}
 {%- endif -%}
 {%- if param.multiple -%}
-&nbsp;*Can be specified multiple times.*
+<br />*Separate multiple values with commas
+{%- if param.opts%}, or use `{{ param.opts | first }}` multiple times{% endif %}.*
 {%- endif -%}<br />
 
 {#- bandaid to patch in harborapi query usage -#}
