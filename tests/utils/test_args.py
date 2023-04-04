@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from typing import Any
+from typing import Callable
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Type
+from typing import Union
 
 import pytest
 import typer
@@ -306,8 +308,15 @@ def test_add_to_query(kwargs: dict[str, Any], query: str | None, expected: str) 
         ("id:123", 123),
     ],
 )
-def test__get_id_name_arg(name_or_id: str, expected: str | int) -> None:
-    # Test all functions that use _get_id_name_arg
-    assert get_project_arg(name_or_id) == expected
-    assert get_user_arg(name_or_id) == expected
-    assert get_ldap_group_arg(name_or_id) == expected
+@pytest.mark.parametrize(
+    "func",
+    [
+        get_project_arg,
+        get_user_arg,
+        get_ldap_group_arg,
+    ],
+)
+def test__get_id_name_arg(
+    name_or_id: str, expected: str | int, func: Callable[[str], Union[str, int]]
+) -> None:
+    assert func(name_or_id) == expected

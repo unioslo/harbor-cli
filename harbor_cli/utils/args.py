@@ -329,7 +329,7 @@ def add_to_query(query: str | None, **kwargs: str | list[str] | None) -> str:
     return as_query(**query_dict)
 
 
-def _get_id_name_arg(resource_type: str, resource_name: str) -> str | int:
+def _get_id_name_arg(resource_type: str, name_or_id: str) -> str | int:
     """
     Helper function for getting a resource given its name or ID.
 
@@ -340,14 +340,15 @@ def _get_id_name_arg(resource_type: str, resource_name: str) -> str | int:
     just checking if the string is all digits is not sufficient, and would
     break access to those projects.
     """
-    if PREFIX_ID in resource_name:
-        resource_id = resource_name.partition(PREFIX_ID)[2]
-        try:
-            return int(resource_id)
-        except ValueError:
-            exit_err(f"Invalid {resource_type} ID: {resource_name} is not an integer.")
-    else:
-        return resource_name
+    # If we have a prefix in the resource, we assume it's an ID
+    if not name_or_id.startswith(PREFIX_ID):
+        return name_or_id
+
+    resource_id = name_or_id.partition(PREFIX_ID)[2]
+    try:
+        return int(resource_id)
+    except ValueError:
+        exit_err(f"Invalid {resource_type} ID: {name_or_id} is not an integer.")
 
 
 def get_project_arg(project_name_or_id: str) -> str | int:
