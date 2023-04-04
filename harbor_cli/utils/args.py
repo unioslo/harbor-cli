@@ -135,8 +135,7 @@ def create_updated_model(
     BaseModelType
         The updated model.
     """
-    from ..output.console import exit_err
-
+    # Make sure ctx contains values we can update model with
     params = model_params_from_ctx(ctx, new)
     if not params and not empty_ok:
         exit_err("No parameters provided to update")
@@ -144,7 +143,6 @@ def create_updated_model(
     # Cast existing model to dict, update it with the new values
     d = existing.dict(include=None if extra else set(new.__fields__))
     d.update(params)
-
     return new.parse_obj(d)
 
 
