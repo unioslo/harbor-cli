@@ -18,16 +18,28 @@ BaseModelType = TypeVar("BaseModelType", bound=BaseModel)
 def model_params_from_ctx(
     ctx: typer.Context, model: Type[BaseModel], filter_none: bool = True
 ) -> dict[str, Any]:
-    """Get the model parameters from a Typer context.
+    """Get fields from a Typer context that are valid for a model.
 
     Given a command where the function parameter names match the
-    model field names, this function will return a dictionary of only the
-    parameters that are valid for the model.
+    model field names, the function returns a dict of the parameters
+    that are valid for the model.
 
     If `filter_none` is True, then parameters that are None will be filtered out.
     This is enabled by default, since most Harbor API model fields are optional,
     and we want to signal to Pydantic that these fields should be treated
-    as "unset" rather than "set to None".
+    as *unset* rather than *set to None*.
+
+    Examples
+    --------
+    >>> from pydantic import BaseModel
+    >>> class Foo(BaseModel):
+    ...     foo: str
+    ...     bar: str
+    >>> foo = Foo(a=1, b=2)
+    >>> ctx = typer.Context(...) # --foo spam --bar grok --baz quux
+    >>> model_params_from_ctx(ctx, Foo)
+    {"foo": "spam", "bar": "grok"} # baz is not a valid field for Foo
+
 
     Parameters
     ----------
@@ -61,11 +73,27 @@ def create_updated_model(
     from the fields of the existing model combined with the arguments given
     to the command in the Typer context.
 
-    Basically, when we call a PUT enpdoint, the API expects the full model definition,
+    When we call a PUT enpdoint, the API expects the full model definition,
     but we want to allow the user to only specify the fields they want to update.
     This function allows us to do that, by taking the existing model and updating
-    it with the new values from the Typer context (which derives its parameters
-    from the model used in send the PUT request.)
+    it with the new values from the Typer context.
+
+    Furthermore, Harbor API generally uses a different model definition for
+    when updating a resource (PUT), compared to the one fetched by GET.
+    For example, fetching information about a project returns a Project object,
+    while updating a project requires a ProjectUpdateReq object.
+
+    These models largely contain the same fields, but might have certain deviations.
+    For example, the Project model has a `creation_time` field, while the
+    ProjectUpdateReq model does not.
+
+    This function allows us to create, for example, a ProjectUpdateReq object
+    from a Project object. Furthermore, we extract additional parameters for
+    the model passed in via CLI args to add/update fields to the model.
+
+    See [model_params_from_ctx][harbor_cli.utils.args.model_params_from_ctx]
+    for more information on how the CLI context is used to provide the updated
+    fields for the new model.
 
     Examples
     --------
@@ -78,13 +106,13 @@ def create_updated_model(
     ...     a: Optional[int]
     ...     b: Optional[int]
     ...     c: Optional[bool]
-    ...     insecure: bool = False
+    ...     d: bool = False
     >>> foo = Foo(a=1, b="foo", c=True)
     >>> # we get a ctx object from Typer inside the function of a command
     >>> ctx = typer.Context(...) # --a 2 --b bar
     >>> foo_update = create_updated_model(foo, FooUpdateReq, ctx)
     >>> foo_update
-    FooUpdateReq(a=2, b='bar', c=True, insecure=False)
+    FooUpdateReq(a=2, b='bar', c=True, d=False)
     >>> #        ^^^  ^^^^^^^
     >>> # We created a FooUpdateReq with the new values from the context
 
@@ -268,6 +296,8 @@ def add_to_query(query: str | None, **kwargs: str | list[str] | None) -> str:
     'foo=baz'
     >>> add_to_query(None, foo="baz")
     'foo=baz'
+    >>> add_to_query("foo=foo", foo="bar")
+    'foo={foo bar}'
     """
     query_items = parse_commalist([query] if query else [])
     query_dict = parse_key_value_args(query_items)
