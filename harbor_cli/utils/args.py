@@ -215,8 +215,6 @@ def parse_key_value_args(arg: list[str]) -> dict[str, str]:
 def as_query(**kwargs: Any) -> str:
     """Converts keyword arguments into a query string.
 
-    Always returns a string, even if the resulting query string is empty.
-
     Examples
     --------
     >>> as_query(foo="bar", baz="qux")
@@ -306,10 +304,15 @@ def add_to_query(query: str | None, **kwargs: str | list[str] | None) -> str:
         if not v:
             continue
 
+        # Remove empty list or otherwise absent value for key if exists
+        query_val = query_dict.get(k, None)
+        if query_val is not None and any(query_val.startswith(c) for c in ["{", "("]):
+            # Query dict contains empty list (invalid), so we just remove it
+            # TODO: respect union/intersection list type
+            del query_dict[k]
+
         # When the query already has a value for the given key, we need to
         # convert the value to a list if isn't already one.
-        # NOTE: not handling empty query lists here, but it's on the user
-        # to not pass empty lists.
         if k in query_dict:
             if isinstance(v, list):
                 query_dict[k] = construct_query_list(query_dict[k], *v)
