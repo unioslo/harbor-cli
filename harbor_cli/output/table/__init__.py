@@ -50,6 +50,7 @@ from .anysequence import AnySequence
 from .anysequence import anysequence_table
 from .artifact import artifact_table
 from .artifact import artifact_vulnerabilities_table
+from .artifact import artifact_vulnerability_summary_table
 from .artifact import artifactinfo_panel
 from .artifact import artifactinfo_table
 from .auditlog import auditlog_table
@@ -79,6 +80,7 @@ _RENDER_FUNCTIONS = [
     artifactinfo_table,
     artifactinfo_panel,
     artifact_table,
+    artifact_vulnerability_summary_table,
     auditlog_table,
     commandsummary_table,
     artifact_vulnerabilities_table,

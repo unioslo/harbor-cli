@@ -13,12 +13,16 @@ from typing import Optional
 
 from click.core import Argument
 from click.core import Parameter
+from harborapi.ext.artifact import ArtifactInfo
 from harborapi.models import Project
+from harborapi.models import VulnerabilitySummary
 from harborapi.models.base import BaseModel as HarborAPIBaseModel
+from pydantic import Field
 from pydantic import root_validator
 from typer.core import TyperArgument
 from typer.core import TyperCommand
 
+from .harbor.artifact import get_artifact_native_report_summary
 from .utils.utils import markup_as_plain_text
 
 
@@ -278,3 +282,31 @@ _MEMBERROLETYPE_MAPPING = {
 _MEMBERROLETYPE_MAPPING_REVERSE = {
     v: k for k, v in _MEMBERROLETYPE_MAPPING.items()
 }  # type: dict[MemberRoleType, int]
+
+
+class ArtifactVulnerabilitySummary(BaseModel):
+    artifact: str
+    tags: List[str]
+    summary: VulnerabilitySummary = Field(..., exclude={"summary"})
+    # Not a property since we don't keep the original artifact around
+    artifact_short: str = Field(..., exclude=True)
+
+    @classmethod
+    def from_artifact(cls, artifact: ArtifactInfo) -> ArtifactVulnerabilitySummary:
+        summary = None
+        report = get_artifact_native_report_summary(artifact.artifact)
+        if report:
+            summary = report.summary
+        # Report either had no summary or we had no report to begin with
+        if not summary or not report:
+            summary = VulnerabilitySummary()
+
+        return cls(
+            artifact=artifact.name_with_digest_full,
+            artifact_short=artifact.name_with_digest,
+            tags=artifact.tags,
+            summary=summary,
+        )
+
+    # def json(self, *args, **kwargs):
+    #     return super().json(*args, **kwargs, exclude={"summary."}

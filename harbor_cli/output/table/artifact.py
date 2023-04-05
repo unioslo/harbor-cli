@@ -6,7 +6,6 @@ from typing import Sequence
 from typing import TypedDict
 
 from harborapi.ext.artifact import ArtifactInfo
-from harborapi.models import NativeReportSummary
 from harborapi.models import VulnerabilitySummary
 from harborapi.models.models import Artifact
 from harborapi.models.scanner import HarborVulnerabilityReport
@@ -14,8 +13,8 @@ from rich import box
 from rich.table import Table
 
 from ...harbor.artifact import get_artifact_architecture
-from ...harbor.artifact import get_artifact_native_report_summary
 from ...harbor.artifact import get_artifact_severity
+from ...models import ArtifactVulnerabilitySummary
 from ..formatting.builtin import float_str
 from ..formatting.builtin import int_str
 from ..formatting.builtin import str_str
@@ -54,10 +53,6 @@ def artifact_table(artifacts: Sequence[Artifact], **kwargs: Any) -> Table:
 
 def artifactinfo_table(artifacts: Sequence[ArtifactInfo], **kwargs: Any):
     """Display one or more artifacts (ArtifactInfo) in a table."""
-    # Pass a kwarg to display a vulnerability summary table instead
-    if kwargs.get("vuln_summary", False):
-        return artifactinfo_vuln_summary_table(artifacts, **kwargs)
-
     table = get_table("Artifact", artifacts)
     table.add_column("Project")
     table.add_column("Repository")
@@ -71,7 +66,7 @@ def artifactinfo_table(artifacts: Sequence[ArtifactInfo], **kwargs: Any):
         table.add_row(
             str_str(artifact.project_name),
             str_str(artifact.repository_name),
-            str_str(artifact.tags),
+            str_str(", ".join(artifact.tags)),
             str_str(artifact.artifact.digest),
             str_str(get_artifact_architecture(artifact.artifact)),
             str_str(get_artifact_severity(artifact.artifact)),
@@ -81,7 +76,9 @@ def artifactinfo_table(artifacts: Sequence[ArtifactInfo], **kwargs: Any):
     return table
 
 
-def artifactinfo_vuln_summary_table(artifacts: Sequence[ArtifactInfo], **kwargs: Any):
+def artifact_vulnerability_summary_table(
+    artifacts: Sequence[ArtifactVulnerabilitySummary], **kwargs: Any
+):
     table = get_table("Artifacts")
     table.add_column("Artifact", overflow="fold")
     table.add_column("Tags", overflow="fold")
@@ -89,13 +86,11 @@ def artifactinfo_vuln_summary_table(artifacts: Sequence[ArtifactInfo], **kwargs:
 
     full_digest = kwargs.pop("full_digest", False)
     for artifact in artifacts:
-        name = (
-            artifact.name_with_digest_full if full_digest else artifact.name_with_digest
-        )
-        vulns = vuln_summary_table(artifact.artifact, **kwargs)
+        name = artifact.artifact if full_digest else artifact.artifact_short
+        vulns = vuln_summary_table(artifact.summary, **kwargs)
         table.add_row(
             name,
-            artifact.tags,
+            ", ".join(artifact.tags),
             vulns,
         )
     return table
@@ -165,7 +160,7 @@ class ColKwargs(TypedDict):  # mypy complains if we use a normal dict
     justify: Literal["right", "left", "center"]
 
 
-def vuln_summary_table(artifact: Artifact, **kwargs: Any) -> Table:
+def vuln_summary_table(summary: VulnerabilitySummary, **kwargs: Any) -> Table:
     """A single line table in the form of nC nH nM nL nU (total)
     where each letter is a color coded severity level + count.
     """
@@ -178,22 +173,16 @@ def vuln_summary_table(artifact: Artifact, **kwargs: Any) -> Table:
     table.add_column("High", style="black on red", **col_kwargs)
     table.add_column("Medium", style="black on orange3", **col_kwargs)
     table.add_column("Low", style="black on green", **col_kwargs)
-
     # not adding unknown for now
     # TODO: add kwargs toggle for this
     # table.add_column("Unknown", style="black on grey")
     table.add_column("Total")  # no style, use default (respecting theme)
-    report = get_artifact_native_report_summary(artifact)
-    if not report:
-        report = NativeReportSummary()
-    if not report.summary:
-        report.summary = VulnerabilitySummary()
 
     table.add_row(
-        f"{report.summary.critical or 0}C",
-        f"{report.summary.high or 0}H",
-        f"{report.summary.medium or 0}M",
-        f"{report.summary.low or 0}L",
-        f"({int_str(report.summary.total)})",
+        f"{summary.critical or 0}C",
+        f"{summary.high or 0}H",
+        f"{summary.medium or 0}M",
+        f"{summary.low or 0}L",
+        f"({int_str(summary.total)})",
     )  # might include unknown?
     return table

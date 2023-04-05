@@ -30,6 +30,7 @@ from ...format import OutputFormat
 from ...harbor.artifact import get_artifact_architecture
 from ...harbor.artifact import parse_artifact_name
 from ...logs import logger
+from ...models import ArtifactVulnerabilitySummary
 from ...models import BaseModel
 from ...models import Operator
 from ...output.console import console
@@ -113,6 +114,7 @@ def list_artifacts(
         "--arch",
         help="Limit to artifacts with architecture(s) (e.g. 'amd64').",
         callback=parse_commalist,
+        metavar="arch",
     ),
     with_report: bool = typer.Option(
         False,
@@ -825,13 +827,13 @@ def list_artifact_vulnerabilities_summary(
     project: List[str] = typer.Option(
         [],
         "--project",
-        help="Project name(s).",
+        help="Name of projects to check.",
         callback=parse_commalist,
     ),
     repo: List[str] = typer.Option(
         [],
         "--repo",
-        help="Repository name(s). Should not include project name.",
+        help="Name of repositories to check.",
         callback=parse_commalist,
     ),
     query: Optional[str] = OPTION_QUERY,
@@ -898,7 +900,9 @@ def list_artifact_vulnerabilities_summary(
         raise ValueError(f"Unknown sort order {sort}")
     # fmt: on
     result = sorted(result, key=sort_key, reverse=sort_reverse)
-    render_result(result, ctx, vuln_summary=True, full_digest=full_digest)
+
+    summary = [ArtifactVulnerabilitySummary.from_artifact(r) for r in result]
+    render_result(summary, ctx, vuln_summary=True, full_digest=full_digest)
 
 
 # harborapi.ext.api.get_artifact
