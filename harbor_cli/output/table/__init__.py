@@ -120,12 +120,36 @@ class EmptySequenceError(ValueError):
 def get_render_function(
     obj: T | Sequence[T],
 ) -> RENDER_FUNC_T:
-    """Get the render function for a given object."""
+    """Get the render function for a given object.
+
+    If the object is a sequence, only render functions that take in
+    sequences are returned.
+
+    If the object is not a sequence, render functions that take in a
+    a single object are prioritized, but if none are found, a sequence
+    render func is returned.
+
+    The caller of this function must discern whether or not a sequence function
+    has been returned, and if so, wrap the object in a sequence if it is
+    not a sequence.
+
+    Parameters
+    ----------
+    obj : T | Sequence[T]
+        The object to get the render function for.
+
+    Returns
+    -------
+    RENDER_FUNC_T
+        The render function for the object. A render function is a function
+        that takes in a BaseModel or a list of BaseModels and returns a
+        rich.table.Table or rich.panel.Panel object.
+    """
 
     if isinstance(obj, Sequence) and not isinstance(obj, str):
         if len(obj) == 0:
             raise EmptySequenceError("Cannot render empty sequence.")
-        t = Sequence[type(obj[0])]  # type: ignore # TODO: fix this
+        t = Sequence[type(obj[0])]  # type: ignore # TODO: find a way to type this
     else:
         t = type(obj)
 
