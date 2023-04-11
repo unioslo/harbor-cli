@@ -53,6 +53,7 @@ from .artifact import artifact_vulnerabilities_table
 from .artifact import artifact_vulnerability_summary_table
 from .artifact import artifactinfo_panel
 from .artifact import artifactinfo_table
+from .artifact import buildhistoryentry_table
 from .auditlog import auditlog_table
 from .commandsummary import commandsummary_table
 from .project import project_extended_panel
@@ -82,18 +83,19 @@ _RENDER_FUNCTIONS = [
     artifact_table,
     artifact_vulnerability_summary_table,
     auditlog_table,
+    buildhistoryentry_table,
     commandsummary_table,
     artifact_vulnerabilities_table,
     project_table,
     project_extended_panel,
     project_summary_panel,
     repository_table,
+    registryproviders_table,
     supported_events_table,
     systeminfo_table,
     search_panel,
     userresp_table,
     usersearchrespitem_table,
-    registryproviders_table,
     usergroupsearchitem_table,
 ]  # type: list[RENDER_FUNC_T]
 

@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import re
 from typing import Any
 from typing import Literal
 from typing import Sequence
 from typing import TypedDict
 
 from harborapi.ext.artifact import ArtifactInfo
+from harborapi.models import BuildHistoryEntry
 from harborapi.models import VulnerabilitySummary
 from harborapi.models.models import Artifact
 from harborapi.models.scanner import HarborVulnerabilityReport
@@ -22,6 +24,9 @@ from ..formatting.bytes import bytesize_str
 from ..formatting.dates import datetime_str
 from ._utils import get_panel
 from ._utils import get_table
+
+
+DOUBLE_SPACE_PATTERN = re.compile(" +")
 
 
 def artifact_table(artifacts: Sequence[Artifact], **kwargs: Any) -> Table:
@@ -185,4 +190,18 @@ def vuln_summary_table(summary: VulnerabilitySummary, **kwargs: Any) -> Table:
         f"{summary.low or 0}L",
         f"({int_str(summary.total)})",
     )  # might include unknown?
+    return table
+
+
+def buildhistoryentry_table(history: Sequence[BuildHistoryEntry]) -> Table:
+    """Display one or more build history entries in a table.
+    Omits the "author" and "empty_layer" fields.
+    """
+    table = get_table("Build History", columns=["Created", "Command"])
+    for entry in history:
+        table.add_row(
+            datetime_str(entry.created),
+            str_str(DOUBLE_SPACE_PATTERN.sub(" ", entry.created_by)),
+        )
+        table.add_section()  # type: ignore # mypy thinks add_section doesn't exist(?)
     return table
