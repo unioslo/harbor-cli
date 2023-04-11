@@ -21,7 +21,6 @@ from . import search as search  # no subcommands
 from . import system as system
 from . import user as user
 from . import usergroup as usergroup
-from . import vulnerabilities as vulnerabilities
 from . import webhook as webhook
 
 api_commands: list[typer.Typer] = [
