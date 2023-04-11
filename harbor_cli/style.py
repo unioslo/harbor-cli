@@ -40,6 +40,10 @@ STYLE_CVE_SEVERITY = {
 }
 
 
+EMOJI_YES = ":white_check_mark:"
+EMOJI_NO = ":cross_mark:"
+
+
 def get_severity_style(severity: str | Severity) -> str:
     if isinstance(severity, Severity):
         severity = severity.value.lower()

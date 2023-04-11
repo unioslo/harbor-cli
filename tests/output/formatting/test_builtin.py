@@ -11,18 +11,28 @@ from harbor_cli.output.formatting.builtin import float_str
 from harbor_cli.output.formatting.builtin import int_str
 from harbor_cli.output.formatting.builtin import NONE_STR
 from harbor_cli.output.formatting.builtin import plural_str
+from harbor_cli.state import state
+from harbor_cli.style import EMOJI_NO
+from harbor_cli.style import EMOJI_YES
 
 
 @pytest.mark.parametrize(
-    "inp,expected,none_is_false",
+    "inp,expected,none_is_false,as_emoji",
     [
-        (True, "true", False),
-        (False, "false", False),
-        (None, NONE_STR, False),
-        (None, "false", True),
+        (True, "true", False, False),
+        (False, "false", False, False),
+        (None, NONE_STR, False, False),
+        (None, "false", True, False),
+        (True, EMOJI_YES, False, True),
+        (False, EMOJI_NO, False, True),
+        (None, EMOJI_NO, False, True),
+        (None, EMOJI_NO, True, True),
     ],
 )
-def test_bool_str(inp: bool, expected: str, none_is_false: bool) -> None:
+def test_bool_str(
+    inp: bool, expected: str, none_is_false: bool, as_emoji: bool
+) -> None:
+    state.config.output.table.style.bool_emoji = as_emoji
     assert bool_str(inp, none_is_false) == expected
 
 
