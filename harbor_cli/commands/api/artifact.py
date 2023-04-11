@@ -33,7 +33,6 @@ from ...logs import logger
 from ...models import ArtifactVulnerabilitySummary
 from ...models import BaseModel
 from ...models import Operator
-from ...output.console import console
 from ...output.console import exit
 from ...output.console import exit_err
 from ...output.console import warning
@@ -290,12 +289,7 @@ def list_artifact_tags(
         state.client.get_artifact_tags(an.project, an.repository, an.reference),
         f"Fetching tags for {an!r}...",
     )
-
-    if not tags:
-        exit_err(f"No tags found for {an!r}")
-
-    for tag in tags:
-        console.print(tag)
+    render_result(tags, ctx, artifact=artifact)
 
 
 # create_artifact_tag()
