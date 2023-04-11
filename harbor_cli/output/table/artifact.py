@@ -17,6 +17,10 @@ from rich.table import Table
 from ...harbor.artifact import get_artifact_architecture
 from ...harbor.artifact import get_artifact_severity
 from ...models import ArtifactVulnerabilitySummary
+from ...style import COLOR_CVE_CRITICAL
+from ...style import COLOR_CVE_HIGH
+from ...style import COLOR_CVE_LOW
+from ...style import COLOR_CVE_MEDIUM
 from ..formatting.builtin import float_str
 from ..formatting.builtin import int_str
 from ..formatting.builtin import str_str
@@ -174,10 +178,10 @@ def vuln_summary_table(summary: VulnerabilitySummary, **kwargs: Any) -> Table:
     )
     # NOTE: column is truncated if category has >9999 vulnerabilities, but that's unlikely
     col_kwargs = ColKwargs(min_width=5, max_width=5, justify="right")
-    table.add_column("Critical", style="black on dark_red", **col_kwargs)
-    table.add_column("High", style="black on red", **col_kwargs)
-    table.add_column("Medium", style="black on orange3", **col_kwargs)
-    table.add_column("Low", style="black on green", **col_kwargs)
+    table.add_column("Critical", style=f"black on {COLOR_CVE_CRITICAL}", **col_kwargs)
+    table.add_column("High", style=f"black on {COLOR_CVE_HIGH}", **col_kwargs)
+    table.add_column("Medium", style=f"black on {COLOR_CVE_MEDIUM}", **col_kwargs)
+    table.add_column("Low", style=f"black on {COLOR_CVE_LOW}", **col_kwargs)
     # not adding unknown for now
     # TODO: add kwargs toggle for this
     # table.add_column("Unknown", style="black on grey")

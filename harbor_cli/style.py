@@ -1,6 +1,8 @@
 # Rich markup styles for the CLI
 from __future__ import annotations
 
+from harborapi.models.scanner import Severity
+
 STYLE_CONFIG_OPTION = "italic yellow"
 """Used to signify a configuration file option/key/entry."""
 
@@ -16,6 +18,32 @@ STYLE_CLI_COMMAND = "bold green"
 STYLE_TABLE_HEADER = "bold green"
 STYLE_COMMAND = "bold italic green"
 STYLE_WARNING = "yellow"
+
+# These are the _colors_ for the different CVE severities
+# They should be used to colorize output and help define styles,
+# but they should not contain any formatting (e.g. bold, italic)
+COLOR_CVE_CRITICAL = "dark_red"
+COLOR_CVE_HIGH = "red"
+COLOR_CVE_MEDIUM = "orange3"
+COLOR_CVE_LOW = "green"
+COLOR_CVE_NEGLIGIBLE = "blue"
+COLOR_CVE_UNKNOWN = "white"
+
+
+STYLE_CVE_SEVERITY = {
+    "critical": COLOR_CVE_CRITICAL,
+    "high": COLOR_CVE_HIGH,
+    "medium": COLOR_CVE_MEDIUM,
+    "low": COLOR_CVE_LOW,
+    "negligible": COLOR_CVE_NEGLIGIBLE,
+    "unknown": COLOR_CVE_UNKNOWN,
+}
+
+
+def get_severity_style(severity: str | Severity) -> str:
+    if isinstance(severity, Severity):
+        severity = severity.value.lower()
+    return STYLE_CVE_SEVERITY.get(severity, "white")
 
 
 def render_warning(msg: str) -> str:
