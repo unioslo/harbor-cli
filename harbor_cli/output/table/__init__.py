@@ -54,6 +54,7 @@ from .artifact import artifact_vulnerability_summary_table
 from .artifact import artifactinfo_panel
 from .artifact import artifactinfo_table
 from .artifact import buildhistoryentry_table
+from .artifact import tags_table
 from .auditlog import auditlog_table
 from .commandsummary import commandsummary_table
 from .project import project_extended_panel
@@ -94,6 +95,7 @@ _RENDER_FUNCTIONS = [
     supported_events_table,
     systeminfo_table,
     search_panel,
+    tags_table,
     userresp_table,
     usersearchrespitem_table,
     usergroupsearchitem_table,
