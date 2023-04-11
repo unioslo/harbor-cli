@@ -38,18 +38,20 @@ def render_result(result: T, ctx: typer.Context | None = None, **kwargs: Any) ->
     **kwargs
         Additional keyword arguments to pass to the render function.
     """
+    # Short form aliases
     fmt = state.config.output.format
     paging = state.config.output.paging
     raw_mode = state.config.harbor.raw_mode
+    validation = state.config.harbor.validate_data
 
     ctx_manager = console.pager() if paging else nullcontext()
     with ctx_manager:  # type: ignore # not quite sure why mypy is complaining here
         if raw_mode:  # raw mode ignores output format
             render_raw(result, ctx, **kwargs)
+        elif fmt == OutputFormat.JSON or not validation:
+            render_json(result, ctx, **kwargs)
         elif fmt == OutputFormat.TABLE:
             render_table(result, ctx, **kwargs)
-        elif fmt == OutputFormat.JSON:
-            render_json(result, ctx, **kwargs)
         else:
             raise ValueError(f"Unknown output format {fmt!r}.")
 
