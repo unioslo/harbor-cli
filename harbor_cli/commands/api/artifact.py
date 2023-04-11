@@ -26,7 +26,6 @@ from harborapi.models.scanner import Severity
 from pydantic import BaseModel as PydanticBaseModel
 from rich.table import Table
 
-from ...format import OutputFormat
 from ...harbor.artifact import get_artifact_architecture
 from ...harbor.artifact import parse_artifact_name
 from ...logs import logger
@@ -260,18 +259,12 @@ def get(
         get_artifact(state.client, an.project, an.repository, an.reference, with_report=with_vulnerabilities),  # type: ignore
         f"Fetching artifact(s)...",
     )
-    # artifact = state.run(
-    #     state.client.get_artifact(an.project, an.repository, an.reference),  # type: ignore
-    #     f"Fetching artifact(s)...",
-    # )
-    render_result(art, ctx)
 
     # Hack to render vulnerabilities after the artifact in table mode
     # When we render in JSON mode we automatically render the report, but
     # in table mode we don't render the report by default
     # TODO: make this less hacky
-    if with_vulnerabilities and state.config.output.format == OutputFormat.TABLE:
-        render_result(art.report, ctx, with_description=with_vuln_descriptions)
+    render_result(art, ctx, with_description=with_vuln_descriptions)
 
 
 # HarborAsyncClient.get_artifact_tags()
