@@ -5,6 +5,7 @@ from typing import Any
 from typing import Optional
 from typing import Sequence
 
+from ...state import state
 from .constants import NONE_STR
 
 
@@ -19,7 +20,10 @@ def bool_str(value: Optional[bool], none_is_false: bool = True) -> str:
     # Why? I don't know.
     if value is None and none_is_false:
         value = False
-    return str(value).lower() if value is not None else NONE_STR
+    if state.config.output.table.style.bool_emoji:
+        return ":white_check_mark:" if value else ":cross_mark:"
+    else:
+        return str(value).lower() if value is not None else NONE_STR
 
 
 def float_str(value: Optional[float], precision: int = 2) -> str:

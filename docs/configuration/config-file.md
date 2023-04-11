@@ -333,8 +333,19 @@ expand = true
 Display a header over each table. Typically states the type of resource being displayed.
 
 ```toml
-[output.table.show_header]
+[output.table.style]
 show_header = true
+```
+
+----
+
+#### `output.table.style.bool_emoji`
+
+Render booleans as emojis. The default is `true`.
+
+```toml
+[output.table.style]
+bool_emoji = true
 ```
 
 ### `output.JSON`
