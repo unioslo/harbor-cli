@@ -254,13 +254,14 @@ class TableStyleSettings(BaseModel):
             A dictionary of Rich Table style settings.
         """
         return {
-            "row_styles": self.rows,
-            "header_style": self.header,
             "border_style": self.border,
-            "footer_style": self.footer,
             "caption_style": self.caption,
             "expand": self.expand,
+            "footer_style": self.footer,
+            "header_style": self.header,
+            "row_styles": self.rows,
             "show_header": self.show_header,
+            "title_style": self.title,
         }
 
 
