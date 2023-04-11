@@ -123,6 +123,13 @@ def main_callback(
         envvar=env_var("harbor_raw_mode"),
         config_override="harbor.raw_mode",
     ),
+    harbor_verify_ssl: Optional[bool] = Option(
+        None,
+        "--harbor-verify-ssl/--no-harbor-verify-ssl",
+        help=f"Verify SSL certificates when connecting to Harbor.",
+        envvar=env_var("harbor_verify_ssl"),
+        config_override="harbor.verify_ssl",
+    ),
     # Formatting
     show_description: Optional[bool] = Option(
         None,
@@ -285,6 +292,8 @@ def main_callback(
         state.config.harbor.validate_data = harbor_validate
     if harbor_raw_mode is not None:
         state.config.harbor.raw_mode = harbor_raw_mode
+    if harbor_verify_ssl is not None:
+        state.config.harbor.verify_ssl = harbor_verify_ssl
     # Output
     if compact is not None:
         state.config.output.table.compact = compact

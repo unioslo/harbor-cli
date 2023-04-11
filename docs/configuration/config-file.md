@@ -116,6 +116,18 @@ raw_mode = false
 ```
 
 ----
+#### `harbor.verify_ssl`
+
+Control verification of the SSL certificate of the Harbor instance. The default is `true`.
+
+```toml
+[harbor]
+verify_ssl = true
+```
+
+!!! info In the future, this option might be expanded to allow for more fine-grained control of the SSL verification.
+
+----
 
 ### `general`
 

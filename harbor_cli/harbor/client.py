@@ -23,6 +23,7 @@ def get_client(config: HarborCLIConfig) -> HarborAsyncClient:
             **(config.harbor.credentials),
             validate=config.harbor.validate_data,
             raw=config.harbor.raw_mode,
+            verify=config.harbor.verify_ssl,
         )
     client = _CLIENTS[config.harbor.url]
     # Ensure we use the latest config values (when running in REPL mode)
