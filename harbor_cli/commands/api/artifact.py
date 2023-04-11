@@ -452,7 +452,7 @@ def get_buildhistory(
         ),
         f"Getting build history for {artifact}...",
     )
-    render_result(history, ctx)
+    render_result(history, ctx, artifact=artifact)
 
 
 class DeletionReason(str, Enum):

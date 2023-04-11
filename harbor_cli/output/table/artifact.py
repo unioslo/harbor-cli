@@ -193,11 +193,16 @@ def vuln_summary_table(summary: VulnerabilitySummary, **kwargs: Any) -> Table:
     return table
 
 
-def buildhistoryentry_table(history: Sequence[BuildHistoryEntry]) -> Table:
+def buildhistoryentry_table(
+    history: Sequence[BuildHistoryEntry], **kwargs: Any
+) -> Table:
     """Display one or more build history entries in a table.
     Omits the "author" and "empty_layer" fields.
     """
-    table = get_table("Build History", columns=["Created", "Command"])
+    title = "Build History"
+    if artifact := kwargs.get("artifact"):
+        title = f"{title} for [bold]{artifact}[/bold]"
+    table = get_table(title, columns=["Created", "Command"])
     for entry in history:
         table.add_row(
             datetime_str(entry.created),
