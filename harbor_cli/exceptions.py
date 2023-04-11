@@ -50,9 +50,8 @@ class OverwriteError(HarborCLIError, FileExistsError):
 class ArtifactNameFormatError(HarborCLIError):
     def __init__(self, s: str) -> None:
         super().__init__(
-            self,
             f"Artifact string {s} is not in the correct format. "
-            "Expected format: [domain/]project/repo{@sha256:digest,:tag}",
+            "Expected 'project/repo:tag' OR 'project/repo@sha256:digest'",
         )
 
 
