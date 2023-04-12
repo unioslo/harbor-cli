@@ -27,7 +27,7 @@ class OptionInfo(_OptionInfo):
             h = self.help or ""
             if h and not h.endswith(" "):
                 h += " "
-            self.help = h + help_config_override(self.config_override)
+            self.help = f"{h}{help_config_override(self.config_override)}"
 
 
 def Option(*args, config_override: str | None = None, **kwargs: Any) -> Any:
