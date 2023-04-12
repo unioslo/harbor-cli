@@ -36,9 +36,11 @@ _PRE_OVERRIDE_CONFIG = None  # type: HarborCLIConfig | None
 def _restore_config(state: State) -> None:
     """Restore the config to the state before any overrides were applied.
 
-    By default, if you're in the REPL and run `--format json system info`,
+    Without this function, if you're in the REPL and run `--format json system info`,
     the next command will also have use JSON format, even if not specified.
-    This command restores the original config before the override was applied.
+
+    This function restores the original config to its state before any
+    overrides were applied, so that they don't persist across commands.
     """
     global _PRE_OVERRIDE_CONFIG
     if _PRE_OVERRIDE_CONFIG is not None:
@@ -248,7 +250,8 @@ def main_callback(
     # These commands don't require state management
     # and can be run without a config file or client.
     if ctx.invoked_subcommand in ["sample-config", "init", "find"]:
-        return
+        # try to load the config file, but don't fail if it doesn't exist
+        try_load_config(config_file, create=False)
 
     # TODO: find a better way to do this
     # We don't want to run the rest of the callback if the user is asking
@@ -274,6 +277,8 @@ def main_callback(
             logger.info("Run 'harbor init' to configure Harbor CLI. ")
         state.add_config(conf)
 
+    # At this point we require an active configuation
+    try_load_config(config_file, create=True)
     _restore_config(state)  # necessary for overrides to to reset in REPL
 
     # Set config overrides
@@ -283,9 +288,9 @@ def main_callback(
     if harbor_username is not None:
         state.config.harbor.username = harbor_username
     if harbor_secret is not None:
-        state.config.harbor.secret = harbor_secret  # type: ignore
+        state.config.harbor.secret = harbor_secret  # type: ignore # Pydantic.SecretStr
     if harbor_basicauth is not None:
-        state.config.harbor.basicauth = harbor_basicauth  # type: ignore
+        state.config.harbor.basicauth = harbor_basicauth  # type: ignore # Pydantic.SecretStr
     if harbor_credentials_file is not None:
         state.config.harbor.credentials_file = harbor_credentials_file
     if harbor_validate is not None:
@@ -344,6 +349,34 @@ def configure_from_config(config: HarborCLIConfig) -> None:
         setup_logging(config.logging)
     else:
         disable_logging()
+
+
+def try_load_config(config_file: Optional[Path], create: bool = True) -> None:
+    """Attempts to load the config given a config file path.
+    Assigns the loaded config to the global state.
+
+    Parameters
+    ----------
+    config_file : Optional[Path]
+        The path to the config file.
+    create : bool, optional
+        Whether to create a new config file if one is not found, by default True
+    """
+    if not state.config_loaded:
+        try:
+            conf = HarborCLIConfig.from_file(config_file)
+        except FileNotFoundError:
+            if not create:  # TODO: handle ConfigError
+                return
+            # Create a new config file, but don't run wizard
+            logger.info("Config file not found. Creating new config file.")
+            conf = HarborCLIConfig.from_file(config_file, create=create)
+            if conf.config_file is None:
+                exit_err("Unable to create config file.")
+            success(f"Created config file at {path_link(conf.config_file)}")
+            logger.info("Proceeding with default configuration.")
+            logger.info("Run 'harbor init' to configure Harbor CLI. ")
+        state.add_config(conf)
 
 
 def main() -> None:
