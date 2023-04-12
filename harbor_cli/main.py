@@ -252,6 +252,7 @@ def main_callback(
     if ctx.invoked_subcommand in ["sample-config", "init", "find"]:
         # try to load the config file, but don't fail if it doesn't exist
         try_load_config(config_file, create=False)
+        return
 
     # TODO: find a better way to do this
     # We don't want to run the rest of the callback if the user is asking
