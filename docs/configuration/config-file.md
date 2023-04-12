@@ -382,8 +382,7 @@ indent = 2
 
 #### `output.JSON.sort_keys`
 
-**NYI:** Sort JSON keys before printing. The default is `false`.
-
+Sort JSON keys before printing. The default is `false`.
 
 ```toml
 [output.JSON]

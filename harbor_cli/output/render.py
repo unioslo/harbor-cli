@@ -114,7 +114,7 @@ def render_json(
     with_stdout = state.options.with_stdout
     no_overwrite = state.options.no_overwrite
     indent = state.config.output.JSON.indent
-    # sort_keys = state.config.output.JSON.sort_keys
+    sort_keys = state.config.output.JSON.sort_keys
 
     # We need to convert the types to JSON serializable types (base types)
     # Pydantic can handle this for us to some extent.
@@ -146,7 +146,7 @@ def render_json(
     if not p or with_stdout:
         # We have to specify indent again here, because print_json()
         # ignores the indent of the JSON string passed to it.
-        console.print_json(o_json, indent=indent)
+        console.print_json(o_json, indent=indent, sort_keys=sort_keys)
 
 
 def render_raw(result: Any, ctx: typer.Context | None = None, **kwargs: Any) -> None:
