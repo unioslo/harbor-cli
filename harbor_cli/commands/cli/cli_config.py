@@ -5,6 +5,7 @@ from typing import Any
 from typing import Optional
 
 import typer
+from pydantic import ValidationError
 
 from ...config import HarborCLIConfig
 from ...logs import logger
@@ -103,23 +104,31 @@ def set_cli_config(
         help="Render updated config as TOML in terminal if [green]--show[/] is set. Overrides global option [green]--format[/].",
     ),
 ) -> None:
-    attrs = []
-    if "." in key:
-        attrs = key.split(".")
+    if not key:
+        exit_err("No key specified.")
 
-    # Forbid extra temporarily so typos trigger errors
+    # Forbid extra temporarily so config key typos trigger errors
     with forbid_extra(state.config):
         try:
-            if attrs:
+            if (attrs := key.split(".")) and len(attrs) > 1:
                 obj = getattr(state.config, attrs[0])
                 for attr in attrs[1:-1]:
                     obj = getattr(obj, attr)
                 setattr(obj, attrs[-1], value)
             else:
+                # Top-level keys are supported, but we shouldn't have any!
+                # It's just here in case we do add it in the future.
+                # That saves us a potential bug in the future where this
+                # command fails to set a top-level key.
                 setattr(state.config, key, value)
+        except ValidationError as e:
+            # There should be at least one error, but we play it safe
+            errors = e.errors()
+            error = errors[0]["msg"] if errors else str(e)
+            exit_err(f"Invalid value for key {key!r}: {error}")
         except (
-            ValueError,  # pydantic raises ValueError for unknown fields
-            AttributeError,  # getattr call failed
+            ValueError,  # setattr failed for unknown model field (Pydantic)
+            AttributeError,  # getattr failed
         ):
             exit_err(f"Invalid config key: {key!r}")
 
@@ -128,6 +137,7 @@ def set_cli_config(
 
     if show_config:
         render_config(state.config, as_toml)
+
     success(f"Set {render_config_option(key)} to {render_cli_value(value)}")
 
 
