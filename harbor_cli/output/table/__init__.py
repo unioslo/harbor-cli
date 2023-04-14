@@ -63,6 +63,9 @@ from .project import project_table
 from .registry import registryproviders_table
 from .repository import repository_table
 from .search import search_panel
+from .system import generalinfo_panel
+from .system import overallhealthstatus_panel
+from .system import statistic_table
 from .system import systeminfo_table
 from .user import userresp_table
 from .user import usersearchrespitem_table
@@ -82,11 +85,13 @@ _RENDER_FUNCTIONS = [
     artifactinfo_table,
     artifactinfo_panel,
     artifact_table,
+    artifact_vulnerabilities_table,
     artifact_vulnerability_summary_table,
     auditlog_table,
     buildhistoryentry_table,
     commandsummary_table,
-    artifact_vulnerabilities_table,
+    generalinfo_panel,
+    overallhealthstatus_panel,
     project_table,
     project_extended_panel,
     project_summary_panel,
@@ -95,6 +100,7 @@ _RENDER_FUNCTIONS = [
     supported_events_table,
     systeminfo_table,
     search_panel,
+    statistic_table,
     tags_table,
     userresp_table,
     usersearchrespitem_table,

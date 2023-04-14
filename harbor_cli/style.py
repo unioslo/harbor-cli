@@ -28,6 +28,8 @@ COLOR_CVE_MEDIUM = "orange3"
 COLOR_CVE_LOW = "green"
 COLOR_CVE_NEGLIGIBLE = "blue"
 COLOR_CVE_UNKNOWN = "white"
+COLOR_HEALTH_HEALTHY = "green"
+COLOR_HEALTH_UNHEALTHY = "red"
 
 
 STYLE_CVE_SEVERITY = {
@@ -77,3 +79,10 @@ def render_cli_command(value: str) -> str:
 def help_config_override(option: str) -> str:
     """Render a help string for a configuration file option/key/entry."""
     return f"Overrides config option {render_config_option(option)}."
+
+
+def get_health_color(health: str | None) -> str:
+    if health == "healthy":
+        return COLOR_HEALTH_HEALTHY
+    else:  # TODO: find all health states
+        return COLOR_HEALTH_UNHEALTHY
