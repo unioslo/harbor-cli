@@ -21,11 +21,13 @@ pip install harbor-cli
 
 The name `harbor-cli` is in the process of being acquired from its current owner on PyPI.
 
-In the meantime, you can install the package from GitHub:
+In the meantime, you can install the package from GitHub, preferably with `pipx`:
 
 ```
-pip install git+https://github.com/pederhan/harbor-cli
+pipx install git+https://github.com/pederhan/harbor-cli
 ```
+
+Before the name acquisition process is complete, semantic versioning will not be adhered to and breaking changes may be introduced at any point. Once the package is available on PyPI, semantic versioning will be adhered to and breaking changes will only be introduced in major version updates.
 
 ## Usage
 
