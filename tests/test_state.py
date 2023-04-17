@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import pytest
 
-from harbor_cli.state import state
+if TYPE_CHECKING:
+    from harbor_cli.state import State
 
 
-def test_state_run_nohandle() -> None:
+def test_state_run_nohandle(state: State) -> None:
     async def coro() -> int:
         raise ValueError("test")
 

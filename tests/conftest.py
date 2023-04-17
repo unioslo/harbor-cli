@@ -14,6 +14,7 @@ import click
 import pytest
 import typer
 from _pytest.logging import LogCaptureFixture
+from harborapi import HarborAsyncClient
 from loguru import logger
 from pydantic import BaseModel
 from typer.testing import CliRunner
@@ -61,6 +62,24 @@ def config_file(tmp_path: Path, config: HarborCLIConfig) -> Path:  # type: ignor
     conf_path = tmp_path / "config.toml"
     config.save(conf_path)
     yield conf_path
+
+
+@pytest.fixture(scope="function")
+def harbor_client(config: HarborCLIConfig) -> HarborAsyncClient:
+    """Fixture for testing the Harbor client."""
+    return HarborAsyncClient(
+        username=config.harbor.username,
+        secret=config.harbor.secret.get_secret_value(),
+        url=config.harbor.url,
+    )
+
+
+@pytest.fixture(name="state", scope="function")
+def _state_fixture(
+    config: HarborCLIConfig, harbor_client: HarborAsyncClient
+) -> state.State:
+    """Fixture for testing the state."""
+    return state.State(config=config, client=harbor_client)
 
 
 class PartialInvoker(Protocol):
