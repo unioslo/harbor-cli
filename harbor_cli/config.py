@@ -395,7 +395,6 @@ class HarborCLIConfig(BaseModel):
     config_file: Optional[Path] = Field(
         None, exclude=True, description="Path to config file (if any)."
     )  # populated by CLI if loaded from file
-    toplevel: str = "empty"
 
     class Config:
         json_encoders = {
