@@ -83,7 +83,7 @@ def init(
         # fmt: off
         from ...state import state
         config = run_config_wizard(config_path)
-        state.add_config(config)
+        state.config = config
         # fmt: on
 
 

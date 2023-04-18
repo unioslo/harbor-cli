@@ -360,7 +360,7 @@ def try_load_config(config_file: Optional[Path], create: bool = True) -> None:
             info("Running configuration wizard...")
             conf = run_config_wizard(conf.config_file)
 
-        state.add_config(conf)
+        state.config = conf
 
 
 def main() -> None:

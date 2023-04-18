@@ -64,9 +64,6 @@ class State:
     command, but is instead accessed via the global state variable.
     """
 
-    # Initialize with defaults that will be overwritten by the CLI
-    config: HarborCLIConfig
-
     # Bogus defaults so we can instantiate the client before the config is loaded
     client: HarborAsyncClient
     loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
@@ -78,6 +75,8 @@ class State:
     _console_loaded: bool = False
     _client_loaded: bool = False
 
+    _config = None  # type: HarborCLIConfig | None
+
     def __init__(
         self,
         config: HarborCLIConfig | None = None,
@@ -85,9 +84,7 @@ class State:
     ) -> None:
         """Initialize the state object."""
         if config:
-            self.add_config(config)
-        else:
-            self.config = get_default_config()
+            self.config = config
 
         if client:
             self.add_client(client)
@@ -98,24 +95,30 @@ class State:
         self.options = CommonOptions()
 
     @property
+    def config(self) -> HarborCLIConfig:
+        """Return the config object."""
+        if self._config is None:  # lazy import to avoid circular imports
+            from .config import HarborCLIConfig
+
+            self._config = HarborCLIConfig()
+        return self._config
+
+    @config.setter
+    def config(self, config: HarborCLIConfig) -> None:
+        self._config = config
+        self._config_loaded = True
+
+    @property
     def config_loaded(self) -> bool:
-        """Return True if the config has been loaded."""
         return self._config_loaded
 
     @property
     def console_loaded(self) -> bool:
-        """Return True if the console has been loaded."""
         return self._console_loaded
 
     @property
     def client_loaded(self) -> bool:
-        """Return True if the client has been loaded."""
         return self._client_loaded
-
-    def add_config(self, config: "HarborCLIConfig") -> None:
-        """Add a config object to the state."""
-        self.config = config
-        self._config_loaded = True
 
     def add_client(self, client: HarborAsyncClient) -> None:
         """Add a client object to the state."""
