@@ -7,7 +7,6 @@ from typing import Optional
 import typer
 
 from . import commands
-from . import harbor
 from .app import app
 from .config import env_var
 from .config import HarborCLIConfig
@@ -334,10 +333,6 @@ def main_callback(
     state.options.output_file = output_file
     state.options.no_overwrite = no_overwrite
     state.options.with_stdout = with_stdout
-
-    # Instantiate the client
-    client = harbor.setup_client(state.config)
-    state.add_client(client)
 
     # Run configuration based on config file
     configure_from_config(state.config)

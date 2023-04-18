@@ -15,6 +15,9 @@ from ...exceptions import OverwriteError
 from ...format import output_format_emoji
 from ...format import output_format_repr
 from ...format import OutputFormat
+from ...harbor.common import prompt_basicauth
+from ...harbor.common import prompt_credentials_file
+from ...harbor.common import prompt_username_secret
 from ...logs import logger
 from ...logs import LogLevel
 from ...output.console import console
@@ -155,37 +158,20 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
 
     auth_method = str_prompt(base_msg, choices=choices, default="s", show_choices=False)
     if auth_method == "u":
-        hconf.username = str_prompt(
-            "Harbor username",
-            default=hconf.username,
-            empty_ok=False,
+        username, secret = prompt_username_secret(
+            hconf.username, hconf.secret.get_secret_value()
         )
-        hconf.secret = str_prompt(
-            "Harbor secret",
-            default=hconf.secret,
-            password=True,
-            empty_ok=False,
-        )  # type: ignore # pydantic.SecretStr
+        hconf.username = username
+        hconf.secret = secret  # type: ignore # pydantic.SecretStr
     elif auth_method == "b":
-        hconf.basicauth = str_prompt(
-            f"Harbor Base64 Basic Auth token",
-            default=hconf.basicauth,
-            password=True,
-            empty_ok=False,
-        )  # type: ignore # pydantic.SecretStr
+        hconf.basicauth = prompt_basicauth(hconf.basicauth.get_secret_value())  # type: ignore # pydantic.SecretStr
     elif auth_method == "f":
-        hconf.credentials_file = path_prompt(
-            "Harbor credentials file",
-            default=hconf.credentials_file,
-            show_default=True,
-            must_exist=True,
-            exist_ok=True,
-        )
+        hconf.credentials_file = prompt_credentials_file(hconf.credentials_file)
 
     # Explain what will happen if no auth method is provided
     if not hconf.has_auth_method:
         warning(
-            ":warning: No authentication info provided. "
+            "No authentication info provided. "
             "You will be prompted for username and password when required.",
         )
 

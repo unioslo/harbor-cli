@@ -109,7 +109,7 @@ class HarborCredentialsKwargs(TypedDict):
     url: str
     username: str
     secret: str
-    credentials: str
+    basicauth: str
     credentials_file: Optional[Path]
 
 
@@ -180,7 +180,7 @@ class HarborSettings(BaseModel):
             url=self.url,
             username=self.username,
             secret=self.secret.get_secret_value(),
-            credentials=self.basicauth.get_secret_value(),
+            basicauth=self.basicauth.get_secret_value(),
             credentials_file=self.credentials_file,
         )
 
