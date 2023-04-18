@@ -8,6 +8,7 @@ import typer
 
 from . import commands
 from .app import app
+from .commands.cli.init import run_config_wizard
 from .config import env_var
 from .config import HarborCLIConfig
 from .deprecation import check_deprecated_options
@@ -16,11 +17,10 @@ from .exceptions import handle_exception
 from .exceptions import HarborCLIError
 from .format import OutputFormat
 from .logs import disable_logging
-from .logs import logger
 from .logs import setup_logging
 from .option import Option
 from .output.console import exit_err
-from .output.console import success
+from .output.console import info
 from .output.formatting.path import path_link
 from .state import State
 from .state import state
@@ -262,22 +262,8 @@ def main_callback(
     if any(help_arg in sys.argv for help_arg in ctx.help_option_names):
         return
 
-    # if we're in the REPL, we don't want to load config again
-    if not state.config_loaded:
-        try:
-            conf = HarborCLIConfig.from_file(config_file)
-        except FileNotFoundError:
-            # Create a new config file, but don't run wizard
-            logger.info("Config file not found. Creating new config file.")
-            conf = HarborCLIConfig.from_file(config_file, create=True)
-            if conf.config_file is None:
-                exit_err("Unable to create config file.")
-            success(f"Created config file at {path_link(conf.config_file)}")
-            logger.info("Proceeding with default configuration.")
-            logger.info("Run 'harbor init' to configure Harbor CLI. ")
-        state.add_config(conf)
-
-    # At this point we require an active configuation
+    # At this point we require an active configuation, be it from a file
+    # loaded from disk or a default configuration.
     try_load_config(config_file, create=True)
     _restore_config(state)  # necessary for overrides to to reset in REPL
 
@@ -358,20 +344,22 @@ def try_load_config(config_file: Optional[Path], create: bool = True) -> None:
     create : bool, optional
         Whether to create a new config file if one is not found, by default True
     """
+    # Don't load the config if it's already loaded (e.g. in REPL)
     if not state.config_loaded:
         try:
             conf = HarborCLIConfig.from_file(config_file)
         except FileNotFoundError:
             if not create:  # TODO: handle ConfigError
                 return
-            # Create a new config file, but don't run wizard
-            logger.info("Config file not found. Creating new config file.")
+            # Create a new config file and run wizard
+            info("Config file not found. Creating new config file.")
             conf = HarborCLIConfig.from_file(config_file, create=create)
             if conf.config_file is None:
                 exit_err("Unable to create config file.")
-            success(f"Created config file at {path_link(conf.config_file)}")
-            logger.info("Proceeding with default configuration.")
-            logger.info("Run 'harbor init' to configure Harbor CLI. ")
+            info(f"Created config file: {path_link(conf.config_file)}")
+            info("Running configuration wizard...")
+            conf = run_config_wizard(conf.config_file)
+
         state.add_config(conf)
 
 

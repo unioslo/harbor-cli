@@ -65,7 +65,6 @@ def init(
     try:
         config_path = create_config(path, overwrite=overwrite)
     except OverwriteError:
-
         # TODO: verify that this path is always correct
         p = path or DEFAULT_CONFIG_FILE
         warning(f"Config file already exists ({path_link(p)})")
@@ -81,10 +80,14 @@ def init(
         logger.info(f"Created config file at {config_path}")
 
     if wizard:
-        run_config_wizard(config_path)
+        # fmt: off
+        from ...state import state
+        config = run_config_wizard(config_path)
+        state.add_config(config)
+        # fmt: on
 
 
-def run_config_wizard(config_path: Optional[Path] = None) -> None:
+def run_config_wizard(config_path: Optional[Path] = None) -> HarborCLIConfig:
     """Loads the config file, and runs the configuration wizard.
 
     Delegates to subroutines for each config category, that modify
@@ -104,6 +107,9 @@ def run_config_wizard(config_path: Optional[Path] = None) -> None:
 
     console.print()
     console.rule(":sparkles: Harbor CLI Configuration Wizard :mage:")
+
+    # FIXME: we have likely created the config file at this point, so
+    # the logic below is incorrect.
 
     # We only ask the user to configure mandatory sections if the config
     # file existed prior to running wizard.
@@ -140,6 +146,7 @@ def run_config_wizard(config_path: Optional[Path] = None) -> None:
     save_config(config, conf_path)
     console.print("Configuration complete! :tada:")
     success(f"Saved config to {path_link(conf_path)}")
+    return config
 
 
 def init_harbor_settings(config: HarborCLIConfig) -> None:
@@ -174,6 +181,54 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
             "No authentication info provided. "
             "You will be prompted for username and password when required.",
         )
+
+    if bool_prompt("Configure advanced Harbor settings?"):
+        _init_advanced_harbor_settings(config)
+
+
+def _init_advanced_harbor_settings(config: HarborCLIConfig) -> None:
+    """Initialize advanced Harbor settings."""
+    print_title("Advanced Harbor Settings", emoji=":wrench:")
+
+    hconf = config.harbor
+
+    hconf.verify_ssl = bool_prompt(
+        "Verify SSL certificates?",
+        default=hconf.verify_ssl,
+        show_default=True,
+    )
+
+    # NOTE: Enabling these _WILL_ cause certain commands to fail
+    # So we leave them as config file-only options for now that
+    # can be enabled manually.
+    # hconf.validate_data = bool_prompt(
+    #     "Validate data received from Harbor?",
+    #     default=hconf.validate_data,
+    #     show_default=True,
+    # )
+
+    # hconf.raw_mode = bool_prompt(
+    #     "Enable raw mode (print raw responses from API)?",
+    #     default=hconf.raw_mode,
+    #     show_default=True,
+    # )
+
+    # TODO: implement timeout, retry, retry_delay
+    # hconf.timeout = int_prompt(
+    #     "Timeout (seconds)",
+    #     default=hconf.timeout,
+    #     show_default=True,
+    # )
+    # hconf.retry = int_prompt(
+    #     "Retry count",
+    #     default=hconf.retry,
+    #     show_default=True,
+    # )
+    # hconf.retry_delay = int_prompt(
+    #     "Retry delay (seconds)",
+    #     default=hconf.retry_delay,
+    #     show_default=True,
+    # )
 
 
 def init_logging_settings(config: HarborCLIConfig) -> None:
@@ -227,8 +282,9 @@ def init_output_settings(config: HarborCLIConfig) -> None:
     # so we delegate to a separate function.
     _init_output_format(config)
 
+    # Leading newline to separate from format configuration(s)
     oconf.paging = bool_prompt(
-        "Show output in pager? (requires 'less' or other pager to be installed and configured)",
+        "\nShow output in pager? (requires 'less' or other pager to be installed and configured)",
         default=oconf.paging,
         show_default=True,
     )
@@ -270,7 +326,7 @@ def _init_output_format(config: HarborCLIConfig) -> None:
     formats = [f for f in OutputFormat if f != oconf.format]
     for fmt in formats:
         if bool_prompt(
-            f"Configure {output_format_repr(fmt)} output settings?", default=False
+            f"\nConfigure {output_format_repr(fmt)} output settings?", default=False
         ):
             conf_fmt(fmt)
 
@@ -318,7 +374,8 @@ def _init_output_table_settings(config: HarborCLIConfig) -> None:
         show_default=True,
     )
 
-    if bool_prompt("Configure table style?", default=False):
+    # Leading newline for subcategory
+    if bool_prompt("\nConfigure table style?", default=False):
         _init_output_table_style_settings(config)
 
 
