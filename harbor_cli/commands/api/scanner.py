@@ -7,6 +7,7 @@ from harborapi.models.models import ScannerRegistration
 from harborapi.models.models import ScannerRegistrationReq
 
 from ...logs import logger
+from ...output.prompts import delete_prompt
 from ...output.render import render_result
 from ...state import state
 from ...utils.args import create_updated_model
@@ -14,7 +15,6 @@ from ...utils.args import model_params_from_ctx
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
 from ...utils.commands import OPTION_FORCE
-from ...utils.prompts import delete_prompt
 
 # Create a command group
 app = typer.Typer(
