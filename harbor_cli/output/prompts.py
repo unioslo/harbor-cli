@@ -5,13 +5,18 @@ from pathlib import Path
 from typing import Any
 from typing import overload
 from typing import Type
+from typing import TYPE_CHECKING
 
 from rich.prompt import Confirm
 from rich.prompt import FloatPrompt
 from rich.prompt import IntPrompt
 from rich.prompt import Prompt
 
-from ..style import render_warning
+if TYPE_CHECKING:
+    from ..config import HarborCLIConfig
+    from ..state import State
+
+from ..style import STYLE_CLI_OPTION, render_warning
 from .console import console
 from .console import error
 from .formatting import path_link
@@ -253,3 +258,39 @@ def path_prompt(
             error(f"Path already exists: {path_link(path)}")
         else:
             return path
+
+
+def delete_prompt(
+    config: HarborCLIConfig,
+    force: bool,
+    dry_run: bool = False,
+    resource: str | None = None,
+    name: str | None = None,
+) -> None:
+    """Prompt user to confirm deletion of a resource."""
+    if dry_run:
+        return
+    if force:
+        return
+    if config.general.confirm_deletion:
+        resource = resource or "resource(s)"
+        name = f" {name!r}" if name else ""
+        message = f"Are you sure you want to delete the {resource}{name}?"
+        if not bool_prompt(message, default=False):
+            exit("Deletion aborted.")
+    return
+
+
+def check_enumeration_options(
+    state: State,
+    query: str | None = None,
+    limit: int | None = None,
+) -> None:
+    if state.config.general.confirm_enumeration and not limit and not query:
+        if not bool_prompt(
+            f"Neither [{STYLE_CLI_OPTION}]--query[/] nor [{STYLE_CLI_OPTION}]--limit[/] is specified. "
+            "This could result in a large amount of data being returned. "
+            "Do you want to continue?",
+            warning=True,
+        ):
+            exit()

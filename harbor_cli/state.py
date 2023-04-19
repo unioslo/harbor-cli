@@ -4,6 +4,7 @@ import asyncio
 from pathlib import Path
 from typing import Awaitable
 from typing import Optional
+from typing import TYPE_CHECKING
 from typing import TypeVar
 
 from harborapi import HarborAsyncClient
@@ -11,10 +12,31 @@ from pydantic import BaseModel
 from rich.console import Console
 
 from .cache import Cache
-from .config import HarborCLIConfig
 from .exceptions import handle_exception
+from .harbor.common import prompt_url
+from .harbor.common import prompt_username_secret
+from .logs import logger
+
+if TYPE_CHECKING:
+    from .config import HarborCLIConfig
 
 T = TypeVar("T")
+
+
+# fmt: off
+def get_default_config() -> HarborCLIConfig:
+    """Lazy-import config to avoid circular imports."""
+    from .config import HarborCLIConfig
+    return HarborCLIConfig()
+# fmt: on
+
+
+def get_default_client() -> HarborAsyncClient:
+    return HarborAsyncClient(
+        url="http://example.com",
+        username="username",
+        secret="password",
+    )
 
 
 class CommonOptions(BaseModel):
@@ -42,15 +64,8 @@ class State:
     command, but is instead accessed via the global state variable.
     """
 
-    # Initialize with defaults that will be overwritten by the CLI
-    config: HarborCLIConfig = HarborCLIConfig()
-
     # Bogus defaults so we can instantiate the client before the config is loaded
-    client: HarborAsyncClient = HarborAsyncClient(
-        url="http://example.com",
-        username="username",
-        secret="password",
-    )
+    client: HarborAsyncClient
     loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
     options: CommonOptions = CommonOptions()
     repl: bool = False
@@ -60,36 +75,55 @@ class State:
     _console_loaded: bool = False
     _client_loaded: bool = False
 
-    def __init__(self) -> None:
+    _config = None  # type: HarborCLIConfig | None
+
+    def __init__(
+        self,
+        config: HarborCLIConfig | None = None,
+        client: HarborAsyncClient | None = None,
+    ) -> None:
         """Initialize the state object."""
-        self.config = HarborCLIConfig()
-        self.client = None  # type: ignore # will be patched by init_state
+        if config:
+            self.config = config
+
+        if client:
+            self.add_client(client)
+        else:
+            self.client = get_default_client()
+
         self.loop = asyncio.get_event_loop()
         self.options = CommonOptions()
 
     @property
+    def config(self) -> HarborCLIConfig:
+        """Return the config object."""
+        if self._config is None:  # lazy import to avoid circular imports
+            from .config import HarborCLIConfig
+
+            self._config = HarborCLIConfig()
+        return self._config
+
+    @config.setter
+    def config(self, config: HarborCLIConfig) -> None:
+        self._config = config
+        self._config_loaded = True
+
+    @property
     def config_loaded(self) -> bool:
-        """Return True if the config has been loaded."""
         return self._config_loaded
 
     @property
     def console_loaded(self) -> bool:
-        """Return True if the console has been loaded."""
         return self._console_loaded
 
     @property
     def client_loaded(self) -> bool:
-        """Return True if the client has been loaded."""
         return self._client_loaded
-
-    def add_config(self, config: "HarborCLIConfig") -> None:
-        """Add a config object to the state."""
-        self.config = config
-        self._config_loaded = True
 
     def add_client(self, client: HarborAsyncClient) -> None:
         """Add a client object to the state."""
         self.client = client
+        self._client_loaded = True
 
     def configure_cache(self) -> None:
         """Configure the cache based on the config."""
@@ -99,7 +133,7 @@ class State:
         self.loop.create_task(self.cache.start_flush_loop())
 
     def _init_console(self) -> None:
-        """Import the console object if it hasn't been imported yet.
+        """Import the global console object if it hasn't been imported yet.
         We do this here, so that we don't create a circular import
         between the state module and the output module."""
         # I really hate this, but due to the way the state object is
@@ -113,6 +147,34 @@ class State:
         self.console = console
         self._console_loaded = True
         # fmt: on
+
+    def _init_client(self) -> None:
+        """Configures  Harbor client if it hasn't been configured yet.
+
+        Prompts for necessary authentication info if it's missing from the config.
+        """
+        if not self.config.harbor.url:
+            logger.warning("Harbor API URL missing from configuration file.")
+            self.config.harbor.url = prompt_url()
+
+        # We need one of the available auth methods to be specified
+        # If not, prompt for username and password
+        if not self.config.harbor.has_auth_method:
+            logger.warning(
+                "Harbor authentication method is missing or incomplete in configuration file."
+            )
+            # TODO: refactor this so we can re-use username and password
+            # prompts from commands.cli.init!
+            username, secret = prompt_username_secret(
+                self.config.harbor.username,
+                self.config.harbor.secret.get_secret_value(),
+            )
+            self.config.harbor.username = username
+            self.config.harbor.secret = secret  # type: ignore # pydantic.SecretStr
+
+        self.client.authenticate(**self.config.harbor.credentials)
+        self._client_loaded = True
+        # TODO: test that authenication works
 
     def run(
         self,
@@ -142,8 +204,11 @@ class State:
         --------
         [harbor_cli.exceptions.handle_exception][]
         """
+        # Make sure console and client are loaded
         if not self._console_loaded:
             self._init_console()
+        if not self._client_loaded:
+            self._init_client()
 
         if not status:
             status = "Working..."

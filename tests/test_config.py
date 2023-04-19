@@ -133,7 +133,7 @@ def test_harbor_is_authable_basicauth() -> None:
     h = HarborSettings(basicauth="dXNlcm5hbWU6cGFzc3dvcmQK")
     assert h.has_auth_method
     # TODO: rename to basicauth when harborapi supports it
-    assert h.credentials["credentials"] == "dXNlcm5hbWU6cGFzc3dvcmQK"
+    assert h.credentials["basicauth"] == "dXNlcm5hbWU6cGFzc3dvcmQK"
 
 
 def test_harbor_is_authable_credentials_file(tmp_path: Path) -> None:

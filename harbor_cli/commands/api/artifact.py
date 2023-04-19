@@ -36,6 +36,8 @@ from ...output.console import exit
 from ...output.console import exit_err
 from ...output.console import warning
 from ...output.prompts import bool_prompt
+from ...output.prompts import check_enumeration_options
+from ...output.prompts import delete_prompt
 from ...output.render import render_result
 from ...output.table._utils import get_table
 from ...state import state
@@ -47,8 +49,6 @@ from ...utils.args import parse_commalist
 from ...utils.commands import inject_resource_options
 from ...utils.commands import OPTION_FORCE
 from ...utils.commands import OPTION_QUERY
-from ...utils.prompts import check_enumeration_options
-from ...utils.prompts import delete_prompt
 from ...utils.utils import parse_version_string
 from ..help import ARTIFACT_HELP_STRING
 

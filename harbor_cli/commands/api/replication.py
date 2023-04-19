@@ -10,14 +10,14 @@ from harborapi.models.models import ReplicationTrigger
 from harborapi.models.models import ReplicationTriggerSettings
 
 from ...logs import logger
+from ...output.prompts import check_enumeration_options
+from ...output.prompts import delete_prompt
 from ...output.render import render_result
 from ...state import state
 from ...utils.args import model_params_from_ctx
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
 from ...utils.commands import OPTION_FORCE
-from ...utils.prompts import check_enumeration_options
-from ...utils.prompts import delete_prompt
 
 # Create a command group
 app = typer.Typer(

@@ -6,12 +6,12 @@ import typer
 from harborapi.models.models import Repository
 
 from ...logs import logger
+from ...output.prompts import delete_prompt
 from ...output.render import render_result
 from ...state import state
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
 from ...utils.commands import OPTION_FORCE
-from ...utils.prompts import delete_prompt
 
 
 # Create a command group

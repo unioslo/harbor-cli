@@ -5,6 +5,7 @@ import inspect
 from functools import lru_cache
 from typing import Any
 from typing import Type
+from typing import TYPE_CHECKING
 
 import click
 import typer
@@ -12,7 +13,8 @@ from pydantic import BaseModel
 from typer.core import TyperCommand
 from typer.core import TyperGroup
 
-from ..models import CommandSummary
+if TYPE_CHECKING:
+    from ..models import CommandSummary
 
 
 def get_parent_ctx(
@@ -48,6 +50,9 @@ def _get_app_commands(
     cmds: list[CommandSummary] | None = None,
     current: str = "",
 ) -> list[CommandSummary]:
+    # Lazy-import to avoid circular imports
+    from ..models import CommandSummary
+
     if cmds is None:
         cmds = []
 
@@ -56,7 +61,7 @@ def _get_app_commands(
     elif isinstance(app, (TyperGroup, TyperCommand)):
         cmd = app
     else:
-        raise TypeError(f"Unexpected type: {type(app)}")
+        raise TypeError(f"Unexpected app type: {type(app)}")
 
     try:
         groups = cmd.commands  # type: ignore

@@ -4,12 +4,12 @@ from typing import Optional
 
 import typer
 
+from ...output.prompts import check_enumeration_options
 from ...output.render import render_result
 from ...state import state
 from ...utils.args import get_project_arg
 from ...utils.commands import ARG_PROJECT_NAME_OR_ID
 from ...utils.commands import inject_resource_options
-from ...utils.prompts import check_enumeration_options
 
 # Create a command group
 app = typer.Typer(name="webhook", help="Manage webhooks", no_args_is_help=True)
