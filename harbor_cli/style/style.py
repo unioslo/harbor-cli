@@ -1,6 +1,8 @@
 # Rich markup styles for the CLI
 from __future__ import annotations
 
+from typing import Any
+
 from harborapi.models.scanner import Severity
 
 STYLE_CONFIG_OPTION = "italic yellow"
@@ -67,8 +69,8 @@ def render_cli_option(option: str) -> str:
     return f"[{STYLE_CLI_OPTION}]{option}[/]"
 
 
-def render_cli_value(value: str) -> str:
-    """Render a CLI value."""
+def render_cli_value(value: Any) -> str:
+    """Render a CLI value/argument."""
     return f"[{STYLE_CLI_VALUE}]{value!r}[/]"
 
 
