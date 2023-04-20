@@ -11,32 +11,19 @@ from harborapi import HarborAsyncClient
 from pydantic import BaseModel
 from rich.console import Console
 
-from .cache import Cache
-from .exceptions import handle_exception
-from .harbor.common import prompt_url
-from .harbor.common import prompt_username_secret
-from .logs import logger
+# THIS MODULE CANNOT IMPORT FROM ANY OTHER MODULE IN THE PROJECT
+# The state module should be importable by every other module in the
+# project, so that it can be used as a singleton shared between all
+# commands. This is necessary because the state object is not passed
+# to each command, but is instead accessed via the global state variable.
+# If we import from any other module, we will create a circular import problem.
+
 
 if TYPE_CHECKING:
     from .config import HarborCLIConfig
+    from .cache import Cache
 
 T = TypeVar("T")
-
-
-# fmt: off
-def get_default_config() -> HarborCLIConfig:
-    """Lazy-import config to avoid circular imports."""
-    from .config import HarborCLIConfig
-    return HarborCLIConfig()
-# fmt: on
-
-
-def get_default_client() -> HarborAsyncClient:
-    return HarborAsyncClient(
-        url="http://example.com",
-        username="username",
-        secret="password",
-    )
 
 
 class CommonOptions(BaseModel):
@@ -70,12 +57,15 @@ class State:
     options: CommonOptions = CommonOptions()
     repl: bool = False
     console: Console = Console()  # the default console
-    cache: Cache = Cache()
+
+    # Attributes that are lazily loaded (exposed as properties)
+    _cache = None  # type: Cache | None
+    _config = None  # type: HarborCLIConfig | None
+
+    # Flags to indicate if attributes are configured (i.e. not using defaults)
     _config_loaded: bool = False
     _console_loaded: bool = False
     _client_loaded: bool = False
-
-    _config = None  # type: HarborCLIConfig | None
 
     def __init__(
         self,
@@ -89,19 +79,38 @@ class State:
         if client:
             self.add_client(client)
         else:
-            self.client = get_default_client()
+            # bogus defaults which we override when the config is loaded
+            self.client = HarborAsyncClient(
+                url="http://example.com",
+                username="username",
+                secret="password",
+            )
 
         self.loop = asyncio.get_event_loop()
         self.options = CommonOptions()
 
     @property
+    def cache(self) -> Cache:
+        """Return the cache object."""
+        # fmt: off
+        if self._cache is None:
+            from .cache import Cache
+            self._cache = Cache()
+        return self._cache
+        # fmt: on
+
+    # TODO: we could get rid of _config_loaded by returning a new default config
+    # if none exists, and only write to _config if a new config is set.
+    # config_loaded would then be True if _config is not None.
+    @property
     def config(self) -> HarborCLIConfig:
         """Return the config object."""
+        # fmt: off
         if self._config is None:  # lazy import to avoid circular imports
             from .config import HarborCLIConfig
-
             self._config = HarborCLIConfig()
         return self._config
+        # fmt: on
 
     @config.setter
     def config(self, config: HarborCLIConfig) -> None:
@@ -153,6 +162,10 @@ class State:
 
         Prompts for necessary authentication info if it's missing from the config.
         """
+        from .harbor.common import prompt_url
+        from .harbor.common import prompt_username_secret
+        from .logs import logger
+
         if not self.config.harbor.url:
             logger.warning("Harbor API URL missing from configuration file.")
             self.config.harbor.url = prompt_url()
@@ -222,7 +235,10 @@ class State:
         except Exception as e:
             if no_handle and isinstance(e, no_handle):
                 raise e
+            # fmt: off
+            from .exceptions import handle_exception
             handle_exception(e)
+            # fmt: on
         return resp
 
 
