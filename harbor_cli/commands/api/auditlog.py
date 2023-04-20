@@ -227,9 +227,10 @@ def create_audit_log_rotation_schedule(
         help=f"Number of hours to retain audit logs, e.g. {render_cli_value('168')}",
     ),
     # TODO: implement audit_retention_day if confirmed to work
-    include_operations: Optional[str] = typer.Option(
+    operations: Optional[List[str]] = typer.Option(
         None,
         help=f"Operations to rotate logs for e.g. {render_cli_value('create,delete,pull')}",
+        callback=parse_commalist,
     ),
     dry_run: Optional[bool] = typer.Option(None, help="Dry run"),
 ) -> None:
@@ -237,7 +238,7 @@ def create_audit_log_rotation_schedule(
     schedule = _get_schedule(
         cron=cron,
         audit_retention_hour=audit_retention_hour,
-        include_operations=include_operations,
+        include_operations=_parse_operations_args(operations),
         dry_run=dry_run,
         type=type,
     )
@@ -263,18 +264,20 @@ def update_audit_log_rotation_schedule(
     audit_retention_hour: Optional[int] = typer.Option(
         None,
         "--retention-hours",
-        help=f"Number of hours to retain audit logs, e.g. {render_cli_value('168')}",
+        help=f"Number of hours to retain audit logs, e.g. {render_cli_value(168)}",
     ),
-    include_operations: Optional[str] = typer.Option(
+    operations: Optional[List[str]] = typer.Option(
         None,
         help=f"Operations to rotate logs for e.g. {render_cli_value('create,delete,pull')}",
+        callback=parse_commalist,
     ),
     dry_run: Optional[bool] = typer.Option(None, help="Dry run"),
 ) -> None:
+    """Update the audit log rotation schedule."""
     schedule = _get_schedule(
         cron=cron,
         audit_retention_hour=audit_retention_hour,
-        include_operations=include_operations,
+        include_operations=_parse_operations_args(operations),
         dry_run=dry_run,
         type=type,
     )
@@ -284,3 +287,10 @@ def update_audit_log_rotation_schedule(
         f"Updating audit log rotation schedule...",
     )
     render_result(s, ctx)
+
+
+def _parse_operations_args(args: Optional[List[str]]) -> Optional[str]:
+    # Operations is probably required, but the API spec doesn't specify that
+    if not args:
+        return None
+    return ",".join(args)  # no spaces allowed
