@@ -18,6 +18,7 @@ from ...output.prompts import check_enumeration_options
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
 from ...state import state
+from ...style.style import render_cli_value
 from ...utils import parse_commalist
 from ...utils.args import create_updated_model
 from ...utils.args import get_ldap_group_arg
@@ -515,9 +516,8 @@ def set_project_metadata(
         [],
         "--extra",
         help=(
-            "Extra metadata to set beyond the fields in the spec."
-            "Format: [green]key[/green][magenta]=[/magenta][cyan]value[/cyan]. "
-            "May be specified multiple times, or as a comma-separated list."
+            "Extra metadata to set beyond the fields in the spec. "
+            f"Format: {render_cli_value('key=value')}. "
         ),
         metavar="KEY=VALUE",
         callback=parse_commalist,
