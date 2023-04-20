@@ -13,6 +13,8 @@ from pydantic import BaseModel
 from typer.core import TyperCommand
 from typer.core import TyperGroup
 
+from ..style.style import render_cli_value
+
 if TYPE_CHECKING:
     from ..models import CommandSummary
 
@@ -218,19 +220,20 @@ ARG_PROJECT_NAME = typer.Argument(
     None,
     help="Name of the project to use.",
 )
+_USE_ID_HELP = f"Prefix with {render_cli_value(PREFIX_ID)} to specify an ID."
 # TODO: when union types are supported, we can use `get_project_arg` as the callback
 # for this option. For now, we have to call the function manually inside each command.
 ARG_PROJECT_NAME_OR_ID = typer.Argument(
     ...,
-    help=f"Name or ID of the project to use. Prefix with {PREFIX_ID!r} to use an ID.",
+    help=f"Name or ID of the project to use. {_USE_ID_HELP}",
 )
 ARG_USERNAME_OR_ID = typer.Argument(
     ...,
-    help=f"Username or ID of the user to use. Prefix with {PREFIX_ID!r} to use an ID.",
+    help=f"Username or ID of the user to use. {_USE_ID_HELP}",
 )
 ARG_LDAP_GROUP_DN_OR_ID = typer.Argument(
     ...,
-    help=f"LDAP Group DN or ID of the group to use. Prefix with {PREFIX_ID!r} to use an ID.",
+    help=f"LDAP Group DN or ID of the group to use. {_USE_ID_HELP}",
 )
 
 

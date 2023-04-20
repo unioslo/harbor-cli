@@ -19,9 +19,14 @@ STYLE_TABLE_HEADER = "bold green"
 STYLE_COMMAND = "bold italic green"
 STYLE_WARNING = "yellow"
 
-# These are the _colors_ for the different CVE severities
-# They should be used to colorize output and help define styles,
-# but they should not contain any formatting (e.g. bold, italic)
+
+EMOJI_YES = ":white_check_mark:"
+EMOJI_NO = ":cross_mark:"
+
+
+# Colors
+# Colors should be used to colorize output and help define styles,
+# but they should not contain any formatting (e.g. bold, italic, `x` on `y`, etc.)
 COLOR_CVE_CRITICAL = "dark_red"
 COLOR_CVE_HIGH = "red"
 COLOR_CVE_MEDIUM = "orange3"
@@ -40,10 +45,6 @@ STYLE_CVE_SEVERITY = {
     "negligible": COLOR_CVE_NEGLIGIBLE,
     "unknown": COLOR_CVE_UNKNOWN,
 }
-
-
-EMOJI_YES = ":white_check_mark:"
-EMOJI_NO = ":cross_mark:"
 
 
 def get_severity_style(severity: str | Severity) -> str:
@@ -68,7 +69,7 @@ def render_cli_option(option: str) -> str:
 
 def render_cli_value(value: str) -> str:
     """Render a CLI value."""
-    return f"[{STYLE_CLI_VALUE}]{value}[/]"
+    return f"[{STYLE_CLI_VALUE}]{value!r}[/]"
 
 
 def render_cli_command(value: str) -> str:

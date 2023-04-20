@@ -15,8 +15,8 @@
 {% endif -%}
 {% endif %}<br />
 
-{%- if param.help_plain -%}
-{{ param.help_plain }}
+{%- if param.help -%}
+{{ param.help_md }}
 {%- endif -%}
 {%- if param.multiple -%}
 <br />*Separate multiple values with commas
@@ -73,7 +73,7 @@ See [harborapi docs](https://pederhan.github.io/harborapi/usage/methods/read/#qu
 {{ command.usage }}
 ```
 
-{{ command.help_plain }}
+{{ command.help_md }}
 
 {# Only show this section if we have arguments #}
 {% set argument_params = command.params | selectattr('is_argument', 'equalto', true) | list %}

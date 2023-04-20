@@ -23,7 +23,8 @@ from typer.core import TyperArgument
 from typer.core import TyperCommand
 
 from .harbor.artifact import get_artifact_native_report_summary
-from .utils.utils import markup_as_plain_text
+from .style.markup import markup_as_plain_text
+from .style.markup import markup_to_markdown
 
 
 class BaseModel(HarborAPIBaseModel):
@@ -114,6 +115,10 @@ class ParamSummary(BaseModel):
     def help_plain(self) -> str:
         return markup_as_plain_text(self.help)
 
+    @property
+    def help_md(self) -> str:
+        return markup_to_markdown(self.help)
+
     @root_validator
     def _fmt_metavar(cls, values: dict[str, Any]) -> dict[str, Any]:
         metavar = values.get("metavar") or values.get("human_readable_name", "")
@@ -163,6 +168,10 @@ class CommandSummary(BaseModel):
     @property
     def help_plain(self) -> str:
         return markup_as_plain_text(self.help)
+
+    @property
+    def help_md(self) -> str:
+        return markup_to_markdown(self.help)
 
     @property
     def usage(self) -> str:

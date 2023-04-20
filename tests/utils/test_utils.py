@@ -4,7 +4,6 @@ from typing import Any
 
 import pytest
 
-from harbor_cli.utils.utils import markup_as_plain_text
 from harbor_cli.utils.utils import PackageVersion
 from harbor_cli.utils.utils import parse_version_string
 from harbor_cli.utils.utils import replace_none
@@ -123,20 +122,3 @@ def test_replace_none_replacement(replacement: Any) -> None:
 )
 def test_parse_version_string(package: str, expected: PackageVersion) -> None:
     assert parse_version_string(package) == expected
-
-
-@pytest.mark.parametrize(
-    "inp,expected",
-    [
-        ("", ""),
-        ("[bold][/]", ""),
-        ("[bold][/bold]", ""),
-        ("This is a test", "This is a test"),
-        ("This is a [bold]test[/]", "This is a test"),
-        ("This is a [bold]test[/bold]", "This is a test"),
-        ("[italic]This is a [bold]test[/bold][/italic]", "This is a test"),
-        ("[italic]This is a [bold]test[/bold][/]", "This is a test"),
-    ],
-)
-def test_markup_as_plain_text(inp: str, expected: str) -> None:
-    assert markup_as_plain_text(inp) == expected
