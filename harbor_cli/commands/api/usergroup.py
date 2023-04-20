@@ -23,7 +23,10 @@ app = typer.Typer(
 
 # HarborAsyncClient.get_usergroup()
 @app.command("get")
-def get_usergroup(ctx: typer.Context, group_id: int) -> None:
+def get_usergroup(
+    ctx: typer.Context,
+    group_id: int = typer.Argument(..., help="ID of the group to fetch."),
+) -> None:
     """Get a user group."""
     usergroup = state.run(
         state.client.get_usergroup(group_id), f"Fetching user group {group_id}..."
@@ -79,7 +82,7 @@ def update_usergroup(
 @app.command("delete")
 def delete_usergroup(
     ctx: typer.Context,
-    group_id: int,
+    group_id: int = typer.Argument(..., help="ID of the user group to delete."),
     force: bool = OPTION_FORCE,
 ) -> None:
     """Delete a user group."""
@@ -128,7 +131,7 @@ def get_usergroups(
 @inject_resource_options()
 def search_usergroups(
     ctx: typer.Context,
-    group_name: str = typer.Argument(..., help="Group name to search for."),
+    group_name: str = typer.Argument(..., help="Name of group to search for."),
     page: int = 1,
     page_size: int = 10,
     # limit: Optional[int] = ...,  # type: ignore # NYI in harborapi
