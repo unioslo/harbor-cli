@@ -4,6 +4,7 @@ from typing import List
 from typing import Optional
 from typing import TYPE_CHECKING
 
+from ...output.console import info
 from ...utils.args import add_to_query
 from ...utils.args import parse_commalist
 
@@ -176,6 +177,10 @@ def get_audit_log_rotation_schedule(
         f"Fetching log rotation schedule...",
     )
     render_result(schedule, ctx)
+    # The method returns an emtpy schedule instead of a 404 error
+    # if the schedule is not set. Check the `schedule` field.
+    if schedule.schedule is None:
+        info("No schedule is set.")
 
 
 def _get_schedule(
