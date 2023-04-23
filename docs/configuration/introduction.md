@@ -17,6 +17,13 @@ To create a configuration file at a location different than the default one, use
 harbor init --path /path/to/config.toml
 ```
 
+The custom file path can then be specified when running the application with the `--config` option:
+
+```
+harbor --config /path/to/config.toml <command>
+```
+
+
 ## Print sample configuration file to stdout
 To print a sample configuration file, use the `sample-config` command:
 
@@ -28,12 +35,6 @@ This can then be combined with the `>` operator to redirect the output to a file
 
 ```
 harbor sample-config > /path/to/config.toml
-```
-
-The custom file can then be specified when running the application with the `--config` option:
-
-```
-harbor --config /path/to/config.toml <command>
 ```
 
 [^1]: This project uses [platformdirs](https://pypi.org/project/platformdirs/). See the `user_config_dir` example in the official platformdirs [examples](https://pypi.org/project/platformdirs/#example-output) for up-to-date information on what this resolves to. At the time of writing, this is `~/.config/harbor-cli/config.toml` on Linux, `~/Library/Preferences/harbor-cli/config.toml` on macOS, and `%LOCALAPPDATA%\harbor-cli\config.toml` on Windows.
