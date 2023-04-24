@@ -84,6 +84,7 @@ app.add_typer(tag_cmd)
 app.add_typer(label_cmd)
 app.add_typer(vuln_cmd)
 
+
 # get_artifacts()
 @app.command("list")
 @inject_resource_options()
@@ -92,26 +93,26 @@ def list_artifacts(
     project: List[str] = typer.Option(
         [],
         "--project",
-        help="Project name(s).",
+        help=f"Project name(s). (e.g. {render_cli_value('library')}).",
         callback=parse_commalist,
     ),
     repo: List[str] = typer.Option(
         [],
         "--repo",
-        help="Repository name(s).",
+        help=f"Repository name(s).(e.g. {render_cli_value('hello-world')}).",
         callback=parse_commalist,
     ),
     query: Optional[str] = ...,  # type: ignore
     tag: List[str] = typer.Option(
         [],
         "--tag",
-        help="Limit to artifacts with tag(s) (e.g. 'latest').",
+        help=f"Limit to artifacts with tag(s) (e.g. {render_cli_value('latest')}).",
         callback=parse_commalist,
     ),
     architecture: List[str] = typer.Option(
         [],
         "--arch",
-        help="Limit to artifacts with architecture(s) (e.g. 'amd64').",
+        help=f"Limit to artifacts with architecture(s) (e.g. {render_cli_value('amd64,arm64')}).",
         callback=parse_commalist,
         metavar="arch",
     ),
