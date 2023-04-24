@@ -27,6 +27,7 @@ from pydantic import BaseModel as PydanticBaseModel
 from rich.table import Table
 
 from ...harbor.artifact import get_artifact_architecture
+from ...harbor.artifact import get_artifact_os
 from ...harbor.artifact import parse_artifact_name
 from ...logs import logger
 from ...models import ArtifactVulnerabilitySummary
@@ -114,6 +115,12 @@ def list_artifacts(
         callback=parse_commalist,
         metavar="arch",
     ),
+    os: List[str] = typer.Option(
+        [],
+        "--os",
+        help=f"Limit to artifacts with OS(es) (e.g. {render_cli_value('linux,freebsd')}).",
+        callback=parse_commalist,
+    ),
     with_report: bool = typer.Option(
         False,
         "--with-report",
@@ -152,18 +159,18 @@ def list_artifacts(
         "Fetching artifacts...",
     )
 
-    # We have no way of filtering by architecture in the API itself, so we
-    # filter the results manually here by accessing the extra_attrs field.
+    # extra_attrs fields cannot be filtered with an API query,
+    # so we have to do it ourselves here
+    results = artifacts
     if architecture:
-        results = []
-        for arch in architecture:
-            for artifact in artifacts:
-                if arch == get_artifact_architecture(artifact.artifact):
-                    results.append(artifact)
-        artifacts = results
+        results = [
+            a for a in results if get_artifact_architecture(a.artifact) in architecture
+        ]
+    if os:
+        results = [a for a in results if get_artifact_os(a.artifact) in os]
 
-    render_result(artifacts, ctx)
-    logger.info(f"Fetched {len(artifacts)} artifact(s).")
+    render_result(results, ctx)
+    logger.info(f"Fetched {len(results)} artifact(s).")
 
 
 # delete_artifact()

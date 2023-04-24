@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from typing import NamedTuple
+from typing import Type
+from typing import TypeVar
 
 from harborapi.models import Artifact
 from harborapi.models import NativeReportSummary
@@ -54,12 +56,27 @@ def parse_artifact_name(s: str) -> ArtifactName:
     return ArtifactName(domain, project, repo, tag_or_digest)
 
 
+AttrType = TypeVar("AttrType")
+
+
 def get_artifact_architecture(artifact: Artifact) -> str | None:
+    return _get_extra_attrs_field(artifact, "architecture", str)
+
+
+def get_artifact_os(artifact: Artifact) -> str | None:
+    return _get_extra_attrs_field(artifact, "os", str)
+
+
+def _get_extra_attrs_field(
+    artifact: Artifact, field: str, type_: Type[AttrType]
+) -> AttrType | None:
     # the ExtraAttrs model has no documented fields, so we just
-    # attempt to access the architecture field and return None if it
+    # attempt to access the field and return None if it
     # doesn't exist
     try:
-        return artifact.extra_attrs.architecture  # type: ignore
+        attr = getattr(artifact.extra_attrs, field)
+        assert isinstance(attr, type_)
+        return attr
     except AttributeError:
         return None
 
