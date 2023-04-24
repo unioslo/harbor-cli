@@ -28,12 +28,6 @@ harbor --config /path/to/config.toml <command>
 To print a sample configuration file, use the `sample-config` command:
 
 ```
-harbor sample-config
-```
-
-This can then be combined with the `>` operator to redirect the output to a file:
-
-```
 harbor sample-config > /path/to/config.toml
 ```
 
