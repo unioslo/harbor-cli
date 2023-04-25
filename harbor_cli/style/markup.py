@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import itertools
 from dataclasses import dataclass
+from functools import cmp_to_key
 
 from rich.text import Text
 
@@ -25,59 +27,94 @@ class MarkdownSpan:
     bold: bool = False
     code: bool = False
 
+    def to_symbols(self) -> tuple[MarkdownSymbol, MarkdownSymbol]:
+        kwargs = {
+            "italic": self.italic,
+            "bold": self.bold,
+            "code": self.code,
+        }
+        start = MarkdownSymbol(position=self.start, **kwargs)
+        end = MarkdownSymbol(position=self.end, end=True, **kwargs)
+        return start, end
+
+
+@dataclass
+class MarkdownSymbol:
+    position: int
+    italic: bool = False
+    bold: bool = False
+    code: bool = False
+    end: bool = False
+
+    @property
+    def symbol(self) -> str:
+        symbol = []
+        if self.italic:
+            symbol.append("*")
+        if self.bold:
+            symbol.append("**")
+        if self.code:
+            symbol.append("`")
+        s = "".join(symbol)
+        if self.end:
+            s = f"{s[::-1]}"
+        return s
+
+
+# Easier than implementing rich comparison methods on MarkdownSymbol
+def mdsymbol_cmp(a: MarkdownSymbol, b: MarkdownSymbol) -> int:
+    if a.position < b.position:
+        return -1
+    elif a.position > b.position:
+        return 1
+    else:
+        # code tags cannot have other tags inside them
+        if a.code and not b.code:
+            return 1
+        if b.code and not a.code:
+            return -1
+    return 0
+
 
 def markup_to_markdown(s: str) -> str:
     """Parses a string that might contain markup formatting and converts it to Markdown.
 
     This is a very naive implementation that only supports a subset of Rich markup, but it's
     good enough for our purposes.
-
-
-    !!! warning
-        This function does not support combined and/or styles,
-        e.g. `[bold italic]foo[/]`, `[bold]foo[italic]bar[/italic][/bold]`, etc.
     """
-    # TODO: support combined styles like [bold italic]foo[/]
-    # Will probably need to use recursion to handle nested styles (?)
     t = Text.from_markup(s)
-    spans = []
+    spans = []  # list[MarkdownSpan]
     # Markdown has more limited styles than Rich markup, so we just
     # identify the ones we care about and ignore the rest.
     for span in t.spans:
         new_span = MarkdownSpan(span.start, span.end)
         span_style = str(span.style)
+        # Code block styles ignore other styles
         if span_style in CODEBLOCK_STYLES:
             new_span.code = True
-        if "italic" in span_style:
-            new_span.italic = True
-        if "bold" in span_style:
-            new_span.bold = True
+        else:
+            if "italic" in span_style:
+                new_span.italic = True
+            if "bold" in span_style:
+                new_span.bold = True
         spans.append(new_span)
 
-    def _insert(start: int, end: int, char: str, offset: int) -> int:
-        new.insert(start + offset, char)
-        new.insert(end + 1 + offset, char)  # +1 to insert AFTER
-        return offset + (len(char) * 2)
+    # Convert MarkdownSpans to MarkdownSymbols
+    # Each MarkdownSymbol represents a markdown formatting character along
+    # with its position in the string.
+    symbols = list(
+        itertools.chain.from_iterable(sp.to_symbols() for sp in spans)
+    )  # list[MarkdownSymbol]
+    symbols = sorted(symbols, key=cmp_to_key(mdsymbol_cmp))
 
-    new = list(str(t.plain))
+    # List of characters that make up string
+    plaintext = list(str(t.plain))
     offset = 0
-    for sp in spans:
-        char = []
-        # TODO: keep order of styles
-        if sp.code:
-            char.append("`")
+    for symbol in symbols:
+        plaintext.insert(symbol.position + offset, symbol.symbol)
+        offset += 1
 
-        # Code styles are mutually exclusive with bold/italic for now
-        if not sp.code:
-            if sp.italic:
-                char.append("*")
-            if sp.bold:
-                char.append("**")
-
-        c = "".join(char)
-        offset = _insert(sp.start, sp.end, c, offset)
-
-    return "".join(new)
+    return "".join(plaintext)
 
 
 def markup_as_plain_text(s: str) -> str:

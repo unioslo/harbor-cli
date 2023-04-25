@@ -19,16 +19,15 @@ from harbor_cli.style.markup import markup_to_markdown
         ("hello [bold]world[/bold]", "hello **world**"),
         ("hello [bold italic]world[/]", "hello ***world***"),
         ("hello [bold italic]world[/bold italic]", "hello ***world***"),
-        # Overlapping styles fail
-        pytest.param(
+        # Overlapping styles (code with bold/italic)
+        # IRL this would render as a code block with asterisks in it.
+        (
             f"[{CODEBLOCK_STYLES[0]}]hello [bold]world[/bold][/]",
             "`hello **world**`",
-            marks=pytest.mark.xfail,
         ),
-        pytest.param(
+        (
             "[bold]hello[italic] world[/italic][/bold]",
-            "**hello *world***",
-            marks=pytest.mark.xfail,
+            "**hello* world***",
         ),
         # Causes issues if offset is not handled correctly
         (
@@ -36,10 +35,9 @@ from harbor_cli.style.markup import markup_to_markdown
             "Type of schedule, e.g. `Hourly`. Mutually exclusive with `--cron`.",
         ),
         # Numerous styles
-        pytest.param(
+        (
             "[bold]hello [italic]world[/italic][/bold] [black]foo[/] [bold]bar[/] [bold italic]baz[/]",
             "**hello *world*** foo **bar** ***baz***",
-            marks=pytest.mark.xfail,
         ),
     ],
 )
