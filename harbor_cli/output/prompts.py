@@ -19,6 +19,7 @@ if TYPE_CHECKING:
 from ..style import STYLE_CLI_OPTION, render_warning
 from .console import console
 from .console import error
+from .console import exit
 from .formatting import path_link
 
 
