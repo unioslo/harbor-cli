@@ -58,6 +58,7 @@ class ParamSummary(BaseModel):
     multiple: bool
     name: str
     nargs: int
+    opts: List[str]
     prompt: Optional[str] = None
     prompt_required: Optional[bool] = None
     required: bool
@@ -193,7 +194,12 @@ class CommandSummary(BaseModel):
         has_optional = False
         for option in self.options:
             if option.required:
-                parts.append(f"<{option.metavar or option.human_readable_name}>")
+                metavar = option.metavar or option.human_readable_name
+                if not option.opts:
+                    s = metavar
+                else:
+                    s = f"{max(option.opts)} {metavar}"
+                parts.append(s)
             else:
                 has_optional = True
         else:
