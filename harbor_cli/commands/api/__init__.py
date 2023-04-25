@@ -14,6 +14,7 @@ from . import quotas as quotas
 from . import registry as registry
 from . import replication as replication
 from . import repository as repository
+from . import retention as retention
 from . import scan as scan
 from . import scanall as scanall
 from . import scanner as scanner
@@ -35,6 +36,7 @@ api_commands: list[typer.Typer] = [
     registry.app,
     replication.app,
     repository.app,
+    retention.app,
     scan.app,
     scanall.app,
     scanner.app,

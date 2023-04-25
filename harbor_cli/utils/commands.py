@@ -175,6 +175,7 @@ def inject_help(
 
 
 PREFIX_ID = "id:"
+_USE_ID_HELP = f"Prefix with {render_cli_value(PREFIX_ID)} to specify an ID."
 
 OPTION_QUERY = typer.Option(
     None,
@@ -211,6 +212,11 @@ OPTION_PROJECT_NAME = typer.Option(
     "--project",
     help="Name of the project to use.",
 )
+OPTION_PROJECT_NAME_OR_ID = typer.Option(
+    None,
+    "--project",
+    help=f"Name or ID of the project to use. {_USE_ID_HELP}",
+)
 OPTION_FORCE = typer.Option(
     False,
     "--force",
@@ -220,13 +226,19 @@ ARG_PROJECT_NAME = typer.Argument(
     None,
     help="Name of the project to use.",
 )
-_USE_ID_HELP = f"Prefix with {render_cli_value(PREFIX_ID)} to specify an ID."
+
 # TODO: when union types are supported, we can use `get_project_arg` as the callback
 # for this option. For now, we have to call the function manually inside each command.
-ARG_PROJECT_NAME_OR_ID = typer.Argument(
-    ...,
-    help=f"Name or ID of the project to use. {_USE_ID_HELP}",
-)
+def _arg_project_name_or_id(default: Any = ...) -> Any:  # typer.Argument is untyped
+    return typer.Argument(
+        default,
+        help=f"Name or ID of the project to use. {_USE_ID_HELP}",
+    )
+
+
+ARG_PROJECT_NAME_OR_ID = _arg_project_name_or_id()
+ARG_PROJECT_NAME_OR_ID_OPTIONAL = _arg_project_name_or_id(None)
+
 ARG_USERNAME_OR_ID = typer.Argument(
     ...,
     help=f"Username or ID of the user to use. {_USE_ID_HELP}",
