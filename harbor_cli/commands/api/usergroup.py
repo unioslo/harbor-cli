@@ -38,17 +38,22 @@ def get_usergroup(
 @app.command("create", no_args_is_help=True)
 def create_usergroup(
     ctx: typer.Context,
+    group_name: str = typer.Argument(
+        ...,
+        help="Name of the group to create.",
+    ),
     group_type: UserGroupType = typer.Argument(
         ..., help="The type of user group to create."
     ),
-    group_name: str = typer.Option(..., "--name", help="Name of the group to create."),
     ldap_group_dn: Optional[str] = typer.Option(
-        None, "--ldap-group-dn", help="The DN of the LDAP group if group type is LDAP"
+        None,
+        "--ldap-group-dn",
+        help="The DN of the LDAP group if group type is LDAP",
     ),
 ) -> None:
     """Create a user group."""
     if group_type == UserGroupType.LDAP and ldap_group_dn is None:
-        exit_err("LDAP group DN is required for LDAP user groups.")
+        exit_err("--ldap-group-dn is required for LDAP user groups.")
 
     usergroup = UserGroup(
         group_name=group_name,
