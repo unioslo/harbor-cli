@@ -5,7 +5,6 @@ from typing import Type
 from typing import TypeVar
 
 from harborapi.models import Artifact
-from harborapi.models import NativeReportSummary
 
 from ..exceptions import ArtifactNameFormatError
 
@@ -85,29 +84,8 @@ def get_artifact_severity(artifact: Artifact) -> str | None:
     """Attempt to get the severity string for an artifact.
     Not every artifact has a scan overview, and not every scan overview
     has a severity string.
-
-    A scan overview may contain arbitrary fields OR be an instance of
-    NativeReportSummary, and in the latter case we can access the severity field.
-    (Yes, the Harbor API is a bit of mess in this regard.)
     """
     try:
         return artifact.scan_overview.severity  # type: ignore
-    except AttributeError:
-        return None
-
-
-def get_artifact_native_report_summary(
-    artifact: Artifact,
-) -> NativeReportSummary | None:
-    """Attempt to get the NativeReportSummary for an artifact.
-    Not every artifact has a scan overview, and not every scan overview
-    has a NativeReportSummary.
-
-    A scan overview may contain arbitrary fields OR be an instance of
-    NativeReportSummary, and in the latter case we can access the severity field.
-    (Yes, the Harbor API is a bit of mess in this regard.)
-    """
-    try:
-        return artifact.scan_overview  # type: ignore
     except AttributeError:
         return None

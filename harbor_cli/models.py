@@ -22,7 +22,6 @@ from pydantic import root_validator
 from typer.core import TyperArgument
 from typer.core import TyperCommand
 
-from .harbor.artifact import get_artifact_native_report_summary
 from .style.markup import markup_as_plain_text
 from .style.markup import markup_to_markdown
 
@@ -303,7 +302,7 @@ class ArtifactVulnerabilitySummary(BaseModel):
     @classmethod
     def from_artifact(cls, artifact: ArtifactInfo) -> ArtifactVulnerabilitySummary:
         summary = None
-        report = get_artifact_native_report_summary(artifact.artifact)
+        report = artifact.artifact.scan_overview
         if report:
             summary = report.summary
         # Report either had no summary or we had no report to begin with
