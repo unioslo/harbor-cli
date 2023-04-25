@@ -13,6 +13,7 @@ from harborapi.models.models import RoleRequest
 from ...logs import logger
 from ...models import MemberRoleType
 from ...models import ProjectExtended
+from ...output.console import exit
 from ...output.console import exit_err
 from ...output.prompts import check_enumeration_options
 from ...output.prompts import delete_prompt
@@ -132,7 +133,7 @@ def project_exists(
         f"Checking if {project_repr} exists...",
     )
     render_result(exists, ctx)
-    raise SystemExit(0 if exists else 1)
+    exit(code=0 if exists else 1)
 
 
 class ProjectCreateResult(BaseModel):
