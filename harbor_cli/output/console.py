@@ -4,9 +4,8 @@ from typing import Any
 from typing import NoReturn
 from typing import Optional
 
+from rich import markup
 from rich.console import Console
-
-from ..logs import logger
 
 _exit = exit  # save the original exit function
 
@@ -20,7 +19,7 @@ err_console = Console(
 
 def _add_fix(message: str, prefix: str | None, suffix: str | None = None) -> str:
     if prefix:
-        prefix = prefix.strip()
+        prefix = f"[bold]\[{markup.escape(prefix.strip())}][/]"
         message = f"{prefix} {message}"
     if suffix:
         suffix = suffix.strip()
@@ -42,13 +41,13 @@ def success(
     err_console.print(message, style="green")
 
 
-def warning(message: str, prefix: str = "WARNING: ", suffix: str | None = None) -> None:
+def warning(message: str, prefix: str = "WARNING", suffix: str | None = None) -> None:
     """Prints a yellow message with a warning prefix to the stderr console."""
     message = _add_fix(message, prefix, suffix)
     err_console.print(message, style="yellow")
 
 
-def error(message: str, prefix: str = "ERROR: ", suffix: str | None = None) -> None:
+def error(message: str, prefix: str = "ERROR", suffix: str | None = None) -> None:
     """Prints a red message with an error prefix to the stderr console."""
     message = _add_fix(message, prefix, suffix)
     err_console.print(message, style="red")
@@ -66,13 +65,11 @@ def exit(message: Optional[str] = None, code: int = 0) -> NoReturn:
         Exit code, by default 0
     """
     if message:
-        logger.info(message)
+        info(message)
     raise SystemExit(code)
 
 
-def exit_err(
-    message: str, code: int = 1, prefix: str = "ERROR", **extra: Any
-) -> NoReturn:
+def exit_err(message: str, code: int = 1, **extra: Any) -> NoReturn:
     """Prints a message to the error console and exits with the given
     code (default: 1).
 
@@ -83,5 +80,5 @@ def exit_err(
     code : int, optional
         Exit code, by default 1
     """
-    logger.bind(**extra).error(message)
+    error(message)
     raise SystemExit(code)
