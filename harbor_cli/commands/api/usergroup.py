@@ -71,10 +71,10 @@ def create_usergroup(
 @app.command("update")
 def update_usergroup(
     group_id: int = typer.Argument(..., help="ID of the user group to update."),
-    group_name: str = typer.Option(..., "--name", help="Name of the group to create."),
+    group_name: str = typer.Option(..., "--name", help="New name for the user group."),
     # NOTE: make group_name optional if we can update other fields in the future
 ) -> None:
-    """Update a user group. Only the name can be updated."""
+    """Update a user group. Only the name can be updated currently."""
     usergroup = UserGroup(group_name=group_name)
     state.run(
         state.client.update_usergroup(group_id, usergroup),
@@ -106,12 +106,12 @@ def get_usergroups(
     ldap_group_dn: Optional[str] = typer.Option(
         None,
         "--ldap-group-dn",
-        help="Filter by LDAP group DN.",
+        help="LDAP group DN to filter by.",
     ),
     group_name: Optional[str] = typer.Option(
         None,
         "--group-name",
-        help="Filter by group name (fuzzy matching).",
+        help="Group name to filter by (fuzzy matching).",
     ),
     page: int = ...,  # type: ignore
     page_size: int = ...,  # type: ignore
