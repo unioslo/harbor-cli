@@ -87,7 +87,7 @@ def delete_retention_policy(
 ) -> None:
     """Delete a retention policy given a project name or ID, [bold]or[/bold] using a retention policy ID.
 
-    [bold]NOTE:[/] The user [bold]needs[/] permission to update the project
+    NOTE: The user needs permission to update the project
     metadata in addition to managing its retention policy, due to a fatal
     API bug that will break a project if the project metadata is not updated
     after the retention policy is deleted.
