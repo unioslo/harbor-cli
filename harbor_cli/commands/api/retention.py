@@ -87,10 +87,11 @@ def delete_retention_policy(
 ) -> None:
     """Delete a retention policy given a project name or ID, [bold]or[/bold] using a retention policy ID.
 
-    NOTE: The user needs permission to update the project
-    metadata in addition to managing its retention policy, due to a fatal
-    API bug that will break a project if the project metadata is not updated
-    after the retention policy is deleted.
+    !!! warning
+        The user [bold]needs[/] permission to update the project metadata
+        in addition to managing its retention policy, due to a critical
+        API bug that will break a project if the project metadata is not updated
+        after its retention policy is deleted.
     """
     if policy_id is None and project_name_or_id is None:
         exit_err(f"Must provide an argument or use {render_cli_value('--id')}.")
