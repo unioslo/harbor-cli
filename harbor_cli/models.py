@@ -175,36 +175,32 @@ class CommandSummary(BaseModel):
 
     @property
     def usage(self) -> str:
-        # TODO: determine if we should show metavar or not
-        # TODO: render required options!
         parts = [self.name]
 
         # Assume arg list is sorted by required/optional
-        # Show required in angle brackets, optional in square brackets
+        # `<POSITIONAL_ARG1> <POSITIONAL_ARG2> [OPTIONAL_ARG1] [OPTIONAL_ARG2]`
         for arg in self.arguments:
             metavar = arg.metavar or arg.human_readable_name
             parts.append(metavar)
 
         # Command with both required and optional options:
-        # `command <required_option> [OPTIONS]`
-        # Only required option(s):
-        # `command <required_option> <required_option>`
-        # Only optional options:
-        # `command [OPTIONS]`
+        # `--option1 <opt1> --option2 <opt2> [OPTIONS]`
         has_optional = False
         for option in self.options:
             if option.required:
                 metavar = option.metavar or option.human_readable_name
-                if not option.opts:
-                    s = metavar
-                else:
+                if option.opts:
                     s = f"{max(option.opts)} {metavar}"
+                else:
+                    # this shouldn't happen, but just in case. A required
+                    # option without any opts is not very useful.
+                    # NOTE: could raise exception here instead
+                    s = metavar
                 parts.append(s)
             else:
                 has_optional = True
-        else:
-            if has_optional:
-                parts.append("[OPTIONS]")
+        if has_optional:
+            parts.append("[OPTIONS]")
 
         return " ".join(parts)
 
