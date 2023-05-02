@@ -122,7 +122,7 @@ class PackageVersion(NamedTuple):
 def parse_version_string(package: str) -> PackageVersion:
     """Parse a PEP 440 package version string into a PackageVersion tuple.
 
-    Must be in the form of <package_name>[{~=,==,!=,<=,>=,<,>}{x.y.z}][,][{~=,==,!=,<=,>=,<,>}{x.y.z}]
+    Must be in the form of `<package_name>[{~=,==,!=,<=,>=,<,>}{x.y.z}][,][{~=,==,!=,<=,>=,<,>}{x.y.z}]`
 
     Examples:
         - "foo"
