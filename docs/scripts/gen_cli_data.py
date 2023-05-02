@@ -12,6 +12,9 @@ import sys
 from pathlib import Path
 from typing import NamedTuple
 
+from tomli import loads
+from tomli_w import dumps
+
 sys.path.append(Path(__file__).parent.as_posix())
 
 
@@ -29,17 +32,34 @@ class Command(NamedTuple):
     filename: str
 
 
+COMMAND_HELP = Command(["harbor", "--help"], "help.txt")
+COMMAND_SAMPLE_CONFIG = Command(["harbor", "sample-config"], "sample_config.toml")
+
 # List of commands to run
 COMMANDS = [
-    Command(["harbor", "--help"], "help.txt"),
-    Command(["harbor", "sample-config"], "sample_config.toml"),
+    COMMAND_HELP,
+    COMMAND_SAMPLE_CONFIG,
 ]
+
+
+def add_config_bogus_defaults(output: str) -> str:
+    """Give bogus defaults to certain config values."""
+    config = loads(output)
+    config["harbor"]["url"] = "https://demo.goharbor.io/api/v2.0"
+    config["harbor"]["username"] = "admin"
+    config["harbor"]["secret"] = "password"
+    config["repl"]["history_file"] = "/path/to/history/file"
+    config["logging"]["directory"] = "/path/to/logdir"
+    return dumps(config)
 
 
 def main() -> None:
     """Run the commands and save the output to files."""
     for cmd in COMMANDS:
         output = subprocess.check_output(cmd.command, env=env).decode("utf-8")
+        if cmd == COMMAND_SAMPLE_CONFIG:
+            output = add_config_bogus_defaults(output)
+
         with open(DATA_DIR / cmd.filename, "w") as f:
             f.write(output)
 

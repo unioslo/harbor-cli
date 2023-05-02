@@ -1,8 +1,8 @@
-# Options
+# Global Options
 
-## Global options
+Global options are options that apply to every command, and are usually overrides for configuration file options. For persistent configuration of these options, see [Configuration](../configuration/config-file).
 
-Global options are options that apply to every command. They are usually overrides of configuration values, such as the Harbor URL, username, password, etc. They must be specified before the command to run, e.g.:
+Global options must be specified before the command to run, e.g.:
 
 ```
 harbor \

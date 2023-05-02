@@ -41,14 +41,17 @@ The final subcommand is the _action_ to perform on the resource, such as `create
 * `get` - Get a resource
 * `create` - Create a resource
 * `delete` - Delete a resource
-    * Prompts for confirmation unless `--force` is specified.
+    * Prompts for confirmation unless `--force` is specified. This behavior can be disabled in the configuration file under [`general.confirm_deletion`](../../configuration/config-file/#generalconfirm_deletion).
+
 * `list` - List resources.
     * Most of these commands expose the options `--query`, `--sort`, `--limit`, `--page` and `--page-size` to filter and limit the output.
-    * Each command may have its own set of options for more granular filtering of the resources such as `--tag`, `--architecture`, etc., which is syntactic sugar for the `--query` option.
-    * See [harborapi docs](https://pederhan.github.io/harborapi/usage/methods/read/#query) for more information about the different parameters that can be used to filter the resources.
+    * Each command may have its own set of options for more granular filtering of the resources such as `--tag`, `--architecture`. Some of this behavior can be achieved with `--query` as well.
+    * See [harborapi `--query` docs](https://pederhan.github.io/harborapi/usage/methods/read/#query) for more information about the different parameters that can be used to filter the resources using `--query`.
+    * See [harborapi `--sort` docs](https://pederhan.github.io/harborapi/usage/methods/read/#sort) for information on how to use the `--sort` parameter.
 * `update` - Update a resource.
-    * The default behavior is similar to a PATCH request. Performs a partial update with only the given parameters (corresponding to the resource's fields) being updated on the resource.
-    * The CLI diverges from the API spec here, since the spec only defines PUT operations (which replaces a given resource with a new resource definition). To improve the ergonomics of the interface for users, the CLI first retrieves the existing resource and only replaces the fields the user wants to update.
+    * The behavior of these commands mimic a PATCH request. A `update` command performs a partial update to an existing resource replacing a subset of the resource's fields with new values.
+    * Parameter names attempt to be 1:1 with the resource's field names. I.e. `project update --public trueAny divergences are specified in the relevant command's help text.
+    * The CLI fetches the existing resource first then replaces the given fields with the new values.[^1]
 * `set` - Set the value of a specific field on a resource.
     * Used for setting single values, such as setting default project scanner.
 * `add` - Add a value or reference to a resource to a resource
@@ -61,7 +64,7 @@ The final subcommand is the _action_ to perform on the resource, such as `create
 
 ## `ARGS`
 
-The args for a command is usually the name or ID of a resource.
+The args for a command is usually one or more names or IDs identifying a resource. For example:
 
 ```
 harbor project get my-project
@@ -69,27 +72,17 @@ harbor project get my-project
 
 The command specifies `my-project` as the argument for the `get` action on the `project` resource.
 
-Certain commands accept either a name or ID as arguments. Prefix IDs with `id:` to specify that the argument is an ID. Check the relevant command's help text for more information.
+Certain commands accept either a name or ID as arguments. Prefix IDs with `id:` to specify that the argument is an ID. Check the relevant command's documentation for more information.
 
 ## `COMMAND OPTIONS`
 
 Command options are options that apply to a command.
 
 ```
-harbor project create my-project --public
+harbor project create my-project --public true
 ```
-The command above has a `--public` option that can be used to create a public project.
+The [`project create`](../../commands/project/#project-create) command has a `--public` option that can be used to create a public project.
 
-### Multiple values
 
-Certain options accept multiple values. These can be specified as a comma-separated list:
 
-```
-harbor artifact list --project library,my-project
-```
-
-Or by using the relevant option multiple times:
-
-```
-harbor artifact list --project library --project my-project
-```
+[^1]: The endpoints themselves are `PUT` endpoints in the Harbor API but they use `PATCH` semantics (i.e. partial updates). Until this is codified as intended behavior by Harbor, we will continue to fetch the existing resource first and then replace the given fields with the new values before sending back the updated resource to the server.
