@@ -237,6 +237,26 @@ def test_construct_query_list(values: List[str], expected: str, union: bool) -> 
 
 
 @pytest.mark.parametrize(
+    "values,expected",
+    [
+        ([], ""),
+        (["foo"], "foo"),
+        (["foo", "bar", "baz", "qux"], "foo,bar,baz,qux"),
+    ],
+)
+@pytest.mark.parametrize("union", [True, False])
+def test_construct_query_list_comma(
+    values: List[str], expected: str, union: bool
+) -> None:
+    if len(values) < 2:
+        exp = expected
+    else:
+        exp = f"{{{expected}}}" if union else f"({expected})"
+    assert construct_query_list(*values, union=union, comma=True) == exp
+    # TODO: add deconstruction with comma test once implemented
+
+
+@pytest.mark.parametrize(
     "kwargs,query,expected",
     [
         ({}, "", ""),

@@ -245,13 +245,13 @@ def construct_query_list(
     >>> construct_query_list("", "bar", "baz", allow_empty=True)
     '{ bar baz}'
     >>> construct_query_list("", "bar", "baz", comma=True)
-    '{bar, baz}'
+    '{bar,baz}'
     """
     if len(values) < 2:
         return str(values[0] if values else "")
     start = "{" if union else "("
     end = "}" if union else ")"
-    sep = ", " if comma else " "
+    sep = "," if comma else " "
     return f"{start}{sep.join(str(v) for v in values if v or allow_empty)}{end}"
 
 
