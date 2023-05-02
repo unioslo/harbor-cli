@@ -302,7 +302,7 @@ class ArtifactVulnerabilitySummary(BaseModel):
     artifact_short: str = Field(..., exclude=True)
 
     @classmethod
-    def from_artifact(cls, artifact: ArtifactInfo) -> ArtifactVulnerabilitySummary:
+    def from_artifactinfo(cls, artifact: ArtifactInfo) -> ArtifactVulnerabilitySummary:
         summary = None
         report = artifact.artifact.scan_overview
         if report:

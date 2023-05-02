@@ -138,6 +138,8 @@ def list_artifacts(
     # TODO: add ArtifactReport filtering options here
 ) -> None:
     """List artifacts in one or more projects and/or repositories."""
+    # TODO: warn if no projects or repos match the given names
+
     # The presence of an asterisk trumps all other arguments
     # None signals that we want to enumerate over all projects
     if any(x == "*" for x in project) or not project:
@@ -896,7 +898,7 @@ def list_artifact_vulnerabilities_summary(
     # fmt: on
     result = sorted(result, key=sort_key, reverse=sort_reverse)
 
-    summary = [ArtifactVulnerabilitySummary.from_artifact(r) for r in result]
+    summary = [ArtifactVulnerabilitySummary.from_artifactinfo(r) for r in result]
     render_result(summary, ctx, vuln_summary=True, full_digest=full_digest)
 
 
