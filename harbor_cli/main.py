@@ -4,9 +4,12 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+import click
 import typer
 
 from . import commands
+from .__about__ import __version__
+from .__about__ import APP_NAME
 from .app import app
 from .commands.cli.init import run_config_wizard
 from .config import env_var
@@ -19,6 +22,7 @@ from .format import OutputFormat
 from .logs import disable_logging
 from .logs import setup_logging
 from .option import Option
+from .output.console import exit
 from .output.console import exit_err
 from .output.console import info
 from .output.formatting.path import path_link
@@ -54,8 +58,17 @@ def _restore_config(state: State) -> None:
         )
 
 
+def check_version_param(ctx: typer.Context, version: bool) -> None:
+    # Print version and exit if --version
+    if version:
+        exit(f"{APP_NAME} version {__version__}")
+    # Show error if no command and no version option
+    if not version and not ctx.invoked_subcommand:
+        raise click.UsageError("Missing command.")
+
+
 # The callback defines global command options
-@app.callback(no_args_is_help=True)
+@app.callback(no_args_is_help=True, invoke_without_command=True)
 def main_callback(
     ctx: typer.Context,
     # Configuration options
@@ -240,10 +253,17 @@ def main_callback(
         "--with-stdout",
         help="Output to stdout in addition to the specified output file, if any. Has no effect if no output file is specified.",
     ),
+    # Version
+    version: bool = Option(
+        None,
+        "--version",
+        help="Show application version and exit.",
+    ),
 ) -> None:
     """
     Configuration options that affect all commands.
     """
+    check_version_param(ctx, version)
     check_deprecated_options(ctx)
 
     # These commands don't require state management
