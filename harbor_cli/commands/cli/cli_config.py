@@ -7,6 +7,7 @@ from typing import Optional
 import typer
 from pydantic import ValidationError
 
+from ...config import DEFAULT_CONFIG_FILE
 from ...config import HarborCLIConfig
 from ...logs import logger
 from ...output.console import console
@@ -33,6 +34,16 @@ def render_config(config: HarborCLIConfig, as_toml: bool) -> None:
         console.print(config.toml(expose_secrets=False), markup=False)
     else:
         render_result(config)
+
+
+@app.callback()
+def callback(ctx: typer.Context) -> None:
+    # Every other command than "path" requires a config file
+    if ctx.invoked_subcommand != "path":
+        if state.config.config_file is None or not state.config_loaded:
+            exit_err(
+                "No configuration file loaded. A configuration file must exist to use this command."
+            )
 
 
 @app.command("get")
@@ -163,6 +174,15 @@ def write_session_config(
         )
     state.config.save(path=save_path)
     success(f"Saved configuration to [green]{save_path}[/]")
+
+
+@app.command(
+    "path",
+    help="Show the path to the current configuration file, or default path if no config is loaded.",
+)
+def show_config_path(ctx: typer.Context) -> None:
+    path = state.config.config_file or DEFAULT_CONFIG_FILE
+    render_result(path, ctx)
 
 
 # TODO: reload config

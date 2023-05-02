@@ -58,6 +58,17 @@ def _restore_config(state: State) -> None:
         )
 
 
+CONFIG_EXEMPT_GROUPS = {"cli-config", "find", "sample-config", "version"}
+
+
+def is_config_exempt(ctx: typer.Context):
+    if not ctx.invoked_subcommand:  # no subcommand might require a config?
+        return False
+    if ctx.invoked_subcommand in CONFIG_EXEMPT_GROUPS:
+        return True
+    return False
+
+
 def check_version_param(ctx: typer.Context, version: bool) -> None:
     # Print version and exit if --version
     if version:
@@ -268,7 +279,7 @@ def main_callback(
 
     # These commands don't require state management
     # and can be run without a config file or client.
-    if ctx.invoked_subcommand in ["sample-config", "init", "find"]:
+    if is_config_exempt(ctx):
         # try to load the config file, but don't fail if it doesn't exist
         try_load_config(config_file, create=False)
         return
