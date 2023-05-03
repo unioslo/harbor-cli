@@ -96,4 +96,6 @@ def _formatter(record: Record) -> str:
     """Format log messages for Loguru logger."""
     level = record["level"].name
     color = COLORS.get(level, COLOR_DEFAULT)
-    return f"<{color}><bold>[{level}]</bold> {record['message']}</{color}>\n"
+    message = record["message"]
+    message = message.replace("{", "{{").replace("}", "}}")
+    return f"<{color}><bold>[{level}]</bold> {message}</{color}>\n"
