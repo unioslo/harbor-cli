@@ -155,6 +155,27 @@ def main_callback(
         envvar=env_var("harbor_verify_ssl"),
         config_override="harbor.verify_ssl",
     ),
+    harbor_retry_enabled: Optional[bool] = Option(
+        None,
+        "--retry/--no-retry",
+        help=f"Retry failed HTTP requests.",
+        envvar=env_var("harbor_retry_enabled"),
+        config_override="harbor.retry.enabled",
+    ),
+    harbor_retry_max_tries: Optional[int] = Option(
+        None,
+        "--retry-max-tries",
+        help=f"Number of times to retry failed HTTP requests.",
+        envvar=env_var("harbor_retry_max_tries"),
+        config_override="harbor.retry.max_tries",
+    ),
+    harbor_retry_max_time: Optional[float] = Option(
+        None,
+        "--retry-max-time",
+        help=f"Maximum number of seconds to retry failed HTTP requests.",
+        envvar=env_var("harbor_retry_max_time"),
+        config_override="harbor.retry.max_time",
+    ),
     # Formatting
     show_description: Optional[bool] = Option(
         None,
@@ -316,6 +337,14 @@ def main_callback(
         state.config.harbor.raw_mode = harbor_raw_mode
     if harbor_verify_ssl is not None:
         state.config.harbor.verify_ssl = harbor_verify_ssl
+    # Harbor retry
+    if harbor_retry_enabled is not None:
+        state.config.harbor.retry.enabled = harbor_retry_enabled
+    if harbor_retry_max_tries is not None:
+        state.config.harbor.retry.max_tries = harbor_retry_max_tries
+    if harbor_retry_max_time is not None:
+        state.config.harbor.retry.max_time = harbor_retry_max_time
+
     # Output
     if compact is not None:
         state.config.output.table.compact = compact

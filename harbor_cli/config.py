@@ -113,6 +113,15 @@ class HarborCredentialsKwargs(TypedDict):
     credentials_file: Optional[Path]
 
 
+class RetrySettings(BaseModel):
+    """Retry settings for API requests."""
+
+    enabled: bool = True
+    max_tries: int = 5
+    max_time: float = 10.0
+    # TODO: add remaining settings
+
+
 class HarborSettings(BaseModel):
     url: str = ""
     username: str = ""
@@ -122,6 +131,7 @@ class HarborSettings(BaseModel):
     validate_data: bool = Field(True, alias="validate")
     raw_mode: bool = False
     verify_ssl: bool = True
+    retry: RetrySettings = RetrySettings()
 
     @validator("credentials_file", pre=True)
     def _empty_string_is_none(cls, v: Any) -> Any:

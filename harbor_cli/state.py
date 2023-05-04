@@ -182,8 +182,17 @@ class State:
             self.config.harbor.secret = secret  # type: ignore # pydantic.SecretStr
 
         self.client.authenticate(**self.config.harbor.credentials)
+
+        # Raw + validate modes
         self.client.raw = self.config.harbor.raw_mode
         self.client.validate = self.config.harbor.validate_data
+
+        # Retry settings
+        if self.client.retry is not None:
+            self.client.retry.enabled = self.config.harbor.retry.enabled
+            self.client.retry.max_tries = self.config.harbor.retry.max_tries
+            self.client.retry.max_time = self.config.harbor.retry.max_time
+
         self._client_loaded = True
         # TODO: test that authentication works
 

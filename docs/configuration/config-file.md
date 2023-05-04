@@ -18,6 +18,7 @@ The configuration file is structured as a [TOML](https://toml.io/en/) file. The 
 The configuration file is divided into the following tables:
 
 - [harbor](#harbor)
+- [harbor.retry](#harborretry)
 - [general](#general)
 - [output](#output)
 - [output.table](#outputtable)
@@ -125,7 +126,47 @@ Control verification of the SSL certificate of the Harbor instance. The default 
 verify_ssl = true
 ```
 
-!!! info In the future, this option might be expanded to allow for more fine-grained control of the SSL verification.
+!!! info
+    In the future, this option might be expanded to allow for more fine-grained control of the SSL verification.
+
+----
+
+### `harbor.retry`
+
+The `harbor.retry` table contains settings related to retrying failed HTTP requests to the Harbor API.
+
+----
+
+#### `harbor.retry.enabled`
+
+Enable retrying of failed requests. By default `true`.
+
+```toml
+[harbor.retry]
+enabled = true
+```
+
+----
+
+#### `harbor.retry.max_tries`
+
+Maximum number of times to retry failed requests. By default `5`.
+
+```toml
+[harbor.retry]
+max_tries = 5
+```
+
+----
+
+#### `harbor.retry.max_time`
+
+Maximum time in seconds to retry failed requests. By default `10`.
+
+```toml
+[harbor.retry]
+max_time = 10
+```
 
 ----
 
