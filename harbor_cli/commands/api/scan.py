@@ -9,10 +9,10 @@ from harborapi.models import ScanDataExportRequest
 
 from ...harbor.artifact import parse_artifact_name
 from ...logs import logger
-from ...output.console import exit_err
 from ...output.render import render_result
 from ...state import state
 from ...style import render_cli_value
+from ...style.style import render_cli_command
 from ...utils.args import construct_query_list
 from ...utils.args import parse_commalist
 from ...utils.args import parse_commalist_int
@@ -114,8 +114,16 @@ def get_scan_exports(ctx: typer.Context) -> None:
     render_result(exports, ctx)
 
 
+export_start_help = f"""Start a scan export job.
+
+Returns an execution ID that can be used to download the export once it is finished
+using {render_cli_command('harbor scan export download')}
+
+!!! warning
+    The official documentation for this endpoint is poor, and as such, this command might not work as intended."""
+
 #  HarborAsyncClient.export_scan_data()
-@export_cmd.command("start")
+@export_cmd.command("start", help=export_start_help)
 def start_scan_export(
     ctx: typer.Context,
     job_name: Optional[str] = typer.Option(
@@ -133,8 +141,9 @@ def start_scan_export(
         ["**"],
         "--tag",
         help=(
-            f"Multiple comma separated tags, {render_cli_value('tag*')}, or {render_cli_value('**')}. "
-            "Defaults to all tags."
+            f"Names of tag(s) to include in the export. "
+            f"Supports wildcards ({render_cli_value('tag*')}, {render_cli_value('**')}). "
+            f"Defaults to all tags ({render_cli_value('**')})"
         ),
         callback=parse_commalist,
     ),
@@ -148,22 +157,16 @@ def start_scan_export(
         ["**"],
         "--repo",
         help=(
-            f"Multiple comma separated repos, {render_cli_value('repo*')}, or {render_cli_value('**')}. "
-            "Defaults to all repos."
+            f"Names of repo(s) to include in the export. "
+            f"Supports wildcards ({render_cli_value('repo*')}, {render_cli_value('**')}). "
+            f"Defaults to all repos ({render_cli_value('**')})"
         ),
         callback=parse_commalist,
     ),
-    project: List[str] = typer.Option(
-        [],
+    project: Optional[str] = typer.Option(
+        None,
         "--project",
-        help="Names of project(s) to include in the export.",
-        callback=parse_commalist,
-    ),
-    project_id: List[str] = typer.Option(
-        [],
-        "--project-id",
-        help="IDs of project(s) to include in the export.",
-        callback=parse_commalist_int,
+        help="Name or ID of project to include in the export.",
     ),
     scan_type: str = typer.Option(
         "application/vnd.security.vulnerability.report; version=1.1",
@@ -171,21 +174,6 @@ def start_scan_export(
         help="The type of scan to export. Should not be changed unless you know what you are doing.",
     ),
 ) -> None:
-    """Start a scan export job.
-
-    NOTE: The official documentation for this endpoint is poor, and as such, this command might not work as intended.
-    """
-
-    # Assert for mypy that all project IDs are int + make set
-    project_id_set = set([int(pid) for pid in project_id])
-
-    # Resolve project names to IDs
-    for proj in project:
-        p = get_project(proj)
-        if p.project_id is None:
-            exit_err(f"Project {proj!r} does not have a project ID.")
-        project_id_set.add(p.project_id)
-
     # TODO: resolve label names to IDs (?)
 
     req = ScanDataExportRequest()
@@ -193,22 +181,27 @@ def start_scan_export(
         req.job_name = job_name
     if cve:
         req.cve_ids = construct_query_list(*cve, comma=True)
+    # TODO: investigate if tags should be comma-separated or not
     if tag:
         req.tags = construct_query_list(*tag, comma=True)
     if label:
         req.labels = label  # type: ignore
+    # TODO: investigate if tags should be comma-separated or not
     if repo:
         req.repositories = construct_query_list(*repo, comma=True)
-    if project:
-        req.projects = list(project_id_set)
+    if project is not None:
+        # Resolve project names to IDs
+        p = get_project(project)
+        assert p.project_id is not None, f"Project {project!r} has no ID"
+        req.projects = [p.project_id]
 
-        export = state.run(
-            state.client.export_scan_data(
-                req,
-                scan_type,
-            ),
-            "Starting scan export...",
-        )
+    export = state.run(
+        state.client.export_scan_data(
+            req,
+            scan_type,
+        ),
+        "Starting scan export...",
+    )
     render_result(export, ctx)
 
 
@@ -222,10 +215,12 @@ def download_scan_export(
     ),
     destination: Path = typer.Argument(
         ...,
-        help="Destination to download the export to. Uses application temp dir if omitted.",
+        help="Destination to download the export to.",
+        # TODO: use automatic filename if omitted
+        # Which location do we save to?
     ),
 ) -> None:
-    """Download a specific scan export."""
+    """Download the results of a scan export job as a CSV file."""
     export = state.run(
         state.client.download_scan_export(execution_id),
         "Downloading scan export...",
