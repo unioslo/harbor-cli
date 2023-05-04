@@ -77,7 +77,8 @@ class State:
             self.config = config
 
         if client:
-            self.add_client(client)
+            self.client = client
+            self._client_loaded = True
         else:
             # bogus defaults which we override when the config is loaded
             self.client = HarborAsyncClient(
@@ -128,11 +129,6 @@ class State:
     @property
     def client_loaded(self) -> bool:
         return self._client_loaded
-
-    def add_client(self, client: HarborAsyncClient) -> None:
-        """Add a client object to the state."""
-        self.client = client
-        self._client_loaded = True
 
     def configure_cache(self) -> None:
         """Configure the cache based on the config."""
@@ -186,8 +182,10 @@ class State:
             self.config.harbor.secret = secret  # type: ignore # pydantic.SecretStr
 
         self.client.authenticate(**self.config.harbor.credentials)
+        self.client.raw = self.config.harbor.raw_mode
+        self.client.validate = self.config.harbor.validate_data
         self._client_loaded = True
-        # TODO: test that authenication works
+        # TODO: test that authentication works
 
     def run(
         self,
