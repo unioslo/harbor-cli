@@ -9,16 +9,18 @@ from pydantic import ValidationError
 
 from ...config import DEFAULT_CONFIG_FILE
 from ...config import HarborCLIConfig
-from ...logs import logger
 from ...output.console import console
 from ...output.console import exit_err
+from ...output.console import info
 from ...output.console import success
+from ...output.formatting.path import path_link
 from ...output.render import render_result
 from ...output.table.anysequence import AnySequence
 from ...state import state
 from ...style import render_cli_command
 from ...style import render_cli_value
 from ...style import render_config_option
+from ...style.style import render_cli_option
 from ...utils.utils import forbid_extra
 
 # Create a command group
@@ -57,7 +59,8 @@ def get_cli_config(
 ) -> None:
     """Show the current CLI configuration."""
     render_config(state.config, as_toml)
-    logger.info(f"Source: {state.config.config_file}")
+    if state.config.config_file is not None:
+        info(f"Source: {path_link(state.config.config_file)}")
 
 
 @app.command(
@@ -170,7 +173,7 @@ def write_session_config(
     save_path = path or state.config.config_file
     if save_path is None:
         exit_err(
-            "No path specified and no path found in current configuration. Use [green]--path[/] to specify a path."
+            f"No path specified and no path found in current configuration. Use {render_cli_option('--path')} to specify a path."
         )
     state.config.save(path=save_path)
     success(f"Saved configuration to [green]{save_path}[/]")
