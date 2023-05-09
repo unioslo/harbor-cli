@@ -394,11 +394,11 @@ show_header = true
 
 #### `output.table.style.bool_emoji`
 
-Render booleans as emojis. The default is `true`.
+Render booleans as emojis. The default is `false`.
 
 ```toml
 [output.table.style]
-bool_emoji = true
+bool_emoji = false
 ```
 
 ### `output.JSON`

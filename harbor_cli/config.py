@@ -213,7 +213,7 @@ class TableStyleSettings(BaseModel):
     caption: Optional[str] = None
     expand: bool = True
     show_header: bool = True
-    bool_emoji: bool = True
+    bool_emoji: bool = False
     # TODO: box
 
     @validator("rows", pre=True)
