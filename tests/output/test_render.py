@@ -12,8 +12,9 @@ from harbor_cli.output import render
 from harbor_cli.output.render import render_json
 from harbor_cli.output.render import render_result
 from harbor_cli.output.render import render_table
-from harbor_cli.state import state
+from harbor_cli.state import get_state
 
+state = get_state()
 
 # The actual testing of the render functions is done in test_render_<format>()
 def test_render_result_json(mocker: MockerFixture) -> None:

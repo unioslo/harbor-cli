@@ -11,8 +11,10 @@ from ...app import app
 from ...config import DEFAULT_HISTORY_FILE
 from ...config import env_var
 from ...option import Option
-from ...state import state
+from ...state import get_state
 from ...style import render_cli_value
+
+state = get_state()
 
 
 @app.command()

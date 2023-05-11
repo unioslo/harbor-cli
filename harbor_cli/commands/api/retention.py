@@ -11,12 +11,14 @@ from ...output.console import error
 from ...output.console import exit_err
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
-from ...state import state
+from ...state import get_state
 from ...style import render_cli_value
 from ...utils.args import get_project_arg
 from ...utils.commands import ARG_PROJECT_NAME_OR_ID_OPTIONAL
 from ...utils.commands import inject_resource_options
 from ...utils.commands import OPTION_FORCE
+
+state = get_state()
 
 app = typer.Typer(
     name="retention",

@@ -15,11 +15,14 @@ from pydantic import BaseModel
 from ..exceptions import OverwriteError
 from ..format import OutputFormat
 from ..logs import logger
-from ..state import state
+from ..state import get_state
 from .console import console
 from .table import BuiltinTypeException
 from .table import EmptySequenceError
 from .table import get_renderable
+
+
+state = get_state()
 
 T = TypeVar("T")
 

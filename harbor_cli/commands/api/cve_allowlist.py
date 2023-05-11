@@ -9,8 +9,11 @@ from harborapi.models.models import CVEAllowlistItem
 from ...logs import logger
 from ...output.console import exit
 from ...output.render import render_result
-from ...state import state
+from ...state import get_state
 from ...utils import parse_commalist
+
+
+state = get_state()
 
 # Create a command group
 app = typer.Typer(

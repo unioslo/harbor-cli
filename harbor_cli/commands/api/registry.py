@@ -14,12 +14,14 @@ from ...output.console import exit_err
 from ...output.console import success
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
-from ...state import state
+from ...state import get_state
 from ...utils.args import create_updated_model
 from ...utils.args import model_params_from_ctx
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
 from ...utils.commands import OPTION_FORCE
+
+state = get_state()
 
 # Create a command group
 app = typer.Typer(

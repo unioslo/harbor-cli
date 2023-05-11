@@ -16,12 +16,15 @@ from ...output.console import success
 from ...output.formatting.path import path_link
 from ...output.render import render_result
 from ...output.table.anysequence import AnySequence
-from ...state import state
+from ...state import get_state
 from ...style import render_cli_command
 from ...style import render_cli_value
 from ...style import render_config_option
 from ...style.style import render_cli_option
 from ...utils.utils import forbid_extra
+
+
+state = get_state()
 
 # Create a command group
 app = typer.Typer(
@@ -40,9 +43,9 @@ def render_config(config: HarborCLIConfig, as_toml: bool) -> None:
 
 @app.callback()
 def callback(ctx: typer.Context) -> None:
-    # Every other command than "path" requires a config file
-    if ctx.invoked_subcommand != "path":
-        if state.config.config_file is None or not state.config_loaded:
+    # Every other command than "path" and "write" requires a config file
+    if ctx.invoked_subcommand not in ["path", "write"]:
+        if state.config.config_file is None or not state.is_config_loaded:
             exit_err(
                 "No configuration file loaded. A configuration file must exist to use this command."
             )
@@ -51,6 +54,8 @@ def callback(ctx: typer.Context) -> None:
 @app.command("get")
 def get_cli_config(
     ctx: typer.Context,
+    # TODO: Add support for fetching keys with dot notation
+    # key: str = typer.Argument(..., help="The config key to get."),
     as_toml: bool = typer.Option(
         True,
         "--toml/--no-toml",

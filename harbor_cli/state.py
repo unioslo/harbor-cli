@@ -11,16 +11,10 @@ from harborapi import HarborAsyncClient
 from pydantic import BaseModel
 from rich.console import Console
 
-# THIS MODULE CANNOT IMPORT FROM ANY OTHER MODULE IN THE PROJECT
-# The state module should be importable by every other module in the
-# project, so that it can be used as a singleton shared between all
-# commands. This is necessary because the state object is not passed
-# to each command, but is instead accessed via the global state variable.
-# If we import from any other module, we will create a circular import problem.
-
+from .config import HarborCLIConfig
+from .output.console import console as default_console
 
 if TYPE_CHECKING:
-    from .config import HarborCLIConfig
     from .cache import Cache
 
 T = TypeVar("T")
@@ -44,27 +38,22 @@ class CommonOptions(BaseModel):
 
 
 class State:
-    """Class used to manage the state of the program.
-
-    It is used as a singleton shared between all commands.
-    Unlike a context object, the state object is not passed to each
-    command, but is instead accessed via the global state variable.
+    """Object that encapsulates the current state of the application.
+    Holds the current configuration, harbor client, and other stateful objects.
     """
 
-    # Bogus defaults so we can instantiate the client before the config is loaded
-    client: HarborAsyncClient
-    loop: asyncio.AbstractEventLoop = asyncio.get_event_loop()
     options: CommonOptions = CommonOptions()
+    console: Console = default_console
+    loop: asyncio.AbstractEventLoop
     repl: bool = False
-    console: Console = Console()  # the default console
 
-    # Attributes that are lazily loaded (exposed as properties)
+    # Attributes (exposed as properties)
     _cache = None  # type: Cache | None
     _config = None  # type: HarborCLIConfig | None
+    _client = None  # type: HarborAsyncClient | None
 
-    # Flags to indicate if attributes are configured (i.e. not using defaults)
+    # Flags to determine if the config or client have been loaded
     _config_loaded: bool = False
-    _console_loaded: bool = False
     _client_loaded: bool = False
 
     def __init__(
@@ -72,46 +61,59 @@ class State:
         config: HarborCLIConfig | None = None,
         client: HarborAsyncClient | None = None,
     ) -> None:
-        """Initialize the state object."""
+        """Initialize the state object.
+
+        Parameters
+        ----------
+        config : HarborCLIConfig | None
+            Config to override default config with.
+        client : HarborAsyncClient | None
+            Harbor client to override the default client with.
+        """
+        # NOTE: these overrides are used mainly for testing
         if config:
             self.config = config
-
         if client:
             self.client = client
-            self._client_loaded = True
-        else:
-            # bogus defaults which we override when the config is loaded
-            self.client = HarborAsyncClient(
-                url="http://example.com",
-                username="username",
-                secret="password",
-            )
-
         self.loop = asyncio.get_event_loop()
         self.options = CommonOptions()
 
     @property
-    def cache(self) -> Cache:
-        """Return the cache object."""
-        # fmt: off
-        if self._cache is None:
-            from .cache import Cache
-            self._cache = Cache()
-        return self._cache
-        # fmt: on
+    def client(self) -> HarborAsyncClient:
+        """Harbor async client object.
 
-    # TODO: we could get rid of _config_loaded by returning a new default config
-    # if none exists, and only write to _config if a new config is set.
-    # config_loaded would then be True if _config is not None.
+        Returns a client with bogus defaults if the client is not configured.
+        """
+        # NOTE: we use this pattern so users can invoke commands without
+        # first having provided authentication info. Only when we try to
+        # use the client, will we detect that no authentication info is provided,
+        # and then we can prompt the user for it.
+        # We have to keep re-using this client object, because it's directly
+        # referenced by the various commands, so we have to patch it in-place
+        # when we get the authentication info.
+        if self._client is None:
+            # Direct assignment to avoid triggering the setter
+            self._client = HarborAsyncClient(
+                url="http://example.com",
+                username="username",
+                secret="password",
+            )
+        return self._client
+
+    @client.setter
+    def client(self, client: HarborAsyncClient) -> None:
+        self._client = client
+        self._client_loaded = True
+
     @property
     def config(self) -> HarborCLIConfig:
-        """Return the config object."""
-        # fmt: off
-        if self._config is None:  # lazy import to avoid circular imports
-            from .config import HarborCLIConfig
-            self._config = HarborCLIConfig()
+        """The current program configuration.
+
+        Returns the default config if no config is loaded.
+        """
+        if self._config is None:
+            return HarborCLIConfig()
         return self._config
-        # fmt: on
 
     @config.setter
     def config(self, config: HarborCLIConfig) -> None:
@@ -119,42 +121,36 @@ class State:
         self._config_loaded = True
 
     @property
-    def config_loaded(self) -> bool:
+    def is_config_loaded(self) -> bool:
+        """Whether or not the the config has been loaded."""
+        # If we have assigned a custom config, it's loaded
         return self._config_loaded
 
     @property
-    def console_loaded(self) -> bool:
-        return self._console_loaded
+    def is_client_loaded(self) -> bool:
+        return self._client_loaded
 
     @property
-    def client_loaded(self) -> bool:
-        return self._client_loaded
+    def cache(self) -> Cache:
+        """The program cache.
+        Initializes the cache if it's not already initialized."""
+        # fmt: off
+        if self._cache is None:
+            from .cache import Cache
+            self._cache = Cache()
+        return self._cache
+        # fmt: on
 
     def configure_cache(self) -> None:
         """Configure the cache based on the config."""
         self.cache.ttl = self.config.cache.ttl
         self.cache.enabled = self.config.cache.enabled
         # Start the cache flushing loop
-        self.loop.create_task(self.cache.start_flush_loop())
-
-    def _init_console(self) -> None:
-        """Import the global console object if it hasn't been imported yet.
-        We do this here, so that we don't create a circular import
-        between the state module and the output module."""
-        # I really hate this, but due to the way the state object is
-        # globally instantiated, it's difficult to conceive a way to do
-        # this without creating a circular import _somewhere_.
-        # I suppose we could run some sort analysis tool to figure out
-        # the optimal way to structure the modules to accommodate this
-        # pattern, but I'm not sure it's worth the effort (yet).
-        # fmt: off
-        from .output.console import console
-        self.console = console
-        self._console_loaded = True
-        # fmt: on
+        if not self.cache._loop_running:
+            self.loop.create_task(self.cache.start_flush_loop())
 
     def _init_client(self) -> None:
-        """Configures  Harbor client if it hasn't been configured yet.
+        """Configures Harbor client if it hasn't been configured yet.
 
         Prompts for necessary authentication info if it's missing from the config.
         """
@@ -211,9 +207,9 @@ class State:
         status : str, optional
             The status message to display while the coroutine is running.
         no_handle : type[Exception] | tuple[type[Exception], ...] | None
-            One or more Exception types to not handle.
-            If None, all exceptions will be handled using the default
-            exception handler.
+            One or more Exception types to not pass to the default
+            exception handler. All other exceptions will be handled.
+            If None, all exceptions will be handled.
 
         Returns
         -------
@@ -224,10 +220,8 @@ class State:
         --------
         [harbor_cli.exceptions.handle_exception][]
         """
-        # Make sure console and client are loaded
-        if not self._console_loaded:
-            self._init_console()
-        if not self._client_loaded:
+        # Make sure client is loaded and configured
+        if not self.is_client_loaded:
             self._init_client()
 
         if not status:
@@ -249,4 +243,14 @@ class State:
         return resp
 
 
-state = State()
+_STATE = None  # type: State | None
+
+
+def get_state() -> State:
+    """Returns the global state object.
+
+    Instantiates a new state object with defaults if it doesn't exist."""
+    global _STATE
+    if _STATE is None:
+        _STATE = State()
+    return _STATE

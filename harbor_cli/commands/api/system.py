@@ -5,7 +5,9 @@ import time
 import typer
 
 from ...output.render import render_result
-from ...state import state
+from ...state import get_state
+
+state = get_state()
 
 # Create a command group
 app = typer.Typer(

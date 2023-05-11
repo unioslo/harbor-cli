@@ -16,7 +16,9 @@ from ...output.console import console
 from ...output.console import info
 from ...output.render import render_result
 from ...output.table._utils import get_table
-from ...state import state
+from ...state import get_state
+
+state = get_state()
 
 # Create a command group
 app = typer.Typer(

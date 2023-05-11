@@ -18,7 +18,7 @@ from ...output.console import exit_err
 from ...output.prompts import check_enumeration_options
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
-from ...state import state
+from ...state import get_state
 from ...style.style import render_cli_value
 from ...utils import parse_commalist
 from ...utils.args import create_updated_model
@@ -33,6 +33,8 @@ from ...utils.commands import ARG_USERNAME_OR_ID
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
 from ...utils.commands import OPTION_FORCE
+
+state = get_state()
 
 # Create a command group
 app = typer.Typer(

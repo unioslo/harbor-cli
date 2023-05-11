@@ -12,6 +12,8 @@ from rich.prompt import FloatPrompt
 from rich.prompt import IntPrompt
 from rich.prompt import Prompt
 
+from ..style.style import render_cli_option
+
 if TYPE_CHECKING:
     from ..config import HarborCLIConfig
     from ..state import State
@@ -280,6 +282,9 @@ def delete_prompt(
         if not bool_prompt(message, default=False):
             exit("Deletion aborted.")
     return
+
+
+ENUMERATION_WARNING = f"Unconstrained resource enumeration detected. It is recommended to use {render_cli_option('--query')} or {render_cli_option('--limit')} to constrain the results. Continue?"
 
 
 def check_enumeration_options(

@@ -26,8 +26,10 @@ from .output.console import exit
 from .output.console import exit_err
 from .output.console import info
 from .output.formatting.path import path_link
+from .state import get_state
 from .state import State
-from .state import state
+
+state = get_state()
 
 # Init subcommand groups here
 for group in commands.ALL_GROUPS:
@@ -372,7 +374,7 @@ def main_callback(
         state.config.cache.enabled = cache_enabled
     if cache_ttl is not None:
         state.config.cache.ttl = cache_ttl
-    state.configure_cache()
+    state.configure_cache()  # NOTE: move to configure_from_config?
 
     # Set global options
     state.options.verbose = verbose
@@ -405,7 +407,7 @@ def try_load_config(config_file: Optional[Path], create: bool = True) -> None:
         Whether to create a new config file if one is not found, by default True
     """
     # Don't load the config if it's already loaded (e.g. in REPL)
-    if not state.config_loaded:
+    if not state.is_config_loaded:
         try:
             conf = HarborCLIConfig.from_file(config_file)
         except FileNotFoundError:
