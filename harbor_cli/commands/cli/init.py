@@ -31,8 +31,11 @@ from ...output.prompts import bool_prompt
 from ...output.prompts import int_prompt
 from ...output.prompts import path_prompt
 from ...output.prompts import str_prompt
+from ...state import get_state
 from ...style import render_cli_option
 from ...style import STYLE_COMMAND
+
+state = get_state()
 
 
 TITLE_STYLE = "bold"  # Style for titles used by each config category
@@ -81,7 +84,6 @@ def init(
 
     if wizard:
         # fmt: off
-        from ...state import state
         config = run_config_wizard(config_path)
         state.config = config
         # fmt: on

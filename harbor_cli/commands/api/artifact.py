@@ -41,7 +41,7 @@ from ...output.prompts import check_enumeration_options
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
 from ...output.table._utils import get_table
-from ...state import state
+from ...state import get_state
 from ...style import render_cli_option
 from ...style import render_cli_value
 from ...style import render_warning
@@ -55,6 +55,9 @@ from ..help import ARTIFACT_HELP_STRING
 
 if TYPE_CHECKING:
     from ...utils.utils import PackageVersion  # noqa: F401
+
+
+state = get_state()
 
 
 # Create a command group

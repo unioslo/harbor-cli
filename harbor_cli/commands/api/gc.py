@@ -11,10 +11,13 @@ from ...logs import logger
 from ...output.console import exit_err
 from ...output.prompts import check_enumeration_options
 from ...output.render import render_result
-from ...state import state
+from ...state import get_state
 from ...utils.args import create_updated_model
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
+
+state = get_state()
+
 
 # Create a command group
 app = typer.Typer(

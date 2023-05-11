@@ -13,7 +13,7 @@ from ...exceptions import HarborCLIError
 from ...logs import logger
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
-from ...state import state
+from ...state import get_state
 from ...utils.args import create_updated_model
 from ...utils.args import get_user_arg
 from ...utils.commands import ARG_USERNAME_OR_ID
@@ -23,6 +23,9 @@ from ...utils.commands import OPTION_LIMIT
 from ...utils.commands import OPTION_PAGE
 from ...utils.commands import OPTION_PAGE_SIZE
 from ...utils.commands import OPTION_QUERY
+
+
+state = get_state()
 
 # Create a command group
 app = typer.Typer(

@@ -20,14 +20,11 @@ from pydantic import BaseModel
 from typer.testing import CliRunner
 from typer.testing import Result
 
-from harbor_cli.main import app as main_app  # noreorder
-
-# We can't import these before main is imported, because of circular imports
+from ._strategies import COMPACT_TABLE_MODELS
+from harbor_cli import state
 from harbor_cli.config import HarborCLIConfig
 from harbor_cli.format import OutputFormat
-from harbor_cli import state
-
-from ._strategies import COMPACT_TABLE_MODELS
+from harbor_cli.main import app as main_app
 
 runner = CliRunner()
 
@@ -52,7 +49,7 @@ def config() -> HarborCLIConfig:
     # These are required to run commands
     conf.harbor.url = "https://harbor.example.com/api/v2.0"
     conf.harbor.username = "admin"
-    conf.harbor.secret = "password"
+    conf.harbor.secret = "password"  # type: ignore
     return conf
 
 
@@ -123,14 +120,14 @@ def output_format_arg(output_format: OutputFormat) -> list[str]:
     return ["--format", output_format.value]
 
 
-_ORIGINAL_STATE = copy(state.state)
+_ORIGINAL_STATE = copy(state.get_state())
 
 
 @pytest.fixture(scope="function", autouse=True)
 def revert_state() -> Generator[None, None, None]:
     """Reverts the global state back to its original value after the test is run."""
     yield
-    state.state = _ORIGINAL_STATE
+    state._STATE = _ORIGINAL_STATE
 
 
 @pytest.fixture

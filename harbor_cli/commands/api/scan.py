@@ -10,7 +10,7 @@ from harborapi.models import ScanDataExportRequest
 from ...harbor.artifact import parse_artifact_name
 from ...logs import logger
 from ...output.render import render_result
-from ...state import state
+from ...state import get_state
 from ...style import render_cli_value
 from ...style.style import render_cli_command
 from ...utils.args import construct_query_list
@@ -18,6 +18,8 @@ from ...utils.args import parse_commalist
 from ...utils.args import parse_commalist_int
 from ..help import ARTIFACT_HELP_STRING
 from .project import get_project
+
+state = get_state()
 
 app = typer.Typer(
     name="scan",

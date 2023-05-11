@@ -5,10 +5,14 @@ from typing import Any
 from typing import Optional
 from typing import Sequence
 
-from ...state import state
+from ...state import get_state
 from ...style import EMOJI_NO
 from ...style import EMOJI_YES
+from .constants import FALSE_STR
 from .constants import NONE_STR
+from .constants import TRUE_STR
+
+state = get_state()
 
 
 def str_str(value: Optional[str]) -> str:
@@ -24,8 +28,9 @@ def bool_str(value: Optional[bool], none_is_false: bool = True) -> str:
         value = False
     if state.config.output.table.style.bool_emoji:
         return EMOJI_YES if value else EMOJI_NO
-    else:
-        return str(value).lower() if value is not None else NONE_STR
+    elif value is None:
+        return NONE_STR  # should we return None in emoji mode as well?
+    return TRUE_STR if value else FALSE_STR
 
 
 def float_str(value: Optional[float], precision: int = 2) -> str:

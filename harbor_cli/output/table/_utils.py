@@ -8,8 +8,11 @@ from rich.console import RenderableType
 from rich.panel import Panel
 from rich.table import Table
 
-from ...state import state
+from ...state import get_state
 from ..formatting.builtin import plural_str
+
+
+state = get_state()
 
 
 def get_table(

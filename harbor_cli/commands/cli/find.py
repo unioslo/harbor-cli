@@ -11,7 +11,7 @@ from fuzzywuzzy import fuzz
 from ...app import app
 from ...logs import logger
 from ...models import CommandSummary
-from ...output.render import render_result  # avoid circular import # TODO: fix
+from ...output.render import render_result
 from ...utils.commands import get_app_commands
 
 

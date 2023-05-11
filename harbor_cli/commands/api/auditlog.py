@@ -17,9 +17,12 @@ from harborapi.models import Schedule, ScheduleObj
 from ...style import render_cli_option, render_cli_value
 
 from ...output.render import render_result
-from ...state import state
+from ...state import get_state
 from ...utils.commands import inject_resource_options
 from ...output.prompts import check_enumeration_options
+
+
+state = get_state()
 
 # Create a command group
 app = typer.Typer(

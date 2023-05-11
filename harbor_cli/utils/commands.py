@@ -5,7 +5,6 @@ import inspect
 from functools import lru_cache
 from typing import Any
 from typing import Type
-from typing import TYPE_CHECKING
 
 import click
 import typer
@@ -13,10 +12,8 @@ from pydantic import BaseModel
 from typer.core import TyperCommand
 from typer.core import TyperGroup
 
+from ..models import CommandSummary
 from ..style.style import render_cli_value
-
-if TYPE_CHECKING:
-    from ..models import CommandSummary
 
 
 def get_parent_ctx(
@@ -52,9 +49,6 @@ def _get_app_commands(
     cmds: list[CommandSummary] | None = None,
     current: str = "",
 ) -> list[CommandSummary]:
-    # Lazy-import to avoid circular imports
-    from ..models import CommandSummary
-
     if cmds is None:
         cmds = []
 
@@ -238,6 +232,10 @@ def _arg_project_name_or_id(default: Any = ...) -> Any:  # typer.Argument is unt
 
 ARG_PROJECT_NAME_OR_ID = _arg_project_name_or_id()
 ARG_PROJECT_NAME_OR_ID_OPTIONAL = _arg_project_name_or_id(None)
+ARG_REPO_NAME = typer.Argument(
+    ...,
+    help="Name of the repository to use.",
+)
 
 ARG_USERNAME_OR_ID = typer.Argument(
     ...,

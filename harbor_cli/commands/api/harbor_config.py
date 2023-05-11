@@ -10,9 +10,11 @@ from harborapi.models import ConfigurationsResponse
 from ...logs import logger
 from ...output.console import exit_err
 from ...output.render import render_result
-from ...state import state
+from ...state import get_state
 from ...utils.args import model_params_from_ctx
 from ...utils.commands import inject_help
+
+state = get_state()
 
 # Create a command group
 app = typer.Typer(
