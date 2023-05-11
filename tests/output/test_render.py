@@ -1,12 +1,19 @@
 from __future__ import annotations
 
 from typing import Any
+from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pytest
+from hypothesis import given
+from hypothesis import HealthCheck
+from hypothesis import settings
+from hypothesis import strategies as st
 from pydantic import BaseModel
 from pytest import CaptureFixture
 from pytest_mock import MockerFixture
 
+from .._strategies import COMPACT_TABLE_MODELS
 from harbor_cli.format import OutputFormat
 from harbor_cli.output import render
 from harbor_cli.output.render import render_json
@@ -65,29 +72,37 @@ def test_render_table(capsys: CaptureFixture) -> None:
     assert out not in ["", "\n"]
 
 
-def test_render_table_compact_mock(
-    mocker: MockerFixture, compact_table_renderable: BaseModel
-) -> None:
+@given(st.one_of(COMPACT_TABLE_MODELS))
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
+def test_render_table_compact_mock(renderable: BaseModel | list[BaseModel]) -> None:
     """Test that we can render a result as a compact table."""
-    # FIXME: getting the following error when attempting to create mock
-    # for render_table and render_table_compact when using hypothesis strategy:
-    # TypeError: __name__ must be set to a string object
+    # NOTE: we cannot use the mocker fixture from pytest-mock here, because
+    # it will not work with the @given decorator.
+    # The mocker fixture is not reset between examples and will cause
+    # the test to fail. So we have to manually set up the mocks.
+    #
+    # This also applies to test_render_table_full_mock()
 
-    full_table_spy = mocker.spy(render, "render_table_full")
-    compact_table_spy = mocker.spy(render, "render_table_compact")
+    full_table_mock = MagicMock()
+    compact_table_mock = MagicMock()
 
-    state.config.output.format = OutputFormat.TABLE
-    state.config.output.table.compact = True
-    render_table(compact_table_renderable)
+    with patch("harbor_cli.output.render.render_table_full", full_table_mock), patch(
+        "harbor_cli.output.render.render_table_compact", compact_table_mock
+    ):
+        # Activate compact table mode
+        state.config.output.format = OutputFormat.TABLE
+        state.config.output.table.compact = True
+        render_table(renderable)
 
-    # Check our spies
-    compact_table_spy.assert_called_once()
-    full_table_spy.assert_not_called()
+        # Check our spies
+        compact_table_mock.assert_called_once()
+        full_table_mock.assert_not_called()
 
 
 def test_render_table_compact_fallback(mocker: MockerFixture) -> None:
     """Tests that a model with no compact table implementation is rendered
     via the fallback full table implementation."""
+    # We can use the pytest-mock mocker fixture here since we don't use hypothesis
     full_table_spy = mocker.spy(render, "render_table_full")
     compact_table_spy = mocker.spy(render, "render_table_compact")
 
@@ -103,25 +118,22 @@ def test_render_table_compact_fallback(mocker: MockerFixture) -> None:
     full_table_spy.assert_called()
 
 
-# TODO: fix not being able to combine mocker and hypothesis
-
-
-def test_render_table_full_mock(
-    mocker: MockerFixture, compact_table_renderable: BaseModel
-) -> None:
+@given(st.one_of(COMPACT_TABLE_MODELS))
+@settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
+def test_render_table_full_mock(renderable: BaseModel | list[BaseModel]) -> None:
     """Test that we can render a result as a full table."""
-    # FIXME: getting the following error when attempting to create mock
-    # for render_table and render_table_compact:
-    # TypeError: __name__ must be set to a string object
 
-    full_table_spy = mocker.spy(render, "render_table_full")
-    compact_table_spy = mocker.spy(render, "render_table_compact")
+    full_table_mock = MagicMock()
+    compact_table_mock = MagicMock()
 
-    # Deactivate compact tables
-    state.config.output.format = OutputFormat.TABLE
-    state.config.output.table.compact = False
-    render_table(compact_table_renderable)
+    with patch("harbor_cli.output.render.render_table_full", full_table_mock), patch(
+        "harbor_cli.output.render.render_table_compact", compact_table_mock
+    ):
+        # Deactivate compact tables
+        state.config.output.format = OutputFormat.TABLE
+        state.config.output.table.compact = False
+        render_table(renderable)
 
-    # Check our spies
-    compact_table_spy.assert_not_called()
-    full_table_spy.assert_called()
+        # Check our spies
+        compact_table_mock.assert_not_called()
+        full_table_mock.assert_called_once()

@@ -16,11 +16,9 @@ import typer
 from _pytest.logging import LogCaptureFixture
 from harborapi import HarborAsyncClient
 from loguru import logger
-from pydantic import BaseModel
 from typer.testing import CliRunner
 from typer.testing import Result
 
-from ._strategies import COMPACT_TABLE_MODELS
 from harbor_cli import state
 from harbor_cli.config import HarborCLIConfig
 from harbor_cli.format import OutputFormat
@@ -135,11 +133,3 @@ def caplog(caplog: LogCaptureFixture):
     handler_id = logger.add(caplog.handler, format="{message}")
     yield caplog
     logger.remove(handler_id)
-
-
-@pytest.fixture(scope="function", params=COMPACT_TABLE_MODELS)
-def compact_table_renderable(request: pytest.FixtureRequest) -> BaseModel:
-    """Fixture for testing compact table renderables that can be instantiated with no arguments."""
-    # NOTE: kind of janky, but it lets us generate examples for functions that use
-    # pytest-mock's mocker fixture, which doesn't work when using hypothesis it seems?
-    return request.param.example()
