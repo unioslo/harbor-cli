@@ -40,6 +40,7 @@ from harborapi.models.scanner import HarborVulnerabilityReport
 from rich.panel import Panel
 from rich.table import Table
 
+from . import *
 from ...logs import logger
 from ...models import BaseModel
 from ...models import CommandSummary

@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from . import console
-from . import formatting
-from . import prompts
-from . import render
-from . import table
+from . import *
+from .console import *
+from .formatting import *
+from .prompts import *
+from .render import *
+from .table import *  # type: ignore # just a typevar name collision
