@@ -159,9 +159,16 @@ def handle_validationerror(e: ValidationError, exiter: Exiter) -> NoReturn:
     exiter(str(e), errors=e.errors())
 
 
+def handle_notraceback(e: HarborCLIError, exiter: Exiter) -> NoReturn:
+    """Handles an exception (no traceback)."""
+    # TODO: log error
+    exiter(str(e))
+
+
 EXC_HANDLERS: Mapping[Type[Exception], HandleFunc] = {
     ValidationError: handle_validationerror,
     StatusError: handle_status_error,
+    HarborCLIError: handle_notraceback,
 }
 
 
@@ -186,6 +193,5 @@ def handle_exception(e: Exception) -> NoReturn:
 
     handler = get_exception_handler(type(e))
     if not handler:
-        # TODO: print traceback
-        exit_err(str(e), exception=e)
+        raise e
     handler(e, exiter)
