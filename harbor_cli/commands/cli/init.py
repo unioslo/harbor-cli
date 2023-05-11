@@ -37,7 +37,6 @@ from ...style import STYLE_COMMAND
 
 state = get_state()
 
-
 TITLE_STYLE = "bold"  # Style for titles used by each config category
 MAIN_TITLE_STYLE = "bold underline"  # Style for the main title
 

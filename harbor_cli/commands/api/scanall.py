@@ -16,7 +16,6 @@ from ...utils.commands import inject_help
 
 state = get_state()
 
-
 # Create a command group
 app = typer.Typer(
     name="scan-all",

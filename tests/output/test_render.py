@@ -16,7 +16,6 @@ from harbor_cli.state import get_state
 
 state = get_state()
 
-
 # The actual testing of the render functions is done in test_render_<format>()
 def test_render_result_json(mocker: MockerFixture) -> None:
     """Test that we can render a result."""

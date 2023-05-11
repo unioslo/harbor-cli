@@ -59,7 +59,6 @@ if TYPE_CHECKING:
 
 state = get_state()
 
-
 # Create a command group
 app = typer.Typer(
     name="artifact",

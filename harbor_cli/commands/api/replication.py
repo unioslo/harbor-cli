@@ -21,7 +21,6 @@ from ...utils.commands import OPTION_FORCE
 
 state = get_state()
 
-
 # Create a command group
 app = typer.Typer(
     name="replication",
