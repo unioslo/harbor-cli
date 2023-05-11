@@ -11,10 +11,12 @@ from harborapi import HarborAsyncClient
 from pydantic import BaseModel
 from rich.console import Console
 
-from .config import HarborCLIConfig
-from .output.console import console as default_console
+# This module generally shouldn't import from other local modules
+# because it's widely used throughout the application, and we don't want
+# to create circular import issues.
 
 if TYPE_CHECKING:
+    from .config import HarborCLIConfig
     from .cache import Cache
 
 T = TypeVar("T")
@@ -43,7 +45,6 @@ class State:
     """
 
     options: CommonOptions = CommonOptions()
-    console: Console = default_console
     loop: asyncio.AbstractEventLoop
     repl: bool = False
 
@@ -51,6 +52,7 @@ class State:
     _cache = None  # type: Cache | None
     _config = None  # type: HarborCLIConfig | None
     _client = None  # type: HarborAsyncClient | None
+    _console = None  # type: Console | None
 
     # Flags to determine if the config or client have been loaded
     _config_loaded: bool = False
@@ -129,6 +131,16 @@ class State:
     @property
     def is_client_loaded(self) -> bool:
         return self._client_loaded
+
+    @property
+    def console(self) -> Console:
+        """Rich console object."""
+        # fmt: off
+        if not self._console:
+            from .output.console import console # lazy load the console
+            self._console = console
+        return self._console
+        # fmt: on
 
     @property
     def cache(self) -> Cache:
