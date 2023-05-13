@@ -4,6 +4,7 @@ from typing import Any
 from typing import Sequence
 
 from rich.console import Group
+from rich.console import OverflowMethod
 from rich.console import RenderableType
 from rich.panel import Panel
 from rich.table import Table
@@ -20,6 +21,7 @@ def get_table(
     data: Sequence[Any] | None = None,
     pluralize: bool = True,
     columns: list[str] | None = None,
+    overflow: OverflowMethod = "fold",
     **kwargs: Any,
 ) -> Table:
     """Get a table with a title."""
@@ -41,7 +43,7 @@ def get_table(
     )
     if columns is not None:
         for column in columns:
-            table.add_column(column)
+            table.add_column(column, overflow=overflow)
     return table
 
 
