@@ -10,10 +10,16 @@ harbor init
 
 This will create a config file at `~/.config/harbor-cli/config.toml`[^1], and then run the interactive configuration wizard. Use the `--no-wizard` flag to skip the configuration wizard.
 
-!!! important
-    The configuration file is required to run the application. Running without a configuration file will call [`init`](../../commands/init/#init_1) and create a configuration file at the default location.
+You can always check the default location of the configuration file by running the [`cli-config path`](../../commands/cli-config/#cli-config-path) command:
 
-    Certain commands, such as [`init`](../../commands/init/#init_1), [`sample-config`](../../commands/sample-config/), and [`cli-config path`](../../commands/cli-config/), do not require a configuration file to be present.
+```bash
+$ harbor cli-config path
+/Users/<username>/Library/Preferences/harbor-cli/config.toml
+```
+*Example from macOS 12.6 with platformdirs==2.5.4*
+
+!!! important
+    The configuration file is required to run the application. Running without a configuration file will call [`init`](../../commands/init/#init_1) and create a configuration file at the default location, with the exception of certain commands such as [`init`](../../commands/init/#init_1), [`sample-config`](../../commands/sample-config/), and [`cli-config path`](../../commands/cli-config/), which have been designed to work without a configuration file.
 
 
 ### Alternative config location
@@ -38,13 +44,13 @@ To print a sample configuration file, use the [`sample-config`](../../commands/s
 harbor sample-config > /path/to/config.toml
 ```
 
-You can combine [`sample-config`](../../commands/sample-config/) with [`cli-config path`](../../commands/cli-config/#cli-config-path) to create a config file at the default location with the sample configuration:
+You can combine [`sample-config`](../../commands/sample-config/) with [`cli-config path`](../../commands/cli-config/#cli-config-path) to create a config file at the default location with the sample configuration. This is a non-interactive alternative to using the [`init`](../../commands/init/#init_1) command:
 
 ```
 harbor sample-config > $(harbor cli-config path)
 ```
 
-This is a faster, but less interactive, way of creating a configuration file than using the [`init`](../../commands/init/#init_1) command. Edit the file to suit your needs:
+Edit the file to suit your needs:
 
 ```
 code $(harbor cli-config path)
