@@ -15,6 +15,7 @@ from rich.table import Table
 
 from ...logs import logger
 from ...models import ProjectExtended
+from ..formatting.builtin import bool_str
 from ..formatting.builtin import int_str
 from ..formatting.builtin import str_str
 from ..formatting.bytes import bytesize_str
@@ -82,6 +83,15 @@ def project_extended_table(p: Sequence[ProjectExtended], **kwargs: Any) -> Table
     return table
 
 
+def bool_str_to_bool(b: str | None) -> bool:
+    if b == "true":
+        return True
+    elif b == "false":
+        return False
+    else:
+        return False  # account for None
+
+
 def project_metadata_table(p: Sequence[ProjectMetadata], **kwargs: Any) -> Table:
     table = get_table("Project Metadata", p)
     table.add_column("Public")
@@ -94,13 +104,15 @@ def project_metadata_table(p: Sequence[ProjectMetadata], **kwargs: Any) -> Table
     table.add_column("Retention ID")
     for metadata in p:
         table.add_row(
-            str_str(metadata.public),
-            str_str(metadata.enable_content_trust),
-            str_str(metadata.enable_content_trust_cosign),
-            str_str(metadata.prevent_vul),
+            # Some of these values are strings instead of bools
+            # See: https://pederhan.github.io/harborapi/usage/models/#string-fields-with-true-and-false-values-in-api-spec
+            bool_str(bool_str_to_bool(metadata.public)),
+            bool_str(bool_str_to_bool(metadata.enable_content_trust)),
+            bool_str(bool_str_to_bool(metadata.enable_content_trust_cosign)),
+            bool_str(bool_str_to_bool(metadata.prevent_vul)),
             str_str(metadata.severity),
-            str_str(metadata.auto_scan),
-            str_str(metadata.reuse_sys_cve_allowlist),
+            bool_str(bool_str_to_bool(metadata.auto_scan)),
+            bool_str(bool_str_to_bool(metadata.reuse_sys_cve_allowlist)),
             str_str(metadata.retention_id),
         )
     return table
