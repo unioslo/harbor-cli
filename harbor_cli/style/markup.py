@@ -76,6 +76,11 @@ def mdsymbol_cmp(a: MarkdownSymbol, b: MarkdownSymbol) -> int:
     return 0
 
 
+# TODO: rename `markup_to_markdown` to `markup_as_markdown`
+# OR    rename `markup_to_plaintext` to `markup_as_plaintext`
+#       I am partial to `x_to_y`.
+
+
 def markup_to_markdown(s: str) -> str:
     """Parses a string that might contain markup formatting and converts it to Markdown.
 
