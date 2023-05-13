@@ -10,7 +10,9 @@
 **Table of Contents**
 
 - [Installation](#installation)
+- [Features](#features)
 - [Usage](#usage)
+- [Examples](#examples)
 - [License](#license)
 
 ## Installation
@@ -35,11 +37,15 @@ Before the name acquisition process is complete, semantic versioning will not be
 - Beautiful command-line interface powered by [Typer](https://github.com/tiangolo/typer) and [Rich](https://github.com/Textualize/rich).
 - REPL mode (`harbor repl`)
 - Tab completion for commands and options.
-- Large number of configuration options
 - Automatic retrying of failed requests
 - Multiple output formats:
     - Table
     - JSON
+- Large number of configuration options
+    - Authentication methods
+    - Table styling
+    - Output formats
+    - ... and more
 
 
 ## Usage
@@ -53,9 +59,12 @@ Check the [documentation](https://pederhan.github.io/harbor-cli/) for more infor
 
 ## Examples
 
-Most commands produce some sort of rich output that is displayed in a table. While the most common methods have nice hand-written tables, some of the tables are generated automatically from the data returned by the API. This means that the tables are not always perfect, but they are usually good enough to be useful. PRs are welcome if you wish to add a new table or improve an existing one.
+Most commands produce some sort of table. While the most common methods have nice hand-written tables, some of the tables are generated automatically from the data returned by the API.
+
+PRs are always welcome if you wish to add a new table or improve an existing one.
 
 This first example in this section is an automatically generated table, while the subsequent examples all feature hand-made tables.
+
 
 ### Create project
 
@@ -135,8 +144,10 @@ $ harbor project get test-project
 
 ### Get project (JSON format)
 
-```json
+```
 $ harbor --format json project get test-project
+```
+```json
 {
   "chart_count": null,
   "creation_time": "2023-05-13T10:29:56.214000+00:00",
