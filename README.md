@@ -69,21 +69,21 @@ This first example in this section is an automatically generated table, while th
 ### Create project
 
 ```console
-$ harbor project create test-project2 --public true
-[INFO] Created project 'test-project2'
+$ harbor project create test-project --public true
+[INFO] Created project 'test-project'
 ╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
 │ ProjectCreateResult                                                                              │
 │ ┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
 │ ┃ Field             ┃ Value                                                                    ┃ │
 │ ┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩ │
-│ │ location          │ /api/v2.0/projects/test-project2                                         │ │
+│ │ location          │ /api/v2.0/projects/test-project                                          │ │
 │ │ project           │ See below (ProjectCreateResult.project)                                  │ │
 │ └───────────────────┴──────────────────────────────────────────────────────────────────────────┘ │
 │ ProjectCreateResult.project                                                                      │
 │ ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
 │ ┃ Field                ┃ Value                                                                 ┃ │
 │ ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩ │
-│ │ project_name         │ test-project2                                                         │ │
+│ │ project_name         │ test-project                                                          │ │
 │ │ public               │ None                                                                  │ │
 │ │ metadata             │ See below (ProjectCreateResult.project.metadata)                      │ │
 │ │ cve_allowlist        │ None                                                                  │ │
