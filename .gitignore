@@ -21,6 +21,8 @@ TODO
 # Auto generated files
 docs/data/**
 docs/commands/**
+# Index of commands is hand-written
+!docs/commands/index.md
 
 # Overrides
 !tests/data/**
