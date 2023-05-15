@@ -3,10 +3,8 @@ from __future__ import annotations
 from typing import Any
 from typing import Sequence
 
-from harborapi.models.models import ChartVersion
 from harborapi.models.models import Search
 from harborapi.models.models import SearchRepository
-from harborapi.models.models import SearchResult
 from rich.console import Group
 from rich.panel import Panel
 from rich.table import Table
@@ -14,7 +12,6 @@ from rich.table import Table
 from ...logs import logger
 from ..formatting.builtin import bool_str
 from ..formatting.builtin import int_str
-from ..formatting.builtin import str_str
 from ._utils import get_table
 from .project import project_table
 
@@ -33,11 +30,6 @@ def search_panel(search: Sequence[Search], **kwargs: Any) -> Panel:
     if s.repository:
         tables.append(searchrepo_table(s.repository))
 
-    if s.chart:
-        tables.append(searchresult_table(s.chart))
-
-    # TODO: chart results when they are available
-
     return Panel(Group(*tables), title=f"Search Results", expand=True)
 
 
@@ -53,23 +45,5 @@ def searchrepo_table(repos: Sequence[SearchRepository], **kwargs: Any) -> Table:
             str(repo.repository_name),
             int_str(repo.artifact_count),
             bool_str(repo.project_public),
-        )
-    return table
-
-
-def searchresult_table(results: Sequence[SearchResult], **kwargs: Any) -> Table:
-    """Table of Helm chart search results."""
-    table = get_table("Chart", results)
-    table.add_column("Project")
-    table.add_column("Match")  # ??
-    table.add_column("Digest")
-    # TODO: sort by score
-    for result in results:
-        if not result.chart:
-            result.chart = ChartVersion()
-        table.add_row(
-            str_str(result.name),
-            int_str(result.score),
-            str_str(result.chart.digest),
         )
     return table

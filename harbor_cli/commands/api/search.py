@@ -15,6 +15,6 @@ def search(
     ctx: typer.Context,
     query: str = typer.Argument(..., help="The search query."),
 ) -> None:
-    """Search for projects, repositories and charts."""
+    """Search for projects and repositories."""
     results = state.run(state.client.search(query), "Searching...")
     render_result(results, ctx)

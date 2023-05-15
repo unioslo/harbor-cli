@@ -66,7 +66,6 @@ def project_extended_table(p: Sequence[ProjectExtended], **kwargs: Any) -> Table
             "Public",
             "Owner",
             "Repositories",
-            "Charts",
             "Created",
         ],
     )
@@ -77,7 +76,6 @@ def project_extended_table(p: Sequence[ProjectExtended], **kwargs: Any) -> Table
             str_str(project.metadata.public) if project.metadata else "Unknown",
             str_str(project.owner_name),
             int_str(project.repo_count),
-            int_str(project.chart_count),
             datetime_str(project.creation_time),
         )
     return table
@@ -93,7 +91,7 @@ def bool_str_to_bool(b: str | None) -> bool:
 
 
 def project_metadata_table(p: Sequence[ProjectMetadata], **kwargs: Any) -> Table:
-    table = get_table("Project Metadata", p)
+    table = get_table("Metadata", p)
     table.add_column("Public")
     table.add_column("Content Trust")
     table.add_column("Content Trust Cosign")
@@ -161,7 +159,6 @@ def project_summary_panel(p: ProjectSummary, **kwargs: Any) -> Panel:
     counts_table = get_table(
         columns=[
             "# Repos",
-            "# Charts",
             "# Admins",
             "# Maintainers",
             "# Developers",
@@ -173,7 +170,6 @@ def project_summary_panel(p: ProjectSummary, **kwargs: Any) -> Panel:
         # Makes no sense that some fields can be None and others 0,
         # so we make them all 0 if they are None.
         int_str(p.repo_count or 0),
-        int_str(p.chart_count or 0),
         int_str(p.project_admin_count or 0),
         int_str(p.maintainer_count or 0),
         int_str(p.developer_count or 0),

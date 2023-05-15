@@ -118,14 +118,14 @@ harbor project update test-project --public false --severity high --auto-scan tr
 
 ```console
 $ harbor project get test-project
-╭────────────────────────────────────────── test-project ──────────────────────────────────────────╮
+╭───────────────────────────────────────── test-project ───────────────────────────────────────────╮
 │                                             Project                                              │
-│ ┏━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃ ID  ┃ Name           ┃ Public  ┃ Owner     ┃ Repositories   ┃ Charts  ┃ Created              ┃ │
-│ ┡━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩ │
-│ │ 6   │ test-project   │ false   │ pederhan  │ 0              │ None    │ 2023-05-13 10:29:56  │ │
-│ └─────┴────────────────┴─────────┴───────────┴────────────────┴─────────┴──────────────────────┘ │
-│                                         Project Metadata                                         │
+│ ┏━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓ │
+│ ┃ ID  ┃ Name                     ┃ Public  ┃ Owner     ┃ Repositories   ┃ Created              ┃ │
+│ ┡━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩ │
+│ │ 7   │ test-project             │ false   │ pederhan  │ 1              │ 2023-05-15 07:04:30  │ │
+│ └─────┴──────────────────────────┴─────────┴───────────┴────────────────┴──────────────────────┘ │
+│                                             Metadata                                             │
 │ ┏━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┓ │
 │ ┃        ┃           ┃ Content   ┃            ┃           ┃           ┃            ┃           ┃ │
 │ ┃        ┃ Content   ┃ Trust     ┃ Vuln       ┃ Max       ┃           ┃ Reuse Sys  ┃ Retention ┃ │
@@ -150,7 +150,7 @@ $ harbor --format json project get test-project
 ```json
 {
   "chart_count": null,
-  "creation_time": "2023-05-13T10:29:56.214000+00:00",
+  "creation_time": "2023-05-15T07:04:30.569000+00:00",
   "current_user_role_id": 1,
   "current_user_role_ids": [
     1
@@ -160,7 +160,7 @@ $ harbor --format json project get test-project
     "expires_at": null,
     "id": 6,
     "items": [],
-    "project_id": 6,
+    "project_id": 7,
     "update_time": "0001-01-01T00:00:00+00:00"
   },
   "deleted": null,
@@ -174,14 +174,14 @@ $ harbor --format json project get test-project
     "reuse_sys_cve_allowlist": null,
     "severity": "high"
   },
-  "name": "test-project",
-  "owner_id": 7,
+  "name": "test-project-pederhan",
+  "owner_id": 6,
   "owner_name": "pederhan",
-  "project_id": 6,
+  "project_id": 7,
   "registry_id": null,
-  "repo_count": 0,
+  "repo_count": 1,
   "togglable": null,
-  "update_time": "2023-05-13T10:29:56.214000+00:00"
+  "update_time": "2023-05-15T07:04:30.569000+00:00"
 }
 ```
 
