@@ -174,7 +174,7 @@ $ harbor --format json project get test-project
     "reuse_sys_cve_allowlist": null,
     "severity": "high"
   },
-  "name": "test-project-pederhan",
+  "name": "test-project",
   "owner_id": 6,
   "owner_name": "pederhan",
   "project_id": 7,
