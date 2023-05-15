@@ -33,7 +33,7 @@ Before the name acquisition process is complete, semantic versioning will not be
 
 ## Features
 
-- 150+ commands
+- [150+ commands](https://pederhan.github.io/harbor-cli/commands/)
 - Beautiful command-line interface powered by [Typer](https://github.com/tiangolo/typer) and [Rich](https://github.com/Textualize/rich).
 - REPL mode (`harbor repl`)
 - Tab completion for commands and options.
