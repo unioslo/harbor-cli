@@ -158,12 +158,12 @@ def project_summary_panel(p: ProjectSummary, **kwargs: Any) -> Panel:
     tables = []  # type: list[Table]
     counts_table = get_table(
         columns=[
-            "# Repos",
-            "# Admins",
-            "# Maintainers",
-            "# Developers",
-            "# Guests",
-            "# Limited Guests",
+            "Repos",
+            "Admins",
+            "Maintainers",
+            "Developers",
+            "Guests",
+            "Limited Guests",
         ],
     )
     counts_table.add_row(
