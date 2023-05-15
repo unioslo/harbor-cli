@@ -50,6 +50,12 @@ def test_markup_to_markdown_code_styles(style: str) -> None:
     assert markup_to_markdown(f"[{style}]hello world[/]") == "`hello world`"
 
 
+def test_markup_to_markdown_emoji() -> None:
+    """Test that emoji are converted to unicode characters and play nice when nested inside other styles"""
+    s = f":sparkles: [{CODEBLOCK_STYLES[0]}]Hello world :desktop_computer:[/] foo [bold]:sparkles: bar :sparkles:[/] [bold italic]:sparkles: baz :sparkles:[/] :sparkles:"
+    assert markup_to_markdown(s) == "✨ `Hello world 🖥` foo **✨ bar ✨** ***✨ baz ✨*** ✨"
+
+
 @pytest.mark.parametrize(
     "inp,expected",
     [
