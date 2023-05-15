@@ -109,7 +109,7 @@ $ harbor project create test-project2 --public true
 ### Update project
 
 ```console
-harbor project update test-project --public false --severity high --auto-scan true
+$ harbor project update test-project --public false --severity high --auto-scan true
 [INFO] Updated project 'test-project'
 ```
 
