@@ -28,16 +28,13 @@ repos:
     rev: "v0.0.220"
     hooks:
       - id: ruff
-  - repo: local
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: "v1.3.0" # Use the sha / tag you want to point at
     hooks:
-      - id: mypy-local
-        name: mypy
-        entry: mypy
+      - id: mypy
+        additional_dependencies: [types-all, rich]
         language: python
         types: [python]
         files: '.*\.py[i]?'
         exclude: ^tests/
         args: [--config-file, pyproject.toml, --ignore-missing-imports]
-        # This is a bit of a hack, and might stop working in the future.
-        # We should probably just specify the dependencies we need (PyYAML)
-        additional_dependencies: [types-all]
