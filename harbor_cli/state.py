@@ -13,11 +13,12 @@ from rich.console import Console
 
 # This module generally shouldn't import from other local modules
 # because it's widely used throughout the application, and we don't want
-# to create circular import issues.
+# to create circular import issues. It sucks, but it's the way it is.
 
 if TYPE_CHECKING:
     from .config import HarborCLIConfig
     from .cache import Cache
+
 
 T = TypeVar("T")
 
@@ -111,11 +112,16 @@ class State:
     def config(self) -> HarborCLIConfig:
         """The current program configuration.
 
-        Returns the default config if no config is loaded.
+        Returns a default config if no config is loaded.
+        The default config is just a placeholder that is expected
+        to be replaced with a custom config loaded from a config file.
         """
+        # fmt: off
         if self._config is None:
-            return HarborCLIConfig()
+            from .config import HarborCLIConfig
+            self._config = HarborCLIConfig()
         return self._config
+        # fmt: on
 
     @config.setter
     def config(self, config: HarborCLIConfig) -> None:
@@ -137,7 +143,7 @@ class State:
         """Rich console object."""
         # fmt: off
         if not self._console:
-            from .output.console import console # lazy load the console
+            from .output.console import console
             self._console = console
         return self._console
         # fmt: on
@@ -180,8 +186,6 @@ class State:
             logger.warning(
                 "Harbor authentication method is missing or incomplete in configuration file."
             )
-            # TODO: refactor this so we can re-use username and password
-            # prompts from commands.cli.init!
             username, secret = prompt_username_secret(
                 self.config.harbor.username,
                 self.config.harbor.secret.get_secret_value(),
