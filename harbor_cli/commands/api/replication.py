@@ -45,7 +45,7 @@ app.add_typer(policy_cmd)
 @app.command("start")
 def start_replication_execution(
     ctx: typer.Context,
-    policy_id: int = typer.Option(
+    policy_id: int = typer.Argument(
         ...,
         help="The ID of the policy to start a execution for.",
     ),
@@ -62,7 +62,7 @@ def start_replication_execution(
 @app.command("stop")
 def stop_replication_execution(
     ctx: typer.Context,
-    execution_id: int = typer.Option(
+    execution_id: int = typer.Argument(
         ...,
         help="The ID of the replication execution.",
     ),
@@ -134,7 +134,7 @@ def list_replication_executions(
 @policy_cmd.command("get")
 def get_replication_policy(
     ctx: typer.Context,
-    policy_id: int = typer.Option(
+    policy_id: int = typer.Argument(
         ...,
         help="The ID of the replication policy.",
     ),
@@ -331,11 +331,12 @@ def create_replication_policy(
 #      Users would expect `policy update`, but it would instead be
 #      `policy create --update`
 
+
 # HarborAsyncClient.delete_replication_policy()
 @policy_cmd.command("delete")
 def delete_replication_policy(
     ctx: typer.Context,
-    policy_id: int = typer.Option(
+    policy_id: int = typer.Argument(
         ...,
         help="The ID of the replication policy.",
     ),
@@ -376,6 +377,7 @@ def list_replication_policies(
 
 
 # Tasks
+
 
 # HarborAsyncClient.get_replication_tasks()
 @task_cmd.command("list")

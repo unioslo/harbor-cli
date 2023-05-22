@@ -53,13 +53,11 @@ def get_registry_cmd(
 @inject_help(Registry)
 def create_registry(
     ctx: typer.Context,
-    name: str = typer.Option(
+    name: str = typer.Argument(
         ...,
-        "--name",
     ),
-    url: str = typer.Option(
+    url: str = typer.Argument(
         ...,
-        "--url",
     ),
     credential_type: str = typer.Option(
         None,

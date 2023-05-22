@@ -20,13 +20,14 @@ policy_cmd = typer.Typer(
 )
 app.add_typer(policy_cmd)
 
+
 # HarborAsyncClient.get_webhook_jobs()
 @app.command("jobs")
 @inject_resource_options()
 async def get_webhook_jobs(
     ctx: typer.Context,
     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
-    policy_id: int = typer.Option(
+    policy_id: int = typer.Argument(
         ...,
         help="ID of the webhook policy to list jobs for.",
     ),
