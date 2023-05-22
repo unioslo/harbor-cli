@@ -39,16 +39,13 @@ def test_state_run_nohandle(state: State) -> None:
     ["secret123", ""],
 )
 def test_state_init_client(
-    # state: State,
     monkeypatch: pytest.MonkeyPatch,
     # Fixture parameters
     url: str,
     username: str,
     secret: str,
 ) -> None:
-    # This test uses the state parameter because we need the config
-    # to be loaded, so that we can configure it.
-    # assert state.is_config_loaded
+    # Fresh state with default config
     state = State()
 
     state.config.harbor.url = url
@@ -66,10 +63,17 @@ def test_state_init_client(
     stdin = []
     if not url:
         stdin.append(url_arg)
-        assert not state.config.harbor.url
     if not username or not secret:
         stdin.append(username_arg)
         stdin.append(secret_arg)
+        # For some reason, patching sys.stdin fails for password prompts when
+        # running in a terminal (zsh 5.8.1 (x86_64-apple-darwin21.0) && GNU bash, version 5.1.16(1)-release (aarch64-apple-darwin21.1.0))
+        # on MacOS 12.6 (M1)
+        # To work around this, we patch the underlying getpass._raw_input function
+        monkeypatch.setattr(
+            "getpass._raw_input", lambda prompt, stream, input: secret_arg
+        )
+        assert not state.config.harbor.has_auth_method
 
     sep = os.linesep
     stdin_str = sep.join(stdin) + sep
