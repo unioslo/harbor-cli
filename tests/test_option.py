@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import typer
+from typer.models import OptionInfo
+
 from harbor_cli.config import env_var
 from harbor_cli.option import Option
 from harbor_cli.style import help_config_override
@@ -47,3 +50,23 @@ def test_option_no_help() -> None:
     # Test the rest of the attributes
     assert info.param_decls == ("--option", "-o")
     assert info.default == "default"
+
+
+def test_option_subclass() -> None:
+    args = (None, "--option", "-o")
+    typer_option = typer.Option(*args)
+    option = Option(*args)
+    assert isinstance(option, OptionInfo)
+    assert issubclass(option.__class__, OptionInfo)
+
+    # Test that the subclass has the same attributes as the parent
+    for attr in dir(typer_option):
+        if attr.startswith("_"):
+            continue
+
+        # we explictly set these to false in the Option function
+        if attr in ["show_default", "show_envvar"]:
+            assert getattr(option, attr) is False
+        else:
+            # otherwise, the attributes should be the same
+            assert getattr(typer_option, attr) == getattr(option, attr)
