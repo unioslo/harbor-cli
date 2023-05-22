@@ -143,7 +143,7 @@ class HarborSettings(BaseModel):
             return None
         return v
 
-    @validator("credentials_file")
+    @validator("credentials_file", always=True)
     def _validate_credentials_file(cls, v: Path | None) -> Path | None:
         if v is not None:
             if not v.exists():
