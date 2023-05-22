@@ -71,7 +71,7 @@ def test_state_init_client(
         # on MacOS 12.6 (M1)
         # To work around this, we patch the underlying getpass._raw_input function
         monkeypatch.setattr(
-            "getpass._raw_input", lambda prompt, stream, input: secret_arg
+            "getpass._raw_input", lambda prompt="", stream=None, input=None: secret_arg
         )
         assert not state.config.harbor.has_auth_method
 
