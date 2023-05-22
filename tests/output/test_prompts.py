@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import io
+import os
 from pathlib import Path
 from typing import Iterator
 
@@ -27,35 +28,36 @@ def leading_newline() -> Iterator[str]:
     This helps us test whether or not empty inputs prompts the user to
     input again.
     """
-    yield "\n"
+    yield os.linesep
     yield ""
 
 
-@pytest.mark.skip(reason="Flaky test in CI. Need to investigate.")
+@pytest.mark.timeout(1)
 @pytest.mark.parametrize("leading_newline", leading_newline())
 @given(st.text(min_size=1))
 @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_str_prompt(monkeypatch: MonkeyPatch, leading_newline: str, text: str) -> None:
     assume(not text.isspace())  # not testing pure whitespace
-    stdin_str = leading_newline + text + "\n"
+    stdin_str = leading_newline + text + os.linesep
     monkeypatch.setattr("sys.stdin", io.StringIO(stdin_str))
     # Result is always stripped of whitespace, and newline = enter
     # So anything after \n is
-    expect = next(t.strip() for t in text.split("\n") if t)
+    expect = next(t.strip() for t in text.split(os.linesep) if t)
     assert str_prompt("foo") == expect
 
 
-@pytest.mark.skip(reason="Flaky test in CI. Need to investigate.")
+@pytest.mark.timeout(1)
 @given(st.text())
 @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
 def test_str_prompt_empty_ok(monkeypatch: MonkeyPatch, text: str) -> None:
-    stdin_str = text + "\n"
+    stdin_str = text + os.linesep
     monkeypatch.setattr("sys.stdin", io.StringIO(stdin_str))
     # Result is always stripped of whitespace, and newline = enter
     # So anything after \n is ignored
-    assert str_prompt("foo", empty_ok=True) == text.split("\n")[0].strip()
+    assert str_prompt("foo", empty_ok=True) == text.split(os.linesep)[0].strip()
 
 
+@pytest.mark.timeout(1)
 @pytest.mark.parametrize("leading_newline", leading_newline())
 @pytest.mark.parametrize("leading_float", ["", "3.14159265358979\n"])
 @given(st.integers())
@@ -68,11 +70,12 @@ def test_int_prompt(
     leading_float: str,
     inp: int,
 ) -> None:
-    stdin_str = leading_newline + leading_float + str(inp) + "\n"
+    stdin_str = leading_newline + leading_float + str(inp) + os.linesep
     monkeypatch.setattr("sys.stdin", io.StringIO(stdin_str))
     assert int_prompt("foo") == inp
 
 
+@pytest.mark.timeout(1)
 @pytest.mark.parametrize("leading_newline", leading_newline())
 @given(st.floats(allow_nan=False))
 @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
@@ -80,7 +83,7 @@ def test_float_prompt(
     monkeypatch: MonkeyPatch, capsys: CaptureFixture, leading_newline: str, inp: float
 ) -> None:
     # so we can test that empty input prompts again
-    stdin_str = leading_newline + str(inp) + "\n"
+    stdin_str = leading_newline + str(inp) + os.linesep
     monkeypatch.setattr("sys.stdin", io.StringIO(stdin_str))
     assert float_prompt("foo") == inp
     if leading_newline:
@@ -88,6 +91,7 @@ def test_float_prompt(
         assert "Please enter a number" in capsys.readouterr().out
 
 
+@pytest.mark.timeout(1)
 @pytest.mark.parametrize("leading_newline", leading_newline())
 def test_float_prompt_nan(
     monkeypatch: MonkeyPatch, leading_newline: str, capsys: CaptureFixture
