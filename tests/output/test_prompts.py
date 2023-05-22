@@ -22,6 +22,23 @@ from harbor_cli.output.prompts import str_prompt
 # TODO: test defaults
 
 
+def test_input_mocking(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Test input with built-in input() instead of our input functions."""
+    s1 = "hello, world!"
+    s2 = "goodbye, world!"
+    sep = os.linesep
+
+    # Blank line, then two lines with strings
+    stdin_str = sep + s1 + sep + s2 + sep
+    monkeypatch.setattr("sys.stdin", io.StringIO(stdin_str, newline=sep))
+
+    # We first get a prompt where we are just expected to press enter
+    # Then we get two prompts where we are expected to enter a string
+    input("Continue?")  # first prompt
+    assert input("Greeting") == s1  # second prompt
+    assert input("Farewell") == s2  # third prompt
+
+
 def leading_newline() -> Iterator[str]:
     """Yields a leading newline and then no leading newline.
 
