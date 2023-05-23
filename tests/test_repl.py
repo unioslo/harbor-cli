@@ -2,15 +2,12 @@ from __future__ import annotations
 
 import typer
 from pytest_mock import MockFixture
-from typer.testing import CliRunner
 
 from .conftest import PartialInvoker
 from harbor_cli.format import OutputFormat
 from harbor_cli.models import BaseModel
 from harbor_cli.output import render
 from harbor_cli.state import State
-
-runner = CliRunner()
 
 
 def test_repl_reset_between_commands(
