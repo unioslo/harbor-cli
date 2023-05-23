@@ -76,8 +76,9 @@ def create_registry(
         "--type",
     ),
     insecure: bool = typer.Option(
-        None,
+        False,
         "--insecure",
+        help="Disable verification of TLS certificates.",
     ),
     description: str = typer.Option(
         None,
