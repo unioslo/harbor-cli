@@ -42,7 +42,10 @@ def _restore_config(state: State) -> None:
     """Restore the config to the state before any overrides were applied.
 
     Without this function, if you're in the REPL and run `--format json system info`,
-    the next command will also have use JSON format, even if not specified.
+    the next command will also use JSON format, even if --format wasn't specified,
+    because the main callback would have overridden the output format in the config,
+    and since the next command did not specify a format, it would fall back to the
+    one found in the config, which would now be JSON.
 
     This function restores the original config to its state before any
     overrides were applied, so that they don't persist across commands.
@@ -64,6 +67,7 @@ CONFIG_EXEMPT_GROUPS = {"cli-config", "find", "sample-config", "version"}
 
 
 def is_config_exempt(ctx: typer.Context):
+    """Check if the command is exempt from requiring a config."""
     if not ctx.invoked_subcommand:  # no subcommand might require a config?
         return False
     if ctx.invoked_subcommand in CONFIG_EXEMPT_GROUPS:
@@ -72,6 +76,7 @@ def is_config_exempt(ctx: typer.Context):
 
 
 def check_version_param(ctx: typer.Context, version: bool) -> None:
+    """Check if --version was passed, and if so, print version and exit."""
     # Print version and exit if --version
     if version:
         exit(f"{APP_NAME} version {__version__}")
@@ -295,7 +300,10 @@ def main_callback(
     ),
 ) -> None:
     """
-    Configuration options that affect all commands.
+    Global configuration options.
+
+    Most options passed in to this callback will override specific config
+    file values. If an option is omitted, the config file value will be used.
     """
     check_version_param(ctx, version)
     check_deprecated_options(ctx)
