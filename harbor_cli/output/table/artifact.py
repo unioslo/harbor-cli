@@ -232,14 +232,13 @@ def buildhistoryentry_table(
 def tags_table(tags: Sequence[Tag], **kwargs: Any) -> Table:
     """Display one or more tags in a table."""
     title = _title_for_artifact("Tags", kwargs)
-    table = get_table(title, columns=["Name", "ID", "Created", "Immutable", "Signed"])
+    table = get_table(title, columns=["Name", "ID", "Created", "Immutable"])
     for tag in tags:
         table.add_row(
             str_str(tag.name),
             int_str(tag.id),
             datetime_str(tag.push_time),
             bool_str(tag.immutable),
-            bool_str(tag.signed),
         )
     return table
 

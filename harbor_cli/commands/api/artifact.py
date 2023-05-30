@@ -306,8 +306,8 @@ def create_artifact_tag(
         help=ARTIFACT_HELP_STRING,
     ),
     tag: str = typer.Argument(..., help="Name of the tag to create."),
-    # signed
-    # immutable
+    # signed (probably not. Deprecated in v2.9.0)
+    # immutable?
 ) -> None:
     """Create a tag for an artifact."""
     an = parse_artifact_name(artifact)
