@@ -95,7 +95,6 @@ def generalinfo_panel(info: GeneralInfo, **kwargs) -> Panel:
             "Harbor Version",
             "Registry Storage Provider",
             "Read Only",
-            "Nested Notary",
         ],
     )
     general_table.add_row(
@@ -104,7 +103,6 @@ def generalinfo_panel(info: GeneralInfo, **kwargs) -> Panel:
         str_str(info.harbor_version),
         str_str(info.registry_storage_provider_name),
         bool_str(info.read_only),
-        bool_str(info.with_notary),
     )
     tables.append(general_table)
 
