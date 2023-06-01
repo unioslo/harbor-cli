@@ -29,8 +29,8 @@ from .registry import registry_table
 def project_table(p: Sequence[Project], **kwargs: Any) -> Table:
     """Display one or more projects in a table."""
     table = get_table("Project", p)
-    table.add_column("ID")
     table.add_column("Name")
+    table.add_column("ID")
     table.add_column("Public")
     table.add_column("Repositories")
     table.add_column("Created")
