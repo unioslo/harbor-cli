@@ -650,7 +650,7 @@ def cleanup_artifacts(
         help="Abort the operation and exit with non-zero exit code if an artifact cannot be deleted.",
     ),
 ) -> None:
-    """Delete artifacts that don't match one or more conditions."""
+    """Bulk delete artifacts that match one or more conditions."""
     if not project and not repository:
         warning(
             "Not specifying any projects or repositories could be very dangerous and slow."
@@ -813,11 +813,20 @@ class AffectedArtifactList(BaseModel):
         yield table
 
 
-class ArtifactSummarySortOrder(str, Enum):
+class ArtifactSummarySorting(str, Enum):
     total = "total"
     severity = "severity"
     name = "name"
     age = "age"
+
+
+class SortOrder(str, Enum):
+    asc = "asc"
+    desc = "desc"
+
+    @property
+    def reverse(self) -> bool:
+        return self == SortOrder.desc
 
 
 @vuln_cmd.command("summary")
@@ -836,19 +845,25 @@ def list_artifact_vulnerabilities_summary(
         callback=parse_commalist,
     ),
     query: Optional[str] = OPTION_QUERY,
-    sort: ArtifactSummarySortOrder = typer.Option(
-        ArtifactSummarySortOrder.name.value,
+    sort: ArtifactSummarySorting = typer.Option(
+        ArtifactSummarySorting.total.value,
         "--sort",
-        help="Sort order of artifacts,",
+        help="Artifact attribute to sort by.",
+        case_sensitive=False,
+    ),
+    order: SortOrder = typer.Option(
+        SortOrder.desc.value,
+        "--order",
+        help="Sorting order of artifacts.",
         case_sensitive=False,
     ),
     full_digest: bool = typer.Option(
         False,
         "--full-digest",
-        help="Show full digest instead of abbreviated digest.",
+        help="Show full artifact digests.",
     ),
 ) -> None:
-    """Show a summary of vulnerabilities for artifacts in in a project or repository."""
+    """Show a summary of vulnerabilities for artifacts in a project or repository."""
     ctx_key = f"{ctx.command_path} {sorted(ctx.params['project'])} {sorted(ctx.params['repo'])} {ctx.params['query']}"
 
     if (cached := state.cache.get(ctx_key, List[ArtifactInfo])) is not None:
@@ -868,27 +883,47 @@ def list_artifact_vulnerabilities_summary(
         state.cache.set(ctx_key, result)
 
     # fmt: off
-    sort_reverse = True # descending
-    if sort == ArtifactSummarySortOrder.total:
+    if sort == ArtifactSummarySorting.total:
         # Most -> Least (total vulnerabilities)
         def sort_key(a: ArtifactInfo) -> int:
             try:
                 return a.artifact.scan_overview.summary.total or 0  # type: ignore
             except AttributeError:
                 return 0
-    elif sort == ArtifactSummarySortOrder.severity:
+    elif sort == ArtifactSummarySorting.severity:
         # Number of critical vulnerabilities
+
+        # TODO: this could take into account other severities as well
+        # And we could just weight them by severity.
+        #
+        # Weighting:
+        #   Critical: 10
+        #   High: 5
+        #   Medium: 2
+        #   Low: 1
+        #   Negligible: 0
+        #   Unknown: 0
+        #
+        # Example:
+        # try:
+        #    summary = a.artifact.scan_overview.summary
+        # except AttributeError:
+        #    return 0
+        #
+        # for attr in ["critical", ...]:
+        #    if getattr(summary, attr):
+        #        return getattr(summary, attr) * weight
+        # return 0
         def sort_key(a: ArtifactInfo) -> int:
             try:
                 return a.artifact.scan_overview.summary.critical or 0  # type: ignore
             except AttributeError:
                 return 0
-    elif sort == ArtifactSummarySortOrder.name:
+    elif sort == ArtifactSummarySorting.name:
         # A -> Z
         def sort_key(a: ArtifactInfo) -> str: # type: ignore
             return a.name_with_digest_full
-        sort_reverse = False
-    elif sort == ArtifactSummarySortOrder.age:
+    elif sort == ArtifactSummarySorting.age:
         # new -> old
         def sort_key(a: ArtifactInfo) -> float: # type: ignore
             try:
@@ -896,9 +931,9 @@ def list_artifact_vulnerabilities_summary(
             except AttributeError:
                 return 0.0
     else:
-        raise ValueError(f"Unknown sort order {sort}")
+        raise ValueError(f"Unknown sorting criteria: {sort}")
     # fmt: on
-    result = sorted(result, key=sort_key, reverse=sort_reverse)
+    result = sorted(result, key=sort_key, reverse=order.reverse)
 
     summary = [ArtifactVulnerabilitySummary.from_artifactinfo(r) for r in result]
     render_result(summary, ctx, vuln_summary=True, full_digest=full_digest)
