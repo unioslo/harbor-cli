@@ -242,6 +242,7 @@ def list_projects(
         None,
         "--name",
         help="Name of a specific project to fetch.",
+        hidden=True,
     ),
     public: Optional[bool] = typer.Option(
         None,
@@ -252,10 +253,6 @@ def list_projects(
         "--owner",
         help="Filter projects by the user who owns them.",
     ),
-    with_detail: bool = typer.Option(
-        True,
-        help="Fetch detailed information about each project.",
-    ),
 ) -> None:
     """Fetch projects."""
     projects = state.run(
@@ -265,7 +262,7 @@ def list_projects(
             name=name,
             public=public,
             owner=owner,
-            with_detail=with_detail,
+            with_detail=True,
             page_size=page_size,
             limit=limit,
         ),
