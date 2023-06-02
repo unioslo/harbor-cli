@@ -235,9 +235,20 @@ def create_project(
 def list_projects(
     ctx: typer.Context,
     query: Optional[str],
-    sort: Optional[str],
-    page_size: int,
-    limit: Optional[int],
+    sort: Optional[str] = typer.Option(
+        "name",
+        "--sort",
+        help=(
+            "Sort projects by the given field(s). "
+            "Sortable fields: "
+            f"{render_cli_value('name')}, "
+            f"{render_cli_value('project_id')}, "
+            f"{render_cli_value('creation_time')}"
+        ),
+    ),
+    page: int = ...,  # type: ignore
+    page_size: int = ...,  # type: ignore
+    limit: Optional[int] = ...,  # type: ignore
     name: Optional[str] = typer.Option(
         None,
         "--name",
