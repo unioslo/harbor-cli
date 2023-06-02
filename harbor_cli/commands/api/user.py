@@ -293,7 +293,7 @@ def set_user_password(
         "--old-password",
         prompt="Enter old password",
         hide_input=True,
-        help="Old password for user.",
+        help="Old password for user. Prompted if not provided.",
     ),
     new_password: str = typer.Option(
         ...,
@@ -301,7 +301,7 @@ def set_user_password(
         prompt="Enter new password",
         hide_input=True,
         confirmation_prompt=True,
-        help="New password for user.",
+        help="New password for user. Prompted if not provided.",
     ),
 ) -> None:
     """Set a user's password."""
