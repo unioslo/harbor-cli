@@ -15,12 +15,12 @@ from rich.table import Table
 
 from ...logs import logger
 from ...models import ProjectExtended
-from ..formatting.builtin import bool_str
 from ..formatting.builtin import int_str
 from ..formatting.builtin import str_str
 from ..formatting.bytes import bytesize_str
 from ..formatting.constants import NONE_STR
 from ..formatting.dates import datetime_str
+from ..formatting.harbor import boolstr_str
 from ._utils import get_panel
 from ._utils import get_table
 from .registry import registry_table
@@ -29,16 +29,18 @@ from .registry import registry_table
 def project_table(p: Sequence[Project], **kwargs: Any) -> Table:
     """Display one or more projects in a table."""
     table = get_table("Project", p)
-    table.add_column("Name")
     table.add_column("ID")
+    table.add_column("Name")
     table.add_column("Public")
     table.add_column("Repositories")
     table.add_column("Created")
     for project in p:
+        # TODO: handle ProjectMetadata fields that can be `'true'`, `'false'`, or `None`
+        # Other tables can use bool_str, but here we need to handle strings
         table.add_row(
-            str(project.name),
             str(project.project_id),
-            str(project.metadata.public) if project.metadata else "Unknown",
+            str(project.name),
+            boolstr_str(project.metadata.public) if project.metadata else "Unknown",
             str(project.repo_count),
             datetime_str(project.creation_time),
         )
@@ -81,15 +83,6 @@ def project_extended_table(p: Sequence[ProjectExtended], **kwargs: Any) -> Table
     return table
 
 
-def bool_str_to_bool(b: str | None) -> bool:
-    if b == "true":
-        return True
-    elif b == "false":
-        return False
-    else:
-        return False  # account for None
-
-
 def project_metadata_table(p: Sequence[ProjectMetadata], **kwargs: Any) -> Table:
     table = get_table("Metadata", p)
     table.add_column("Public")
@@ -102,15 +95,13 @@ def project_metadata_table(p: Sequence[ProjectMetadata], **kwargs: Any) -> Table
     table.add_column("Retention ID")
     for metadata in p:
         table.add_row(
-            # Some of these values are strings instead of bools
-            # See: https://pederhan.github.io/harborapi/usage/models/#string-fields-with-true-and-false-values-in-api-spec
-            bool_str(bool_str_to_bool(metadata.public)),
-            bool_str(bool_str_to_bool(metadata.enable_content_trust)),
-            bool_str(bool_str_to_bool(metadata.enable_content_trust_cosign)),
-            bool_str(bool_str_to_bool(metadata.prevent_vul)),
+            boolstr_str(metadata.public),
+            boolstr_str(metadata.enable_content_trust),
+            boolstr_str(metadata.enable_content_trust_cosign),
+            boolstr_str(metadata.prevent_vul),
             str_str(metadata.severity),
-            bool_str(bool_str_to_bool(metadata.auto_scan)),
-            bool_str(bool_str_to_bool(metadata.reuse_sys_cve_allowlist)),
+            boolstr_str(metadata.auto_scan),
+            boolstr_str(metadata.reuse_sys_cve_allowlist),
             str_str(metadata.retention_id),
         )
     return table

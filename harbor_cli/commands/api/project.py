@@ -467,6 +467,7 @@ def get_project_repr(arg: str | int) -> str:
 
 # Metadata commands (which are in their own category in Harbor API)
 
+
 # HarborAsyncClient.get_project_metadata()
 @metadata_cmd.command("get")
 def get_project_metadata(
