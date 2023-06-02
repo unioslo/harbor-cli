@@ -97,7 +97,7 @@ See [harborapi docs](https://pederhan.github.io/harborapi/usage/methods/read/#qu
 **Options**
 
 {# Opts. Example (--wizard/--no-wizard) #}
-{% for param in command.params if not param.is_argument %}
+{% for param in command.params if not param.is_argument and not param.hidden %}
 {{ render_param(param) }}
 {# End param loop #}
 {% endfor %}
