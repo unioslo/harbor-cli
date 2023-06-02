@@ -114,8 +114,8 @@ def get_project_logs(
         ),
         f"Fetching logs for {project_repr}...",
     )
-    logger.info(f"Fetched {len(logs)} logs.")
     render_result(logs, ctx)
+    logger.info(f"Fetched {len(logs)} logs.")
 
 
 # HarborAsyncClient.project_exists()
@@ -271,8 +271,8 @@ def list_projects(
         ),
         "Fetching projects...",
     )
-    logger.info(f"Fetched {len(projects)} projects.")
     render_result(projects, ctx)
+    logger.info(f"Fetched {len(projects)} projects.")
 
 
 # HarborAsyncClient.update_project()
