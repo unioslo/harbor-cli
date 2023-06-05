@@ -9,6 +9,6 @@ from . import find as find
 from . import init as init
 from . import repl as repl
 from . import sample_config as sample_config
+from . import tui as tui
 
-# No subcommands for the CLI commands yet
 cli_commands: list[typer.Typer] = [cli_config.app, cache.app]
