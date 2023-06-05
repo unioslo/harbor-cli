@@ -65,7 +65,6 @@ def project_extended_table(p: Sequence[ProjectExtended], **kwargs: Any) -> Table
         columns=[
             "ID",
             "Name",
-            "Public",
             "Owner",
             "Repositories",
             "Created",
@@ -75,7 +74,6 @@ def project_extended_table(p: Sequence[ProjectExtended], **kwargs: Any) -> Table
         table.add_row(
             int_str(project.project_id),
             str_str(project.name),
-            str_str(project.metadata.public) if project.metadata else "Unknown",
             str_str(project.owner_name),
             int_str(project.repo_count),
             datetime_str(project.creation_time),
@@ -136,10 +134,11 @@ def _get_quota(resource: ResourceList | None) -> int | None:
     try:
         quota = resource.storage  # type: ignore
         if quota is not None:
+            # NOTE: try to convert to int in case this is a float or string?
             assert isinstance(quota, int)
     except (AttributeError, AssertionError) as e:
         if isinstance(e, AssertionError):
-            logger.error(f"Resource quota is not an integer: {resource}")
+            logger.error(f"Resource quota is not an integer: {quota}")
         quota = None
     return quota
 
