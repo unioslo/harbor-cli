@@ -281,17 +281,32 @@ def get(
 
 # HarborAsyncClient.get_artifact_tags()
 @tag_cmd.command("list", no_args_is_help=True)
+@inject_resource_options()
 def list_artifact_tags(
     ctx: typer.Context,
     artifact: str = typer.Argument(
         ...,
         help=ARTIFACT_HELP_STRING,
     ),
+    query: Optional[str] = ...,  # type: ignore
+    sort: Optional[str] = ...,  # type: ignore
+    page: int = ...,  # type: ignore
+    page_size: int = ...,  # type: ignore
+    limit: Optional[int] = ...,  # type: ignore
 ) -> None:
     """List tags for an artifact."""
     an = parse_artifact_name(artifact)
     tags = state.run(
-        state.client.get_artifact_tags(an.project, an.repository, an.reference),
+        state.client.get_artifact_tags(
+            project_name=an.project,
+            repository_name=an.repository,
+            reference=an.reference,
+            query=query,
+            sort=sort,
+            page=page,
+            page_size=page_size,
+            limit=limit,
+        ),
         f"Fetching tags for {an!r}...",
     )
     render_result(tags, ctx, artifact=artifact)
