@@ -210,13 +210,14 @@ def create_project(
         storage_limit=storage_limit,
         registry_id=registry_id,
         metadata=ProjectMetadata(
-            public=public,
-            enable_content_trust=enable_content_trust,
-            enable_content_trust_cosign=enable_content_trust_cosign,
-            prevent_vul=prevent_vul,
+            # validator does bool -> str conversion for the string bool fields
+            public=public,  # type: ignore
+            enable_content_trust=enable_content_trust,  # type: ignore
+            enable_content_trust_cosign=enable_content_trust_cosign,  # type: ignore
+            prevent_vul=prevent_vul,  # type: ignore
             severity=severity,
-            auto_scan=auto_scan,
-            reuse_sys_cve_allowlist=reuse_sys_cve_allowlist,
+            auto_scan=auto_scan,  # type: ignore
+            reuse_sys_cve_allowlist=reuse_sys_cve_allowlist,  # type: ignore
             retention_id=retention_id,
         ),
     )

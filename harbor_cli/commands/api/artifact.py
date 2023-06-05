@@ -780,8 +780,8 @@ class AffectedArtifactList(BaseModel):
             a = AffectedArtifact(
                 artifact=get_artifactinfo_name(artifact),
                 tags=tags,
-                vulnerabilities=vulnerabilities or [],
-                packages=packages or [],
+                vulnerabilities=vulnerabilities or [],  # type: ignore # coerced to set in model
+                packages=packages or [],  # type: ignore # coerced to set in model
                 # TODO: add exact package versions somehow
             )
             self.update(a)

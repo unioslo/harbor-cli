@@ -267,7 +267,7 @@ def create_replication_policy(
         filters.append(
             ReplicationFilter(
                 type="name",
-                value=filter_name,
+                value=filter_name,  # type: ignore # takes Any type
                 decoration=None,
             )
         )
@@ -275,7 +275,7 @@ def create_replication_policy(
         filters.append(
             ReplicationFilter(
                 type="tag",
-                value=filter_tag,
+                value=filter_tag,  # type: ignore # takes Any type
                 decoration=filter_tag_mode.value,
             )
         )
@@ -283,7 +283,7 @@ def create_replication_policy(
         filters.append(
             ReplicationFilter(
                 type="label",
-                value=filter_label,
+                value=filter_label,  # type: ignore # takes Any type
                 decoration=filter_label_mode.value,
             )
         )
