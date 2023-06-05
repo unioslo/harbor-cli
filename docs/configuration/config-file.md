@@ -8,7 +8,8 @@ In the previous section, we created a config file and went through the interacti
 {% include "sample_config.toml" %}
 ```
 
-**NOTE**: The name of the `output.JSON` table is case-sensitive. The reason this name is upper-case is due to a conflict with the built-in Pydantic `json` method. This will hopefully be fixed in a future release.
+!!! warning
+    The name of the `output.JSON` table is case-sensitive. The reason this name is upper-case is due to a conflict with the built-in Pydantic `json` method. This will hopefully be fixed in a future release.
 
 
 ## Configuration file structure
