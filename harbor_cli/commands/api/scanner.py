@@ -169,6 +169,7 @@ def list_scanners(
     sort: Optional[str],
     page: int,
     page_size: int,
+    limit: int,
 ) -> None:
     """List scanners."""
     scanners = state.run(
@@ -177,6 +178,7 @@ def list_scanners(
             sort=sort,
             page=page,
             page_size=page_size,
+            limit=limit,
         ),
         f"Fetching scanners...",
     )

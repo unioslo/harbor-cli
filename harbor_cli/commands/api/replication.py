@@ -362,6 +362,7 @@ def list_replication_policies(
     sort: Optional[str],
     page: int,
     page_size: int,
+    limit: int,
 ) -> None:
     """List replication policies."""
     policies = state.run(
@@ -370,6 +371,7 @@ def list_replication_policies(
             sort=sort,
             page=page,
             page_size=page_size,
+            limit=limit,
         ),
         f"Fetching replication policies...",
     )
