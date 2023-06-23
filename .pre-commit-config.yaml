@@ -15,21 +15,21 @@ repos:
   #     - id: pyupgrade
   #       args: [--py38-plus]
   - repo: https://github.com/psf/black
-    rev: 22.12.0
+    rev: 23.3.0
     hooks:
       - id: black
         language_version: python3.8
   - repo: https://github.com/asottile/reorder_python_imports
-    rev: v3.9.0
+    rev: v3.10.0
     hooks:
       - id: reorder-python-imports
         args: [--py38-plus, --add-import, "from __future__ import annotations"]
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.0.220"
+    rev: "v0.0.275"
     hooks:
       - id: ruff
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v1.3.0" # Use the sha / tag you want to point at
+    rev: "v1.4.0"
     hooks:
       - id: mypy
         additional_dependencies: [types-all, rich]
