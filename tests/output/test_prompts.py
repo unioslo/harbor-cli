@@ -58,8 +58,8 @@ def test_str_prompt(monkeypatch: MonkeyPatch, leading_newline: str, text: str) -
     stdin_str = leading_newline + text + os.linesep
     monkeypatch.setattr("sys.stdin", io.StringIO(stdin_str))
     # Result is always stripped of whitespace, and newline = enter
-    # So anything after \n is
-    expect = next(t.strip() for t in text.split(os.linesep) if t)
+    # So anything after \n is discarded.
+    expect = text.strip().split(os.linesep)[0]
     assert str_prompt("foo") == expect
 
 
