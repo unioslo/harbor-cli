@@ -136,6 +136,9 @@ def caplog(caplog: LogCaptureFixture):
     logger.remove(handler_id)
 
 
-needs_keyring = pytest.mark.skipif(
+requires_keyring = pytest.mark.skipif(
     not KEYRING_SUPPORTED, reason="Keyring is not supported on this platform."
+)
+requires_no_keyring = pytest.mark.skipif(
+    KEYRING_SUPPORTED, reason="Test requires keyring to be unsupported."
 )

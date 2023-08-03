@@ -8,7 +8,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
-from .conftest import needs_keyring
+from .conftest import requires_keyring
 from harbor_cli.config import HarborCLIConfig
 from harbor_cli.config import HarborSettings
 from harbor_cli.config import load_config
@@ -120,7 +120,7 @@ def test_harbor_is_authable_username() -> None:
     assert not h.has_auth_method
 
 
-@needs_keyring
+@requires_keyring
 def test_harbor_is_authable_keyring() -> None:
     h = HarborSettings(username="admin", keyring=True)
     set_password(h.username, "password")

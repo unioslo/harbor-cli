@@ -7,7 +7,6 @@ import keyring
 from typing_extensions import ParamSpec
 
 from ..logs import logger
-from ..output.console import error
 from ..output.console import info
 
 KEYRING_SERVICE_NAME = "harbor_cli"
@@ -23,10 +22,11 @@ def check_keyring_support():
 
         # Check if the password was correctly retrieved
         if password == dummy_password:
-            logger.debug("Keyring is supported on this platform.")
             return True
         else:
             raise keyring.errors.KeyringError
+    # TODO: make this error handling more robust. Differentiate between different
+    # keyring errors and handle them accordingly.
     except keyring.errors.KeyringError as e:
         logger.warning(f"Keyring is not supported on this platform: {e}")
         return False
@@ -41,22 +41,23 @@ P = ParamSpec("P")
 T = TypeVar("T")
 
 
-def warn_unsupported(f: Callable[P, T]) -> Callable[P, T]:
+def require_keyring(f: Callable[P, T]) -> Callable[P, T]:
     def wrapper(*args: P.args, **kwargs: P.kwargs):
         if not KEYRING_SUPPORTED:
-            error("Keyring is not supported on this platform.")
-            return None
+            raise keyring.errors.KeyringError(
+                "Keyring is not supported on this platform."
+            )
         return f(*args, **kwargs)
 
     return wrapper
 
 
-@warn_unsupported
+@require_keyring
 def get_password(username: str) -> str | None:
     return keyring.get_password(KEYRING_SERVICE_NAME, username)
 
 
-@warn_unsupported
+@require_keyring
 def set_password(username: str, password: str) -> None:
     keyring.set_password(KEYRING_SERVICE_NAME, username, password)
     info("Added password to keyring.")
