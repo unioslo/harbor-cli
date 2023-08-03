@@ -23,6 +23,7 @@ from harbor_cli import state
 from harbor_cli.config import HarborCLIConfig
 from harbor_cli.format import OutputFormat
 from harbor_cli.main import app as main_app
+from harbor_cli.utils.keyring import KEYRING_SUPPORTED
 
 runner = CliRunner()
 
@@ -133,3 +134,11 @@ def caplog(caplog: LogCaptureFixture):
     handler_id = logger.add(caplog.handler, format="{message}")
     yield caplog
     logger.remove(handler_id)
+
+
+requires_keyring = pytest.mark.skipif(
+    not KEYRING_SUPPORTED, reason="Keyring is not supported on this platform."
+)
+requires_no_keyring = pytest.mark.skipif(
+    KEYRING_SUPPORTED, reason="Test requires keyring to be unsupported."
+)

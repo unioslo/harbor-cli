@@ -9,6 +9,7 @@ from ...app import app
 from ...config import create_config
 from ...config import DEFAULT_CONFIG_FILE
 from ...config import HarborCLIConfig
+from ...config import HarborSettings
 from ...config import save_config
 from ...exceptions import ConfigError
 from ...exceptions import OverwriteError
@@ -34,6 +35,8 @@ from ...output.prompts import str_prompt
 from ...state import get_state
 from ...style import render_cli_option
 from ...style import STYLE_COMMAND
+from ...utils.keyring import KEYRING_SUPPORTED
+from ...utils.keyring import set_password
 
 state = get_state()
 
@@ -120,6 +123,10 @@ def run_config_wizard(config_path: Optional[Path] = None) -> HarborCLIConfig:
         init_harbor_settings(config)
         console.print()
 
+    if bool_prompt("Configure advanced Harbor settings?", default=False):
+        _init_advanced_harbor_settings(config)
+        console.print()
+
     if bool_prompt("Configure general settings?", default=False):
         init_general_settings(config)
         console.print()
@@ -161,16 +168,19 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
         show_default=True,
     )
 
+    # Determine auth method
     base_msg = "Authentication method [bold magenta](\[u]sername/password, \[b]asic auth, \[f]ile, \[s]kip)[/]"
     choices = ["u", "b", "f", "s"]
+    if hconf.has_auth_method:
+        default_choice = "s"
+    else:
+        default_choice = "u"
+    auth_method = str_prompt(
+        base_msg, choices=choices, default=default_choice, show_choices=False
+    )
 
-    auth_method = str_prompt(base_msg, choices=choices, default="s", show_choices=False)
     if auth_method == "u":
-        username, secret = prompt_username_secret(
-            hconf.username, hconf.secret.get_secret_value()
-        )
-        hconf.username = username
-        hconf.secret = secret  # type: ignore # pydantic.SecretStr
+        _set_username_secret(hconf)
     elif auth_method == "b":
         hconf.basicauth = prompt_basicauth(hconf.basicauth.get_secret_value())  # type: ignore # pydantic.SecretStr
     elif auth_method == "f":
@@ -183,8 +193,27 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
             "You will be prompted for username and password when required.",
         )
 
-    if bool_prompt("Configure advanced Harbor settings?"):
-        _init_advanced_harbor_settings(config)
+
+def _set_username_secret(
+    hconf: HarborSettings,
+) -> None:
+    if KEYRING_SUPPORTED:
+        return _set_username_secret_keyring(hconf)
+    else:
+        from harborapi.utils import get_basicauth
+
+        username, secret = prompt_username_secret(hconf.username, hconf.secret_value)
+        hconf.basicauth = get_basicauth(username, secret)
+
+
+def _set_username_secret_keyring(hconf: HarborSettings) -> None:
+    """Set username and secret using keyring.
+    Stores the secret in the keyring and the username in the config file."""
+    username, secret = prompt_username_secret(hconf.username, hconf.secret_value)
+    hconf.username = username
+    set_password(username, secret)
+    hconf.keyring = True
+    hconf.secret = "_"  # type: ignore # maybe not necessary
 
 
 def _init_advanced_harbor_settings(config: HarborCLIConfig) -> None:
