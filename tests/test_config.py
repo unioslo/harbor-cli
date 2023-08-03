@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import keyring
 import pytest
 import tomli
 from hypothesis import given
@@ -9,6 +10,7 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 from .conftest import requires_keyring
+from .conftest import requires_no_keyring
 from harbor_cli.config import HarborCLIConfig
 from harbor_cli.config import HarborSettings
 from harbor_cli.config import load_config
@@ -134,6 +136,17 @@ def test_harbor_is_authable_keyring() -> None:
     assert h.has_auth_method
     assert h.credentials["username"] == "admin"
     assert h.credentials["secret"] == "password"
+
+
+@requires_no_keyring
+def test_harbor_is_authable_no_keyring() -> None:
+    with pytest.raises(keyring.errors.KeyringError) as exc_info:
+        h = HarborSettings(username="admin", secret="ignored", keyring=True)
+        h.secret_value  # raises
+    assert "not supported" in str(exc_info.value).casefold()
+    h = HarborSettings(username="admin", secret="password", keyring=False)
+    assert h.secret_value == "password"
+    assert h.has_auth_method
 
 
 def test_harbor_is_authable_basicauth() -> None:
