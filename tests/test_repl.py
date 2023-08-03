@@ -19,6 +19,8 @@ from harbor_cli.state import State
     # Same test that succeeded on Jun 5 2023 failed on Jun 23 2023:
     # https://github.com/pederhan/harbor-cli/actions/runs/5175827834/attempts/1
     # https://github.com/pederhan/harbor-cli/actions/runs/5175827834/attempts/2
+    # This test also breaks in the hatch test environments, but not in the
+    # default environment... I'm not sure why.
 )
 def test_repl_reset_between_commands(
     app: typer.Typer,

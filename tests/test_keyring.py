@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from .conftest import needs_keyring
 from harbor_cli.utils.keyring import get_password
-from harbor_cli.utils.keyring import KEYRING_SUPPORTED
 from harbor_cli.utils.keyring import set_password
 
 
