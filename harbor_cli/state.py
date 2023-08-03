@@ -188,7 +188,7 @@ class State:
             )
             username, secret = prompt_username_secret(
                 self.config.harbor.username,
-                self.config.harbor.secret.get_secret_value(),
+                self.config.harbor.secret_value,
             )
             self.config.harbor.username = username
             self.config.harbor.secret = secret  # type: ignore # pydantic.SecretStr

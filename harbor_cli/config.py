@@ -31,6 +31,7 @@ from .format import OutputFormat
 from .logs import LogLevel
 from .style import STYLE_TABLE_HEADER
 from .utils import replace_none
+from .utils.keyring import get_password
 
 
 DEFAULT_CONFIG_FILE = CONFIG_DIR / "config.toml"
@@ -132,6 +133,7 @@ class HarborSettings(BaseModel):
     raw_mode: bool = False
     verify_ssl: bool = True
     retry: RetrySettings = RetrySettings()
+    keyring: bool = False
 
     @validator("credentials_file", pre=True)
     def _empty_string_is_none(cls, v: Any) -> Any:
@@ -169,10 +171,21 @@ class HarborSettings(BaseModel):
         return True
 
     @property
+    def secret_value(self) -> str:
+        """Returns the secret value from the keyring if enabled, otherwise
+        returns the secret value from the config file."""
+        if self.keyring:
+            return get_password(self.username) or ""
+        else:
+            return self.secret.get_secret_value()
+
+    @property
     def has_auth_method(self) -> bool:
         """Returns True if any of the auth methods are set."""
         return bool(
-            (self.username and self.secret) or self.basicauth or self.credentials_file
+            (self.username and self.secret_value)
+            or self.basicauth
+            or self.credentials_file
         )
 
     @property
@@ -189,7 +202,7 @@ class HarborSettings(BaseModel):
         return HarborCredentialsKwargs(
             url=self.url,
             username=self.username,
-            secret=self.secret.get_secret_value(),
+            secret=self.secret_value,
             basicauth=self.basicauth.get_secret_value(),
             credentials_file=self.credentials_file,
         )

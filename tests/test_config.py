@@ -8,6 +8,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
 
+from .conftest import needs_keyring
 from harbor_cli.config import HarborCLIConfig
 from harbor_cli.config import HarborSettings
 from harbor_cli.config import load_config
@@ -16,6 +17,7 @@ from harbor_cli.config import sample_config
 from harbor_cli.config import save_config
 from harbor_cli.config import TableSettings
 from harbor_cli.config import TableStyleSettings
+from harbor_cli.utils.keyring import set_password
 
 
 def test_save_config(tmp_path: Path, config: HarborCLIConfig) -> None:
@@ -118,15 +120,20 @@ def test_harbor_is_authable_username() -> None:
     assert not h.has_auth_method
 
 
-def test_secretstr_assignment() -> None:
-    """We want to make sure assignment to SecretStr fields with regular
-    strings are still converted to SecretStr, so we don't leak credentials
-    that have been assigned to the field _after_ instantiation."""
+@needs_keyring
+def test_harbor_is_authable_keyring() -> None:
+    h = HarborSettings(username="admin", keyring=True)
+    set_password(h.username, "password")
 
-    h = HarborSettings(username="admin", secret="password")
-    assert all(c == "*" for c in str(h.secret))
-    h.secret = "newpassword"
-    assert all(c == "*" for c in str(h.secret))
+    # secret field will not be populated by keyring assignment
+    assert h.secret.get_secret_value() != "password"
+
+    # secret_value fetches from keyring if it is enabled
+    assert h.secret_value == "password"  # fetches from keyring
+
+    assert h.has_auth_method
+    assert h.credentials["username"] == "admin"
+    assert h.credentials["secret"] == "password"
 
 
 def test_harbor_is_authable_basicauth() -> None:
@@ -142,6 +149,17 @@ def test_harbor_is_authable_credentials_file(tmp_path: Path) -> None:
     h = HarborSettings(credentials_file=f)
     assert h.has_auth_method
     assert h.credentials["credentials_file"] == f
+
+
+def test_secretstr_assignment() -> None:
+    """We want to make sure assignment to SecretStr fields with regular
+    strings are still converted to SecretStr, so we don't leak credentials
+    that have been assigned to the field _after_ instantiation."""
+
+    h = HarborSettings(username="admin", secret="password")
+    assert all(c == "*" for c in str(h.secret))
+    h.secret = "newpassword"
+    assert all(c == "*" for c in str(h.secret))
 
 
 @given(st.builds(TableSettings))
