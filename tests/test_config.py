@@ -35,7 +35,7 @@ def test_load_config(tmp_path: Path, config: HarborCLIConfig) -> None:
     assert loaded.toml() == config.toml()
 
 
-def test_load_toml_file(tmp_path: Path, config: HarborCLIConfig) -> None:
+def test_load_toml_file(tmp_path: Path) -> None:
     contents = """\
 [harbor]
 url = "https://harbor.example.com/api/v2.0"
@@ -250,6 +250,31 @@ def test_tablestylesettings_rows_emptyarray(tmp_path: Path) -> None:
 def test_tablestylesettings_rows_omit(tmp_path: Path) -> None:
     styleconf = _write_table_style_rows(tmp_path, None)
     assert styleconf.rows is None
+
+
+def test_tablestylesettings_empty_string_is_none(tmp_path: Path) -> None:
+    toml = """[output.table.style]
+title = ""
+header = ""
+rows = ""
+border = ""
+footer = ""
+caption = ""
+expand = true
+show_header = true
+bool_emoji = false"""
+
+    # Pass in just the table style TOML and rely on defaults for the rest
+    conf_file = tmp_path / "config.toml"
+    conf_file.write_text(toml)
+    config = HarborCLIConfig.from_file(conf_file)
+    styleconf = config.output.table.style
+    assert styleconf.rows is None
+    assert styleconf.title is None
+    assert styleconf.header is None
+    assert styleconf.border is None
+    assert styleconf.footer is None
+    assert styleconf.caption is None
 
 
 @given(st.one_of(st.none(), st.text(), st.lists(st.text(), min_size=1)))

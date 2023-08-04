@@ -55,7 +55,9 @@ def callback(ctx: typer.Context) -> None:
 def get_cli_config(
     ctx: typer.Context,
     # TODO: Add support for fetching keys with dot notation
-    # key: str = typer.Argument(..., help="The config key to get."),
+    key: Optional[str] = typer.Argument(
+        None, help="Specific config key to get value of."
+    ),
     as_toml: bool = typer.Option(
         True,
         "--toml/--no-toml",
@@ -63,9 +65,23 @@ def get_cli_config(
     ),
 ) -> None:
     """Show the current CLI configuration."""
-    render_config(state.config, as_toml)
-    if state.config.config_file is not None:
-        info(f"Source: {path_link(state.config.config_file)}")
+    if key:
+        try:
+            if (attrs := key.split(".")) and len(attrs) > 1:
+                obj = getattr(state.config, attrs[0])
+                for attr in attrs[1:-1]:
+                    obj = getattr(obj, attr)
+                value = getattr(obj, attrs[-1])
+            else:
+                value = getattr(state.config, key)
+        except AttributeError:
+            exit_err(f"Invalid config key: {render_cli_value(key)}")
+        else:
+            render_result(value)
+    else:
+        render_config(state.config, as_toml)
+        if state.config.config_file is not None:
+            info(f"Source: {path_link(state.config.config_file)}")
 
 
 @app.command(

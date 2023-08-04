@@ -236,10 +236,11 @@ class TableStyleSettings(BaseModel):
         """Validates the rows field.
 
         Strings are turned into tuples of length 2 where both elements
-        are the string value.
+        are the string value. e.g. "black" becomes ("black", "black").
 
         Sequences are truncated to length 2. If the sequence is length 1,
-        the first element is repeated.
+        the first element is repeated. e.g. ("black",) becomes ("black", "black"),
+        and ("black", "white", "red") becomes ("black", "white").
 
         None, empty strings, and empty sequences are converted to None.
         """
@@ -268,6 +269,14 @@ class TableStyleSettings(BaseModel):
         return vv
 
     # TODO add * validator that turns empty strings into None?
+    @validator("*")
+    def _empty_string_is_none(cls, v: Any) -> Any:
+        """TOML has no None support, but we need to pass these kwargs to
+        Rich's Table constructor, which does uses None. So we convert
+        empty strings to None."""
+        if v == "":
+            return None
+        return v
 
     def as_rich_kwargs(self) -> dict[str, Optional[Union[str, Tuple[str, str], bool]]]:
         """Converts the TableStyleSettings to a dictionary that can be passed
@@ -278,6 +287,8 @@ class TableStyleSettings(BaseModel):
         Dict[str, Optional[str]]
             A dictionary of Rich Table style settings.
         """
+        # TODO: define return type as a TypedDict, which can then be used
+        # to type check the kwargs we pass to Rich's Table constructor.
         return {
             "border_style": self.border,
             "caption_style": self.caption,
@@ -332,7 +343,7 @@ class OutputSettings(BaseModel):
         False,
         description="Show output in pager (if supported). Default pager does not support color output currently.",
     )
-    pager: Optional[str] = Field(None, description="Pager to use if paging is enabled.")
+    pager: str = Field("", description="Pager to use if paging is enabled.")
     # Naming: Don't shadow the built-in .json() method
     # The config file can still use the key "json" because of the alias
     table: TableSettings = Field(default_factory=TableSettings)

@@ -25,7 +25,7 @@ from harbor_cli.format import OutputFormat
 from harbor_cli.main import app as main_app
 from harbor_cli.utils.keyring import KEYRING_SUPPORTED
 
-runner = CliRunner()
+runner = CliRunner(mix_stderr=False)
 
 
 @pytest.fixture(scope="session")
@@ -42,7 +42,7 @@ def dumb_terminal():
     os.environ.pop("FORCE_COLOR", None)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def config() -> HarborCLIConfig:
     conf = HarborCLIConfig()
     # These are required to run commands
