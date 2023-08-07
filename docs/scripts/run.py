@@ -11,11 +11,17 @@ from . import gen_command_list  # noqa
 from . import gen_command_pages  # noqa
 from . import gen_formats  # noqa
 
-for mod in [
-    gen_cli_data,
-    gen_cli_options,
-    gen_command_list,
-    gen_command_pages,
-    gen_formats,
-]:
-    mod.main()
+
+def main(*args, **kwargs) -> None:
+    for mod in [
+        gen_cli_data,
+        gen_cli_options,
+        gen_command_list,
+        gen_command_pages,
+        gen_formats,
+    ]:
+        mod.main()
+
+
+if __name__ == "__main__":
+    main()
