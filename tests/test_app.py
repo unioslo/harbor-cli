@@ -1,15 +1,19 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import typer
 from typer.testing import Result
 
 from .conftest import PartialInvoker
 from harbor_cli.config import EnvVar
 from harbor_cli.format import OutputFormat
-from harbor_cli.state import get_state
+from harbor_cli.state import State
 
 
-def test_envvars(invoke: PartialInvoker, app: typer.Typer, tmp_path: Path) -> None:
+def test_envvars(
+    invoke: PartialInvoker, app: typer.Typer, tmp_path: Path, state: State
+) -> None:
     @app.command("test-cmd")
     def test_cmd(ctx: typer.Context) -> None:
         print("ok!")
@@ -19,9 +23,6 @@ def test_envvars(invoke: PartialInvoker, app: typer.Typer, tmp_path: Path) -> No
         res = invoke(["test-cmd"], env={str(envvar): value})
         assert res.exit_code == 0
         return res
-
-    # state = get_state()
-    state = get_state()
 
     # FIXME HACK: for some reason this test makes permanent changes to the config
     # despite the fact that we have a fixture that is supposed to reset it
