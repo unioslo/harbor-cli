@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+from enum import Enum
 from pathlib import Path
 from typing import Any
 from typing import Optional
@@ -48,6 +49,36 @@ def config_env_var(key: str) -> str:
 def env_var(option: str) -> str:
     """Return the environment variable name for a CLI option."""
     return ENV_VAR_PREFIX + option.upper().replace("-", "_")
+
+
+class EnvVar(str, Enum):
+    CONFIG = env_var("config")
+    URL = env_var("url")
+    USERNAME = env_var("username")
+    SECRET = env_var("secret")
+    BASICAUTH = env_var("basicauth")
+    CREDENTIALS_FILE = env_var("credentials_file")
+    HARBOR_VALIDATE_DATA = env_var("harbor_validate_data")
+    HARBOR_RAW_MODE = env_var("harbor_raw_mode")
+    HARBOR_VERIFY_SSL = env_var("harbor_verify_ssl")
+    HARBOR_RETRY_ENABLED = env_var("harbor_retry_enabled")
+    HARBOR_RETRY_MAX_TRIES = env_var("harbor_retry_max_tries")
+    HARBOR_RETRY_MAX_TIME = env_var("harbor_retry_max_time")
+    TABLE_DESCRIPTION = env_var("table_description")
+    TABLE_MAX_DEPTH = env_var("table_max_depth")
+    TABLE_COMPACT = env_var("table_compact")
+    JSON_INDENT = env_var("json_indent")
+    JSON_SORT_KEYS = env_var("json_sort_keys")
+    OUTPUT_FORMAT = env_var("output_format")
+    PAGING = env_var("paging")
+    PAGER = env_var("pager")
+    CONFIRM_DELETION = env_var("confirm_deletion")
+    CONFIRM_ENUMERATION = env_var("confirm_enumeration")
+    CACHE_ENABLED = env_var("cache_enabled")
+    CACHE_TTL = env_var("cache_ttl")
+
+    def __str__(self) -> str:
+        return self.value
 
 
 def load_toml_file(config_file: Path) -> dict[str, Any]:

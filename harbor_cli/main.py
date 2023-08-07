@@ -12,7 +12,7 @@ from .__about__ import __version__
 from .__about__ import APP_NAME
 from .app import app
 from .commands.cli.init import run_config_wizard
-from .config import env_var
+from .config import EnvVar
 from .config import HarborCLIConfig
 from .deprecation import check_deprecated_options
 from .deprecation import Deprecated
@@ -94,7 +94,7 @@ def main_callback(
         "--config",
         "-c",
         help="Path to config file.",
-        envvar=env_var("config"),
+        envvar=EnvVar.CONFIG,
     ),
     # Harbor options
     harbor_url: Optional[str] = Option(
@@ -103,7 +103,7 @@ def main_callback(
         "-u",
         Deprecated("--harbor-url", replacement="--url"),
         help=f"Harbor API URL.",
-        envvar=env_var("url"),
+        envvar=EnvVar.URL,
         config_override="harbor.url",
     ),
     harbor_username: Optional[str] = Option(
@@ -112,7 +112,7 @@ def main_callback(
         "-U",
         Deprecated("--harbor-username", replacement="--username"),
         help=f"Harbor username.",
-        envvar=env_var("username"),
+        envvar=EnvVar.USERNAME,
         config_override="harbor.username",
     ),
     harbor_secret: Optional[str] = Option(
@@ -121,7 +121,7 @@ def main_callback(
         "-S",
         Deprecated("--harbor-secret", replacement="--secret"),
         help=f"Harbor secret (password).",
-        envvar=env_var("secret"),
+        envvar=EnvVar.SECRET,
         config_override="harbor.secret",
     ),
     harbor_basicauth: Optional[str] = Option(
@@ -129,7 +129,7 @@ def main_callback(
         "--basicauth",
         "-B",
         help=f"Harbor basic access credentials (base64).",
-        envvar=env_var("basicauth"),
+        envvar=EnvVar.BASICAUTH,
         config_override="harbor.basicauth",
     ),
     harbor_credentials_file: Optional[Path] = Option(
@@ -137,49 +137,49 @@ def main_callback(
         "--credentials-file",
         "-F",
         help=f"Path to Harbor JSON credentials file.",
-        envvar=env_var("credentials_file"),
+        envvar=EnvVar.CREDENTIALS_FILE,
         config_override="harbor.credentials_file",
     ),
     harbor_validate: Optional[bool] = Option(
         None,
         "--validate/--no-validate",
         help=f"Validate Harbor API response data. Forces JSON output format.",
-        envvar=env_var("harbor_validate_data"),
+        envvar=EnvVar.HARBOR_VALIDATE_DATA,
         config_override="harbor.validate_data",
     ),
     harbor_raw_mode: Optional[bool] = Option(
         None,
         "--raw/--no-raw",
         help=f"Return raw data from Harbor API. Ignores output format and formatting options.",
-        envvar=env_var("harbor_raw_mode"),
+        envvar=EnvVar.HARBOR_RAW_MODE,
         config_override="harbor.raw_mode",
     ),
     harbor_verify_ssl: Optional[bool] = Option(
         None,
         "--verify-ssl/--no-verify-ssl",
         help=f"Verify SSL certificates when connecting to Harbor.",
-        envvar=env_var("harbor_verify_ssl"),
+        envvar=EnvVar.HARBOR_VERIFY_SSL,
         config_override="harbor.verify_ssl",
     ),
     harbor_retry_enabled: Optional[bool] = Option(
         None,
         "--retry/--no-retry",
         help=f"Retry failed HTTP requests.",
-        envvar=env_var("harbor_retry_enabled"),
+        envvar=EnvVar.HARBOR_RETRY_ENABLED,
         config_override="harbor.retry.enabled",
     ),
     harbor_retry_max_tries: Optional[int] = Option(
         None,
         "--retry-max-tries",
         help=f"Number of times to retry failed HTTP requests.",
-        envvar=env_var("harbor_retry_max_tries"),
+        envvar=EnvVar.HARBOR_RETRY_MAX_TRIES,
         config_override="harbor.retry.max_tries",
     ),
     harbor_retry_max_time: Optional[float] = Option(
         None,
         "--retry-max-time",
         help=f"Maximum number of seconds to retry failed HTTP requests.",
-        envvar=env_var("harbor_retry_max_time"),
+        envvar=EnvVar.HARBOR_RETRY_MAX_TIME,
         config_override="harbor.retry.max_time",
     ),
     # Formatting
@@ -187,35 +187,35 @@ def main_callback(
         None,
         "--table-description/--no-table-description",
         help="Include field descriptions in tables.",
-        envvar=env_var("table_description"),
+        envvar=EnvVar.TABLE_DESCRIPTION,
         config_override="output.table.description",
     ),
     max_depth: Optional[int] = Option(
         None,
         "--table-max-depth",
         help="Maximum depth to print nested objects in tables.",
-        envvar=env_var("table_max_depth"),
+        envvar=EnvVar.TABLE_MAX_DEPTH,
         config_override="output.table.max_depth",
     ),
     compact: Optional[bool] = Option(
         None,
         "--table-compact/--no-table-compact",
         help="Compact table output. Has no effect on other formats. ",
-        envvar=env_var("table_compact"),
+        envvar=EnvVar.TABLE_COMPACT,
         config_override="output.table.compact",
     ),
     json_indent: Optional[int] = Option(
         None,
         "--json-indent",
         help="Indentation level for JSON output.",
-        envvar=env_var("json_indent"),
+        envvar=EnvVar.JSON_INDENT,
         config_override="output.json.indent",
     ),
     json_sort_keys: Optional[bool] = Option(
         None,
         "--json-sort-keys/--no-json-sort-keys",
         help="Sort keys in JSON output.",
-        envvar=env_var("json_sort_keys"),
+        envvar=EnvVar.JSON_SORT_KEYS,
         config_override="output.json.sort_keys",
     ),
     # Output options
@@ -224,7 +224,7 @@ def main_callback(
         "--format",
         "-f",
         help=f"Specifies the output format to use.",
-        envvar=env_var("output_format"),
+        envvar=EnvVar.OUTPUT_FORMAT,
         case_sensitive=False,
         config_override="output.format",
     ),
@@ -232,14 +232,14 @@ def main_callback(
         None,
         "--paging/--no-paging",
         help="Display output in a pager (less, etc.).",
-        envvar=env_var("paging"),
+        envvar=EnvVar.PAGING,
         config_override="output.paging",
     ),
     pager: Optional[str] = Option(
         None,
         "--pager",
         help="Pager command to use. The default Rich pager will be used.",
-        envvar=env_var("pager"),
+        envvar=EnvVar.PAGER,
         config_override="output.pager",
     ),
     # General options
@@ -247,14 +247,14 @@ def main_callback(
         None,
         "--confirm-deletion/--no-confirm-deletion",
         help="Confirm before deleting resources.",
-        envvar=env_var("confirm_deletion"),
+        envvar=EnvVar.CONFIRM_DELETION,
         config_override="general.confirm_deletion",
     ),
     confirm_enumeration: Optional[bool] = Option(
         None,
         "--confirm-enumeration/--no-confirm-enumeration",
         help="Confirm before enumerating all resources without a limit or query.",
-        envvar=env_var("confirm_enumeration"),
+        envvar=EnvVar.CONFIRM_ENUMERATION,
         config_override="general.confirm_enumeration",
     ),
     # Cache options
@@ -262,14 +262,14 @@ def main_callback(
         None,
         "--cache/--no-cache",
         help="Enable caching of API responses.",
-        envvar=env_var("cache_enabled"),
+        envvar=EnvVar.CACHE_ENABLED,
         config_override="cache.enabled",
     ),
     cache_ttl: Optional[int] = Option(
         None,
         "--cache-ttl",
         help="Cache TTL in seconds.",
-        envvar=env_var("cache_ttl"),
+        envvar=EnvVar.CACHE_TTL,
         config_override="cache.ttl",
     ),
     # Output options that don't belong to the config file

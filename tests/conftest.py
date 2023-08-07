@@ -20,6 +20,7 @@ from typer.testing import CliRunner
 from typer.testing import Result
 
 from harbor_cli import state
+from harbor_cli.config import EnvVar
 from harbor_cli.config import HarborCLIConfig
 from harbor_cli.format import OutputFormat
 from harbor_cli.main import app as main_app
@@ -100,7 +101,7 @@ class PartialInvoker(Protocol):
 def invoke(app: typer.Typer, config_file: Path) -> PartialInvoker:
     """Partial function for invoking a CLI command with the app as the entrypoint,
     and the temp config as the config file."""
-    p = partial(runner.invoke, app, env={"HARBOR_CLI_CONFIG": str(config_file)})
+    p = partial(runner.invoke, app, env={str(EnvVar.CONFIG): str(config_file)})
     return p
 
 

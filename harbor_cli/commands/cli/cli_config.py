@@ -1,20 +1,27 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from typing import Any
+from typing import Iterable
 from typing import Optional
+from typing import TYPE_CHECKING
 
 import typer
 from pydantic import ValidationError
 
 from ...config import DEFAULT_CONFIG_FILE
+from ...config import EnvVar
 from ...config import HarborCLIConfig
+from ...models import BaseModel
 from ...output.console import console
+from ...output.console import exit
 from ...output.console import exit_err
 from ...output.console import info
 from ...output.console import success
 from ...output.formatting.path import path_link
 from ...output.render import render_result
+from ...output.table._utils import get_table
 from ...output.table.anysequence import AnySequence
 from ...state import get_state
 from ...style import render_cli_command
@@ -23,6 +30,8 @@ from ...style import render_config_option
 from ...style.style import render_cli_option
 from ...utils.utils import forbid_extra
 
+if TYPE_CHECKING:
+    from rich.table import Table
 
 state = get_state()
 
@@ -43,8 +52,10 @@ def render_config(config: HarborCLIConfig, as_toml: bool) -> None:
 
 @app.callback()
 def callback(ctx: typer.Context) -> None:
+    state = get_state()
     # Every other command than "path" and "write" requires a config file
-    if ctx.invoked_subcommand not in ["path", "write"]:
+    if ctx.invoked_subcommand not in ["path", "write", "env"]:
+        # if not hasattr(state.config, "config_file") or state.config.config_file is None:
         if state.config.config_file is None or not state.is_config_loaded:
             exit_err(
                 "No configuration file loaded. A configuration file must exist to use this command."
@@ -209,4 +220,38 @@ def show_config_path(ctx: typer.Context) -> None:
     render_result(path, ctx)
 
 
-# TODO: reload config
+# TODO: add reload config command
+
+
+class EnvVars(BaseModel):
+    envvars: dict[str, str] = {}
+
+    def as_table(self, **kwargs: Any) -> Iterable[Table]:  # type: ignore
+        table = get_table("Environment Variables")
+        table.add_column("Variable")
+        table.add_column("Value")
+
+        for envvar, value in self.envvars.items():
+            table.add_row(envvar, value)
+        yield table
+
+
+@app.command()
+def env(
+    ctx: typer.Context,
+    all: bool = typer.Option(
+        False, "-a", "--all", help="List all environment variables."
+    ),
+) -> None:
+    """Show active Harbor CLI environment variables."""
+    active = {}
+    for env_var in sorted(EnvVar):
+        val = os.environ.get(env_var)
+        if not all and val is None:
+            continue
+        active[str(env_var)] = val or ""
+
+    if not active:
+        exit("No environment variables set.")
+
+    render_result(EnvVars(envvars=active))

@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from harbor_cli.config import EnvVar
 from harbor_cli.config import HarborCLIConfig
 
 
@@ -60,3 +61,16 @@ def test_cli_config_get(
     stdout_config.harbor.credentials_file = config.harbor.credentials_file
 
     assert stdout_config == config
+
+
+def test_env_no_vars(invoke) -> None:
+    res = invoke(["cli-config", "env"], env={})  # unset all env vars for this test
+    assert res.exit_code == 0
+    assert "No environment variables set" in res.stderr
+
+
+def test_env_var_set(invoke) -> None:
+    res = invoke(["cli-config", "env"], env={EnvVar.URL: "https://example.com"})
+    assert res.exit_code == 0
+    assert "URL" in res.stdout
+    assert "https://example.com" in res.stdout
