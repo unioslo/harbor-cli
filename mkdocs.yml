@@ -72,6 +72,7 @@ nav:
           - usage/basic-usage.md
           - usage/options.md
           - usage/repl.md
+          - usage/tui.md
           - usage/terminology.md
           # TODO: formats
   - "Commands":
