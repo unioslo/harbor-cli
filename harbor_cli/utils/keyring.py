@@ -46,7 +46,7 @@ def require_keyring(f: Callable[P, T]) -> Callable[P, T]:
         if not KEYRING_SUPPORTED:
             raise keyring.errors.KeyringError(
                 "Keyring is not supported on this platform."
-            )
+            )  # NOTE: should this be just an exit_err() call?
         return f(*args, **kwargs)
 
     return wrapper

@@ -10,6 +10,7 @@ from harbor_cli.models import CommandSummary
 
 # Tests for the underlying _do_find() function
 
+
 # TODO: more precise testing of this function
 def test__do_find(mock_ctx: typer.Context) -> None:
     res = _do_find(

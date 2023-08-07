@@ -102,6 +102,7 @@ def list_audit_logs(
 
 # Log rotation commands
 
+
 # HarborAsyncClient.get_audit_log_rotation_history()
 @rotation_cmd.command("list")
 @inject_resource_options()

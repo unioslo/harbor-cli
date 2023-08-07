@@ -47,7 +47,6 @@ class ModelUpdateReq(BaseModel):
 
 @pytest.mark.parametrize("b", [None, "b"])
 def test_model_params_from_ctx(mock_ctx: typer.Context, b: Optional[str]) -> None:
-
     mock_ctx.params = {
         "a": "a-updated",
         "b": b,

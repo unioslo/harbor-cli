@@ -32,6 +32,7 @@ export_cmd = typer.Typer(
 )
 app.add_typer(export_cmd)
 
+
 # HarborAsyncClient.scan_artifact()
 @app.command("start")
 def start_scan(
@@ -123,6 +124,7 @@ using {render_cli_command('harbor scan export download')}
 
 !!! warning
     The official documentation for this endpoint is poor, and as such, this command might not work as intended."""
+
 
 #  HarborAsyncClient.export_scan_data()
 @export_cmd.command("start", help=export_start_help)

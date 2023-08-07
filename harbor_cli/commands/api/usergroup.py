@@ -23,6 +23,7 @@ app = typer.Typer(
     no_args_is_help=True,
 )
 
+
 # HarborAsyncClient.get_usergroup()
 @app.command("get")
 def get_usergroup(

@@ -73,7 +73,6 @@ def test_replace_none(d: dict[str, Any], expected: dict[str, Any]) -> None:
 def test_replace_none_iterable_of_dict(
     inp: dict[str, Any], expected: dict[str, Any]
 ) -> None:
-
     assert replace_none(inp) == expected
 
 

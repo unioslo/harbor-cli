@@ -84,6 +84,8 @@ OPTION_POLICY_ID = typer.Option(
     "--id",
     help=f"Retention policy ID. Overrides positional argument.",
 )
+
+
 # HarborAsyncClient.get_retention_metadata()
 @app.command("metadata")
 def get_retention_metadata(ctx: typer.Context) -> None:
@@ -187,6 +189,7 @@ def get_retention_policy_id_cmd(
 # TODO: add these commands once the API is improved
 # HarborAsyncClient.create_retention_policy()
 # HarborAsyncClient.update_retention_policy()
+
 
 # HarborAsyncClient.get_retention_executions()
 @job_cmd.command("list")
