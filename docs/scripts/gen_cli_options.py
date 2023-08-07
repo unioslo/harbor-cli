@@ -16,9 +16,13 @@ from common import DATA_DIR  # noqa
 
 
 def maybe_list_to_str(text: str | list[str] | None) -> str | None:
-    if isinstance(text, str) or text is None:
-        return text
-    return ", ".join(text) or None
+    # The envvars might actually be instances of `harbor_cli.config.EnvVar`,
+    # which the YAML writer does not convert to strings. Hence `str(...)`
+    if text is None:
+        return None
+    if isinstance(text, str):
+        return str(text)
+    return ", ".join([str(t) for t in text])
 
 
 # name it OptInfo to avoid confusion with typer.models.OptionInfo
