@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from pathlib import Path
 from typing import Any
+from typing import Dict
 from typing import Iterable
 from typing import Optional
 from typing import TYPE_CHECKING
@@ -224,7 +225,7 @@ def show_config_path(ctx: typer.Context) -> None:
 
 
 class EnvVars(BaseModel):
-    envvars: dict[str, str] = {}
+    envvars: Dict[str, str] = {}
 
     def as_table(self, **kwargs: Any) -> Iterable[Table]:  # type: ignore
         table = get_table("Environment Variables")
