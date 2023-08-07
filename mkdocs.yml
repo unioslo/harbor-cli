@@ -94,7 +94,6 @@ nav:
       - "Harbor":
           - "reference/harbor/index.md"
           - "reference/harbor/artifact.md"
-          - "reference/harbor/client.md"
       - "Output":
           - "reference/output/index.md"
           - "reference/output/console.md"
