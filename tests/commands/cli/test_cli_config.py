@@ -4,29 +4,28 @@ import os
 from pathlib import Path
 
 from harbor_cli.config import HarborCLIConfig
-from harbor_cli.config import load_config
 
 
 # TODO: test more keys and more levels of nesting
-def test_cli_config_get_key(invoke, config: HarborCLIConfig, tmp_path: Path) -> None:
+def test_cli_config_get_key(invoke, config: HarborCLIConfig, config_file: Path) -> None:
     # We assume the `invoke` fixture uses the `config_file`
     # fixture (which it does at the time of writing), so we can just
     # test against the values in the `config` fixture.
+    config.config_file = config_file
 
     # 1 level of nesting
     assert config.harbor.url is not None
     result = invoke(["cli-config", "get", "harbor.url"])
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.stderr
     assert result.stdout == config.harbor.url + os.linesep
 
     # 2 levels of nesting
-    assert config.harbor.url is not None
+    assert config.harbor.retry.max_tries is not None
     result = invoke(["cli-config", "get", "harbor.retry.max_tries"])
     assert result.exit_code == 0
     assert result.stdout == str(config.harbor.retry.max_tries) + os.linesep
 
     # 0 levels of nesting (top-level key) (technically not supported)
-    assert config.harbor.url is not None
     result = invoke(["cli-config", "get", "harbor"])
     assert result.exit_code == 0
     # this will print the harbor settings as a table NOT TOML, and
@@ -37,12 +36,16 @@ def test_cli_config_get_key(invoke, config: HarborCLIConfig, tmp_path: Path) -> 
         assert key in result.stdout
 
 
-def test_cli_config_get(invoke, config: HarborCLIConfig, tmp_path: Path) -> None:
+def test_cli_config_get(
+    invoke, config: HarborCLIConfig, tmp_path: Path, config_file: Path
+) -> None:
+    config.config_file = config_file
+
     assert config.output.format is not None
     result = invoke(["cli-config", "get"])
-    assert result.exit_code == 0
+    assert result.exit_code == 0, result.stderr
 
-    tmp_config = tmp_path / "config.toml"
+    tmp_config = tmp_path / "config_get.toml"
     with open(tmp_config, "w") as f:
         f.write(result.stdout)
     stdout_config = HarborCLIConfig.from_file(tmp_config)

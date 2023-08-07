@@ -45,6 +45,13 @@ class State:
     Holds the current configuration, harbor client, and other stateful objects.
     """
 
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = super().__new__(cls, *args, **kwargs)
+        return cls._instance
+
     options: CommonOptions = CommonOptions()
     loop: asyncio.AbstractEventLoop
     repl: bool = False
@@ -266,7 +273,4 @@ def get_state() -> State:
     """Returns the global state object.
 
     Instantiates a new state object with defaults if it doesn't exist."""
-    global _STATE
-    if _STATE is None:
-        _STATE = State()
-    return _STATE
+    return State()

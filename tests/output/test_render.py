@@ -19,12 +19,11 @@ from harbor_cli.output import render
 from harbor_cli.output.render import render_json
 from harbor_cli.output.render import render_result
 from harbor_cli.output.render import render_table
-from harbor_cli.state import get_state
+from harbor_cli.state import State
 
-state = get_state()
 
 # The actual testing of the render functions is done in test_render_<format>()
-def test_render_result_json(mocker: MockerFixture) -> None:
+def test_render_result_json(mocker: MockerFixture, state: State) -> None:
     """Test that we can render a result."""
     spy = mocker.spy(render, "render_json")
     state.config.output.format = OutputFormat.JSON
@@ -33,7 +32,7 @@ def test_render_result_json(mocker: MockerFixture) -> None:
     spy.assert_called_once()
 
 
-def test_render_result_table(mocker: MockerFixture) -> None:
+def test_render_result_table(mocker: MockerFixture, state: State) -> None:
     """Test that we can render a result."""
     spy = mocker.spy(render, "render_table")
     state.config.output.format = OutputFormat.TABLE
@@ -58,14 +57,16 @@ class SomeModel(BaseModel):
         (SomeModel(a=1, b="2"), '{\n  "a": 1,\n  "b": "2"\n}'),
     ],
 )
-def test_render_json(capsys: CaptureFixture, inp: Any, expected: str) -> None:
+def test_render_json(
+    capsys: CaptureFixture, state: State, inp: Any, expected: str
+) -> None:
     state.config.output.JSON.indent = 2
     render_json(inp)
     out, _ = capsys.readouterr()
     assert out == expected + "\n"
 
 
-def test_render_table(capsys: CaptureFixture) -> None:
+def test_render_table(capsys: CaptureFixture, state: State) -> None:
     # FIXME: not sure how to test this
     render_table({"a": 1})
     out, _ = capsys.readouterr()
@@ -74,7 +75,9 @@ def test_render_table(capsys: CaptureFixture) -> None:
 
 @given(st.one_of(COMPACT_TABLE_MODELS))
 @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
-def test_render_table_compact_mock(renderable: BaseModel | list[BaseModel]) -> None:
+def test_render_table_compact_mock(
+    state: State, renderable: BaseModel | list[BaseModel]
+) -> None:
     """Test that we can render a result as a compact table."""
     # NOTE: we cannot use the mocker fixture from pytest-mock here, because
     # it will not work with the @given decorator.
@@ -99,7 +102,7 @@ def test_render_table_compact_mock(renderable: BaseModel | list[BaseModel]) -> N
         full_table_mock.assert_not_called()
 
 
-def test_render_table_compact_fallback(mocker: MockerFixture) -> None:
+def test_render_table_compact_fallback(mocker: MockerFixture, state: State) -> None:
     """Tests that a model with no compact table implementation is rendered
     via the fallback full table implementation."""
     # We can use the pytest-mock mocker fixture here since we don't use hypothesis
@@ -120,9 +123,10 @@ def test_render_table_compact_fallback(mocker: MockerFixture) -> None:
 
 @given(st.one_of(COMPACT_TABLE_MODELS))
 @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
-def test_render_table_full_mock(renderable: BaseModel | list[BaseModel]) -> None:
+def test_render_table_full_mock(
+    state: State, renderable: BaseModel | list[BaseModel]
+) -> None:
     """Test that we can render a result as a full table."""
-
     full_table_mock = MagicMock()
     compact_table_mock = MagicMock()
 

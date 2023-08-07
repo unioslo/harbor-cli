@@ -9,6 +9,7 @@ from harborapi import HarborAsyncClient
 
 from harbor_cli.config import HarborCLIConfig
 from harbor_cli.output.console import console
+from harbor_cli.state import get_state
 from harbor_cli.state import State
 
 
@@ -102,6 +103,8 @@ def test_state_console() -> None:
 
 def test_state_client() -> None:
     """Ensure that the client property re-uses the same client object"""
+    # de-init singleton for testing
+    State._instance = None
     state = State()
     assert not state.is_client_loaded
     default_client = state.client  # the default client
@@ -124,7 +127,10 @@ def test_state_client() -> None:
 
 def test_state_config() -> None:
     """Ensure that the client property re-uses the same client object"""
+    # de-init singleton for testing
+    State._instance = None
     state = State()
+    # for testing purposes we
     assert not state.is_config_loaded
     default_config = state.config  # the default config
 
@@ -147,3 +153,10 @@ def test_state_config() -> None:
     # modify the config object directly (not through the state)
     config.harbor.url = "https://example.com"
     assert state.config.harbor.url == "https://example.com"
+
+
+def test_get_state() -> None:
+    state1 = get_state()
+    state2 = get_state()
+    state3 = State()
+    assert state1 is state2 is state3

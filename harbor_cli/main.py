@@ -29,7 +29,6 @@ from .output.formatting.path import path_link
 from .state import get_state
 from .state import State
 
-state = get_state()
 
 # Init subcommand groups here
 for group in commands.ALL_GROUPS:
@@ -327,6 +326,7 @@ def main_callback(
     # At this point we require an active configuation, be it from a file
     # loaded from disk or a default configuration.
     try_load_config(config_file, create=True)
+    state = get_state()
     _restore_config(state)  # necessary for overrides to to reset in REPL
 
     # Set config overrides
@@ -415,6 +415,7 @@ def try_load_config(config_file: Optional[Path], create: bool = True) -> None:
         Whether to create a new config file if one is not found, by default True
     """
     # Don't load the config if it's already loaded (e.g. in REPL)
+    state = get_state()
     if not state.is_config_loaded:
         try:
             conf = HarborCLIConfig.from_file(config_file)

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import copy
 from pathlib import Path
 
 import keyring
@@ -64,15 +65,23 @@ def test_harbor_cli_config_from_file(config_file: Path) -> None:
     assert config is not None
 
 
+def test_harbor_cli_config_not_from_file() -> None:
+    """Assert the config object has the config_file field even
+    if not loaded from a file"""
+    config = HarborCLIConfig()
+    assert config is not None
+    assert config.config_file is None
+
+
 def test_harbor_cli_config_from_file_not_exists(tmp_path: Path) -> None:
-    f = tmp_path / "config.toml"
+    f = tmp_path / "test_harbor_cli_config_from_file_not_exists_config.toml"
     assert not f.exists()
     with pytest.raises(FileNotFoundError):
         HarborCLIConfig.from_file(f, create=False)
 
 
 def test_harbor_cli_config_from_file_create(tmp_path: Path) -> None:
-    f = tmp_path / "config.toml"
+    f = tmp_path / "test_harbor_cli_config_from_file_create_config.toml"
     assert not f.exists()
     conf = HarborCLIConfig.from_file(f, create=True)
     assert conf is not None
@@ -319,3 +328,31 @@ def test_harbor_cli_config_toml_expose_secrets(
         assert "somebasicauth" not in toml_str
         assert "somefile" not in toml_str
         assert "***" in toml_str  # don't be too specific about the number of stars
+
+
+def test_dunder_copy(config: HarborCLIConfig, tmp_path: Path) -> None:
+    """Test that the __copy__ method works as expected with excluded fields."""
+    mock_path = tmp_path / "config.toml"
+    mock_path.touch()
+    config.config_file = mock_path
+    assert config.config_file is not None
+    copied = config.__copy__()
+    assert hasattr(copied, "config_file")
+    assert copied.config_file == config.config_file
+
+    copied_with_copy = copy.copy(config)
+    assert copied_with_copy.config_file == config.config_file
+
+
+def test_dunder_deepcopy(config: HarborCLIConfig, tmp_path: Path) -> None:
+    """Test that the __deepcopy__ method works as expected with excluded fields."""
+    mock_path = tmp_path / "config.toml"
+    mock_path.touch()
+    config.config_file = mock_path
+    assert config.config_file is not None
+    copied = config.__deepcopy__({})
+    assert hasattr(copied, "config_file")
+    assert copied.config_file == config.config_file
+
+    copied_with_copy = copy.deepcopy(config)
+    assert copied_with_copy.config_file == config.config_file

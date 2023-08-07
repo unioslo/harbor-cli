@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import os
-from copy import copy
+from copy import deepcopy
 from functools import partial
 from pathlib import Path
 from typing import Any
@@ -72,10 +72,13 @@ def harbor_client(config: HarborCLIConfig) -> HarborAsyncClient:
 
 @pytest.fixture(name="state", scope="function")
 def _state_fixture(
-    config: HarborCLIConfig, harbor_client: HarborAsyncClient
+    config: HarborCLIConfig, harbor_client: HarborAsyncClient, config_file: Path
 ) -> state.State:
     """Fixture for testing the state."""
-    return state.State(config=config, client=harbor_client)
+    st = state.get_state()  # Initialize the state
+    st.config = config
+    st.client = harbor_client
+    yield state.get_state()
 
 
 class PartialInvoker(Protocol):
@@ -119,14 +122,12 @@ def output_format_arg(output_format: OutputFormat) -> list[str]:
     return ["--format", output_format.value]
 
 
-_ORIGINAL_STATE = copy(state.get_state())
-
-
 @pytest.fixture(scope="function", autouse=True)
-def revert_state() -> Generator[None, None, None]:
-    """Reverts the global state back to its original value after the test is run."""
+def revert_state_config(state: state.State) -> Generator[None, None, None]:
+    """Reverts the global state config back to its original value after the test is run."""
+    original_config = deepcopy(state.config)
     yield
-    state._STATE = _ORIGINAL_STATE
+    state.config = original_config
 
 
 @pytest.fixture

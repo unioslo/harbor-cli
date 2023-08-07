@@ -22,8 +22,6 @@ from .table import EmptySequenceError
 from .table import get_renderable
 
 
-state = get_state()
-
 T = TypeVar("T")
 
 # TODO: add ResultType = T | list[T] to types.py
@@ -42,6 +40,7 @@ def render_result(result: T, ctx: typer.Context | None = None, **kwargs: Any) ->
         Additional keyword arguments to pass to the render function.
     """
     # Short form aliases
+    state = get_state()
     fmt = state.config.output.format
     paging = state.config.output.paging
     raw_mode = state.config.harbor.raw_mode
@@ -66,6 +65,7 @@ def render_table(
     # TODO: handle "primitives" like strings and numbers
 
     # Try to render compact table if enabled
+    state = get_state()
     compact = state.config.output.table.compact
     if compact:
         try:
@@ -89,6 +89,7 @@ def render_table_compact(result: T | Sequence[T], **kwargs) -> None:
 
 
 def render_table_full(result: T | Sequence[T], **kwargs) -> None:
+    state = get_state()
     show_description = state.config.output.table.description
     max_depth = state.config.output.table.max_depth
 
@@ -113,6 +114,7 @@ def render_json(
     result: T | Sequence[T], ctx: typer.Context | None = None, **kwargs: Any
 ) -> None:
     """Render the result of a command as JSON."""
+    state = get_state()
     p = state.options.output_file
     with_stdout = state.options.with_stdout
     no_overwrite = state.options.no_overwrite
@@ -154,6 +156,7 @@ def render_json(
 
 def render_raw(result: Any, ctx: typer.Context | None = None, **kwargs: Any) -> None:
     """Render the result of data fetched in raw mode."""
+    state = get_state()
     try:
         result = json.dumps(result)
         console.print_json(result, indent=state.config.output.JSON.indent)

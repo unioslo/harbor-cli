@@ -435,6 +435,16 @@ class HarborCLIConfig(BaseModel):
             SecretStr: lambda v: v.get_secret_value() if v else None,
         }
 
+    def __copy__(self) -> HarborCLIConfig:
+        """Create a copy of the config object that includes the config file
+        path, so that it can be saved to the same file."""
+        return self.copy(update={"config_file": self.config_file})
+
+    def __deepcopy__(self, memo: dict) -> HarborCLIConfig:
+        """Create a copy of the config object that includes the config file
+        path, so that it can be saved to the same file."""
+        return self.copy(update={"config_file": self.config_file}, deep=True)
+
     @classmethod
     def from_file(
         cls, config_file: Path | None = DEFAULT_CONFIG_FILE, create: bool = False
