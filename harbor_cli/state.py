@@ -174,6 +174,9 @@ class State:
         if not self.cache._loop_running:
             self.loop.create_task(self.cache.start_flush_loop())
 
+    def authenticate_harbor(self) -> None:
+        self.client.authenticate(**self.config.harbor.credentials)
+
     def _init_client(self) -> None:
         """Configures Harbor client if it hasn't been configured yet.
 
@@ -200,7 +203,7 @@ class State:
             self.config.harbor.username = username
             self.config.harbor.secret = secret  # type: ignore # pydantic.SecretStr
 
-        self.client.authenticate(**self.config.harbor.credentials)
+        self.authenticate_harbor()
 
         # Raw + validate modes
         self.client.raw = self.config.harbor.raw_mode
