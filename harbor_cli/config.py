@@ -185,22 +185,6 @@ class HarborSettings(BaseModel):
                 raise ValueError(f"Credentials file {v} is not a file")
         return v
 
-    def ensure_authable(self) -> bool:
-        """Ensures that the credentials are sufficient to authenticate with the Habror API.
-        Raises CredentialsError if not.
-        """
-        if not self.url:
-            raise CredentialsError("A Harbor API URL is required")
-
-        # require one of the auth methods to be set
-        if not self.has_auth_method:
-            raise CredentialsError(
-                "A harbor authentication method must be specified. "
-                "One of 'username'+'secret', 'basicauth', or 'credentials_file' must be specified. "
-                "See the documentation for more information."
-            )
-        return True
-
     @property
     def secret_value(self) -> str:
         """Returns the secret value from the keyring if enabled, otherwise
@@ -237,6 +221,29 @@ class HarborSettings(BaseModel):
             basicauth=self.basicauth.get_secret_value(),
             credentials_file=self.credentials_file,
         )
+
+    def ensure_authable(self) -> bool:
+        """Ensures that the credentials are sufficient to authenticate with the Habror API.
+        Raises CredentialsError if not.
+        """
+        if not self.url:
+            raise CredentialsError("A Harbor API URL is required")
+
+        # require one of the auth methods to be set
+        if not self.has_auth_method:
+            raise CredentialsError(
+                "A harbor authentication method must be specified. "
+                "One of 'username'+'secret', 'basicauth', or 'credentials_file' must be specified. "
+                "See the documentation for more information."
+            )
+        return True
+
+    def clear_credentials(self) -> None:
+        """Clears the credentials from the current configuration."""
+        self.username = ""
+        self.secret = ""  # type: ignore # pydantic.SecretStr
+        self.basicauth = ""  # type: ignore # pydantic.SecretStr
+        self.credentials_file = None
 
 
 class LoggingSettings(BaseModel):

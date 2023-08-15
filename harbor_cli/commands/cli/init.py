@@ -177,8 +177,13 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
         base_msg, choices=choices, default=default_choice, show_choices=False
     )
 
+    # Clear all previous credentials if we provide new credentials
+    username = hconf.username  # copy username for re-use in prompts
+    if not auth_method == "s":
+        hconf.clear_credentials()
+
     if auth_method == "u":
-        _set_username_secret(hconf)
+        set_username_secret(hconf, username)
     elif auth_method == "b":
         hconf.basicauth = prompt_basicauth(hconf.basicauth.get_secret_value())  # type: ignore # pydantic.SecretStr
     elif auth_method == "f":
@@ -192,26 +197,30 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
         )
 
 
-def _set_username_secret(
-    hconf: HarborSettings,
-) -> None:
+def set_username_secret(hconf: HarborSettings, current_username: str) -> None:
+    username, secret = prompt_username_secret(current_username, hconf.secret_value)
     if KEYRING_SUPPORTED:
-        return _set_username_secret_keyring(hconf)
+        _set_username_secret_keyring(hconf, username, secret)
     else:
-        from harborapi.utils import get_basicauth
-
-        username, secret = prompt_username_secret(hconf.username, hconf.secret_value)
-        hconf.basicauth = get_basicauth(username, secret)
+        _set_username_secret_config(hconf, username, secret)
 
 
-def _set_username_secret_keyring(hconf: HarborSettings) -> None:
+def _set_username_secret_config(
+    hconf: HarborSettings, username: str, secret: str
+) -> None:
+    hconf.username = username
+    hconf.secret = secret  # type: ignore # pydantic.SecretStr
+    hconf.keyring = False
+
+
+def _set_username_secret_keyring(
+    hconf: HarborSettings, username: str, secret: str
+) -> None:
     """Set username and secret using keyring.
     Stores the secret in the keyring and the username in the config file."""
-    username, secret = prompt_username_secret(hconf.username, hconf.secret_value)
     hconf.username = username
     set_password(username, secret)
     hconf.keyring = True
-    hconf.secret = "_"  # type: ignore # maybe not necessary
 
 
 def _init_advanced_harbor_settings(config: HarborCLIConfig) -> None:
