@@ -72,14 +72,11 @@ def init(
     except OverwriteError:
         # TODO: verify that this path is always correct
         p = path or DEFAULT_CONFIG_FILE
-        warning(f"Config file already exists ({path_link(p)})")
-        if not wizard:
-            exit_err("Cannot proceed without overwriting config file.")
-
-        wizard = bool_prompt(
-            "Are you sure you want to run the configuration wizard?",
-            default=False,
-        )
+        msg = f"Config file already exists ({path_link(p)})"
+        if wizard:
+            warning(msg)
+        else:
+            exit_err(msg)
         config_path = None
     else:
         logger.info(f"Created config file at {config_path}")
