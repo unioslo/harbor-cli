@@ -81,11 +81,12 @@ def init(
     else:
         logger.info(f"Created config file at {config_path}")
 
-    if wizard:
-        # fmt: off
-        config = run_config_wizard(config_path)
-        state.config = config
-        # fmt: on
+    config = run_config_wizard(config_path)
+    state.config = config
+
+    # NOTE: should we only call this if state.is_client_loaded?
+    # But the worst case scenario is this has no effect, right?
+    state.authenticate_harbor()
 
 
 def run_config_wizard(config_path: Optional[Path] = None) -> HarborCLIConfig:
