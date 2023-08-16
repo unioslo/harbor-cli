@@ -411,7 +411,7 @@ def list_users(
             # we do the sorting ourselves later
             page=page,
             page_size=page_size,
-            limit=limit,
+            # we do the limiting ourselves later
         ),
         "Fetching users...",
     )
@@ -421,4 +421,8 @@ def list_users(
         users.sort(key=lambda u: u.username or "")
     elif sort == UserListSortMode.NAME:
         users.sort(key=lambda u: u.realname or "")
+
+    if limit:
+        users = users[:limit]
+
     render_result(users, ctx)
