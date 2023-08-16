@@ -606,13 +606,13 @@ def cleanup_artifacts(
     project: Optional[List[str]] = typer.Option(
         None,
         "--project",
-        help="Project(s) to delete from. If not specified, all projects will be considered.",
+        help="Project(s) to delete artifacts from. If not specified, all projects will be considered.",
         callback=parse_commalist,
     ),
     repository: Optional[List[str]] = typer.Option(
         None,
         "--repo",
-        help="Repository name(s) to delete from. If not specified, all repositories in the project(s) will be considered.",
+        help="Repository name(s) to delete artifacts from. If not specified, all repositories in the matched project(s) will be considered.",
         callback=parse_commalist,
     ),
     # Matching options

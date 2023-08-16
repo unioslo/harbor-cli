@@ -258,7 +258,7 @@ def list_projects(
     ),
     public: Optional[bool] = typer.Option(
         None,
-        help="Filter projects by whether they are public.",
+        help="Filter projects by whether they are public or not.",
     ),
     owner: Optional[str] = typer.Option(
         None,

@@ -236,7 +236,10 @@ def create_audit_log_rotation_schedule(
         help=f"Operations to rotate logs for e.g. {render_cli_value('create,delete,pull')}",
         callback=parse_commalist,
     ),
-    dry_run: Optional[bool] = typer.Option(None, help="Dry run"),
+    dry_run: Optional[bool] = typer.Option(
+        None,
+        help="Dry run",
+    ),
 ) -> None:
     """Create an audit log rotation schedule."""
     schedule = _get_schedule(
