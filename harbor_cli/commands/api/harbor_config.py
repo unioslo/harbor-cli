@@ -16,11 +16,8 @@ from ...utils.commands import inject_help
 
 state = get_state()
 
-# Create a command group
 app = typer.Typer(
-    # Naming to remove ambiguity with the "cli-config" command group
-    # in ../cli/cli_config.py
-    name="harbor-config",
+    name="config",
     help="Manage Harbor configuration.",
     no_args_is_help=True,
 )
@@ -72,15 +69,11 @@ def flatten_config_response(response: ConfigurationsResponse) -> dict[str, Any]:
 def get_config(
     ctx: typer.Context,
     flatten: bool = typer.Option(
-        False,
-        "--flatten",
-        help=(
-            "Flatten config fields. "
-            "Removes 'editable' field and replaces field value with 'value' field."
-        ),
+        True,
+        help="Flatten config response to a single level.",
     ),
 ) -> None:
-    """Fetch the Harbor configuration."""
+    """Fetch the current Harbor configuration."""
     system_info = state.run(state.client.get_config(), "Fetching system info...")
     if flatten:
         # In order to print a flattened response, we turn it from a
@@ -347,7 +340,9 @@ def update_config(
         is_flag=False,
     ),
 ) -> None:
-    """Update the configuration of Harbor."""
+    """Update the Harbor configuration.
+
+    One or more configuration parameters must be provided."""
     logger.info("Updating configuration...")
     params = model_params_from_ctx(ctx, Configurations)
     if not params:
