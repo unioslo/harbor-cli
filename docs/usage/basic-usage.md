@@ -56,7 +56,7 @@ A boolean value. Can be `true`, `false`, `1`, or `0`. Case-insensitive.
 
 
 !!! info
-    Typically used when updating or creating resources whose fields can be `None`, `True` or `False`, thereby making it impossible to distinguish between `None` and `False` if the option were to be a flag.
+    A boolean argument is typically used for resources whose value can be `None`, `True` or `False`.
 
 #### `choice`
 
