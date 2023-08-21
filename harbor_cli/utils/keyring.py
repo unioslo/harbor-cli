@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Callable
+from typing import Final
 from typing import TypeVar
 
 import keyring
@@ -32,10 +33,7 @@ def check_keyring_support():
         return False
 
 
-KEYRING_SUPPORTED = check_keyring_support()
-
-# These functions are not safe to call if keyring is not supported!
-# Functions should always check KEYRING_SUPPORTED before calling them.
+KEYRING_SUPPORTED: Final[bool] = check_keyring_support()
 
 P = ParamSpec("P")
 T = TypeVar("T")
