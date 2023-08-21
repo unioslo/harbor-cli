@@ -14,16 +14,18 @@ from harbor_cli.state import State
 
 
 def test_state_run_nohandle(state: State) -> None:
-    async def coro() -> int:
-        raise ValueError("test")
+    async def coro(exc_type: type[Exception]) -> int:
+        raise exc_type("test")
 
     # Single error type
     with pytest.raises(ValueError):
-        state.run(coro(), no_handle=ValueError)
+        state.run(coro(ValueError), no_handle=ValueError)
 
     # Tuple of error types
     with pytest.raises(ValueError):
-        state.run(coro(), no_handle=(ValueError, TypeError))
+        state.run(coro(ValueError), no_handle=(ValueError, TypeError))
+    with pytest.raises(TypeError):
+        state.run(coro(TypeError), no_handle=(ValueError, TypeError))
 
 
 @pytest.mark.timeout(1)  # timeout to avoid hanging on prompt
