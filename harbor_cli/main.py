@@ -337,6 +337,7 @@ def main_callback(
         state.config.harbor.username = harbor_username
     if harbor_secret is not None:
         state.config.harbor.secret = harbor_secret  # type: ignore # Pydantic.SecretStr
+        state.config.harbor.keyring = False
     if harbor_basicauth is not None:
         state.config.harbor.basicauth = harbor_basicauth  # type: ignore # Pydantic.SecretStr
     if harbor_credentials_file is not None:
