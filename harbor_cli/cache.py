@@ -109,8 +109,8 @@ class Cache:
 
     async def start_flush_loop(self) -> None:
         """Start a loop that finds expired entries every 5 minutes."""
-        self._loop_running = True
         try:
+            self._loop_running = True
             while self._loop_running:
                 await asyncio.sleep(300)
                 self._flush_expired()

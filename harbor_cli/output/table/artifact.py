@@ -112,7 +112,8 @@ def artifact_vulnerability_summary_table(
 def artifactinfo_panel(artifact: ArtifactInfo, **kwargs: Any) -> Panel:
     """Display an artifact (ArtifactInfo) in a panel.
 
-    The vulnerabilities of the artifact are shown separately from the artifact itself."""
+    The vulnerabilities of the artifact are shown separately from the artifact itself.
+    """
 
     tables = []
 

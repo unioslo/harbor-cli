@@ -135,8 +135,8 @@ def inject_help(
     model : Type[BaseModel]
         The pydantic model to use for help injection.
     strict : bool
-        If True, fail if a field in the model does not have a matching typer
-        option, by default False
+        If True, fail if a field in the model does not correspond to a function
+        parameter of the same name with a typer.OptionInfo as a default value.
     **field_additions
         Additional help text to add to the help attribute of a field.
         The parameter name should be the name of the field, and the value
@@ -220,6 +220,7 @@ ARG_PROJECT_NAME = typer.Argument(
     None,
     help="Name of the project to use.",
 )
+
 
 # TODO: when union types are supported, we can use `get_project_arg` as the callback
 # for this option. For now, we have to call the function manually inside each command.
@@ -477,20 +478,9 @@ def _patch_param(
             )
         return func
 
-    # if not to_replace.annotation:
-    #     raise ValueError(
-    #         f"Parameter {name!r} in function {func.__qualname__!r} must have a type annotation."
-    #     )
-
-    # if to_replace.annotation not in ["Optional[str]", "str | None", "None | str"]:
-    #     raise ValueError(
-    #         f"Parameter {name!r} in function {func.__qualname__!r} must be of type 'Optional[str]' or 'str | None'."
-    #     )
-
     # Use defaults from the injected parameter if they exist
     if use_default:
-        # TODO: add some sort of copy-on-write here, so we don't
-        # we don't copy if we don't need to
+        # TODO: add some sort of copy-on-write here, so we don't copy if we don't need to
         value = copy.copy(value)
         if hasattr(to_replace.default, "default"):
             value.default = to_replace.default.default

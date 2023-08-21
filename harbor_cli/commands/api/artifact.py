@@ -682,6 +682,7 @@ def cleanup_artifacts(
 
     to_delete = []  # type: list[ArtifactDeletion]
 
+    # Determine which artifacts to delete
     for artifact in artifacts:
         d = ArtifactDeletion(
             artifact=artifact,
@@ -695,10 +696,9 @@ def cleanup_artifacts(
         if d.should_delete():
             if not artifact.artifact.digest:
                 exit_err(
-                    "Artifact has no digest, this should not happen. Check the logs for more information.",
+                    f"Artifact {artifact.name_with_tag!r} has no digest, this should not happen. Check the logs for more information.",
                     artifact=artifact.dict(),
                 )
-
             to_delete.append(d)
             logger.debug(
                 f"Scheduling {artifact.name_with_digest} for deletion. Reason(s): {', '.join(reason.value for reason in d.reasons)}",
@@ -1012,7 +1012,11 @@ def get_vulnerabilities(
         help="Operator to use when querying a combination of multiple CVEs or packages.",
     ),
 ) -> None:
-    """Find artifacts affected by a given CVE or vulnerable package."""
+    """Find artifacts affected by a given CVE or vulnerable package.
+
+    :information: The output of this command is slated to change in the future.
+    It desperately needs a facelift. Hidden until this is resolved.
+    """
     # Check that we have at least one CVE or package
     if not any([cve, package]):
         exit_err("One or more CVEs or packages is required.")

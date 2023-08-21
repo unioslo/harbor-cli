@@ -85,7 +85,9 @@ def help_config_override(option: str) -> str:
 
 
 def get_health_color(health: str | None) -> str:
+    # health status can be "healthy" and "unhealthy"
+    # but we treat anything other than "healthy" as unhealthy
     if health == "healthy":
         return COLOR_HEALTH_HEALTHY
-    else:  # TODO: find all health states
+    else:
         return COLOR_HEALTH_UNHEALTHY
