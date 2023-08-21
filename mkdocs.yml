@@ -67,6 +67,7 @@ nav:
       - "Configuration":
           - configuration/introduction.md
           - configuration/config-file.md
+          - configuration/auth.md
           - configuration/formats.md
       - "Usage":
           - usage/basic-usage.md
