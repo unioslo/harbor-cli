@@ -29,7 +29,7 @@ def check_keyring_support():
     # TODO: make this error handling more robust. Differentiate between different
     # keyring errors and handle them accordingly.
     except keyring.errors.KeyringError as e:
-        logger.warning(f"Keyring is not supported on this platform: {e}")
+        logger.debug(f"Keyring is not supported on this platform: {e}")
         return False
 
 
