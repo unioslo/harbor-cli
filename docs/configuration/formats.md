@@ -2,9 +2,9 @@
 
 ## Table: `table`
 
+By default, the application renders result as tables. These tables try to display the most important information in a concise and readable format. The compact tables use plain English and format data such as size (bytes) to the appropriate units to make the information more easily digestible.
 
-By default, Harbor-CLI renders results as one or more [Rich](https://rich.readthedocs.io/en/latest/tables.html) tables.
-The default tables will always reflect the actual JSON structure of the data, and as such, renders the model fields as individual rows. Nested models are rendered as separate tables (nesting level is indicated by its color-coded title).
+<!-- TODO: The following tables have compact representations: -->
 
 ```toml title="config.toml"
 [output]
@@ -13,6 +13,32 @@ format = "table"
 
 ``` title="CLI"
 harbor --format table system volumes
+```
+
+```
+┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━┓
+┃ Total Capacity ┃ Free Space ┃ Used Space ┃
+┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━┩
+│ 912.47 GB      │ 102.38 GB  │ 810.09 GB  │
+└────────────────┴────────────┴────────────┘
+```
+
+There are over 150 different data structures in the Harbor API specification, and not all of them have been given a custom compact table representation in the application yet. In these cases, the application falls back on more crude auto-generated tables, which are described in the next section.
+
+### Auto-generated tables
+
+Not all models in the API have a custom compact table representation, and the application will fall back on creating auto-generated tables for these. The auto-generated tables always reflect the actual JSON structure of the data, and therefore renders each key-value pair as separate rows. Nested models are rendered as separate tables with a reference to the nested model through its name in the parent table. Nesting level is indicated by a table's color-coded, dot-separated title.
+
+```toml title="config.toml"
+[output]
+format = "table"
+
+[output.table]
+compact = false
+```
+
+``` title="CLI"
+harbor --format table --no-table-compact system volumes
 ```
 
 ```
@@ -33,39 +59,10 @@ harbor --format table system volumes
 ╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
+!!! info
+    The `SystemInfo` table contains a nested model under the key `storage`. This name is used as the title of the table representing the nested model.
 
-
-### Compact tables
-
-The auto-generated tables stay true to the JSON structure of the data, but this can be a bit visually overwhelming. To make the output more readable, you can use the `--table-compact` flag or `output.table.compact` configuration option to render the tables in a more compact format.
-
-This will only show the most important fields, and will hide nested tables. These tables are more concise, but also more opinionated in their presentation by omitting certain fields, so they may not be suitable for every use case.
-
-Not all tables can be rendered in this format, and tables that do not have compact representations fall back on the built-in Rich table representation described in the previous section.
-
-
-<!-- TODO: The following tables have compact representations: -->
-
-```toml title="config.toml"
-[output]
-format = "table"
-
-[output.table]
-compact = true
-```
-
-``` title="CLI"
-harbor --format table --table-compact system volumes
-```
-
-
-```
-┏━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━┓
-┃ Total Capacity ┃ Free Space ┃ Used Space ┃
-┡━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━┩
-│ 912.47 GB      │ 102.38 GB  │ 810.09 GB  │
-└────────────────┴────────────┴────────────┘
-```
+In the future, we aim to have custom compact table representations for all models in the API. However, if you prefer the auto-generated tables, you can always disable the compact tables by setting `ouput.table.compact` to `false` in your configuration file or by passing in `--no-table-compact` to the CLI.
 
 
 

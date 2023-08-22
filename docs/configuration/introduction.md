@@ -10,16 +10,14 @@ harbor init
 
 This will create a config file at `~/.config/harbor-cli/config.toml`[^1], and then run the interactive configuration wizard. Use the `--no-wizard` flag to skip the configuration wizard.
 
-You can always check the default location of the configuration file by running the [`cli-config path`](../../commands/cli-config/#cli-config-path) command:
+You can always find the location of the current configuration file by running the [`cli-config path`](../../commands/cli-config/#cli-config-path) command:
 
 ```bash
-$ harbor cli-config path
-/Users/<username>/Library/Preferences/harbor-cli/config.toml
+harbor cli-config path
 ```
-*Example from macOS 12.6 with platformdirs==2.5.4*
 
-!!! important
-    The configuration file is required to run the application. Running without a configuration file will call [`init`](../../commands/init/#init_1) and create a configuration file at the default location, with the exception of certain commands such as [`init`](../../commands/init/#init_1), [`sample-config`](../../commands/sample-config/), and [`cli-config path`](../../commands/cli-config/), which have been designed to work without a configuration file.
+!!! info
+    `cli-config path` will show the default config file location if no config file is found.
 
 
 ### Alternative config location

@@ -1,6 +1,6 @@
 # Configuration file
 
-In the previous section, we created a config file and went through the interactive wizard. This section will go through the configuration file in more detail.
+This section goes over every config category in detail. It is not meant to be read from start to finish, but rather to be used as a reference when configuring the application.
 
 ## Sample configuration file
 

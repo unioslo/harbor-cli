@@ -11,5 +11,8 @@ The name `harbor-cli` is in the process of being acquired from its current owner
 In the meantime, you can install the application from GitHub:
 
 ```
-pip install git+https://github.com/pederhan/harbor-cli
+pipx install git+https://github.com/pederhan/harbor-cli
 ```
+
+!!! info
+    It is highly recommended to install the application through [pipx](https://pypa.github.io/pipx/) to avoid dependency conflicts with other Python applications.
