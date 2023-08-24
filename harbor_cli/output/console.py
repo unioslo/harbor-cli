@@ -19,28 +19,23 @@ err_console = Console(
 
 
 def info(message: str, *args, **kwargs) -> None:
-    """Prints an unstyled message to the stderr console."""
-    logger.info(message)
+    logger.info(message, extra=dict(**kwargs))
 
 
 def success(message: str, *args, **kwargs) -> None:
-    """Prints a green message to the stderr console."""
-    logger.info(message)
+    logger.info(message, extra=dict(**kwargs))
 
 
 def warning(message: str, *args, **kwargs) -> None:
-    """Prints a yellow message with a warning prefix to the stderr console."""
-    logger.warning(message)
+    logger.warning(message, extra=dict(**kwargs))
 
 
 def error(message: str, *args, **kwargs) -> None:
-    """Prints a red message with an error prefix to the stderr console."""
-    logger.error(message)
+    logger.error(message, extra=dict(**kwargs))
 
 
-def exit(message: Optional[str] = None, code: int = 0) -> NoReturn:
-    """Prints a message to the default console and exits with the given
-    code (default: 0).
+def exit(message: Optional[str] = None, code: int = 0, **kwargs) -> NoReturn:
+    """Logs a message with INFO level and exits with the given code (default: 0)
 
     Parameters
     ----------
@@ -48,14 +43,16 @@ def exit(message: Optional[str] = None, code: int = 0) -> NoReturn:
         Message to print.
     code : int, optional
         Exit code, by default 0
+    **kwargs
+        Additional keyword arguments to pass to the extra dict.
     """
     if message:
-        logger.info(message)
+        info(message, **kwargs)
     raise SystemExit(code)
 
 
-def exit_err(message: str, code: int = 1, **extra: Any) -> NoReturn:
-    """Prints a message to the error console and exits with the given
+def exit_err(message: str, code: int = 1, **kwargs: Any) -> NoReturn:
+    """Logs a message with ERROR level and exits with the given
     code (default: 1).
 
     Parameters
@@ -64,6 +61,8 @@ def exit_err(message: str, code: int = 1, **extra: Any) -> NoReturn:
         Message to print.
     code : int, optional
         Exit code, by default 1
+    **kwargs
+        Additional keyword arguments to pass to the extra dict.
     """
-    logger.error(message, extra=dict(**extra))
+    error(message, **kwargs)
     raise SystemExit(code)
