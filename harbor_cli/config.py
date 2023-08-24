@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any
@@ -14,7 +15,6 @@ from typing import Union
 import tomli
 import tomli_w
 from harborapi.models.base import BaseModel as HarborBaseModel
-from loguru import logger
 from pydantic import Field
 from pydantic import root_validator
 from pydantic import SecretStr
@@ -29,6 +29,7 @@ from .exceptions import CredentialsError
 from .exceptions import HarborCLIError
 from .exceptions import OverwriteError
 from .format import OutputFormat
+from .logs import logger
 from .logs import LogLevel
 from .style import STYLE_TABLE_HEADER
 from .utils import replace_none
@@ -251,8 +252,16 @@ class LoggingSettings(BaseModel):
     structlog: bool = False
     level: LogLevel = LogLevel.INFO
     directory: Path = LOGS_DIR
-    filename: str = "harbor_cli_{time}.log"
+    filename: str = "harbor_cli-{time}.log"
+    timeformat: str = "%Y-%m-%d"
     retention: int = 30
+
+    @property
+    def path(self) -> Path:
+        """Full time-formatted path to log file."""
+        return self.directory / self.filename.format(
+            time=datetime.now().strftime(self.timeformat)
+        )
 
 
 class TableStyleSettings(BaseModel):
@@ -515,7 +524,7 @@ class HarborCLIConfig(BaseModel):
         try:
             config = load_toml_file(config_file)
         except Exception as e:
-            logger.bind(exc=e).error("Failed to load config file")
+            logger.error("Failed to load config file", exc_info=True)
             raise ConfigError(f"Could not load config file {config_file}: {e}") from e
         return cls(**config, config_file=config_file)
 
@@ -586,7 +595,7 @@ def create_config(config_path: Path | None, overwrite: bool = False) -> Path:
     except FileExistsError as e:
         raise OverwriteError(f"Config file {config_path} already exists.") from e
     except Exception as e:
-        logger.bind(exc=e).error("Failed to create config file")
+        logger.error("Failed to create config file", exc_info=True)
         raise ConfigError(f"Could not create config file {config_path}: {e}") from e
 
     # Write sample config to the created file
@@ -602,7 +611,7 @@ def load_config(config_path: Path | None = None) -> HarborCLIConfig:
     except HarborCLIError:
         raise
     except Exception as e:
-        logger.bind(exc=e).error("Failed to load config file")
+        logger.error("Failed to load config file", exc_info=True)
         raise ConfigError(f"Could not load config file {config_path}: {e}") from e
 
 
@@ -611,7 +620,7 @@ def save_config(config: HarborCLIConfig, config_path: Path) -> None:
     try:
         config_path.write_text(config.toml(exclude_none=True))
     except Exception as e:
-        logger.bind(exc=e).error("Failed to save config file")
+        logger.error("Failed to save config file", exc_info=True)
         raise ConfigError(f"Could not save config file {config_path}: {e}") from e
 
 

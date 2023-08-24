@@ -6,6 +6,7 @@ from pathlib import Path
 import keyring
 import pytest
 import tomli
+from freezegun import freeze_time
 from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
@@ -356,3 +357,40 @@ def test_dunder_deepcopy(config: HarborCLIConfig, tmp_path: Path) -> None:
 
     copied_with_copy = copy.deepcopy(config)
     assert copied_with_copy.config_file == config.config_file
+
+
+@freeze_time("1970-01-01 00:00:00")
+def test_loggingsettings_path_defaults(config: HarborCLIConfig, tmp_path: Path) -> None:
+    """Default filename and time formatting directive."""
+    lconfig = config.logging
+    lconfig.directory = tmp_path / "logs"
+    assert lconfig.path == tmp_path / "logs" / "harbor_cli-1970-01-01.log"
+
+
+def test_loggingsettings_path_notime(config: HarborCLIConfig, tmp_path: Path) -> None:
+    """No time formatting directive should yield filename as-is."""
+    lconfig = config.logging
+    lconfig.filename = "somefile.log"
+    lconfig.directory = tmp_path / "logs"
+    # With no time formatting directive in the filename, the filename should be
+    # the same as the one we set.
+    assert lconfig.path == tmp_path / "logs" / "somefile.log"
+
+
+@freeze_time("1970-01-01")
+def test_loggingsettings_path_time(config: HarborCLIConfig, tmp_path: Path) -> None:
+    lconfig = config.logging
+    lconfig.filename = "somefile-{time}.log"
+    lconfig.directory = tmp_path / "logs"
+    assert lconfig.path == tmp_path / "logs" / "somefile-1970-01-01.log"
+
+
+@freeze_time("1970-01-01 12:00:00")
+def test_loggingsettings_path_custom_time_formatting(
+    config: HarborCLIConfig, tmp_path: Path
+) -> None:
+    lconfig = config.logging
+    lconfig.filename = "somefile-{time}.log"
+    lconfig.directory = tmp_path / "logs"
+    lconfig.timeformat = "%Y-%m-%d-%H-%M-%S"
+    assert lconfig.path == tmp_path / "logs" / "somefile-1970-01-01-12-00-00.log"

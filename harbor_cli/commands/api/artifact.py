@@ -702,8 +702,7 @@ def cleanup_artifacts(
             to_delete.append(d)
             logger.debug(
                 f"Scheduling {artifact.name_with_digest} for deletion. Reason(s): {', '.join(reason.value for reason in d.reasons)}",
-                artifact=artifact.name_with_digest,
-                reasons=d.criteria,
+                extra=dict(artifact=artifact.name_with_digest, reasons=d.criteria),
             )
 
     if max_count and len(to_delete) > max_count:
@@ -738,10 +737,7 @@ def cleanup_artifacts(
                 ),
                 f"Deleting {deletion.artifact.name_with_digest}...",
             )
-            logger.info(
-                f"Deleted {artifact.name_with_digest}",
-                artifact=artifact.name_with_digest,
-            )
+            logger.info(f"Deleted {artifact.name_with_digest}")
         except Exception as e:
             msg = f"Failed to delete {artifact.name_with_digest}: {e}"
             kwargs = {
@@ -751,7 +747,7 @@ def cleanup_artifacts(
             if exit_on_error:
                 exit_err(msg, **kwargs)  # type: ignore # wrong mypy err? this isn't argument 2
             else:
-                logger.error(msg, **kwargs)
+                logger.error(msg, extra=dict(**kwargs))
 
 
 class AffectedArtifact(BaseModel):

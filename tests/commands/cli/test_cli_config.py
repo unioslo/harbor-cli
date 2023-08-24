@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from pytest import LogCaptureFixture
+
 from harbor_cli.config import EnvVar
 from harbor_cli.config import HarborCLIConfig
 
@@ -63,10 +65,10 @@ def test_cli_config_get(
     assert stdout_config == config
 
 
-def test_env_no_vars(invoke) -> None:
+def test_env_no_vars(invoke, caplog: LogCaptureFixture) -> None:
     res = invoke(["cli-config", "env"], env={})  # unset all env vars for this test
     assert res.exit_code == 0
-    assert "No environment variables set" in res.stderr
+    assert "No environment variables set" in caplog.text
 
 
 def test_env_var_set(invoke) -> None:

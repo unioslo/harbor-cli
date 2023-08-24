@@ -13,9 +13,7 @@ from typing import Protocol
 import click
 import pytest
 import typer
-from _pytest.logging import LogCaptureFixture
 from harborapi import HarborAsyncClient
-from loguru import logger
 from typer.testing import CliRunner
 from typer.testing import Result
 
@@ -24,7 +22,7 @@ from harbor_cli.config import EnvVar
 from harbor_cli.config import HarborCLIConfig
 from harbor_cli.format import OutputFormat
 from harbor_cli.main import app as main_app
-from harbor_cli.utils.keyring import KEYRING_SUPPORTED
+from harbor_cli.utils.keyring import keyring_supported
 
 runner = CliRunner(mix_stderr=False)
 
@@ -131,16 +129,9 @@ def revert_state_config(state: state.State) -> Generator[None, None, None]:
     state.config = original_config
 
 
-@pytest.fixture
-def caplog(caplog: LogCaptureFixture):
-    handler_id = logger.add(caplog.handler, format="{message}")
-    yield caplog
-    logger.remove(handler_id)
-
-
 requires_keyring = pytest.mark.skipif(
-    not KEYRING_SUPPORTED, reason="Keyring is not supported on this platform."
+    not keyring_supported(), reason="Keyring is not supported on this platform."
 )
 requires_no_keyring = pytest.mark.skipif(
-    KEYRING_SUPPORTED, reason="Test requires keyring to be unsupported."
+    keyring_supported(), reason="Test requires keyring to be unsupported."
 )

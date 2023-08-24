@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from loguru import logger
 from platformdirs import PlatformDirs
 
 from .__about__ import APP_NAME
 from .__about__ import AUTHOR
 from .exceptions import DirectoryCreateError
+from .logs import logger
 
 _PLATFORM_DIR = PlatformDirs(APP_NAME, AUTHOR)
 CONFIG_DIR = _PLATFORM_DIR.user_config_path
@@ -20,7 +20,8 @@ def init_directories() -> None:
             directory.mkdir(parents=True, exist_ok=True)
         except Exception as e:
             # TODO: deduplicate these messages
-            logger.bind(exception=e).error(
-                f"Unable to create directory {directory}: {e}"
+            logger.error(
+                f"Unable to create directory {directory}: {e}",
+                exc_info=True,
             )
             raise DirectoryCreateError(f"Unable to create directory {directory}") from e

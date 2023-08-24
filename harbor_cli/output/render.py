@@ -161,5 +161,5 @@ def render_raw(result: Any, ctx: typer.Context | None = None, **kwargs: Any) -> 
         result = json.dumps(result)
         console.print_json(result, indent=state.config.output.JSON.indent)
     except Exception as e:
-        logger.warning("Unable to render raw data as JSON", exception=e)
+        logger.warning(f"Unable to render raw data as JSON: {e}")
         console.print(result)

@@ -3,4 +3,5 @@
 # SPDX-License-Identifier: MIT
 from __future__ import annotations
 
+from . import logs  # noreorder # configure logger first as side-effect
 from . import *
