@@ -34,6 +34,7 @@ from .logs import LogLevel
 from .style import STYLE_TABLE_HEADER
 from .utils import replace_none
 from .utils.keyring import get_password
+from .utils.keyring import KeyringUnsupportedError
 
 
 DEFAULT_CONFIG_FILE = CONFIG_DIR / "config.toml"
@@ -191,7 +192,15 @@ class HarborSettings(BaseModel):
         """Returns the secret value from the keyring if enabled, otherwise
         returns the secret value from the config file."""
         if self.keyring:
-            return get_password(self.username) or ""
+            try:
+                return get_password(self.username) or ""
+            except KeyringUnsupportedError:
+                logger.warning(
+                    "Keyring is not supported on this platform. "
+                    "Falling back to secret from config file."
+                )
+                self.keyring = False  # patch it so we don't try again
+                return self.secret.get_secret_value()
         else:
             return self.secret.get_secret_value()
 

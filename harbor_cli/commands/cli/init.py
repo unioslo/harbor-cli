@@ -35,7 +35,7 @@ from ...output.prompts import str_prompt
 from ...state import get_state
 from ...style import render_cli_option
 from ...style import STYLE_COMMAND
-from ...utils.keyring import KEYRING_SUPPORTED
+from ...utils.keyring import keyring_supported
 from ...utils.keyring import set_password
 
 state = get_state()
@@ -199,7 +199,7 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
 
 def set_username_secret(hconf: HarborSettings, current_username: str) -> None:
     username, secret = prompt_username_secret(current_username, hconf.secret_value)
-    if KEYRING_SUPPORTED:
+    if keyring_supported():
         _set_username_secret_keyring(hconf, username, secret)
     else:
         _set_username_secret_config(hconf, username, secret)
@@ -315,8 +315,6 @@ def init_output_settings(config: HarborCLIConfig) -> None:
 
     oconf = config.output
 
-    # Output format configuration has numerous sub-options,
-    # so we delegate to a separate function.
     _init_output_format(config)
 
     # Leading newline to separate from format configuration(s)
@@ -340,6 +338,7 @@ def init_output_settings(config: HarborCLIConfig) -> None:
 
 
 def _init_output_format(config: HarborCLIConfig) -> None:
+    """Initialize output format settings."""
     oconf = config.output
     fmt_in = str_prompt(
         "Default output format",

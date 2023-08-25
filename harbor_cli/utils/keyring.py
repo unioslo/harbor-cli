@@ -1,7 +1,7 @@
 from __future__ import annotations
 
+import functools
 from typing import Callable
-from typing import Final
 from typing import TypeVar
 
 import keyring
@@ -13,7 +13,12 @@ from ..output.console import info
 KEYRING_SERVICE_NAME = "harbor_cli"
 
 
-def check_keyring_support():
+class KeyringUnsupportedError(Exception):
+    pass
+
+
+@functools.lru_cache(maxsize=1)
+def keyring_supported():
     dummy_user = "test_user"
     dummy_password = "test_password"
     try:
@@ -29,22 +34,20 @@ def check_keyring_support():
     # TODO: make this error handling more robust. Differentiate between different
     # keyring errors and handle them accordingly.
     except keyring.errors.KeyringError as e:
-        logger.debug(f"Keyring is not supported on this platform: {e}")
+        logger.debug(f"Keyring is not supported on this platform: {e}", exc_info=True)
         return False
 
-
-KEYRING_SUPPORTED: Final[bool] = check_keyring_support()
 
 P = ParamSpec("P")
 T = TypeVar("T")
 
 
 def require_keyring(f: Callable[P, T]) -> Callable[P, T]:
+    """Decorator that ensures keyring is supported on the current platform."""
+
     def wrapper(*args: P.args, **kwargs: P.kwargs):
-        if not KEYRING_SUPPORTED:
-            raise keyring.errors.KeyringError(
-                "Keyring is not supported on this platform."
-            )  # NOTE: should this be just an exit_err() call?
+        if not keyring_supported():
+            raise KeyringUnsupportedError("Keyring is not supported on this platform.")
         return f(*args, **kwargs)
 
     return wrapper
