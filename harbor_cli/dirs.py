@@ -4,7 +4,6 @@ from platformdirs import PlatformDirs
 
 from .__about__ import APP_NAME
 from .__about__ import AUTHOR
-from .exceptions import DirectoryCreateError
 from .logs import logger
 
 _PLATFORM_DIR = PlatformDirs(APP_NAME, AUTHOR)
@@ -24,4 +23,7 @@ def init_directories() -> None:
                 f"Unable to create directory {directory}: {e}",
                 exc_info=True,
             )
-            raise DirectoryCreateError(f"Unable to create directory {directory}") from e
+            continue
+
+
+init_directories()
