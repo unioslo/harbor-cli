@@ -90,9 +90,7 @@ def setup_logging(config: LoggingSettings) -> None:
 
     # Create file handler for detailed logs
     file_handler = logging.FileHandler(config.path)
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 
