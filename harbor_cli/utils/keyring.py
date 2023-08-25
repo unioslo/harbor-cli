@@ -30,10 +30,12 @@ def keyring_supported():
         if password == dummy_password:
             return True
         else:
-            raise keyring.errors.KeyringError
+            raise keyring.errors.KeyringError(
+                "Keyring backend did not return the correct password."
+            )
     # TODO: make this error handling more robust. Differentiate between different
     # keyring errors and handle them accordingly.
-    except keyring.errors.KeyringError as e:
+    except (keyring.errors.KeyringError, KeyringUnsupportedError) as e:
         logger.debug(f"Keyring is not supported on this platform: {e}", exc_info=True)
         return False
 
