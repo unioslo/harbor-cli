@@ -151,7 +151,7 @@ def test_harbor_is_authable_keyring() -> None:
 @requires_no_keyring
 def test_harbor_is_authable_no_keyring(caplog: pytest.LogCaptureFixture) -> None:
     h = HarborSettings(username="admin", secret="fallback", keyring=True)
-    assert keyring is True
+    assert h.keyring is True
     # By accessing the secret_value property when keyring is unsupported,
     # it will fall back on the secret field and also set `keyring` to False
     # so that it will not retry the keyring again in REPL mode
