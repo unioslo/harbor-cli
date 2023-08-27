@@ -1,7 +1,14 @@
 from __future__ import annotations
 
-import pytest
+from typing import Any
 
+import pytest
+from harborapi.models.scanner import Severity
+from strenum import StrEnum
+
+from harbor_cli.style import color
+from harbor_cli.style.color import HealthColor
+from harbor_cli.style.color import SeverityColor
 from harbor_cli.style.markup import CODEBLOCK_STYLES
 from harbor_cli.style.markup import markup_as_plain_text
 from harbor_cli.style.markup import markup_to_markdown
@@ -71,3 +78,73 @@ def test_markup_to_markdown_emoji() -> None:
 )
 def test_markup_as_plain_text(inp: str, expected: str) -> None:
     assert markup_as_plain_text(inp) == expected
+
+
+@pytest.mark.parametrize(
+    "severity,expected",
+    [
+        (Severity.unknown, SeverityColor.UNKNOWN),
+        # (Severity.none, SeverityColor.NONE),
+        (Severity.negligible, SeverityColor.NEGLIGIBLE),
+        (Severity.low, SeverityColor.LOW),
+        (Severity.medium, SeverityColor.MEDIUM),
+        (Severity.high, SeverityColor.HIGH),
+        (Severity.critical, SeverityColor.CRITICAL),
+    ],
+)
+def test_severitycolor_from_severity(
+    severity: Severity, expected: SeverityColor
+) -> None:
+    # Test using the enum value first
+    assert SeverityColor.from_severity(severity) == expected
+    # Then as a string
+    # The harborapi Severity enum values have a capital first letter
+    assert SeverityColor.from_severity(severity.value) == expected
+
+
+@pytest.mark.parametrize(
+    "health,expected",
+    [
+        ("healthy", HealthColor.HEALTHY),
+        ("unhealthy", HealthColor.UNHEALTHY),
+        (None, HealthColor.UNHEALTHY),
+        ("", HealthColor.UNHEALTHY),
+        ("123", HealthColor.UNHEALTHY),
+        (123, HealthColor.UNHEALTHY),
+    ],
+)
+def test_healthcolor_from_health(health: Any, expected: SeverityColor) -> None:
+    assert HealthColor.from_health(health) == expected
+
+
+def test_strenum_as_str() -> None:
+    """The strenum library should ensure this behavior for us, but
+    this is a sanity check to make sure it works as expected."""
+
+    class TestEnum(StrEnum):
+        A = "a"
+        B = "b"
+
+    assert str(TestEnum.A) == "a"
+    assert str(TestEnum.B) == "b"
+    assert f"{TestEnum.A}" == "a"
+    assert f"{TestEnum.B}" == "b"
+
+    # Real use-case where we construct a Rich markup formatted string with a StrEnum
+    assert f"[{TestEnum.A}]foo[/]" == "[a]foo[/]"
+
+
+@pytest.mark.parametrize(
+    "func_name",
+    [
+        "blue",
+        "cyan",
+        "green",
+        "magenta",
+        "red",
+        "yellow",
+    ],
+)
+def test_color_func(func_name: str) -> None:
+    func = getattr(color, func_name)
+    assert func("foo") == f"[{func_name}]foo[/]"
