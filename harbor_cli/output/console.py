@@ -6,11 +6,17 @@ from typing import Optional
 
 from rich.console import Console
 
-from ..logs import logger
+from ..style import Icon
+from ..style.color import green
+from ..style.color import red
+from ..style.color import yellow
 
 _exit = exit  # save the original exit function
 
+# stdout console used to print results
 console = Console()
+
+# stderr console used to print prompts, messages, etc.
 err_console = Console(
     stderr=True,
     highlight=False,
@@ -18,20 +24,24 @@ err_console = Console(
 )
 
 
-def info(message: str, *args, **kwargs) -> None:
-    logger.info(message, extra=dict(**kwargs))
+def info(message: str, icon: str = Icon.INFO, *args, **kwargs) -> None:
+    # logger.info(message, extra=dict(**kwargs))
+    err_console.print(f"{green(icon)} {message}")
 
 
-def success(message: str, *args, **kwargs) -> None:
-    logger.info(message, extra=dict(**kwargs))
+def success(message: str, icon: str = Icon.OK, **kwargs) -> None:
+    # logger.info(message, extra=dict(**kwargs))
+    err_console.print(f"{green(icon)} {message}")
 
 
-def warning(message: str, *args, **kwargs) -> None:
-    logger.warning(message, extra=dict(**kwargs))
+def warning(message: str, icon: str = Icon.WARNING, **kwargs) -> None:
+    # logger.warning(message, extra=dict(**kwargs))
+    err_console.print(f"{yellow(icon)} {message}")
 
 
-def error(message: str, *args, **kwargs) -> None:
-    logger.error(message, extra=dict(**kwargs))
+def error(message: str, icon: str = Icon.ERROR, **kwargs) -> None:
+    # logger.error(message, extra=dict(**kwargs))
+    err_console.print(f"{red(icon)} {message}")
 
 
 def exit(message: Optional[str] = None, code: int = 0, **kwargs) -> NoReturn:
