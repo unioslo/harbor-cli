@@ -148,8 +148,8 @@ def run_config_wizard(config_path: Optional[Path] = None) -> HarborCLIConfig:
     if not conf_path:
         raise ConfigError("Could not determine config file path.")
     save_config(config, conf_path)
-    console.print("Configuration complete! :tada:")
-    success(f"Saved config to {path_link(conf_path)}")
+    success("Configuration complete! :tada:")
+    info(f"Saved config to {path_link(conf_path)}")
     return config
 
 
