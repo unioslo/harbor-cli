@@ -176,16 +176,16 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
     )
 
     # Clear all previous credentials if we provide new credentials
-    username = hconf.username  # copy username for re-use in prompts
+    hconf_pre = hconf.copy()  # use for defaults in prompts
     if not auth_method == "s":
         hconf.clear_credentials()
 
     if auth_method == "u":
-        set_username_secret(hconf, username)
+        set_username_secret(hconf, hconf_pre.username, hconf_pre.secret_value)
     elif auth_method == "b":
-        hconf.basicauth = prompt_basicauth(hconf.basicauth.get_secret_value())  # type: ignore # pydantic.SecretStr
+        hconf.basicauth = prompt_basicauth(hconf_pre.basicauth.get_secret_value())  # type: ignore # pydantic.SecretStr
     elif auth_method == "f":
-        hconf.credentials_file = prompt_credentials_file(hconf.credentials_file)
+        hconf.credentials_file = prompt_credentials_file(hconf_pre.credentials_file)
 
     # Explain what will happen if no auth method is provided
     if not hconf.has_auth_method:
@@ -195,8 +195,10 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
         )
 
 
-def set_username_secret(hconf: HarborSettings, current_username: str) -> None:
-    username, secret = prompt_username_secret(current_username, hconf.secret_value)
+def set_username_secret(
+    hconf: HarborSettings, current_username: str, current_secret: str
+) -> None:
+    username, secret = prompt_username_secret(current_username, current_secret)
     if keyring_supported():
         _set_username_secret_keyring(hconf, username, secret)
     else:
@@ -206,6 +208,8 @@ def set_username_secret(hconf: HarborSettings, current_username: str) -> None:
 def _set_username_secret_config(
     hconf: HarborSettings, username: str, secret: str
 ) -> None:
+    """Stores both username and config in config file.
+    Insecure fallback in case keyring is not supported."""
     hconf.username = username
     hconf.secret = secret  # type: ignore # pydantic.SecretStr
     hconf.keyring = False
