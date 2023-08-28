@@ -6,20 +6,23 @@ basicauth = ""
 credentials_file = ""
 validate_data = true
 raw_mode = false
+verify_ssl = true
+keyring = false
+
+[harbor.retry]
+enabled = true
+max_tries = 5
+max_time = 10.0
 
 [general]
 confirm_deletion = true
-
-[logging]
-enabled = true
-structlog = false
-level = "INFO"
+confirm_enumeration = true
+warnings = true
 
 [output]
 format = "table"
 paging = false
 pager = ""
-confirm_enumeration = true
 
 [output.table]
 description = false
@@ -35,7 +38,24 @@ footer = ""
 caption = ""
 expand = true
 show_header = true
+bool_emoji = false
 
 [output.JSON]
 indent = 2
-sort_keys = true
+sort_keys = false
+
+[repl]
+history = true
+history_file = "/Users/pederhan/Library/Application Support/harbor-cli/history"
+
+[cache]
+enabled = false
+ttl = 300
+
+[logging]
+enabled = true
+level = "WARNING"
+directory = "/Users/pederhan/Library/Logs/harbor-cli"
+filename = "harbor_cli-{time}.log"
+timeformat = "%Y-%m-%d"
+retention = 30

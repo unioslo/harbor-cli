@@ -260,7 +260,6 @@ class HarborSettings(BaseModel):
 
 class LoggingSettings(BaseModel):
     enabled: bool = True
-    structlog: bool = False
     level: LogLevel = LogLevel.WARNING
     directory: Path = LOGS_DIR
     filename: str = "harbor_cli-{time}.log"

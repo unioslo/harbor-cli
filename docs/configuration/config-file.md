@@ -518,16 +518,6 @@ Whether or not to enable logging. The default is `true`.
 enabled = true
 ```
 
-----
-
-#### `logging.structlog`
-
-Whether or not to enable [structured logging](https://loguru.readthedocs.io/en/stable/overview.html#structured-logging-as-needed). The default is `false`.
-
-```toml
-[logging]
-structlog = false
-```
 
 ----
 
