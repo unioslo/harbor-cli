@@ -35,6 +35,7 @@ dependencies = [
   "python-Levenshtein>=0.20.9",
   "keyring>=24.2.0",
   "httpx[socks]",
+  "strenum>=0.4.15",
 ]
 dynamic = ["version", "readme"]
 
