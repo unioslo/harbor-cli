@@ -505,7 +505,7 @@ ttl = 300
 
 ### `logging`
 
-The `logging` table contains settings related to configuring logging. Harbor CLI currently uses the [loguru](https://github.com/Delgan/loguru) logging library, but this might change in the future. None of the options pertain specifically to loguru, but are instead generic logging options.
+The `logging` table contains settings related to configuring logging. Logs are exclusively written to a log file and never displayed in the terminal. The default log directory is determined by [platformdirs.user_log_dir](https://pypi.org/project/platformdirs/).
 
 ----
 
@@ -554,6 +554,17 @@ Filename to use for log files. Can be automatically timed by adding `{time}` to 
 ```toml
 [logging]
 filename = "harbor_cli_{time}.log"
+```
+
+----
+
+#### `logging.timeformat`
+
+The time format that is used when automatically timing log files. Defaults to `"%Y-%m-%d"`. See [Python's strftime documentation](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes) for more information on how to format the time.
+
+```toml
+[logging]
+timeformat = "%Y-%m-%d"
 ```
 
 ----
