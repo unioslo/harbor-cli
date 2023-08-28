@@ -28,12 +28,14 @@ err_console = Console(
 
 
 def info(message: str, icon: str = Icon.INFO, *args, **kwargs) -> None:
-    # logger.info(message, extra=dict(**kwargs))
+    """Log with INFO level and print an informational message."""
+    logger.info(message, extra=dict(**kwargs))
     err_console.print(f"{green(icon)} {message}")
 
 
 def success(message: str, icon: str = Icon.OK, **kwargs) -> None:
-    # logger.info(message, extra=dict(**kwargs))
+    """Log with DEBUG level and print a success message."""
+    logger.debug(message, extra=dict(**kwargs))
     err_console.print(f"{green(icon)} {message}")
 
 
@@ -47,6 +49,7 @@ def warning(message: str, icon: str = Icon.WARNING, **kwargs) -> None:
 def error(
     message: str, icon: str = Icon.ERROR, exc_info: bool = False, **kwargs
 ) -> None:
+    """Log with ERROR level and print an error message."""
     logger.error(message, extra=dict(**kwargs), exc_info=exc_info)
     err_console.print(f"{red(icon)} {message}")
 
