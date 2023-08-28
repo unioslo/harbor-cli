@@ -55,25 +55,46 @@ class LogLevel(Enum):
             return logging.NOTSET
         return res
 
-
-_LOGGING_INIT = False
+    @classmethod
+    def levels(cls) -> dict[LogLevel, int]:
+        """Return a dict of all log levels and their corresponding int values."""
+        return {level: level.as_int() for level in cls}
 
 
 def setup_logging(config: LoggingSettings) -> None:
-    """Set up stderr logging."""
-    global _LOGGING_INIT
-    if _LOGGING_INIT:  # prevent re-configuring in REPL
+    """Set up file logging."""
+    if logger.handlers:  # prevent re-configuring in REPL
         return
+    file_handler = _get_file_handler(config)
+    logger.addHandler(file_handler)
 
-    # Create file handler for detailed logs
+
+def _get_file_handler(config: LoggingSettings) -> logging.FileHandler:
     file_handler = logging.FileHandler(config.path)
     formatter = logging.Formatter(
         "%(asctime)s [%(levelname)s] [%(module)s:%(filename)s:%(lineno)s - %(funcName)s()] %(message)s"
     )
     file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+    file_handler.setLevel(config.level.as_int())
+    return file_handler
 
-    _LOGGING_INIT = True
+
+def update_logging(config: LoggingSettings) -> None:
+    """Update logging configuration."""
+    if logger.handlers:
+        if not config.enabled:
+            disable_logging()
+        else:
+            file_handler = _get_file_handler(config)
+            replace_handler(file_handler)
+    else:
+        setup_logging(config)
+
+
+def replace_handler(handler: logging.Handler) -> None:
+    """Replace the file handler with the given handler."""
+    logger.removeHandler(logger.handlers[0])
+    logger.addHandler(handler)
 
 
 def disable_logging() -> None:
