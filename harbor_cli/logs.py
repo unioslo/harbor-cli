@@ -56,18 +56,6 @@ class LogLevel(Enum):
         return res
 
 
-COLOR_DEFAULT = "white"
-COLORS = {
-    "TRACE": "white",
-    "DEBUG": "white",
-    "INFO": "white",
-    "SUCCESS": "white",
-    "WARNING": "yellow",
-    "ERROR": "red",
-    "CRITICAL": "red",
-}
-
-
 _LOGGING_INIT = False
 
 
