@@ -30,10 +30,6 @@ def test_envvars(
         assert res.exit_code == 0
         return res
 
-    # FIXME HACK: for some reason this test makes permanent changes to the config
-    # despite the fact that we have a fixture that is supposed to reset it
-    # between tests.
-
     inv(EnvVar.URL, "https://example.com/api/v2.0")
     assert state.config.harbor.url == "https://example.com/api/v2.0"
 
