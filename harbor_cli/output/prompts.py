@@ -18,10 +18,11 @@ if TYPE_CHECKING:
     from ..config import HarborCLIConfig
     from ..state import State
 
-from ..style import STYLE_CLI_OPTION, render_warning
+from ..style import STYLE_CLI_OPTION
 from .console import console
 from .console import error
 from .console import exit
+from .console import warning
 from ..style.color import yellow
 from ..style.color import green
 from ..style import Icon
@@ -29,7 +30,7 @@ from .formatting.path import path_link
 
 
 def prompt_msg(*msgs: str) -> str:
-    return f"[bold]{green(Icon.PROMPT)} {' '.join(msgs)}[/bold]"
+    return f"[bold]{green(Icon.PROMPT)} {' '.join(msg.strip() for msg in msgs)}[/bold]"
 
 
 def str_prompt(
@@ -67,7 +68,7 @@ def str_prompt(
     # Notify user that a default secret will be used,
     # but don't actually show the secret
     if password and default not in (None, ..., ""):
-        _prompt_add = " (leave empty to use existing value)"
+        _prompt_add = "(leave empty to use existing value)"
     else:
         _prompt_add = ""
     msg = prompt_msg(prompt, _prompt_add)
@@ -227,11 +228,8 @@ def bool_prompt(
     warning: bool = False,
     **kwargs: Any,
 ) -> bool:
-    if warning:
-        prompt = render_warning(prompt)
-
     return Confirm.ask(
-        prompt_msg(),
+        prompt_msg(prompt),
         console=console,
         show_default=show_default,
         default=default,
@@ -301,10 +299,9 @@ def check_enumeration_options(
     limit: int | None = None,
 ) -> None:
     if state.config.general.confirm_enumeration and not limit and not query:
-        if not bool_prompt(
+        warning(
             f"Neither [{STYLE_CLI_OPTION}]--query[/] nor [{STYLE_CLI_OPTION}]--limit[/] is specified. "
             "This could result in a large amount of data being returned. "
-            "Do you want to continue?",
-            warning=True,
-        ):
+        )
+        if not bool_prompt("Continue?"):
             exit()
