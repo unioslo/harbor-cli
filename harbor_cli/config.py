@@ -77,6 +77,7 @@ class EnvVar(StrEnum):
     PAGER = env_var("pager")
     CONFIRM_DELETION = env_var("confirm_deletion")
     CONFIRM_ENUMERATION = env_var("confirm_enumeration")
+    WARNINGS = env_var("warnings")
     CACHE_ENABLED = env_var("cache_enabled")
     CACHE_TTL = env_var("cache_ttl")
 
@@ -437,6 +438,10 @@ class GeneralSettings(BaseModel):
             "Show confirmation prompt for certain resource enumeration "
             "commands when invoked without a limit or filter. E.g. `auditlog list`"
         ),
+    )
+    warnings: bool = Field(
+        True,
+        description="Show warning messages in terminal. Warnings are always logged regardless of this option.",
     )
 
 

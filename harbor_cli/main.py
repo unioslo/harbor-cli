@@ -259,6 +259,13 @@ def main_callback(
         envvar=EnvVar.CONFIRM_ENUMERATION,
         config_override="general.confirm_enumeration",
     ),
+    warnings: Optional[bool] = Option(
+        None,
+        "--warnings/--no-warnings",
+        help="Show/hide warnings.",
+        envvar=EnvVar.WARNINGS,
+        config_override="general.warnings",
+    ),
     # Cache options
     cache_enabled: Optional[bool] = Option(
         None,
@@ -380,6 +387,8 @@ def main_callback(
         state.config.general.confirm_enumeration = confirm_enumeration
     if confirm_deletion is not None:
         state.config.general.confirm_deletion = confirm_deletion
+    if warnings is not None:
+        state.config.general.warnings = warnings
     # Cache
     if cache_enabled is not None:
         state.config.cache.enabled = cache_enabled

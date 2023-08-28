@@ -7,6 +7,7 @@ from typing import Optional
 from rich.console import Console
 
 from ..logs import logger
+from ..state import get_state
 from ..style import Icon
 from ..style.color import bold
 from ..style.color import green
@@ -37,8 +38,10 @@ def success(message: str, icon: str = Icon.OK, **kwargs) -> None:
 
 
 def warning(message: str, icon: str = Icon.WARNING, **kwargs) -> None:
+    """Log with WARNING level and optionally print a warning message."""
     logger.warning(message, extra=dict(**kwargs))
-    err_console.print(bold(f"{yellow(icon)} {message}"))
+    if get_state().config.general.warnings:
+        err_console.print(bold(f"{yellow(icon)} {message}"))
 
 
 def error(

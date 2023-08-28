@@ -207,6 +207,15 @@ Whether or not to show a confirmation prompt when deleting resources unless `--f
 confirm_deletion = true
 ```
 
+#### `general.warnings`
+
+Show warning messages in terminal. Warnings are always logged regardless of this option. The default is `true`.
+
+```toml
+[general]
+warnings = true
+```
+
 ----
 
 ### `output`

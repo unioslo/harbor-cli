@@ -10,6 +10,8 @@ from freezegun import freeze_time
 from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
+from pytest import CaptureFixture
+from pytest import LogCaptureFixture
 
 from .conftest import requires_keyring
 from .conftest import requires_no_keyring
@@ -21,6 +23,8 @@ from harbor_cli.config import sample_config
 from harbor_cli.config import save_config
 from harbor_cli.config import TableSettings
 from harbor_cli.config import TableStyleSettings
+from harbor_cli.output.console import warning
+from harbor_cli.state import State
 from harbor_cli.utils.keyring import set_password
 
 
@@ -398,3 +402,22 @@ def test_loggingsettings_path_custom_time_formatting(
     lconfig.directory = tmp_path / "logs"
     lconfig.timeformat = "%Y-%m-%d-%H-%M-%S"
     assert lconfig.path == tmp_path / "logs" / "somefile-1970-01-01-12-00-00.log"
+
+
+####################
+# General settings
+####################
+
+
+@pytest.mark.parametrize("warnings", [True, False])
+def test_general_settings_warnings(
+    state: State, caplog: LogCaptureFixture, capsys: CaptureFixture, warnings: bool
+) -> None:
+    state.config.general.warnings = warnings
+    warning("test warning")
+    assert "test warning" in caplog.text
+    captured = capsys.readouterr()
+    if warnings:
+        assert "test warning" in captured.err
+    else:
+        assert "test warning" not in captured.err

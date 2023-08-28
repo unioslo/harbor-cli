@@ -11,8 +11,6 @@ from harborapi import HarborAsyncClient
 from pydantic import BaseModel
 from rich.console import Console
 
-from .output.console import warning
-
 # This module generally shouldn't import from other local modules
 # because it's widely used throughout the application, and we don't want
 # to create circular import issues. It sucks, but it's the way it is.
@@ -186,6 +184,10 @@ class State:
         """
         from .harbor.common import prompt_url
         from .harbor.common import prompt_username_secret
+        from .style.style import render_cli_command
+        from .style.style import render_cli_option
+        from .style.style import render_cli_value
+        from .output.console import warning
 
         if not self.config.harbor.url:
             warning("Harbor API URL missing from configuration file.")
@@ -203,6 +205,11 @@ class State:
             )
             self.config.harbor.username = username
             self.config.harbor.secret = secret  # type: ignore # pydantic.SecretStr
+            warning(
+                "Authentication info updated. "
+                f"Run {render_cli_command('harbor init')} to configure it permanently. "
+                f"Suppress this warning by setting {render_cli_option('general.warnings')} to {render_cli_value('false')}."
+            )
 
         self.authenticate_harbor()
 
