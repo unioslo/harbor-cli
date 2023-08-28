@@ -6,8 +6,8 @@ import typer
 from harborapi.models import Schedule
 from harborapi.models import ScheduleObj
 
-from ...logs import logger
 from ...output.console import exit_err
+from ...output.console import info
 from ...output.render import render_result
 from ...state import get_state
 from ...utils.args import create_updated_model
@@ -68,7 +68,7 @@ def create_scanall_schedule(
         state.client.create_scan_all_schedule(schedule),
         "Creating 'Scan All' schedule...",
     )
-    logger.info(f"'Scan All' schedule created.")
+    info(f"'Scan All' schedule created.")
 
 
 @schedule_cmd.command("update")
@@ -89,7 +89,7 @@ def update_scanall_schedule(
         state.client.update_scan_all_schedule(schedule),
         "Updating 'Scan All' schedule...",
     )
-    logger.info(f"'Scan All' schedule created.")
+    info(f"'Scan All' schedule created.")
 
 
 # HarborAsyncClient.stop_scan_all_job()
@@ -97,4 +97,4 @@ def update_scanall_schedule(
 def stop_scanall_job(ctx: typer.Context) -> None:
     """Stop the currently running 'Scan All' job."""
     state.run(state.client.stop_scan_all_job(), "Stopping 'Scan All' job...")
-    logger.info(f"'Scan All' job stopped.")
+    info(f"'Scan All' job stopped.")

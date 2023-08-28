@@ -6,7 +6,9 @@ from typing import Optional
 
 from rich.console import Console
 
+from ..logs import logger
 from ..style import Icon
+from ..style.color import bold
 from ..style.color import green
 from ..style.color import red
 from ..style.color import yellow
@@ -35,12 +37,14 @@ def success(message: str, icon: str = Icon.OK, **kwargs) -> None:
 
 
 def warning(message: str, icon: str = Icon.WARNING, **kwargs) -> None:
-    # logger.warning(message, extra=dict(**kwargs))
-    err_console.print(f"{yellow(icon)} {message}")
+    logger.warning(message, extra=dict(**kwargs))
+    err_console.print(bold(f"{yellow(icon)} {message}"))
 
 
-def error(message: str, icon: str = Icon.ERROR, **kwargs) -> None:
-    # logger.error(message, extra=dict(**kwargs))
+def error(
+    message: str, icon: str = Icon.ERROR, exc_info: bool = False, **kwargs
+) -> None:
+    logger.error(message, extra=dict(**kwargs), exc_info=exc_info)
     err_console.print(f"{red(icon)} {message}")
 
 

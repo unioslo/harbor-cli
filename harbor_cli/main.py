@@ -16,12 +16,14 @@ from .config import EnvVar
 from .config import HarborCLIConfig
 from .deprecation import check_deprecated_options
 from .deprecation import Deprecated
+from .exceptions import ConfigError
 from .exceptions import handle_exception
 from .exceptions import HarborCLIError
 from .format import OutputFormat
 from .logs import disable_logging
 from .logs import setup_logging
 from .option import Option
+from .output.console import error
 from .output.console import exit
 from .output.console import exit_err
 from .output.console import info
@@ -421,7 +423,7 @@ def try_load_config(config_file: Optional[Path], create: bool = True) -> None:
         try:
             conf = HarborCLIConfig.from_file(config_file)
         except FileNotFoundError:
-            if not create:  # TODO: handle ConfigError
+            if not create:
                 return
             # Create a new config file and run wizard
             info("Config file not found. Creating new config file.")
@@ -431,6 +433,9 @@ def try_load_config(config_file: Optional[Path], create: bool = True) -> None:
             info(f"Created config file: {path_link(conf.config_file)}")
             info("Running configuration wizard...")
             conf = run_config_wizard(conf.config_file)
+        except ConfigError as e:
+            error(f"Unable to load config: {str(e)}", exc_info=True)
+            return
 
         state.config = conf
 

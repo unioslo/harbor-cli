@@ -5,7 +5,7 @@ from typing import Optional
 import typer
 from harborapi.models.models import Repository
 
-from ...logs import logger
+from ...output.console import info
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
 from ...state import get_state
@@ -75,7 +75,7 @@ def delete_artifact(
         ),
         "Deleting repository...",
     )
-    logger.info(f"Deleted {project}/{repository}.")
+    info(f"Deleted {project}/{repository}.")
 
 
 # HarborAsyncClient.update_repository()
@@ -100,7 +100,7 @@ def update_repository(
     repo = get_repository(project, repository)
     repo.description = description
     state.run(state.client.update_repository(project, repository, repo))
-    logger.info(f"Updated {project}/{repository}.")
+    info(f"Updated {project}/{repository}.")
 
 
 # HarborAsyncClient.get_repositories()

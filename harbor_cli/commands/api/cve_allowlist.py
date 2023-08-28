@@ -6,8 +6,8 @@ import typer
 from harborapi.models.models import CVEAllowlist
 from harborapi.models.models import CVEAllowlistItem
 
-from ...logs import logger
 from ...output.console import exit
+from ...output.console import info
 from ...output.render import render_result
 from ...state import get_state
 from ...utils import parse_commalist
@@ -69,13 +69,11 @@ def update_allowlist(
 
     state.run(state.client.update_cve_allowlist(current), "Updating CVE allowlist...")
     if remove:
-        logger.info(
+        info(
             f"Removed {len(cves)} CVEs from CVE allowlist. Total: {len(current.items)}"
         )
     else:
-        logger.info(
-            f"Added {len(cves)} CVEs to CVE allowlist. Total: {len(current.items)}"
-        )
+        info(f"Added {len(cves)} CVEs to CVE allowlist. Total: {len(current.items)}")
 
 
 @app.command("clear")
@@ -101,4 +99,4 @@ def clear_allowlist(
     msg = "Cleared CVE allowlist of CVEs."
     if full_clear:
         msg += " Also cleared metadata."
-    logger.info(msg)
+    info(msg)

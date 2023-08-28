@@ -9,8 +9,8 @@ from harborapi.models.models import RegistryCredential
 from harborapi.models.models import RegistryPing
 from harborapi.models.models import RegistryUpdate
 
-from ...logs import logger
 from ...output.console import exit_err
+from ...output.console import info
 from ...output.console import success
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
@@ -144,7 +144,7 @@ def update_registry(
     registry = get_registry(registry_id)
     req = create_updated_model(registry, RegistryUpdate, ctx)
     state.run(state.client.update_registry(registry_id, req), f"Updating registry...")
-    logger.info("Registry updated successfully.")
+    info("Registry updated successfully.")
 
 
 @app.command("delete", no_args_is_help=True)
@@ -159,7 +159,7 @@ def delete_registry(
     """Delete a registry."""
     delete_prompt(state.config, force, resource="registry", name=str(registry_id))
     state.run(state.client.delete_registry(registry_id), f"Deleting registry...")
-    logger.info(f"Deleted registry with ID {registry_id}.")
+    info(f"Deleted registry with ID {registry_id}.")
 
 
 @app.command("info", no_args_is_help=True)

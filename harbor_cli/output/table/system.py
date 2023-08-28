@@ -14,7 +14,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from ...logs import logger
-from ...style import get_health_color
+from ...style.color import HealthColor
 from ..formatting.builtin import bool_str
 from ..formatting.builtin import int_str
 from ..formatting.builtin import str_str
@@ -27,7 +27,7 @@ from ._utils import get_table
 # GeneralInfo is the model used for general system info.
 def systeminfo_table(systeminfo: Sequence[SystemInfo], **kwargs: Any) -> Table:
     """Display system info in a table."""
-    if len(systeminfo) > 1:
+    if len(systeminfo) != 1:
         # should never happen
         logger.warning("Can only display one system info at a time.")
     info = systeminfo[0]
@@ -59,7 +59,7 @@ def systeminfo_table(systeminfo: Sequence[SystemInfo], **kwargs: Any) -> Table:
 
 def overallhealthstatus_panel(health: OverallHealthStatus, **kwargs) -> Panel:
     # Show overall health status at the top
-    status_color = get_health_color(health.status)
+    status_color = HealthColor.from_health(health.status)
     status = f"[{status_color}]{health.status}[/]"
     status_table = Table.grid()
     status_table.add_row("Status: ", status)

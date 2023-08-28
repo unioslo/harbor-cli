@@ -7,8 +7,8 @@ from harborapi.models.models import Schedule
 from harborapi.models.models import ScheduleObj
 from harborapi.models.models import Type as ScheduleType
 
-from ...logs import logger
 from ...output.console import exit_err
+from ...output.console import info
 from ...output.prompts import check_enumeration_options
 from ...output.render import render_result
 from ...state import get_state
@@ -66,7 +66,7 @@ def create_gc_schedule(
         state.client.create_gc_schedule(schedule),
         "Creating Garbage Collection schedule...",
     )
-    logger.info(f"Garbage Collection schedule created.")
+    info(f"Garbage Collection schedule created.")
 
 
 @schedule_cmd.command("update")
@@ -100,7 +100,7 @@ def update_gc_schedule(
         state.client.update_gc_schedule(schedule),
         f"Updating Garbage Collection schedule...",
     )
-    logger.info(f"Garbage Collection schedule updated.")
+    info(f"Garbage Collection schedule updated.")
 
 
 # HarborAsyncClient.get_gc_jobs()

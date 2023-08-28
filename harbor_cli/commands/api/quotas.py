@@ -7,7 +7,7 @@ import typer
 from harborapi.models.models import Quota
 from harborapi.models.models import QuotaUpdateReq
 
-from ...logs import logger
+from ...output.console import info
 from ...output.render import render_result
 from ...state import get_state
 from ...utils.args import parse_commalist
@@ -66,12 +66,12 @@ def update_quota(
     # quota = get_quota(quota_id)
     # FIXME: how to use existing quota?
 
-    req = QuotaUpdateReq(hard=props)
+    req = QuotaUpdateReq(hard=props)  # TODO: fix
     state.run(state.client.update_quota(quota_id, req), f"Updating quota...")
 
     # TODO: render quotas before and after update
     render_result(req, ctx)  # is this a good idea?
-    logger.info("Quota updated successfully.")
+    info("Quota updated successfully.")
 
 
 @app.command("list")

@@ -11,6 +11,8 @@ from harborapi import HarborAsyncClient
 from pydantic import BaseModel
 from rich.console import Console
 
+from .output.console import warning
+
 # This module generally shouldn't import from other local modules
 # because it's widely used throughout the application, and we don't want
 # to create circular import issues. It sucks, but it's the way it is.
@@ -184,16 +186,15 @@ class State:
         """
         from .harbor.common import prompt_url
         from .harbor.common import prompt_username_secret
-        from .logs import logger
 
         if not self.config.harbor.url:
-            logger.warning("Harbor API URL missing from configuration file.")
+            warning("Harbor API URL missing from configuration file.")
             self.config.harbor.url = prompt_url()
 
         # We need one of the available auth methods to be specified
         # If not, prompt for username and password
         if not self.config.harbor.has_auth_method:
-            logger.warning(
+            warning(
                 "Harbor authentication method is missing or incomplete in configuration file."
             )
             username, secret = prompt_username_secret(

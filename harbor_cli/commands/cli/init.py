@@ -19,12 +19,11 @@ from ...format import OutputFormat
 from ...harbor.common import prompt_basicauth
 from ...harbor.common import prompt_credentials_file
 from ...harbor.common import prompt_username_secret
-from ...logs import logger
 from ...logs import LogLevel
 from ...output.console import console
 from ...output.console import error
-from ...output.console import exit
 from ...output.console import exit_err
+from ...output.console import info
 from ...output.console import success
 from ...output.console import warning
 from ...output.formatting import path_link
@@ -34,7 +33,7 @@ from ...output.prompts import path_prompt
 from ...output.prompts import str_prompt
 from ...state import get_state
 from ...style import render_cli_option
-from ...style import STYLE_COMMAND
+from ...style.style import render_cli_command
 from ...utils.keyring import keyring_supported
 from ...utils.keyring import set_password
 
@@ -79,7 +78,7 @@ def init(
             exit_err(msg)
         config_path = None
     else:
-        logger.info(f"Created config file at {config_path}")
+        info(f"Created config file at {config_path}")
 
     config = run_config_wizard(config_path)
     state.config = config
@@ -99,11 +98,10 @@ def run_config_wizard(config_path: Optional[Path] = None) -> HarborCLIConfig:
     try:
         config = HarborCLIConfig.from_file(config_path)
     except Exception as e:
-        error(f"Failed to load config: {e}")
-        error(
-            f"[white]Run [{STYLE_COMMAND}]harbor init --overwrite[/] to create a new config file.[/]"
+        exit_err(
+            f"Failed to load config: {e}. Run {render_cli_command('harbor init --overwrite')} to create a new config file.",
+            exc_info=True,
         )
-        exit(code=1)
 
     assert config.config_file is not None
 
@@ -353,7 +351,7 @@ def _init_output_format(config: HarborCLIConfig) -> None:
         elif fmt == OutputFormat.TABLE:
             _init_output_table_settings(config)
         else:
-            logger.error(f"Unknown configuration format {fmt.value}")
+            error(f"Unknown configuration format {fmt.value}")
 
     # Configure the chosen format first
     conf_fmt(oconf.format)

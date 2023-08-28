@@ -4,7 +4,7 @@ from platformdirs import PlatformDirs
 
 from .__about__ import APP_NAME
 from .__about__ import AUTHOR
-from .logs import logger
+
 
 _PLATFORM_DIR = PlatformDirs(APP_NAME, AUTHOR)
 CONFIG_DIR = _PLATFORM_DIR.user_config_path
@@ -18,8 +18,10 @@ def init_directories() -> None:
         try:
             directory.mkdir(parents=True, exist_ok=True)
         except Exception as e:
+            from .output.console import error
+
             # TODO: deduplicate these messages
-            logger.error(
+            error(
                 f"Unable to create directory {directory}: {e}",
                 exc_info=True,
             )

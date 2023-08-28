@@ -22,7 +22,7 @@ def registryproviders_table(
     providers: Sequence[RegistryProviders], **kwargs: Any
 ) -> Table:
     """Renders a list of RegistryProvider objects as individual tables in a panel."""
-    if len(providers) > 1:
+    if len(providers) != 1:
         logger.warning("Can only display one list of registry providers at a time")
     prov = providers[0]
     table = get_table("Registry Providers", columns=["Name", "Info"], show_lines=True)

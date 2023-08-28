@@ -18,7 +18,7 @@ from .project import project_table
 
 def search_panel(search: Sequence[Search], **kwargs: Any) -> Panel:
     """Display one or more repositories in a table."""
-    if len(search) > 1:
+    if len(search) != 1:
         logger.warning("Can only display one search result at a time.")
     s = search[0]  # guaranteed to be at least one result
 

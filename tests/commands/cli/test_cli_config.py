@@ -65,10 +65,10 @@ def test_cli_config_get(
     assert stdout_config == config
 
 
-def test_env_no_vars(invoke, caplog: LogCaptureFixture) -> None:
+def test_env_no_vars(invoke) -> None:
     res = invoke(["cli-config", "env"], env={})  # unset all env vars for this test
     assert res.exit_code == 0
-    assert "No environment variables set" in caplog.text
+    assert "No environment variables set" in res.stderr
 
 
 def test_env_var_set(invoke) -> None:

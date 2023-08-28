@@ -7,8 +7,8 @@ import typer
 from harborapi.models import Configurations
 from harborapi.models import ConfigurationsResponse
 
-from ...logs import logger
 from ...output.console import exit_err
+from ...output.console import info
 from ...output.render import render_result
 from ...state import get_state
 from ...utils.args import model_params_from_ctx
@@ -343,7 +343,7 @@ def update_config(
     """Update the Harbor configuration.
 
     One or more configuration parameters must be provided."""
-    logger.info("Updating configuration...")
+    info("Updating configuration...")
     params = model_params_from_ctx(ctx, Configurations)
     if not params:
         exit_err("No configuration parameters provided.")
@@ -366,4 +366,4 @@ def update_config(
         state.client.update_config(configuration),
         "Updating configuration...",
     )
-    logger.info("Configuration updated.")
+    info("Configuration updated.")

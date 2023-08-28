@@ -28,6 +28,10 @@ def yellow(message: str) -> str:
     return f"[yellow]{message}[/]"
 
 
+def bold(message: str) -> str:
+    return f"[bold]{message}[/]"
+
+
 class HealthColor(StrEnum):
     HEALTHY = "green"
     UNHEALTHY = "red"

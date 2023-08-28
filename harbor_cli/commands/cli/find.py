@@ -9,8 +9,8 @@ import typer
 from fuzzywuzzy import fuzz
 
 from ...app import app
-from ...logs import logger
 from ...models import CommandSummary
+from ...output.console import warning
 from ...output.render import render_result
 from ...utils.commands import get_app_commands
 
@@ -140,7 +140,7 @@ def _do_find(
         strategy=strategy,
     )
     if limit is not None and len(matches) > limit:
-        logger.warning(f"{len(matches) - limit} results omitted.")
+        warning(f"{len(matches) - limit} results omitted.")
         matches = matches[:limit]
     return matches
 

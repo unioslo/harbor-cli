@@ -15,6 +15,7 @@ from rich.table import Table
 
 from ...logs import logger
 from ...models import ProjectExtended
+from ..console import error
 from ..formatting.builtin import int_str
 from ..formatting.builtin import str_str
 from ..formatting.bytes import bytesize_str
@@ -30,7 +31,7 @@ def project_table(p: Sequence[Project], **kwargs: Any) -> Table:
     """Display one or more projects in a table."""
     table = get_table("Project", p)
     table.add_column("ID")
-    table.add_column("Name")
+    table.add_column("Name", overflow="fold")
     table.add_column("Public")
     table.add_column("Repositories")
     table.add_column("Created")
@@ -49,7 +50,7 @@ def project_table(p: Sequence[Project], **kwargs: Any) -> Table:
 
 def project_extended_panel(p: Sequence[ProjectExtended], **kwargs: Any) -> Panel:
     """Display extended information about one or more projects."""
-    if len(p) > 1:
+    if len(p) != 1:
         logger.warning("This function should only be used to display a single project.")
     pt_table = project_extended_table(p)
     pmt_table = project_metadata_table([p.metadata for p in p if p.metadata])
@@ -138,7 +139,7 @@ def _get_quota(resource: ResourceList | None) -> int | None:
             assert isinstance(quota, int)
     except (AttributeError, AssertionError) as e:
         if isinstance(e, AssertionError):
-            logger.error(f"Resource quota is not an integer: {quota}")
+            error(f"Resource quota is not an integer: {quota}")
         quota = None
     return quota
 

@@ -16,6 +16,7 @@ from ...config import EnvVar
 from ...config import HarborCLIConfig
 from ...models import BaseModel
 from ...output.console import console
+from ...output.console import error
 from ...output.console import exit
 from ...output.console import exit_err
 from ...output.console import info
@@ -218,6 +219,16 @@ def write_session_config(
 )
 def show_config_path(ctx: typer.Context) -> None:
     path = state.config.config_file or DEFAULT_CONFIG_FILE
+    if not path.exists():
+        info("File does not exist.")
+    elif path.is_dir():
+        # this branch should be unreachable since HarborCLIConfig.from_file()
+        # should fail if the path is a directory
+        error(
+            "Path is a directory. Delete the directory so a config file can be created."
+        )
+    elif not path.read_text().strip():
+        info("File exists, but is empty.")
     render_result(path, ctx)
 
 

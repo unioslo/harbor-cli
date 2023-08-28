@@ -10,7 +10,7 @@ from harborapi.models.models import UserProfile
 from harborapi.models.models import UserResp
 
 from ...exceptions import HarborCLIError
-from ...logs import logger
+from ...output.console import info
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
 from ...state import get_state
@@ -186,7 +186,7 @@ def create_user(
     )
     user_info = state.run(state.client.create_user(req), f"Creating user...")
     render_result(user_info, ctx)
-    logger.info(f"Created user {username!r}.")
+    info(f"Created user {username!r}.")
 
 
 # HarborAsyncClient.update_user()
@@ -215,7 +215,7 @@ def update_user(
         )
     req = create_updated_model(user, UserProfile, ctx)
     state.run(state.client.update_user(user.user_id, req), "Updating user...")
-    logger.info(f"Updated user.")
+    info(f"Updated user.")
 
 
 # HarborAsyncClient.delete_user()
@@ -228,7 +228,7 @@ def delete_user(
     delete_prompt(state.config, force, resource="user", name=username_or_id)
     uid = uid_from_username_or_id(username_or_id)
     state.run(state.client.delete_user(uid), "Deleting user...")
-    logger.info(f"Deleted user with ID {uid}.")
+    info(f"Deleted user with ID {uid}.")
 
 
 # HarborAsyncClient.search_users_by_username()
@@ -268,7 +268,7 @@ def set_user_admin(
     state.run(
         state.client.set_user_admin(uid, is_admin=True), "Setting user as admin..."
     )
-    logger.info(f"Set user with ID {uid} as admin.")
+    info(f"Set user with ID {uid} as admin.")
 
 
 @app.command("unset-admin")
@@ -281,7 +281,7 @@ def unset_user_admin(
     state.run(
         state.client.set_user_admin(uid, is_admin=False), "Removing user as admin..."
     )
-    logger.info(f"Removed user with ID {uid} as admin.")
+    info(f"Removed user with ID {uid} as admin.")
 
 
 # HarborAsyncClient.set_user_password()
@@ -316,7 +316,7 @@ def set_user_password(
         ),
         "Setting password for user...",
     )
-    logger.info(f"Set password for user with ID {uid}.")
+    info(f"Set password for user with ID {uid}.")
 
 
 # HarborAsyncClient.set_user_cli_secret()
@@ -336,7 +336,7 @@ def set_user_cli_secret(
     state.run(
         state.client.set_user_cli_secret(uid, secret), "Setting CLI secret for user..."
     )
-    logger.info(f"Set CLI secret for user with ID {uid}.")
+    info(f"Set CLI secret for user with ID {uid}.")
 
 
 # HarborAsyncClient.get_current_user()
@@ -408,10 +408,8 @@ def list_users(
     users = state.run(
         state.client.get_users(
             query=query,
-            # we do the sorting ourselves later
             page=page,
             page_size=page_size,
-            # we do the limiting ourselves later
         ),
         "Fetching users...",
     )

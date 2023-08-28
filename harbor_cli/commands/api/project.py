@@ -10,11 +10,12 @@ from harborapi.models.models import ProjectMetadata
 from harborapi.models.models import ProjectReq
 from harborapi.models.models import RoleRequest
 
-from ...logs import logger
 from ...models import MemberRoleType
 from ...models import ProjectExtended
 from ...output.console import exit
 from ...output.console import exit_err
+from ...output.console import info
+from ...output.console import warning
 from ...output.prompts import check_enumeration_options
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
@@ -115,7 +116,7 @@ def get_project_logs(
         f"Fetching logs for {project_repr}...",
     )
     render_result(logs, ctx)
-    logger.info(f"Fetched {len(logs)} logs.")
+    info(f"Fetched {len(logs)} logs.")
 
 
 # HarborAsyncClient.project_exists()
@@ -225,7 +226,7 @@ def create_project(
         state.client.create_project(project_req), "Creating project..."
     )
     project_repr = get_project_repr(project_name)
-    logger.info(f"Created {project_repr}")
+    info(f"Created {project_repr}")
     res = ProjectCreateResult(location=location, project=project_req)
     render_result(res, ctx)
 
@@ -281,7 +282,7 @@ def list_projects(
         "Fetching projects...",
     )
     render_result(projects, ctx)
-    logger.info(f"Fetched {len(projects)} projects.")
+    info(f"Fetched {len(projects)} projects.")
 
 
 # HarborAsyncClient.update_project()
@@ -369,7 +370,7 @@ def update_project(
     req.metadata = metadata
 
     state.run(state.client.update_project(arg, req), f"Updating project...")
-    logger.info(f"Updated {get_project_repr(arg)}")
+    info(f"Updated {get_project_repr(arg)}")
 
 
 # HarborAsyncClient.delete_project()
@@ -384,7 +385,7 @@ def delete_project(
     delete_prompt(config=state.config, force=force, resource="project", name=str(arg))
     project_repr = get_project_repr(arg)
     state.run(state.client.delete_project(arg), f"Deleting {project_repr}...")
-    logger.info(f"Deleted {project_repr}.")
+    info(f"Deleted {project_repr}.")
 
 
 # HarborAsyncClient.get_project_summary()
@@ -429,7 +430,7 @@ def set_project_scanner(
     state.run(
         state.client.set_project_scanner(arg, scanner_id), f"Setting project scanner..."
     )
-    logger.info(f"Set scanner for {project_repr} to {scanner_repr}")
+    info(f"Set scanner for {project_repr} to {scanner_repr}")
 
 
 # HarborAsyncClient.get_project_scanner_candidates()
@@ -554,7 +555,7 @@ def set_project_metadata(
         state.client.set_project_metadata(arg, metadata),
         f"Setting metadata for {project_repr}...",
     )
-    logger.info(f"Set metadata for {project_repr}.")
+    info(f"Set metadata for {project_repr}.")
 
 
 # HarborAsyncClient.get_project_metadata_entry()
@@ -593,7 +594,7 @@ def set_project_metadata_field(
 ) -> None:
     """Set a single field in the metadata for a project."""
     if field not in ProjectMetadata.__fields__:
-        logger.warning(f"Field {field!r} is not a known project metadata field.")
+        warning(f"Field {field!r} is not a known project metadata field.")
 
     arg = get_project_arg(project_name_or_id)
     project_repr = get_project_repr(arg)
@@ -604,7 +605,7 @@ def set_project_metadata_field(
         state.client.update_project_metadata_entry(arg, field, metadata),
         f"Setting metadata for {project_repr}...",
     )
-    logger.info(f"Set metadata for {project_repr}.")
+    info(f"Set metadata for {project_repr}.")
 
 
 # HarborAsyncClient.delete_project_metadata_entry()
@@ -621,7 +622,7 @@ def delete_project_metadata_field(
     """Delete a single field in the metadata for a project."""
     delete_prompt(state.config, force, resource="metadata field", name=field)
     if field not in ProjectMetadata.__fields__:
-        logger.warning(f"Field {field!r} is not a known project metadata field.")
+        warning(f"Field {field!r} is not a known project metadata field.")
 
     arg = get_project_arg(project_name_or_id)
 
@@ -629,7 +630,7 @@ def delete_project_metadata_field(
         state.client.delete_project_metadata_entry(arg, field),
         f"Deleting metadata field {field!r}...",
     )
-    logger.info(f"Deleted metadata field {field!r}.")
+    info(f"Deleted metadata field {field!r}.")
 
 
 # HarborAsyncClient.get_project_member()
@@ -727,7 +728,7 @@ def remove_project_member(
         state.client.remove_project_member(project_arg, member_id),
         f"Removing member...",
     )
-    logger.info(f"Removed member {member_id} from project {project_arg}.")
+    info(f"Removed member {member_id} from project {project_arg}.")
 
 
 # HarborAsyncClient.get_project_members()

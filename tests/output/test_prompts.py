@@ -12,7 +12,6 @@ from hypothesis import HealthCheck
 from hypothesis import settings
 from hypothesis import strategies as st
 from pytest import CaptureFixture
-from pytest import LogCaptureFixture
 from pytest import MonkeyPatch
 
 from harbor_cli.output.prompts import float_prompt
@@ -117,7 +116,6 @@ def test_float_prompt_nan(
     monkeypatch: MonkeyPatch,
     leading_newline: str,
     capsys: CaptureFixture,
-    caplog: LogCaptureFixture,
 ) -> None:
     # if we give it a nan, it will prompt for new input
     # so we need to give it a valid input after that
@@ -125,7 +123,7 @@ def test_float_prompt_nan(
     monkeypatch.setattr("sys.stdin", io.StringIO(stdin_str))
     assert float_prompt("foo") == 0.0
     stdout, stderr = capsys.readouterr()
-    assert "NaN" in caplog.text
+    assert "NaN" in stderr
     if leading_newline:
         # Rich prints this message to stdout for some reason
         assert "Please enter a number" in stdout

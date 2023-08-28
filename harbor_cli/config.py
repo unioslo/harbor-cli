@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 import os
 from datetime import datetime
-from enum import Enum
 from pathlib import Path
 from typing import Any
 from typing import Optional
@@ -19,6 +18,7 @@ from pydantic import Field
 from pydantic import root_validator
 from pydantic import SecretStr
 from pydantic import validator
+from strenum import StrEnum
 
 from .dirs import CONFIG_DIR
 from .dirs import DATA_DIR
@@ -31,6 +31,7 @@ from .exceptions import OverwriteError
 from .format import OutputFormat
 from .logs import logger
 from .logs import LogLevel
+from .output.console import warning
 from .style import STYLE_TABLE_HEADER
 from .utils import replace_none
 from .utils.keyring import get_password
@@ -53,7 +54,7 @@ def env_var(option: str) -> str:
     return ENV_VAR_PREFIX + option.upper().replace("-", "_")
 
 
-class EnvVar(str, Enum):
+class EnvVar(StrEnum):
     CONFIG = env_var("config")
     URL = env_var("url")
     USERNAME = env_var("username")
@@ -195,9 +196,9 @@ class HarborSettings(BaseModel):
             try:
                 return get_password(self.username) or ""
             except KeyringUnsupportedError:
-                logger.warning(
+                warning(
                     "Keyring is not supported on this platform. "
-                    "Falling back to secret from config file."
+                    "Using secret from config file."
                 )
                 self.keyring = False  # patch it so we don't try again
                 return self.secret.get_secret_value()
@@ -259,7 +260,7 @@ class HarborSettings(BaseModel):
 class LoggingSettings(BaseModel):
     enabled: bool = True
     structlog: bool = False
-    level: LogLevel = LogLevel.INFO
+    level: LogLevel = LogLevel.WARNING
     directory: Path = LOGS_DIR
     filename: str = "harbor_cli-{time}.log"
     timeformat: str = "%Y-%m-%d"
@@ -381,7 +382,7 @@ class TableSettings(BaseModel):
         # and if so, return 0.
         # In the future, we will use Field(..., ge=0) to enforce it.
         if v < 0:
-            logger.warning(
+            warning(
                 "max_depth will stop accepting negative values in a future version. Use 0 instead."
             )
             return 0
@@ -530,10 +531,12 @@ class HarborCLIConfig(BaseModel):
                 raise ConfigFileNotFoundError(
                     f"Config file {config_file} does not exist."
                 )
+        elif not config_file.is_file():
+            raise ConfigError(f"Config file {config_file} is not a file.")
+
         try:
             config = load_toml_file(config_file)
         except Exception as e:
-            logger.error("Failed to load config file", exc_info=True)
             raise ConfigError(f"Could not load config file {config_file}: {e}") from e
         return cls(**config, config_file=config_file)
 
@@ -604,7 +607,6 @@ def create_config(config_path: Path | None, overwrite: bool = False) -> Path:
     except FileExistsError as e:
         raise OverwriteError(f"Config file {config_path} already exists.") from e
     except Exception as e:
-        logger.error("Failed to create config file", exc_info=True)
         raise ConfigError(f"Could not create config file {config_path}: {e}") from e
 
     # Write sample config to the created file
@@ -620,7 +622,6 @@ def load_config(config_path: Path | None = None) -> HarborCLIConfig:
     except HarborCLIError:
         raise
     except Exception as e:
-        logger.error("Failed to load config file", exc_info=True)
         raise ConfigError(f"Could not load config file {config_path}: {e}") from e
 
 
@@ -629,7 +630,6 @@ def save_config(config: HarborCLIConfig, config_path: Path) -> None:
     try:
         config_path.write_text(config.toml(exclude_none=True))
     except Exception as e:
-        logger.error("Failed to save config file", exc_info=True)
         raise ConfigError(f"Could not save config file {config_path}: {e}") from e
 
 

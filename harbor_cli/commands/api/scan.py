@@ -8,7 +8,7 @@ import typer
 from harborapi.models import ScanDataExportRequest
 
 from ...harbor.artifact import parse_artifact_name
-from ...logs import logger
+from ...output.console import info
 from ...output.render import render_result
 from ...state import get_state
 from ...style import render_cli_value
@@ -48,7 +48,7 @@ def start_scan(
         state.client.scan_artifact(an.project, an.repository, an.reference),
         "Starting artifact scan...",
     )
-    logger.info(f"Scan of {artifact!r} started.")
+    info(f"Scan of {artifact!r} started.")
     # TODO: add some sort of results?
 
 
@@ -67,7 +67,7 @@ def stop_scan(
         state.client.stop_artifact_scan(an.project, an.repository, an.reference),
         "Stopping artifact scan...",
     )
-    logger.info(f"Scan of {artifact!r} stopped.")
+    info(f"Scan of {artifact!r} stopped.")
 
 
 # HarborAsyncClient.stop_scan_all_job()
@@ -232,4 +232,4 @@ def download_scan_export(
     # TODO: check resp code + handle errors
     with destination.open("wb") as f:
         f.write(bytes(export))
-    logger.info(f"Export downloaded to {destination!s}")
+    info(f"Export downloaded to {destination!s}")

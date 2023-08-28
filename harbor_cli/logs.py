@@ -9,19 +9,11 @@ if TYPE_CHECKING:
 
 
 import logging
-from rich.logging import RichHandler
 
 
 # Create logger
 logger = logging.getLogger("harbor-cli")
 logger.setLevel(logging.DEBUG)  # Capture all log messages
-
-
-# Create stderr handler for user-friendly messages
-stderr_handler = RichHandler(
-    level=logging.INFO, show_time=False, show_path=False, markup=True
-)
-logger.addHandler(stderr_handler)
 
 
 class LogLevel(Enum):
@@ -82,15 +74,14 @@ _LOGGING_INIT = False
 def setup_logging(config: LoggingSettings) -> None:
     """Set up stderr logging."""
     global _LOGGING_INIT
-    if _LOGGING_INIT:
+    if _LOGGING_INIT:  # prevent re-configuring in REPL
         return
-
-    # stderr logger
-    stderr_handler.setLevel(config.level.as_int())
 
     # Create file handler for detailed logs
     file_handler = logging.FileHandler(config.path)
-    formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter(
+        "%(asctime)s [%(levelname)s] [%(module)s:%(filename)s:%(lineno)s - %(funcName)s()] %(message)s"
+    )
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
 

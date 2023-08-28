@@ -5,9 +5,9 @@ from typing import Optional
 import typer
 from harborapi.models.models import UserGroup
 
-from ...logs import logger
 from ...models import UserGroupType
 from ...output.console import exit_err
+from ...output.console import info
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
 from ...state import get_state
@@ -83,7 +83,7 @@ def update_usergroup(
         state.client.update_usergroup(group_id, usergroup),
         f"Updating user group {group_id}...",
     )
-    logger.info(f"Updated user group {group_id}.")
+    info(f"Updated user group {group_id}.")
 
 
 # HarborAsyncClient.delete_usergroup()
@@ -98,7 +98,7 @@ def delete_usergroup(
     state.run(
         state.client.delete_usergroup(group_id), f"Deleting user group {group_id}..."
     )
-    logger.info(f"Deleted user group {group_id}.")
+    info(f"Deleted user group {group_id}.")
 
 
 # HarborAsyncClient.get_usergroups()
