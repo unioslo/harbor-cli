@@ -533,19 +533,17 @@ structlog = false
 
 #### `logging.level`
 
-The logging level to use. The default is `INFO`. The available logging levels are:
-
-- `TRACE`
+The logging level to use. The default is `WARNING`. The available logging levels are:
+`
 - `DEBUG`
 - `INFO`
-- `SUCCESS`
 - `WARNING`
 - `ERROR`
 - `CRITICAL`
 
 ```toml
 [logging]
-level = "INFO"
+level = "WARNING"
 ```
 
 #### `logging.directory`
