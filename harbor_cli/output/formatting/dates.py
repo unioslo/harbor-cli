@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
+from ...logs import logger
 from .constants import NONE_STR
 
 
@@ -25,7 +26,9 @@ def datetime_str(
     if isinstance(d, (int, float)):
         try:
             d = datetime.fromtimestamp(d)
-        except ValueError:
+        except (ValueError, OSError) as e:  # OSError if timestamp is out of range
+            if isinstance(e, OSError):
+                logger.error("Timestamp out of range: %s", d)
             return NONE_STR
     fmt = "%Y-%m-%d"
     if with_time:
