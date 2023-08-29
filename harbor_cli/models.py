@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from enum import Enum
 from typing import Any
+from typing import Iterable
 from typing import List
 from typing import Optional
 
@@ -19,6 +20,7 @@ from harborapi.models import VulnerabilitySummary
 from harborapi.models.base import BaseModel as HarborAPIBaseModel
 from pydantic import Field
 from pydantic import root_validator
+from rich.table import Table
 from strenum import StrEnum
 from typer.core import TyperArgument
 from typer.core import TyperCommand
@@ -325,3 +327,21 @@ class ArtifactVulnerabilitySummary(BaseModel):
 
     # def json(self, *args, **kwargs):
     #     return super().json(*args, **kwargs, exclude={"summary."}
+
+
+class MetadataFields(BaseModel):
+    """Renders a mapping of one or more metadata fields as a table."""
+
+    __root__: dict[str, Any]
+
+    def as_table(self, **kwargs: Any) -> Iterable[Table]:  # type: ignore
+        from .output.table._utils import get_table
+
+        table = get_table(
+            "Metadata Field",
+            columns=["Field", "Value"],
+            data=list(self.__root__),
+        )
+        for k, v in self.__root__.items():
+            table.add_row(k, str(v))
+        yield table

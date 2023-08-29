@@ -11,6 +11,7 @@ from harborapi.models.models import ProjectReq
 from harborapi.models.models import RoleRequest
 
 from ...models import MemberRoleType
+from ...models import MetadataFields
 from ...models import ProjectExtended
 from ...output.console import exit
 from ...output.console import exit_err
@@ -575,7 +576,8 @@ def get_project_metadata_field(
         state.client.get_project_metadata_entry(arg, field),
         f"Fetching metadata field {field!r} for {project_repr}...",
     )
-    render_result(metadata, ctx)
+    md = MetadataFields.parse_obj(metadata)
+    render_result(md, ctx)
 
 
 # HarborAsyncClient.update_project_metadata_entry()
