@@ -79,9 +79,10 @@ from .webhook import supported_events_table
 
 T = TypeVar("T")
 
-_RENDER_FUNC_SEQ = Callable[[Sequence[T]], Union[Table, Panel]]
-_RENDER_FUNC_SINGLE = Callable[[T], Union[Table, Panel]]
-RENDER_FUNC_T = Union[_RENDER_FUNC_SEQ, _RENDER_FUNC_SINGLE]
+RenderableType = Union[Table, Panel]
+RenderFuncSeq = Callable[[Sequence[T]], RenderableType]
+RenderFuncSingle = Callable[[T], RenderableType]
+RenderFuncType = Union[RenderFuncSeq, RenderFuncSingle]
 
 
 _RENDER_FUNCTIONS = [
@@ -112,18 +113,24 @@ _RENDER_FUNCTIONS = [
     userresp_table,
     usersearchrespitem_table,
     usergroupsearchitem_table,
-]  # type: list[RENDER_FUNC_T]
+]  # type: list[RenderFuncType]
 
 RENDER_FUNCTIONS = {}  # dict of functions + type of first argument
-for function in _RENDER_FUNCTIONS:
-    try:
-        hints = typing.get_type_hints(function)
-        if not hints:
-            continue
-        val = next(iter(hints.values()))
-        RENDER_FUNCTIONS[val] = function
-    except TypeError:
-        logger.warning("Could not add render function %s", function)
+
+
+def _populate_render_functions_dict() -> None:
+    for function in _RENDER_FUNCTIONS:
+        try:
+            hints = typing.get_type_hints(function)
+            if not hints:
+                continue
+            val = next(iter(hints.values()))
+            RENDER_FUNCTIONS[val] = function
+        except TypeError:
+            logger.warning("Could not add render function %s", function)
+
+
+_populate_render_functions_dict()
 
 
 class BuiltinTypeException(TypeError):
@@ -136,7 +143,7 @@ class EmptySequenceError(ValueError):
 
 def get_render_function(
     obj: T | Sequence[T],
-) -> RENDER_FUNC_T:
+) -> RenderFuncType:
     """Get the render function for a given object.
 
     If the object is a sequence, only render functions that take in
@@ -148,7 +155,9 @@ def get_render_function(
 
     The caller of this function must discern whether or not a sequence function
     has been returned, and if so, wrap the object in a sequence if it is
-    not a sequence.
+    not a sequence. In scenarios where non-metaprogrammy code calls this
+    function, this should not be an issue, since the caller should know if they
+    passed in a sequence or not.
 
     Parameters
     ----------
@@ -157,10 +166,16 @@ def get_render_function(
 
     Returns
     -------
-    RENDER_FUNC_T
+    RenderFuncType
         The render function for the object. A render function is a function
         that takes in a BaseModel or a list of BaseModels and returns a
         rich.table.Table or rich.panel.Panel object.
+
+    See Also
+    --------
+    * [harbor_cli.output.table.get_renderable][]
+    * [harbor_cli.types.is_sequence_func][]
+    * [harbor_cli.output.render.render_table_compact][]
     """
 
     if isinstance(obj, Sequence) and not isinstance(obj, str):
@@ -170,7 +185,7 @@ def get_render_function(
     else:
         t = type(obj)
 
-    def _get_render_func(t: Any) -> RENDER_FUNC_T:
+    def _get_render_func(t: Any) -> RenderFuncType:
         try:
             return RENDER_FUNCTIONS[t]
         except KeyError:
