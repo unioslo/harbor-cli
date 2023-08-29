@@ -35,10 +35,10 @@ def model_params_from_ctx(
     >>> class Foo(BaseModel):
     ...     foo: str
     ...     bar: str
-    >>> foo = Foo(a=1, b=2)
-    >>> ctx = typer.Context(...) # --foo spam --bar grok --baz quux
+    >>> foo = Foo(foo="foo", bar="bar")
+    >>> ctx = typer.Context(...) # some-cmd --bar grok --baz quux
     >>> model_params_from_ctx(ctx, Foo)
-    {"foo": "spam", "bar": "grok"} # baz is not a valid field for Foo
+    {"bar": "grok"} # baz is not a valid field for Foo
 
 
     Parameters
@@ -69,17 +69,17 @@ def create_updated_model(
     extra: bool = False,
     empty_ok: bool = False,
 ) -> BaseModelType:
-    """Given a BaseModel and a new model type, create a new model
-    from the fields of the existing model combined with the arguments given
-    to the command in the Typer context.
+    """Given an existing model instance and another model type, instantiate
+    other model based on the fields of the existing model combined with CLI args
+    passed in by the user.
 
     When we call a PUT enpdoint, the API expects the full model definition,
     but we want to allow the user to only specify the fields they want to update.
-    This function allows us to do that, by taking the existing model and updating
-    it with the new values from the Typer context.
+    This function allows us to do that, by taking an existing model fetched via
+    a GET call and updating it with new values from the Typer context.
 
-    Furthermore, Harbor API generally uses a different model definition for
-    when updating a resource (PUT), compared to the one fetched by GET.
+    To further complicate things, Harbor API generally uses a different model
+    definition for updating resources (PUT) than the one fetched from a GET call.
     For example, fetching information about a project returns a Project object,
     while updating a project requires a ProjectUpdateReq object.
 
@@ -88,8 +88,8 @@ def create_updated_model(
     ProjectUpdateReq model does not.
 
     This function allows us to create, for example, a ProjectUpdateReq object
-    from a Project object. Furthermore, we extract additional parameters for
-    the model passed in via CLI args to add/update fields to the model.
+    from a combination of a Project object and CLI args that correspond with
+    the fields of the ProjectUpdateReq model.
 
     See [model_params_from_ctx][harbor_cli.utils.args.model_params_from_ctx]
     for more information on how the CLI context is used to provide the updated
@@ -104,12 +104,12 @@ def create_updated_model(
     ...     c: Optional[bool]
     >>> class FooUpdateReq(BaseModel):
     ...     a: Optional[int]
-    ...     b: Optional[int]
+    ...     b: Optional[str]
     ...     c: Optional[bool]
     ...     d: bool = False
     >>> foo = Foo(a=1, b="foo", c=True)
-    >>> # we get a ctx object from Typer inside the function of a command
-    >>> ctx = typer.Context(...) # --a 2 --b bar
+    >>> # we get a ctx object from a Typer command
+    >>> ctx = typer.Context(...) # update-foo --a 2 --b bar
     >>> foo_update = create_updated_model(foo, FooUpdateReq, ctx)
     >>> foo_update
     FooUpdateReq(a=2, b='bar', c=True, d=False)
@@ -330,17 +330,8 @@ def add_to_query(query: str | None, **kwargs: str | list[str] | None) -> str:
 
 
 def _get_id_name_arg(resource_type: str, name_or_id: str) -> str | int:
-    """
-    Helper function for getting a resource given its name or ID.
-
-    NOTE
-    ----
-    Why not just a single arg and check if all the characters are digits?
-    Because the resource name can be a string of digits, e.g. "1234", so
-    just checking if the string is all digits is not sufficient, and would
-    break access to those projects.
-    """
-    # If we have a prefix in the resource, we assume it's an ID
+    """Helper function for getting a resource given its name or ID."""
+    # Return arg as-is if no ID prefix
     if not name_or_id.startswith(PREFIX_ID):
         return name_or_id
 
@@ -352,20 +343,14 @@ def _get_id_name_arg(resource_type: str, name_or_id: str) -> str | int:
 
 
 def get_project_arg(project_name_or_id: str) -> str | int:
-    """Given a project name and project ID, returns the one that is not None.
-    One of name or ID must be not None. Harbor API expects that int args are
-    project IDs and string args are project names.
-
-    The ID will be returned if both are specified."""
+    """Given a project name or ID argument (prefixed with 'id:'),
+    return a project name (str) or project ID (int)."""
     return _get_id_name_arg("project", project_name_or_id)
 
 
 def get_user_arg(username_or_id: str) -> str | int:
-    """Given a project name and project ID, returns the one that is not None.
-    One of name or ID must be not None. Harbor API expects that int args are
-    user IDs and string args are user names.
-
-    The ID will be returned if both are specified."""
+    """Given a username or ID argument (prefixed with 'id:'),
+    return a username (str) or user ID (int)."""
     return _get_id_name_arg("user", username_or_id)
 
 
