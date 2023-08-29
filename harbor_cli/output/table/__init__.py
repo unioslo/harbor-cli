@@ -58,6 +58,7 @@ from .artifact import buildhistoryentry_table
 from .artifact import tags_table
 from .auditlog import auditlog_table
 from .commandsummary import commandsummary_table
+from .cve import cveallowlist_table
 from .project import project_create_result_panel
 from .project import project_extended_panel
 from .project import project_req_table
@@ -93,6 +94,7 @@ _RENDER_FUNCTIONS = [
     auditlog_table,
     buildhistoryentry_table,
     commandsummary_table,
+    cveallowlist_table,
     generalinfo_panel,
     overallhealthstatus_panel,
     project_table,

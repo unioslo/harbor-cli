@@ -3,7 +3,6 @@ from __future__ import annotations
 from typing import Any
 from typing import Sequence
 
-from harborapi.models.models import CVEAllowlist
 from harborapi.models.models import Project
 from harborapi.models.models import ProjectMetadata
 from harborapi.models.models import ProjectReq
@@ -25,6 +24,7 @@ from ..formatting.dates import datetime_str
 from ..formatting.harbor import boolstr_str
 from ._utils import get_panel
 from ._utils import get_table
+from .cve import cveallowlist_table
 from .registry import registry_table
 
 
@@ -103,31 +103,6 @@ def project_metadata_table(p: Sequence[ProjectMetadata], **kwargs: Any) -> Table
             boolstr_str(metadata.auto_scan),
             boolstr_str(metadata.reuse_sys_cve_allowlist),
             str_str(metadata.retention_id),
-        )
-    return table
-
-
-def cveallowlist_table(c: Sequence[CVEAllowlist], **kwargs: Any) -> Table:
-    table = get_table("CVE Allowlist", c)
-    table.add_column("ID")
-    table.add_column("Items")
-    table.add_column("Expires")
-    table.add_column("Created")
-    table.add_column("Updated")
-    for allowlist in c:
-        if allowlist.items:
-            items = "\n".join(
-                str_str(i.cve_id) for i in allowlist.items if i is not None
-            )
-        else:
-            items = str_str(None)
-
-        table.add_row(
-            int_str(allowlist.id),
-            items,
-            datetime_str(allowlist.expires_at),
-            datetime_str(allowlist.creation_time),
-            datetime_str(allowlist.update_time),
         )
     return table
 
