@@ -58,7 +58,9 @@ from .artifact import buildhistoryentry_table
 from .artifact import tags_table
 from .auditlog import auditlog_table
 from .commandsummary import commandsummary_table
+from .project import project_create_result_panel
 from .project import project_extended_panel
+from .project import project_req_table
 from .project import project_summary_panel
 from .project import project_table
 from .registry import registryproviders_table
@@ -96,6 +98,8 @@ _RENDER_FUNCTIONS = [
     project_table,
     project_extended_panel,
     project_summary_panel,
+    project_create_result_panel,
+    project_req_table,
     repository_table,
     registryproviders_table,
     supported_events_table,

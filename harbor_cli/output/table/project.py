@@ -6,6 +6,7 @@ from typing import Sequence
 from harborapi.models.models import CVEAllowlist
 from harborapi.models.models import Project
 from harborapi.models.models import ProjectMetadata
+from harborapi.models.models import ProjectReq
 from harborapi.models.models import ProjectSummary
 from harborapi.models.models import ProjectSummaryQuota
 from harborapi.models.models import ResourceList
@@ -14,6 +15,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from ...logs import logger
+from ...models import ProjectCreateResult
 from ...models import ProjectExtended
 from ..console import error
 from ..formatting.builtin import int_str
@@ -195,3 +197,29 @@ def project_summary_quota_table(p: ProjectSummaryQuota, **kwargs: Any) -> Table:
         bytesize_str(_get_quota(p.used) or 0),
     )
     return table
+
+
+def project_req_table(p: ProjectReq, **kwargs: Any) -> Table:
+    table = get_table(
+        "Project",
+        columns=["Name", "Storage Limit", "Registry ID"],
+    )
+    table.add_row(
+        str_str(p.project_name),
+        bytesize_str(p.storage_limit),
+        int_str(p.registry_id),
+    )
+    return table
+
+
+def project_create_result_panel(p: ProjectCreateResult, **kwargs: Any) -> Panel:
+    """Display extended information about one or more projects."""
+    tables = []
+    pt_table = project_req_table(p.project)
+    tables.append(pt_table)
+    if p.project.metadata:
+        tables.append(project_metadata_table([p.project.metadata]))
+    # TODO: only render allowlist if allowlist is not empty
+    if p.project.cve_allowlist:
+        tables.append(cveallowlist_table([p.project.cve_allowlist]))
+    return Panel(Group(*tables), title=p.location, expand=True)

@@ -17,6 +17,7 @@ from click.core import Argument
 from click.core import Parameter
 from harborapi.ext.artifact import ArtifactInfo
 from harborapi.models import Project
+from harborapi.models import ProjectReq
 from harborapi.models import VulnerabilitySummary
 from harborapi.models.base import BaseModel as HarborAPIBaseModel
 from pydantic import Field
@@ -346,3 +347,8 @@ class MetadataFields(BaseModel):
         for k, v in self.__root__.items():
             table.add_row(k, str(v))
         yield table
+
+
+class ProjectCreateResult(BaseModel):
+    location: str
+    project: ProjectReq

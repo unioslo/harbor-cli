@@ -4,7 +4,6 @@ from typing import List
 from typing import Optional
 
 import typer
-from harborapi.models.base import BaseModel
 from harborapi.models.models import Project
 from harborapi.models.models import ProjectMetadata
 from harborapi.models.models import ProjectReq
@@ -12,6 +11,7 @@ from harborapi.models.models import RoleRequest
 
 from ...models import MemberRoleType
 from ...models import MetadataFields
+from ...models import ProjectCreateResult
 from ...models import ProjectExtended
 from ...output.console import exit
 from ...output.console import exit_err
@@ -138,11 +138,6 @@ def project_exists(
     )
     render_result(exists, ctx)
     exit(code=0 if exists else 1)
-
-
-class ProjectCreateResult(BaseModel):
-    location: str
-    project: ProjectReq
 
 
 # HarborAsyncClient.create_project()
