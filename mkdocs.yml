@@ -86,8 +86,10 @@ nav:
       - "reference/exceptions.md"
       - "reference/format.md"
       - "reference/logs.md"
+      - "reference/models.md"
       - "reference/main.md"
       - "reference/state.md"
+      - "reference/types.md"
       - "Utils":
           - "reference/utils/index.md"
           - "reference/utils/args.md"
@@ -96,6 +98,7 @@ nav:
       - "Harbor":
           - "reference/harbor/index.md"
           - "reference/harbor/artifact.md"
+          - "reference/harbor/common.md"
       - "Output":
           - "reference/output/index.md"
           - "reference/output/console.md"
