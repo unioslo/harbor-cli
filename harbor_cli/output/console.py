@@ -51,7 +51,7 @@ def error(
 ) -> None:
     """Log with ERROR level and print an error message."""
     logger.error(message, extra=dict(**kwargs), exc_info=exc_info)
-    err_console.print(f"{red(icon)} {message}")
+    err_console.print(bold(f"{red(icon)} {message}"))
 
 
 def exit(message: Optional[str] = None, code: int = 0, **kwargs) -> NoReturn:
