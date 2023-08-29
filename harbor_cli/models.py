@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from enum import Enum
 from typing import Any
+from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Optional
@@ -332,7 +333,7 @@ class ArtifactVulnerabilitySummary(BaseModel):
 class MetadataFields(BaseModel):
     """Renders a mapping of one or more metadata fields as a table."""
 
-    __root__: dict[str, Any]
+    __root__: Dict[str, Any]
 
     def as_table(self, **kwargs: Any) -> Iterable[Table]:  # type: ignore
         from .output.table._utils import get_table
