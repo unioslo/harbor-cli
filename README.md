@@ -50,12 +50,39 @@ Before the name acquisition process is complete, semantic versioning will not be
 
 ## Usage
 
-```
+
+Installing the application puts `harbor` in your `PATH`, and can be invoked by typing `harbor` in your terminal:
+
+```console
 harbor --help
 ```
 
-Check the [documentation](https://pederhan.github.io/harbor-cli/) for more information.
+### Quick Start
 
+
+To begin with, run the configuration wizard:
+
+```console
+harbor init
+```
+
+After configuring the application, you can run commands directly:
+
+```console
+harbor project list
+```
+
+Or enter REPL mode:
+
+```console
+harbor repl
+```
+
+Or enter TUI mode to browse the different commands:
+
+```console
+harbor tui
+```
 
 ## Examples
 
@@ -63,46 +90,26 @@ Most commands produce some sort of table. While the most common methods have nic
 
 PRs are always welcome if you wish to add a new table or improve an existing one.
 
-This first example in this section is an automatically generated table, while the subsequent examples all feature hand-made tables.
-
-
 ### Create project
 
 ```console
-$ harbor project create test-project --public true
-[INFO] Created project 'test-project'
-╭──────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ ProjectCreateResult                                                                              │
-│ ┏━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃ Field             ┃ Value                                                                    ┃ │
-│ ┡━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩ │
-│ │ location          │ /api/v2.0/projects/test-project                                          │ │
-│ │ project           │ See below (ProjectCreateResult.project)                                  │ │
-│ └───────────────────┴──────────────────────────────────────────────────────────────────────────┘ │
-│ ProjectCreateResult.project                                                                      │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
-│ ┃ Field                ┃ Value                                                                 ┃ │
-│ ┡━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩ │
-│ │ project_name         │ test-project                                                          │ │
-│ │ public               │ None                                                                  │ │
-│ │ metadata             │ See below (ProjectCreateResult.project.metadata)                      │ │
-│ │ cve_allowlist        │ None                                                                  │ │
-│ │ storage_limit        │ None                                                                  │ │
-│ │ registry_id          │ None                                                                  │ │
-│ └──────────────────────┴───────────────────────────────────────────────────────────────────────┘ │
-│ ProjectCreateResult.project.metadata                                                             │
-│ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┓ │
-│ ┃ Field                                                                     ┃ Value            ┃ │
-│ ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━┩ │
-│ │ public                                                                    │ true             │ │
-│ │ enable_content_trust                                                      │ None             │ │
-│ │ enable_content_trust_cosign                                               │ None             │ │
-│ │ prevent_vul                                                               │ None             │ │
-│ │ severity                                                                  │ None             │ │
-│ │ auto_scan                                                                 │ None             │ │
-│ │ reuse_sys_cve_allowlist                                                   │ None             │ │
-│ │ retention_id                                                              │ None             │ │
-│ └───────────────────────────────────────────────────────────────────────────┴──────────────────┘ │
+$ harbor project create test-project
+! Created project 'test-project'
+╭──────────────────────────────── /api/v2.0/projects/test-project ─────────────────────────────────╮
+│                                             Project                                              │
+│ ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓ │
+│ ┃ Name                          ┃ Storage Limit                   ┃ Registry ID                ┃ │
+│ ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩ │
+│ │ test-project                  │ None                            │ None                       │ │
+│ └───────────────────────────────┴─────────────────────────────────┴────────────────────────────┘ │
+│                                             Metadata                                             │
+│ ┏━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━┓ │
+│ ┃        ┃           ┃ Content   ┃            ┃           ┃           ┃            ┃           ┃ │
+│ ┃        ┃ Content   ┃ Trust     ┃ Vuln       ┃ Max       ┃           ┃ Reuse Sys  ┃ Retention ┃ │
+│ ┃ Public ┃ Trust     ┃ Cosign    ┃ Prevention ┃ Severity  ┃ Auto Scan ┃ CVE List   ┃ ID        ┃ │
+│ ┡━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━┩ │
+│ │ False  │ False     │ False     │ False      │ None      │ False     │ False      │ None      │ │
+│ └────────┴───────────┴───────────┴────────────┴───────────┴───────────┴────────────┴───────────┘ │
 ╰──────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
@@ -110,7 +117,7 @@ $ harbor project create test-project --public true
 
 ```console
 $ harbor project update test-project --public false --severity high --auto-scan true
-[INFO] Updated project 'test-project'
+! Updated project 'test-project'
 ```
 
 ### Get project
