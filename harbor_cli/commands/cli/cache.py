@@ -3,7 +3,6 @@ from __future__ import annotations
 import time
 from datetime import datetime
 from datetime import timedelta
-from typing import Any
 from typing import Iterable
 from typing import List
 
@@ -66,7 +65,7 @@ class CacheInfo(BaseModel):
     def empty(self) -> bool:
         return not self.commands or not any(c.items for c in self.commands)
 
-    def __rich_console__(self, console: Any, options: Any) -> Iterable[Table]:
+    def as_table(self, **kwargs) -> Iterable[Table]:
         table = get_table("Cache Info", columns=["Command", "# Items", "Expires"])
         for command in self.commands:
             table.add_row(command.key, str(command.items), command.expiry_str)

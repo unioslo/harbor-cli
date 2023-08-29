@@ -591,7 +591,7 @@ class ScheduledArtifactDeletion(PydanticBaseModel):
 
     artifacts: Dict[str, List[Union[DeletionReason, str]]]
 
-    def __rich_console__(self, console, options) -> Table:  # type: ignore
+    def as_table(self, **kwargs) -> Table:  # type: ignore
         from ...output.table._utils import get_table
 
         table = get_table(
