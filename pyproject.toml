@@ -21,10 +21,9 @@ classifiers = [
 ]
 dependencies = [
   "typer==0.9.0",
-  "harborapi>=0.21.0",
-  # "harborapi @ git+https://github.com/pederhan/harborapi.git@main",
-  "pydantic>=1.10.2, <2.0.0",   # not yet sure if we can use 2.0.0 out of the box
-  "trogon>=0.3.0",
+  "harborapi>=0.22.0",
+  "pydantic>=1.10.2, <2.0.0",
+  "trogon>=0.5.0",
   "platformdirs>=2.5.4",
   "tomli>=2.0.1",
   "tomli-w>=1.0.0",
