@@ -30,7 +30,7 @@ from .formatting.path import path_link
 
 
 def prompt_msg(*msgs: str) -> str:
-    return f"[bold]{green(Icon.PROMPT)} {' '.join(msg.strip() for msg in msgs)}[/bold]"
+    return f"[bold]{green(Icon.PROMPT)} {' '.join(msg.strip() for msg in filter(None, msgs))}[/bold]"
 
 
 def str_prompt(

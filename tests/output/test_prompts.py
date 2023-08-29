@@ -17,7 +17,10 @@ from pytest import MonkeyPatch
 from harbor_cli.output.prompts import float_prompt
 from harbor_cli.output.prompts import int_prompt
 from harbor_cli.output.prompts import path_prompt
+from harbor_cli.output.prompts import prompt_msg
 from harbor_cli.output.prompts import str_prompt
+from harbor_cli.style.color import green
+from harbor_cli.style.style import Icon
 
 # TODO: test defaults
 
@@ -134,3 +137,17 @@ def test_path_prompt(monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
     p = p.resolve().absolute()
     monkeypatch.setattr("sys.stdin", io.StringIO(f"{p}\n"))
     assert path_prompt("foo") == p
+
+
+@pytest.mark.parametrize(
+    "inp, expected",
+    [
+        (("foo",), "foo"),
+        (("foo", "bar"), "foo bar"),
+        (("foo", "bar", "baz", "gux"), "foo bar baz gux"),
+        (("foo", ""), "foo"),
+        (("foo", None), "foo"),
+    ],
+)
+def test_prompt_msg(inp: tuple[str, ...], expected: str) -> None:
+    assert prompt_msg(*inp) == f"[bold]{green(Icon.PROMPT)} {expected}[/bold]"
