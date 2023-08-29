@@ -21,7 +21,6 @@ from ..console import error
 from ..formatting.builtin import int_str
 from ..formatting.builtin import str_str
 from ..formatting.bytes import bytesize_str
-from ..formatting.constants import NONE_STR
 from ..formatting.dates import datetime_str
 from ..formatting.harbor import boolstr_str
 from ._utils import get_panel
@@ -187,13 +186,9 @@ def project_summary_panel(p: ProjectSummary, **kwargs: Any) -> Panel:
 def project_summary_quota_table(p: ProjectSummaryQuota, **kwargs: Any) -> Table:
     table = get_table("Quota", columns=["Limit", "Used"])
     limit = _get_quota(p.hard)
-    if limit == -1 or limit is None:
-        limit_str = NONE_STR
-    else:
-        limit_str = bytesize_str(limit)
 
     table.add_row(
-        limit_str,
+        bytesize_str(limit),
         bytesize_str(_get_quota(p.used) or 0),
     )
     return table

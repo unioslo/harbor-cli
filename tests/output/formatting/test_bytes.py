@@ -3,11 +3,14 @@ from __future__ import annotations
 import pytest
 
 from harbor_cli.output.formatting.bytes import bytesize_str
+from harbor_cli.output.formatting.constants import NONE_STR
 
 
 @pytest.mark.parametrize(
     "b, expected",
     [
+        (-1, NONE_STR),
+        (None, NONE_STR),
         (0, "0.0B"),
         (1, "1.0B"),
         (1000, "1.0KB"),
@@ -21,7 +24,7 @@ from harbor_cli.output.formatting.bytes import bytesize_str
         (500000000000, "500.0GB"),
     ],
 )
-def test_bytesize_str_decimal(b: int, expected: str) -> None:
+def test_bytesize_str_decimal(b: int | None, expected: str) -> None:
     """Test bytesize_str in decimal auto mode."""
     assert bytesize_str(b, decimal=True) == expected
 
@@ -29,6 +32,8 @@ def test_bytesize_str_decimal(b: int, expected: str) -> None:
 @pytest.mark.parametrize(
     "b, expected",
     [
+        (-1, NONE_STR),
+        (None, NONE_STR),
         (0, "0.0B"),
         (1, "1.0B"),
         (1023, "1023.0B"),
