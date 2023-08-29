@@ -19,6 +19,7 @@ from harborapi.models import VulnerabilitySummary
 from harborapi.models.base import BaseModel as HarborAPIBaseModel
 from pydantic import Field
 from pydantic import root_validator
+from strenum import StrEnum
 from typer.core import TyperArgument
 from typer.core import TyperCommand
 
@@ -229,17 +230,17 @@ class Operator(Enum):
 
 # We use this enum to provide choices in the CLI, but we also use it to determine
 # the integer value of the group type when we need to send it to the API.
-class UserGroupType(str, Enum):
+class UserGroupType(StrEnum):
     LDAP = "LDAP"
     HTTP = "HTTP"
     OIDC = "OIDC"
 
     @classmethod
-    def from_int(cls, value: int) -> UserGroupType:
+    def from_int(cls, value: int) -> str:
         try:
             return _USERGROUPTYPE_MAPPING[value]
         except KeyError:
-            raise ValueError(f"Unknown user group type: {value}")
+            raise ValueError(f"Invalid user group type: {value}")
 
     def as_int(self) -> int:
         try:
@@ -248,16 +249,20 @@ class UserGroupType(str, Enum):
             raise ValueError(f"Unknown user group type: {self}")
 
 
+# NOTE: Dict keys are typed as str instead of UserGroupType
+# https://github.com/python/mypy/issues/14688
+
+
 # NOTE: could replace with a bidict or similar
 _USERGROUPTYPE_MAPPING = {
     1: UserGroupType.LDAP,
     2: UserGroupType.HTTP,
     3: UserGroupType.OIDC,
-}  # type: dict[int, UserGroupType]
+}  # type: dict[int, str]
 
 _USERGROUPTYPE_MAPPING_REVERSE = {
     v: k for k, v in _USERGROUPTYPE_MAPPING.items()
-}  # type: dict[UserGroupType, int]
+}  # type: dict[str, int]
 
 
 # We use this enum to provide choices in the CLI, but we also use it to determine

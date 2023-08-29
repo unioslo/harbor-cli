@@ -19,12 +19,11 @@ from ...format import OutputFormat
 from ...harbor.common import prompt_basicauth
 from ...harbor.common import prompt_credentials_file
 from ...harbor.common import prompt_username_secret
-from ...logs import logger
 from ...logs import LogLevel
 from ...output.console import console
 from ...output.console import error
-from ...output.console import exit
 from ...output.console import exit_err
+from ...output.console import info
 from ...output.console import success
 from ...output.console import warning
 from ...output.formatting import path_link
@@ -34,8 +33,8 @@ from ...output.prompts import path_prompt
 from ...output.prompts import str_prompt
 from ...state import get_state
 from ...style import render_cli_option
-from ...style import STYLE_COMMAND
-from ...utils.keyring import KEYRING_SUPPORTED
+from ...style.style import render_cli_command
+from ...utils.keyring import keyring_supported
 from ...utils.keyring import set_password
 
 state = get_state()
@@ -79,7 +78,7 @@ def init(
             exit_err(msg)
         config_path = None
     else:
-        logger.info(f"Created config file at {config_path}")
+        info(f"Created config file at {config_path}")
 
     config = run_config_wizard(config_path)
     state.config = config
@@ -99,11 +98,10 @@ def run_config_wizard(config_path: Optional[Path] = None) -> HarborCLIConfig:
     try:
         config = HarborCLIConfig.from_file(config_path)
     except Exception as e:
-        error(f"Failed to load config: {e}")
-        error(
-            f"[white]Run [{STYLE_COMMAND}]harbor init --overwrite[/] to create a new config file.[/]"
+        exit_err(
+            f"Failed to load config: {e}. Run {render_cli_command('harbor init --overwrite')} to create a new config file.",
+            exc_info=True,
         )
-        exit(code=1)
 
     assert config.config_file is not None
 
@@ -150,8 +148,8 @@ def run_config_wizard(config_path: Optional[Path] = None) -> HarborCLIConfig:
     if not conf_path:
         raise ConfigError("Could not determine config file path.")
     save_config(config, conf_path)
-    console.print("Configuration complete! :tada:")
-    success(f"Saved config to {path_link(conf_path)}")
+    success("Configuration complete! :tada:")
+    info(f"Saved config to {path_link(conf_path)}")
     return config
 
 
@@ -178,16 +176,16 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
     )
 
     # Clear all previous credentials if we provide new credentials
-    username = hconf.username  # copy username for re-use in prompts
+    hconf_pre = hconf.copy()  # use for defaults in prompts
     if not auth_method == "s":
         hconf.clear_credentials()
 
     if auth_method == "u":
-        set_username_secret(hconf, username)
+        set_username_secret(hconf, hconf_pre.username, hconf_pre.secret_value)
     elif auth_method == "b":
-        hconf.basicauth = prompt_basicauth(hconf.basicauth.get_secret_value())  # type: ignore # pydantic.SecretStr
+        hconf.basicauth = prompt_basicauth(hconf_pre.basicauth.get_secret_value())  # type: ignore # pydantic.SecretStr
     elif auth_method == "f":
-        hconf.credentials_file = prompt_credentials_file(hconf.credentials_file)
+        hconf.credentials_file = prompt_credentials_file(hconf_pre.credentials_file)
 
     # Explain what will happen if no auth method is provided
     if not hconf.has_auth_method:
@@ -197,9 +195,11 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
         )
 
 
-def set_username_secret(hconf: HarborSettings, current_username: str) -> None:
-    username, secret = prompt_username_secret(current_username, hconf.secret_value)
-    if KEYRING_SUPPORTED:
+def set_username_secret(
+    hconf: HarborSettings, current_username: str, current_secret: str
+) -> None:
+    username, secret = prompt_username_secret(current_username, current_secret)
+    if keyring_supported():
         _set_username_secret_keyring(hconf, username, secret)
     else:
         _set_username_secret_config(hconf, username, secret)
@@ -208,6 +208,8 @@ def set_username_secret(hconf: HarborSettings, current_username: str) -> None:
 def _set_username_secret_config(
     hconf: HarborSettings, username: str, secret: str
 ) -> None:
+    """Stores both username and config in config file.
+    Insecure fallback in case keyring is not supported."""
     hconf.username = username
     hconf.secret = secret  # type: ignore # pydantic.SecretStr
     hconf.keyring = False
@@ -315,8 +317,6 @@ def init_output_settings(config: HarborCLIConfig) -> None:
 
     oconf = config.output
 
-    # Output format configuration has numerous sub-options,
-    # so we delegate to a separate function.
     _init_output_format(config)
 
     # Leading newline to separate from format configuration(s)
@@ -340,6 +340,7 @@ def init_output_settings(config: HarborCLIConfig) -> None:
 
 
 def _init_output_format(config: HarborCLIConfig) -> None:
+    """Initialize output format settings."""
     oconf = config.output
     fmt_in = str_prompt(
         "Default output format",
@@ -354,7 +355,7 @@ def _init_output_format(config: HarborCLIConfig) -> None:
         elif fmt == OutputFormat.TABLE:
             _init_output_table_settings(config)
         else:
-            logger.error(f"Unknown configuration format {fmt.value}")
+            error(f"Unknown configuration format {fmt.value}")
 
     # Configure the chosen format first
     conf_fmt(oconf.format)

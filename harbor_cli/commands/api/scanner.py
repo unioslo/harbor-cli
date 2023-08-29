@@ -6,7 +6,7 @@ import typer
 from harborapi.models.models import ScannerRegistration
 from harborapi.models.models import ScannerRegistrationReq
 
-from ...logs import logger
+from ...output.console import info
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
 from ...state import get_state
@@ -88,7 +88,7 @@ def create_scanner(
     req = ScannerRegistrationReq(**params)
     location = state.run(state.client.create_scanner(req), "Creating scanner...")
     render_result(location, ctx)
-    logger.info(f"Scanner created: {location}.")
+    info(f"Scanner created: {location}.")
 
 
 # HarborAsyncClient.update_scanner()
@@ -141,7 +141,7 @@ def update_scanner(
         state.client.update_scanner(scanner_id, req),
         "Updating scanner...",
     )
-    logger.info(f"Scanner {scanner_id!r} updated.")
+    info(f"Scanner {scanner_id!r} updated.")
 
 
 # HarborAsyncClient.delete_scanner()
@@ -157,7 +157,7 @@ def delete_scanner(
     """Delete a scanner."""
     delete_prompt(state.config, force, resource="scanner", name=str(scanner_id))
     state.run(state.client.delete_scanner(scanner_id), "Deleting scanner...")
-    logger.info(f"Scanner with ID {scanner_id!r} deleted.")
+    info(f"Scanner with ID {scanner_id!r} deleted.")
 
 
 # HarborAsyncClient.get_scanners()
@@ -205,7 +205,7 @@ def set_default_scanner(
         state.client.set_default_scanner(scanner_id, is_default),
         "Setting default scanner...",
     )
-    logger.info(f"Scanner with ID {scanner_id!r} set as default.")
+    info(f"Scanner with ID {scanner_id!r} set as default.")
 
 
 # HarborAsyncClient.ping_scanner_adapter()

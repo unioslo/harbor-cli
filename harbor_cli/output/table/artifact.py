@@ -19,11 +19,7 @@ from rich.table import Table
 from ...harbor.artifact import get_artifact_architecture
 from ...harbor.artifact import get_artifact_severity
 from ...models import ArtifactVulnerabilitySummary
-from ...style import COLOR_CVE_CRITICAL
-from ...style import COLOR_CVE_HIGH
-from ...style import COLOR_CVE_LOW
-from ...style import COLOR_CVE_MEDIUM
-from ...style import get_severity_style
+from ...style.color import SeverityColor
 from ..formatting.builtin import bool_str
 from ..formatting.builtin import float_str
 from ..formatting.builtin import int_str
@@ -149,10 +145,9 @@ def artifact_vulnerabilities_table(
         report.sort()  # critical -> high -> medium -> low
         vulns = report.vulnerabilities
         for vulnerability in vulns:
-            sev_style = get_severity_style(vulnerability.severity)
             row = [
                 str_str(vulnerability.id),
-                f"[{sev_style}]{str_str(vulnerability.severity.value)}[/{sev_style}]",
+                SeverityColor.as_markup(vulnerability.severity),
                 float_str(vulnerability.get_cvss_score()),
                 str_str(vulnerability.package),
                 str_str(vulnerability.version),
@@ -194,10 +189,12 @@ def vuln_summary_table(summary: VulnerabilitySummary, **kwargs: Any) -> Table:
     )
     # NOTE: column is truncated if category has >9999 vulnerabilities, but that's unlikely
     col_kwargs = ColKwargs(min_width=5, max_width=5, justify="right")
-    table.add_column("Critical", style=f"black on {COLOR_CVE_CRITICAL}", **col_kwargs)
-    table.add_column("High", style=f"black on {COLOR_CVE_HIGH}", **col_kwargs)
-    table.add_column("Medium", style=f"black on {COLOR_CVE_MEDIUM}", **col_kwargs)
-    table.add_column("Low", style=f"black on {COLOR_CVE_LOW}", **col_kwargs)
+    table.add_column(
+        "Critical", style=f"black on {SeverityColor.CRITICAL}", **col_kwargs
+    )
+    table.add_column("High", style=f"black on {SeverityColor.HIGH}", **col_kwargs)
+    table.add_column("Medium", style=f"black on {SeverityColor.MEDIUM}", **col_kwargs)
+    table.add_column("Low", style=f"black on {SeverityColor.LOW}", **col_kwargs)
     # not adding unknown for now
     # TODO: add kwargs toggle for this
     # table.add_column("Unknown", style="black on grey")
@@ -226,7 +223,7 @@ def buildhistoryentry_table(
             datetime_str(entry.created),
             str_str(DOUBLE_SPACE_PATTERN.sub(" ", entry.created_by)),
         )
-        table.add_section()  # type: ignore # mypy thinks add_section doesn't exist(?)
+        table.add_section()
     return table
 
 

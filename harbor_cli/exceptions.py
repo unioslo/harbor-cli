@@ -20,6 +20,10 @@ from harborapi.exceptions import PreconditionFailed
 from harborapi.exceptions import StatusError
 from harborapi.exceptions import Unauthorized
 from harborapi.exceptions import UnsupportedMediaType
+from httpx._exceptions import CookieConflict
+from httpx._exceptions import HTTPError
+from httpx._exceptions import InvalidURL
+from httpx._exceptions import StreamError
 from pydantic import ValidationError
 
 
@@ -153,22 +157,22 @@ def handle_status_error(e: StatusError, exiter: Exiter) -> NoReturn:
 
 def handle_validationerror(e: ValidationError, exiter: Exiter) -> NoReturn:
     """Handles a pydantic ValidationError and exits with the appropriate message."""
-    from .output.console import error
-
-    error("Failed to validate data from API.")
-    exiter(str(e), errors=e.errors())
+    exiter(f"Failed to validate data from API: {e}", errors=e.errors(), exc_info=True)
 
 
 def handle_notraceback(e: HarborCLIError, exiter: Exiter) -> NoReturn:
     """Handles an exception (no traceback)."""
-    # TODO: log error
-    exiter(str(e))
+    exiter(str(e), exc_info=True)
 
 
 EXC_HANDLERS: Mapping[Type[Exception], HandleFunc] = {
     ValidationError: handle_validationerror,
     StatusError: handle_status_error,
     HarborCLIError: handle_notraceback,
+    HTTPError: handle_notraceback,
+    InvalidURL: handle_notraceback,
+    CookieConflict: handle_notraceback,
+    StreamError: handle_notraceback,
 }
 
 
@@ -188,6 +192,8 @@ def get_exception_handler(type_: Type[Exception]) -> Optional[HandleFunc]:
 def handle_exception(e: Exception) -> NoReturn:
     """Handles an exception and exits with the appropriate message."""
     from .output.console import exit_err  # avoid circular import
+
+    # TODO: resolve circular imports by lazy-importig OverwriteError in output.render
 
     exiter = cast(Exiter, exit_err)
 

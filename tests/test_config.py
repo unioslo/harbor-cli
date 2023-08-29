@@ -6,9 +6,12 @@ from pathlib import Path
 import keyring
 import pytest
 import tomli
+from freezegun import freeze_time
 from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
+from pytest import CaptureFixture
+from pytest import LogCaptureFixture
 
 from .conftest import requires_keyring
 from .conftest import requires_no_keyring
@@ -20,6 +23,8 @@ from harbor_cli.config import sample_config
 from harbor_cli.config import save_config
 from harbor_cli.config import TableSettings
 from harbor_cli.config import TableStyleSettings
+from harbor_cli.output.console import warning
+from harbor_cli.state import State
 from harbor_cli.utils.keyring import set_password
 
 
@@ -148,14 +153,18 @@ def test_harbor_is_authable_keyring() -> None:
 
 
 @requires_no_keyring
-def test_harbor_is_authable_no_keyring() -> None:
-    with pytest.raises(keyring.errors.KeyringError) as exc_info:
-        h = HarborSettings(username="admin", secret="ignored", keyring=True)
-        h.secret_value  # raises
-    assert "not supported" in str(exc_info.value).casefold()
-    h = HarborSettings(username="admin", secret="password", keyring=False)
-    assert h.secret_value == "password"
+def test_harbor_is_authable_no_keyring(caplog: pytest.LogCaptureFixture) -> None:
+    h = HarborSettings(username="admin", secret="fallback", keyring=True)
+    assert h.keyring is True
+    # By accessing the secret_value property when keyring is unsupported,
+    # it will fall back on the secret field and also set `keyring` to False
+    # so that it will not retry the keyring again in REPL mode
+    assert h.secret_value == "fallback"
+    assert h.keyring is False
+    assert "supported" in caplog.text.lower()
     assert h.has_auth_method
+    assert h.credentials["username"] == "admin"
+    assert h.credentials["secret"] == "fallback"
 
 
 def test_harbor_is_authable_basicauth() -> None:
@@ -356,3 +365,59 @@ def test_dunder_deepcopy(config: HarborCLIConfig, tmp_path: Path) -> None:
 
     copied_with_copy = copy.deepcopy(config)
     assert copied_with_copy.config_file == config.config_file
+
+
+@freeze_time("1970-01-01 00:00:00")
+def test_loggingsettings_path_defaults(config: HarborCLIConfig, tmp_path: Path) -> None:
+    """Default filename and time formatting directive."""
+    lconfig = config.logging
+    lconfig.directory = tmp_path / "logs"
+    assert lconfig.path == tmp_path / "logs" / "harbor_cli-1970-01-01.log"
+
+
+def test_loggingsettings_path_notime(config: HarborCLIConfig, tmp_path: Path) -> None:
+    """No time formatting directive should yield filename as-is."""
+    lconfig = config.logging
+    lconfig.filename = "somefile.log"
+    lconfig.directory = tmp_path / "logs"
+    # With no time formatting directive in the filename, the filename should be
+    # the same as the one we set.
+    assert lconfig.path == tmp_path / "logs" / "somefile.log"
+
+
+@freeze_time("1970-01-01")
+def test_loggingsettings_path_time(config: HarborCLIConfig, tmp_path: Path) -> None:
+    lconfig = config.logging
+    lconfig.filename = "somefile-{time}.log"
+    lconfig.directory = tmp_path / "logs"
+    assert lconfig.path == tmp_path / "logs" / "somefile-1970-01-01.log"
+
+
+@freeze_time("1970-01-01 12:00:00")
+def test_loggingsettings_path_custom_time_formatting(
+    config: HarborCLIConfig, tmp_path: Path
+) -> None:
+    lconfig = config.logging
+    lconfig.filename = "somefile-{time}.log"
+    lconfig.directory = tmp_path / "logs"
+    lconfig.timeformat = "%Y-%m-%d-%H-%M-%S"
+    assert lconfig.path == tmp_path / "logs" / "somefile-1970-01-01-12-00-00.log"
+
+
+####################
+# General settings
+####################
+
+
+@pytest.mark.parametrize("warnings", [True, False])
+def test_general_settings_warnings(
+    state: State, caplog: LogCaptureFixture, capsys: CaptureFixture, warnings: bool
+) -> None:
+    state.config.general.warnings = warnings
+    warning("test warning")
+    assert "test warning" in caplog.text
+    captured = capsys.readouterr()
+    if warnings:
+        assert "test warning" in captured.err
+    else:
+        assert "test warning" not in captured.err

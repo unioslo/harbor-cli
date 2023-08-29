@@ -6,9 +6,9 @@ import typer
 from harborapi.exceptions import StatusError
 from harborapi.models import RetentionPolicy
 
-from ...logs import logger
 from ...output.console import error
 from ...output.console import exit_err
+from ...output.console import info
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
 from ...state import get_state
@@ -165,14 +165,15 @@ def delete_retention_policy(
     except Exception:
         # TODO: ensure we are in the "correct" state (i.e. no policy but metadata exists)
         error(
-            "Failed to delete project metadata retention ID. Retention policy will be restored."
+            "Failed to delete project metadata retention ID. Retention policy will be restored.",
+            exc_info=True,
         )
         state.run(
             state.client.create_retention_policy(policy),
             "Restoring retention policy...",
         )
 
-    logger.info(f"Deleted retention policy {policy_id}.")
+    info(f"Deleted retention policy {policy_id}.")
 
 
 # HarborAsyncClient.get_retention_policy_id()
@@ -235,7 +236,7 @@ def start_retention_job(
     msg = f"Started retention job at {location}."
     if dry_run:
         msg += " (Dry run)"
-    logger.info(msg)
+    info(msg)
 
 
 # HarborAsyncClient.stop_retention_execution()
@@ -253,7 +254,7 @@ def stop_retention_job(
         state.client.stop_retention_execution(policy_id, job_id),
         "Stopping retention job...",
     )
-    logger.info(f"Stopped retention job ({job_id}) for policy {policy_id}.")
+    info(f"Stopped retention job ({job_id}) for policy {policy_id}.")
 
 
 # HarborAsyncClient.get_retention_tasks()

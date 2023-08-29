@@ -4,12 +4,22 @@ from typing import Any
 from typing import NoReturn
 from typing import Optional
 
-from rich import markup
 from rich.console import Console
+
+from ..logs import logger
+from ..state import get_state
+from ..style import Icon
+from ..style.color import bold
+from ..style.color import green
+from ..style.color import red
+from ..style.color import yellow
 
 _exit = exit  # save the original exit function
 
+# stdout console used to print results
 console = Console()
+
+# stderr console used to print prompts, messages, etc.
 err_console = Console(
     stderr=True,
     highlight=False,
@@ -17,45 +27,35 @@ err_console = Console(
 )
 
 
-def _add_fix(message: str, prefix: str | None, suffix: str | None = None) -> str:
-    if prefix:
-        prefix = f"[bold]\[{markup.escape(prefix.strip())}][/]"
-        message = f"{prefix} {message}"
-    if suffix:
-        suffix = suffix.strip()
-        message = f"{message} {suffix}"
-    return message
+def info(message: str, icon: str = Icon.INFO, *args, **kwargs) -> None:
+    """Log with INFO level and print an informational message."""
+    logger.info(message, extra=dict(**kwargs))
+    err_console.print(f"{green(icon)} {message}")
 
 
-def info(message: str, prefix: str | None = None, suffix: str | None = None) -> None:
-    """Prints an unstyled message to the stderr console."""
-    message = _add_fix(message, prefix, suffix)
-    err_console.print(message)
+def success(message: str, icon: str = Icon.OK, **kwargs) -> None:
+    """Log with DEBUG level and print a success message."""
+    logger.debug(message, extra=dict(**kwargs))
+    err_console.print(f"{green(icon)} {message}")
 
 
-def success(
-    message: str, prefix: str | None = None, suffix: str | None = ":white_check_mark:"
+def warning(message: str, icon: str = Icon.WARNING, **kwargs) -> None:
+    """Log with WARNING level and optionally print a warning message."""
+    logger.warning(message, extra=dict(**kwargs))
+    if get_state().config.general.warnings:
+        err_console.print(bold(f"{yellow(icon)} {message}"))
+
+
+def error(
+    message: str, icon: str = Icon.ERROR, exc_info: bool = False, **kwargs
 ) -> None:
-    """Prints a green message to the stderr console."""
-    message = _add_fix(message, prefix, suffix)
-    err_console.print(message, style="green")
+    """Log with ERROR level and print an error message."""
+    logger.error(message, extra=dict(**kwargs), exc_info=exc_info)
+    err_console.print(bold(f"{red(icon)} {message}"))
 
 
-def warning(message: str, prefix: str = "WARNING", suffix: str | None = None) -> None:
-    """Prints a yellow message with a warning prefix to the stderr console."""
-    message = _add_fix(message, prefix, suffix)
-    err_console.print(message, style="yellow")
-
-
-def error(message: str, prefix: str = "ERROR", suffix: str | None = None) -> None:
-    """Prints a red message with an error prefix to the stderr console."""
-    message = _add_fix(message, prefix, suffix)
-    err_console.print(message, style="red")
-
-
-def exit(message: Optional[str] = None, code: int = 0) -> NoReturn:
-    """Prints a message to the default console and exits with the given
-    code (default: 0).
+def exit(message: Optional[str] = None, code: int = 0, **kwargs) -> NoReturn:
+    """Logs a message with INFO level and exits with the given code (default: 0)
 
     Parameters
     ----------
@@ -63,14 +63,16 @@ def exit(message: Optional[str] = None, code: int = 0) -> NoReturn:
         Message to print.
     code : int, optional
         Exit code, by default 0
+    **kwargs
+        Additional keyword arguments to pass to the extra dict.
     """
     if message:
-        info(message)
+        info(message, **kwargs)
     raise SystemExit(code)
 
 
-def exit_err(message: str, code: int = 1, **extra: Any) -> NoReturn:
-    """Prints a message to the error console and exits with the given
+def exit_err(message: str, code: int = 1, **kwargs: Any) -> NoReturn:
+    """Logs a message with ERROR level and exits with the given
     code (default: 1).
 
     Parameters
@@ -79,6 +81,8 @@ def exit_err(message: str, code: int = 1, **extra: Any) -> NoReturn:
         Message to print.
     code : int, optional
         Exit code, by default 1
+    **kwargs
+        Additional keyword arguments to pass to the extra dict.
     """
-    error(message)
+    error(message, **kwargs)
     raise SystemExit(code)

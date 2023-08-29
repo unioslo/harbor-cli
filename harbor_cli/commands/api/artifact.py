@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
-from enum import Enum
 from typing import Any
 from typing import cast
 from typing import Dict
@@ -11,6 +10,7 @@ from typing import List
 from typing import Optional
 from typing import Set
 from typing import TYPE_CHECKING
+from typing import Union
 
 import typer
 from harborapi.exceptions import NotFound
@@ -25,6 +25,7 @@ from harborapi.models import Tag
 from harborapi.models.scanner import Severity
 from pydantic import BaseModel as PydanticBaseModel
 from rich.table import Table
+from strenum import StrEnum
 
 from ...harbor.artifact import get_artifact_architecture
 from ...harbor.artifact import get_artifact_os
@@ -33,8 +34,10 @@ from ...logs import logger
 from ...models import ArtifactVulnerabilitySummary
 from ...models import BaseModel
 from ...models import Operator
+from ...output.console import error
 from ...output.console import exit
 from ...output.console import exit_err
+from ...output.console import info
 from ...output.console import warning
 from ...output.prompts import bool_prompt
 from ...output.prompts import check_enumeration_options
@@ -175,7 +178,7 @@ def list_artifacts(
         results = [a for a in results if get_artifact_os(a.artifact) in os]
 
     render_result(results, ctx)
-    logger.info(f"Fetched {len(results)} artifact(s).")
+    info(f"Fetched {len(results)} artifact(s).")
 
 
 # delete_artifact()
@@ -200,7 +203,7 @@ def delete_artifact(
     except NotFound:
         exit_err(f"Artifact {artifact} not found.")
     else:
-        logger.info(f"Artifact {artifact} deleted.")
+        info(f"Artifact {artifact} deleted.")
 
 
 # copy_artifact()
@@ -225,10 +228,10 @@ def copy_artifact(
     # Warn user if they pass a project name in the repository name
     # e.g. project="foo", repository="foo/bar"
     # When it should be project="foo", repository="bar"
+    # We can't prevent them from doing this in case this is a legitimate
+    # use case, but in most cases it won't be so we need to warn them
     if project in repository:
-        logger.warning(
-            "Project name is part of the repository name, you likely don't want this."
-        )
+        warning("Repository name contains project name, you likely don't want this.")
 
     try:
         resp = state.run(
@@ -238,7 +241,7 @@ def copy_artifact(
     except NotFound:
         exit_err(f"Artifact {artifact} not found.")
     else:
-        logger.info(f"Artifact {artifact} copied to {resp}.")
+        info(f"Artifact {artifact} copied to {resp}.")
 
 
 # HarborAsyncClient.get_artifact()
@@ -332,7 +335,7 @@ def create_artifact_tag(
         state.client.create_artifact_tag(an.project, an.repository, an.reference, t),
         f"Creating tag {tag!r} for {artifact}...",
     )
-    logger.info(f"Created {tag!r} for {artifact}: {location}")
+    info(f"Created {tag!r} for {artifact}: {location}")
 
 
 # delete_artifact_tag()
@@ -402,7 +405,7 @@ def add_artifact_label(
         state.client.add_artifact_label(an.project, an.repository, an.reference, label),
         f"Adding label {label.name!r} to {artifact}...",
     )
-    logger.info(f"Added label {label.name!r} to {artifact}.")
+    info(f"Added label {label.name!r} to {artifact}.")
 
 
 # HarborAsyncClient.delete_artifact_label()
@@ -469,7 +472,7 @@ def get_buildhistory(
     render_result(history, ctx, artifact=artifact)
 
 
-class DeletionReason(str, Enum):
+class DeletionReason(StrEnum):
     """Reasons for deleting an artifact."""
 
     AGE = "age"
@@ -502,14 +505,14 @@ class ArtifactDeletion:
         self.except_tag = except_tag
 
         # Construct a dictionary from the criteria passed in
-        self.criteria = {}
+        self.criteria = {}  # type: dict[str, bool]
         if age is not None:
             self.criteria[DeletionReason.AGE] = False
         if severity is not None:
             self.criteria[DeletionReason.SEVERITY] = False
 
     @property
-    def reasons(self) -> list[DeletionReason]:
+    def reasons(self) -> list[str]:
         return [k for k, v in self.criteria.items() if v]
 
     def should_delete(self) -> bool:
@@ -586,7 +589,7 @@ class ArtifactDeletion:
 class ScheduledArtifactDeletion(PydanticBaseModel):
     """Encapsulates an artifact deletion scheduled for a future time."""
 
-    artifacts: Dict[str, List[DeletionReason]]
+    artifacts: Dict[str, List[Union[DeletionReason, str]]]
 
     def __rich_console__(self, console, options) -> Table:  # type: ignore
         from ...output.table._utils import get_table
@@ -701,9 +704,8 @@ def cleanup_artifacts(
                 )
             to_delete.append(d)
             logger.debug(
-                f"Scheduling {artifact.name_with_digest} for deletion. Reason(s): {', '.join(reason.value for reason in d.reasons)}",
-                artifact=artifact.name_with_digest,
-                reasons=d.criteria,
+                f"Scheduling {artifact.name_with_digest} for deletion. Reason(s): {', '.join(reason for reason in d.reasons)}",
+                extra=dict(artifact=artifact.name_with_digest, reasons=d.criteria),
             )
 
     if max_count and len(to_delete) > max_count:
@@ -718,7 +720,7 @@ def cleanup_artifacts(
         }
     )
 
-    logger.info(f"Will delete {len(to_delete)} artifacts:")
+    info(f"Will delete {len(to_delete)} artifacts:")
     render_result(res, ctx)
 
     if dry_run:
@@ -738,10 +740,7 @@ def cleanup_artifacts(
                 ),
                 f"Deleting {deletion.artifact.name_with_digest}...",
             )
-            logger.info(
-                f"Deleted {artifact.name_with_digest}",
-                artifact=artifact.name_with_digest,
-            )
+            info(f"Deleted {artifact.name_with_digest}")
         except Exception as e:
             msg = f"Failed to delete {artifact.name_with_digest}: {e}"
             kwargs = {
@@ -751,7 +750,7 @@ def cleanup_artifacts(
             if exit_on_error:
                 exit_err(msg, **kwargs)  # type: ignore # wrong mypy err? this isn't argument 2
             else:
-                logger.error(msg, **kwargs)
+                error(msg, **kwargs, exc_info=True)
 
 
 class AffectedArtifact(BaseModel):
@@ -828,14 +827,14 @@ class AffectedArtifactList(BaseModel):
         yield table
 
 
-class ArtifactSummarySorting(str, Enum):
+class ArtifactSummarySorting(StrEnum):
     total = "total"
     severity = "severity"
     name = "name"
     age = "age"
 
 
-class SortOrder(str, Enum):
+class SortOrder(StrEnum):
     asc = "asc"
     desc = "desc"
 
@@ -861,13 +860,13 @@ def list_artifact_vulnerabilities_summary(
     ),
     query: Optional[str] = OPTION_QUERY,
     sort: ArtifactSummarySorting = typer.Option(
-        ArtifactSummarySorting.total.value,
+        ArtifactSummarySorting.total,
         "--sort",
         help="Artifact attribute to sort by.",
         case_sensitive=False,
     ),
     order: SortOrder = typer.Option(
-        SortOrder.desc.value,
+        SortOrder.desc,
         "--order",
         help="Sorting order of artifacts.",
         case_sensitive=False,

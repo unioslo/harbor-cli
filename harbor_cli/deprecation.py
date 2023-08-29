@@ -5,7 +5,7 @@ from typing import Optional
 
 import typer
 
-from .logs import logger
+from .output.console import warning
 
 
 class Deprecated(str):
@@ -86,4 +86,4 @@ def check_deprecated_options(ctx: typer.Context) -> None:
             msg = f"Option {param} is deprecated."
             if param.replacement:
                 msg += f" Use {param.replacement} instead."
-            logger.warning(msg)
+            warning(msg)

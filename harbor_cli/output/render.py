@@ -3,7 +3,6 @@ from __future__ import annotations
 import json
 from contextlib import nullcontext
 from typing import Any
-from typing import List
 from typing import Sequence
 from typing import TypeVar
 from typing import Union
@@ -17,6 +16,8 @@ from ..format import OutputFormat
 from ..logs import logger
 from ..state import get_state
 from .console import console
+from .console import info
+from .console import warning
 from .table import BuiltinTypeException
 from .table import EmptySequenceError
 from .table import get_renderable
@@ -129,13 +130,14 @@ def render_json(
     # data types, we wrap the data in a Pydantic model with a single field
     # named __root__, which renders the data as the root value of the JSON object:
     # Output(__root__={"foo": "bar"}).json() -> '{"foo": "bar"}'
-    # This is especially useful for serializing types like Paths and Timestamps.
+    # This is especially useful for serializing types like Paths and Timestamps,
+    # since they are not natively supported by the stdlib json module.
     #
     # In pydantic v2, the __root__ field is going away, and we will
     # be able to serialize/marshal any data type directly.
 
     class Output(BaseModel):
-        __root__: Union[T, List[T]]
+        __root__: Union[T, Sequence[T]]
 
     o = Output(__root__=result)
     o_json = o.json(indent=indent)
@@ -144,7 +146,7 @@ def render_json(
             raise OverwriteError(f"File {p.resolve()} exists.")
         with open(p, "w") as f:
             f.write(o_json)
-            logger.info(f"Output written to {p.resolve()}")
+            info(f"Output written to {p.resolve()}")
 
     # Print to stdout if no output file is specified or if the
     # --with-stdout flag is set.
@@ -161,5 +163,5 @@ def render_raw(result: Any, ctx: typer.Context | None = None, **kwargs: Any) -> 
         result = json.dumps(result)
         console.print_json(result, indent=state.config.output.JSON.indent)
     except Exception as e:
-        logger.warning("Unable to render raw data as JSON", exception=e)
+        warning(f"Unable to render raw data as JSON: {e}")
         console.print(result)

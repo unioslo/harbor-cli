@@ -110,11 +110,11 @@ _RENDER_FUNCTIONS = [
 
 RENDER_FUNCTIONS = {}  # dict of functions + type of first argument
 for function in _RENDER_FUNCTIONS:
-    hints = typing.get_type_hints(function)
-    if not hints:
-        continue
-    val = next(iter(hints.values()))
     try:
+        hints = typing.get_type_hints(function)
+        if not hints:
+            continue
+        val = next(iter(hints.values()))
         RENDER_FUNCTIONS[val] = function
     except TypeError:
         logger.warning("Could not add render function %s", function)

@@ -184,16 +184,19 @@ class State:
         """
         from .harbor.common import prompt_url
         from .harbor.common import prompt_username_secret
-        from .logs import logger
+        from .style.style import render_cli_command
+        from .style.style import render_cli_option
+        from .style.style import render_cli_value
+        from .output.console import warning
 
         if not self.config.harbor.url:
-            logger.warning("Harbor API URL missing from configuration file.")
+            warning("Harbor API URL missing from configuration file.")
             self.config.harbor.url = prompt_url()
 
         # We need one of the available auth methods to be specified
         # If not, prompt for username and password
         if not self.config.harbor.has_auth_method:
-            logger.warning(
+            warning(
                 "Harbor authentication method is missing or incomplete in configuration file."
             )
             username, secret = prompt_username_secret(
@@ -202,6 +205,11 @@ class State:
             )
             self.config.harbor.username = username
             self.config.harbor.secret = secret  # type: ignore # pydantic.SecretStr
+            warning(
+                "Authentication info updated. "
+                f"Run {render_cli_command('harbor init')} to configure it permanently. "
+                f"Suppress this warning by setting {render_cli_option('general.warnings')} to {render_cli_value('false')}."
+            )
 
         self.authenticate_harbor()
 

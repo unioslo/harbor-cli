@@ -9,7 +9,7 @@ from harborapi.models.models import ReplicationPolicy
 from harborapi.models.models import ReplicationTrigger
 from harborapi.models.models import ReplicationTriggerSettings
 
-from ...logs import logger
+from ...output.console import info
 from ...output.prompts import check_enumeration_options
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
@@ -55,7 +55,7 @@ def start_replication_execution(
         state.client.start_replication(policy_id), "Starting replication..."
     )
     render_result(replication_url, ctx)
-    logger.info(f"Replication started for policy {policy_id}.")
+    info(f"Replication started for policy {policy_id}.")
 
 
 # HarborAsyncClient.stop_replication()
@@ -72,7 +72,7 @@ def stop_replication_execution(
         state.client.stop_replication(execution_id),
         f"Stopping replication execution...",
     )
-    logger.info(f"Stopped replication execution with ID {execution_id}.")
+    info(f"Stopped replication execution with ID {execution_id}.")
 
 
 # HarborAsyncClient.get_replication()
@@ -306,7 +306,7 @@ def create_replication_policy(
         state.client.create_replication_policy(policy),
         f"Creating replication policy {policy}...",
     )
-    logger.info(f"Created replication policy: {policy_url}.")
+    info(f"Created replication policy: {policy_url}.")
 
 
 # HarborAsyncClient.update_replication_policy()
@@ -350,7 +350,7 @@ def delete_replication_policy(
         state.client.delete_replication_policy(policy_id),
         f"Deleting replication policy with ID {policy_id}...",
     )
-    logger.info(f"Deleted replication policy with ID {policy_id}.")
+    info(f"Deleted replication policy with ID {policy_id}.")
 
 
 # HarborAsyncClient.get_replication_policies()
@@ -429,6 +429,6 @@ def get_task_log(
         "Fetching replication logs...",
     )
     render_result(log, ctx)
-    logger.info(
+    info(
         f"Fetched log for replication task {task_id} of replication execution {execution_id}"
     )

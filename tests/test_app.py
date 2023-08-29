@@ -12,7 +12,11 @@ from harbor_cli.state import State
 
 
 def test_envvars(
-    invoke: PartialInvoker, app: typer.Typer, tmp_path: Path, state: State
+    invoke: PartialInvoker,
+    app: typer.Typer,
+    tmp_path: Path,
+    state: State,
+    config_file: Path,
 ) -> None:
     @app.command("test-cmd")
     def test_cmd(ctx: typer.Context) -> None:
@@ -20,13 +24,11 @@ def test_envvars(
         return 0
 
     def inv(envvar: EnvVar, value: str) -> Result:
-        res = invoke(["test-cmd"], env={str(envvar): value})
+        res = invoke(
+            ["test-cmd"], env={str(envvar): value, str(EnvVar.CONFIG): str(config_file)}
+        )
         assert res.exit_code == 0
         return res
-
-    # FIXME HACK: for some reason this test makes permanent changes to the config
-    # despite the fact that we have a fixture that is supposed to reset it
-    # between tests.
 
     inv(EnvVar.URL, "https://example.com/api/v2.0")
     assert state.config.harbor.url == "https://example.com/api/v2.0"

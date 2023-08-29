@@ -1,26 +1,31 @@
 from __future__ import annotations
 
-import sys
 from enum import Enum
 from typing import TYPE_CHECKING
-
-from loguru import logger as logger
 
 
 if TYPE_CHECKING:
     from .config import LoggingSettings
-    from loguru import Record
+
+
+import logging
+
+
+# Create logger
+logger = logging.getLogger("harbor-cli")
+logger.setLevel(logging.DEBUG)  # Capture all log messages
 
 
 class LogLevel(Enum):
     """Enum for log levels."""
 
-    TRACE = "TRACE"
+    NOTSET = "NOTSET"
     DEBUG = "DEBUG"
     INFO = "INFO"
-    SUCCESS = "SUCCESS"
+    WARN = "WARN"
     WARNING = "WARNING"
     ERROR = "ERROR"
+    FATAL = "FATAL"
     CRITICAL = "CRITICAL"
 
     @classmethod
@@ -43,59 +48,55 @@ class LogLevel(Enum):
         """Return the enum value as a string."""
         return self.value
 
+    def as_int(self) -> int:
+        """Return the stdlib log level int corresponding to the level."""
+        res = logging.getLevelName(self.value)
+        if not isinstance(res, int):
+            return logging.NOTSET
+        return res
 
-COLOR_DEFAULT = "white"
-COLORS = {
-    "TRACE": "white",
-    "DEBUG": "white",
-    "INFO": "white",
-    "SUCCESS": "white",
-    "WARNING": "yellow",
-    "ERROR": "red",
-    "CRITICAL": "red",
-}
-
-LOGGER_STDERR_ID: int | None = None
-LOGGER_FILE_ID: int | None = None
+    @classmethod
+    def levels(cls) -> dict[LogLevel, int]:
+        """Return a dict of all log levels and their corresponding int values."""
+        return {level: level.as_int() for level in cls}
 
 
 def setup_logging(config: LoggingSettings) -> None:
-    """Set up stderr logging."""
-    # Avoid reconfiguring logger if we have already set it up (REPL)
-    global LOGGER_STDERR_ID
-    global LOGGER_FILE_ID
-
-    if LOGGER_STDERR_ID is not None and LOGGER_FILE_ID is not None:
+    """Set up file logging."""
+    if logger.handlers:  # prevent re-configuring in REPL
         return
-    elif LOGGER_STDERR_ID is None and LOGGER_FILE_ID is None:
-        logger.remove()  # remove default logging handler
+    file_handler = _get_file_handler(config)
+    logger.addHandler(file_handler)
 
-    # stderr logger
-    if LOGGER_STDERR_ID is None:
-        LOGGER_STDERR_ID = logger.add(
-            sink=sys.stderr,
-            level=config.level.value,
-            format=_formatter,
-        )
 
-    # File logger
-    if LOGGER_FILE_ID is None:
-        logfile = config.directory / config.filename
-        LOGGER_FILE_ID = logger.add(
-            sink=str(logfile),
-            level=config.level.value,
-        )
+def _get_file_handler(config: LoggingSettings) -> logging.FileHandler:
+    file_handler = logging.FileHandler(config.path)
+    formatter = logging.Formatter(
+        "%(asctime)s [%(levelname)s] [%(module)s:%(filename)s:%(lineno)s - %(funcName)s()] %(message)s"
+    )
+    file_handler.setFormatter(formatter)
+    file_handler.setLevel(config.level.as_int())
+    return file_handler
+
+
+def update_logging(config: LoggingSettings) -> None:
+    """Update logging configuration."""
+    if logger.handlers:
+        if not config.enabled:
+            disable_logging()
+        else:
+            file_handler = _get_file_handler(config)
+            replace_handler(file_handler)
+    else:
+        setup_logging(config)
+
+
+def replace_handler(handler: logging.Handler) -> None:
+    """Replace the file handler with the given handler."""
+    logger.removeHandler(logger.handlers[0])
+    logger.addHandler(handler)
 
 
 def disable_logging() -> None:
     """Disable logging."""
-    logger.remove()
-
-
-def _formatter(record: Record) -> str:
-    """Format log messages for Loguru logger."""
-    level = record["level"].name
-    color = COLORS.get(level, COLOR_DEFAULT)
-    message = record["message"]
-    message = message.replace("{", "{{").replace("}", "}}")
-    return f"<{color}><bold>[{level}]</bold> {message}</{color}>\n"
+    logger.handlers.clear()

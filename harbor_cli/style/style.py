@@ -3,7 +3,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from harborapi.models.scanner import Severity
+from strenum import StrEnum
+
 
 STYLE_CONFIG_OPTION = "italic yellow"
 """Used to signify a configuration file option/key/entry."""
@@ -25,34 +26,26 @@ STYLE_WARNING = "yellow"
 EMOJI_YES = ":white_check_mark:"
 EMOJI_NO = ":cross_mark:"
 
-
+####################
 # Colors
+####################
 # Colors should be used to colorize output and help define styles,
 # but they should not contain any formatting (e.g. bold, italic, `x` on `y`, etc.)
-COLOR_CVE_CRITICAL = "dark_red"
-COLOR_CVE_HIGH = "red"
-COLOR_CVE_MEDIUM = "orange3"
-COLOR_CVE_LOW = "green"
-COLOR_CVE_NEGLIGIBLE = "blue"
-COLOR_CVE_UNKNOWN = "white"
-COLOR_HEALTH_HEALTHY = "green"
-COLOR_HEALTH_UNHEALTHY = "red"
+####################
 
 
-STYLE_CVE_SEVERITY = {
-    "critical": COLOR_CVE_CRITICAL,
-    "high": COLOR_CVE_HIGH,
-    "medium": COLOR_CVE_MEDIUM,
-    "low": COLOR_CVE_LOW,
-    "negligible": COLOR_CVE_NEGLIGIBLE,
-    "unknown": COLOR_CVE_UNKNOWN,
-}
+class Icon(StrEnum):
+    INFO = "!"
+    OK = "✓"
+    ERROR = "✗"
+    PROMPT = "?"
+    WARNING = "⚠"
 
 
-def get_severity_style(severity: str | Severity) -> str:
-    if isinstance(severity, Severity):
-        severity = severity.value.lower()
-    return STYLE_CVE_SEVERITY.get(severity, "white")
+# TODO: replace all use of constants with these enums
+class Emoji(StrEnum):
+    YES = EMOJI_YES
+    NO = EMOJI_NO
 
 
 def render_warning(msg: str) -> str:
@@ -82,12 +75,3 @@ def render_cli_command(value: str) -> str:
 def help_config_override(option: str) -> str:
     """Render a help string for a configuration file option/key/entry."""
     return f"Overrides config option {render_config_option(option)}."
-
-
-def get_health_color(health: str | None) -> str:
-    # health status can be "healthy" and "unhealthy"
-    # but we treat anything other than "healthy" as unhealthy
-    if health == "healthy":
-        return COLOR_HEALTH_HEALTHY
-    else:
-        return COLOR_HEALTH_UNHEALTHY

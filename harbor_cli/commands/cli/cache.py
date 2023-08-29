@@ -12,7 +12,6 @@ from pydantic import BaseModel
 from rich.table import Table
 
 from ...cache import Cache
-from ...output.console import console
 from ...output.console import info
 from ...output.render import render_result
 from ...output.table._utils import get_table
@@ -106,4 +105,4 @@ def cache_info(ctx: typer.Context) -> None:
 def cache_clear(ctx: typer.Context) -> None:
     """Clear the CLI's internal cache."""
     state.cache.clear()
-    console.print("Cache cleared.")
+    info("Cache cleared.")
