@@ -6,8 +6,8 @@ User password is looked up in the following order:
 
 <!-- NOTE: we could add the envvar and option names by looking up docs/data/options.yaml -->
 
-1. [Environment variable](../../usage/options/#-secret-s)
-2. [`--secret` option](../../usage/options/#-secret-s)
+1. [`--secret` option](../../usage/options/#-secret-s)
+2. [Environment variable](../../usage/options/#-secret-s)
 2. Keyring
 3. [Configuration file](../config-file/#harborsecret)
 

@@ -224,7 +224,6 @@ class State:
             self.client.retry.max_time = self.config.harbor.retry.max_time
 
         self._client_loaded = True
-        # TODO: test that authentication works
 
     def run(
         self,

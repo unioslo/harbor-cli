@@ -64,3 +64,9 @@ def get_password(username: str) -> str | None:
 def set_password(username: str, password: str) -> None:
     keyring.set_password(KEYRING_SERVICE_NAME, username, password)
     info("Added password to keyring.")
+
+
+@require_keyring
+def delete_password(username: str) -> None:
+    keyring.delete_password(KEYRING_SERVICE_NAME, username)
+    info("Deleted password from keyring.", user=username)

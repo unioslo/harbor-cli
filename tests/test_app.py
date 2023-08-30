@@ -1,14 +1,22 @@
 from __future__ import annotations
 
+from enum import Enum
+from enum import IntEnum
 from pathlib import Path
 
+import pytest
+import pytest_mock
 import typer
+from harborapi.utils import get_basicauth
 from typer.testing import Result
 
 from .conftest import PartialInvoker
+from .conftest import requires_keyring
 from harbor_cli.config import EnvVar
 from harbor_cli.format import OutputFormat
 from harbor_cli.state import State
+from harbor_cli.utils.keyring import delete_password
+from harbor_cli.utils.keyring import set_password
 
 
 def test_envvars(
@@ -117,3 +125,87 @@ def test_envvars(
 
     inv(EnvVar.CACHE_TTL, "3600")
     assert state.config.cache.ttl == 3600
+
+
+HARBOR_CLI_TEST_USERNAME = "harbor_cli_test_user"
+
+
+@pytest.fixture(scope="function")
+def reset_keyring() -> None:
+    """Clears the test user from the keyring.
+    Should only be used by functions decorated with @requires_keyring"""
+    yield
+    delete_password(HARBOR_CLI_TEST_USERNAME)
+
+
+class SecretMethod(IntEnum):
+    OPTION = 0
+    ENV = 1
+    KEYRING = 2
+    CONFIG = 3
+
+
+@requires_keyring
+def test_auth_precedence(
+    invoke: PartialInvoker,
+    app: typer.Typer,
+    tmp_path: Path,
+    state: State,
+    config_file: Path,
+    reset_keyring: None,
+    mocker: pytest_mock.MockFixture,
+) -> None:
+    @app.command("test-cmd")
+    def test_cmd(ctx: typer.Context) -> None:
+        async def some_func() -> None:
+            pass
+
+        # We need to call state.run() in order to trigger the re-authentication
+        state.run(some_func())
+        return 0
+
+    env_common = {
+        str(EnvVar.USERNAME): HARBOR_CLI_TEST_USERNAME,
+        str(EnvVar.URL): "https://example.com/api/v2.0",
+    }
+
+    # Method and expected pw sorted by precedence
+    secret_values = {
+        SecretMethod.OPTION: "option",
+        SecretMethod.ENV: "env",
+        SecretMethod.KEYRING: "keyring",
+        SecretMethod.CONFIG: "config",
+    }
+    for method in secret_values:
+        # Configure from lowest to highest precedence
+        if method <= SecretMethod.CONFIG:
+            state.config.harbor.secret = secret_values[SecretMethod.CONFIG]
+            state.config.harbor.keyring = False
+        if method <= SecretMethod.KEYRING:
+            set_password(HARBOR_CLI_TEST_USERNAME, secret_values[SecretMethod.KEYRING])
+            state.config.harbor.keyring = True
+        else:
+            delete_password(HARBOR_CLI_TEST_USERNAME)
+        if method <= SecretMethod.ENV:
+            env = {str(EnvVar.SECRET): secret_values[SecretMethod.ENV], **env_common}
+        else:
+            env = env_common
+        if method.value <= SecretMethod.OPTION:
+            args = ["--secret", secret_values[SecretMethod.OPTION]]
+        else:
+            args = []
+
+        res = invoke(
+            [*args, "test-cmd"],
+            env=env,
+        )
+        assert res.exit_code == 0, res.stderr
+
+        expect_pw = secret_values[method]
+        # Check config credentials
+        assert state.config.harbor.secret_value == expect_pw
+        # Check client credentials
+        assert (
+            state.client.basicauth.get_secret_value()
+            == get_basicauth(HARBOR_CLI_TEST_USERNAME, expect_pw).get_secret_value()
+        ), f"method: {method.name}"
