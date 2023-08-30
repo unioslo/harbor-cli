@@ -23,3 +23,8 @@ By selecting a command, you can see its description and usage information.
 After adding the required argument and toggling the options you want, pressing `CTRL+R` will close the TUI and run the command in your terminal.
 
 ![TUI](../assets/tui/tui3.png)
+
+
+## Demo
+
+<script async id="asciicast-sTIjEW30Qzh2oXcMm9CqAV0Dy" src="https://asciinema.org/a/sTIjEW30Qzh2oXcMm9CqAV0Dy.js"></script>
