@@ -14,8 +14,8 @@
   - [MacOS](#macos)
   - [Linux](#linux)
   - [Windows](#windows)
+- [Documentation](#documentation)
 - [Usage](#usage)
-  - [Documentation](#documentation)
   - [Quick Start](#quick-start-)
 - [Examples](#examples)
 - [License](#license)
@@ -88,6 +88,11 @@ Keyring functionality is untested on Windows, but should work out of the box. If
 
 
 
+## Documentation
+
+Documentation can be found [here](https://pederhan.github.io/harbor-cli/).
+
+The documentation includes extensive setup and usage guides, as well as a list of all commands and their options.
 
 ## Usage
 
@@ -98,9 +103,7 @@ Installing the application puts `harbor` in your `PATH`, and can be invoked by t
 $ harbor --help
 ```
 
-### Documentation
 
-Full documentation can be found [here](https://pederhan.github.io/harbor-cli/)
 
 <!-- Cut before here -->
 
