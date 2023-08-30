@@ -114,7 +114,6 @@ harbor project create
 ```
 harbor project update test-project --public false --severity high --auto-scan true
 ```
-![Create project](docs/assets/readme/examples/update_project.png)
 
 ### Get project
 
@@ -138,7 +137,7 @@ harbor --format json project get test-project
 harbor system info
 ```
 
-<!-- All examples are running with COLUMNS=100. -->
+<!-- All examples are running with COLUMNS=140. -->
 
 ![System info](docs/assets/readme/examples/system_info.png)
 
