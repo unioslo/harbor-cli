@@ -57,6 +57,10 @@ Installing the application puts `harbor` in your `PATH`, and can be invoked by t
 $ harbor --help
 ```
 
+### Documentation
+
+Full documentation can be found [here](https://pederhan.github.io/harbor-cli/)
+
 <!-- Cut before here -->
 
 ### Quick Start 🚀
@@ -68,7 +72,7 @@ $ harbor --help
 harbor init
 ```
 
-After creating the configuration file, the application can be run in any of the following modes:
+After completing the configuration wizard, the application can be run in any of the following modes:
 
 **2a. Run commands directly**
 
