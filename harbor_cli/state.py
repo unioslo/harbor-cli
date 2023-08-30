@@ -257,6 +257,8 @@ class State:
         # Make sure client is loaded and configured
         if not self.is_client_loaded:
             self._init_client()
+        else:
+            self.authenticate_harbor()  # ensure we use newest credentials
 
         if not status:
             status = "Working..."
