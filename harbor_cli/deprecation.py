@@ -49,8 +49,8 @@ def get_deprecated_params(ctx: typer.Context) -> list[Deprecated]:
     return deprected_params
 
 
-def used_deprecated(ctx: typer.Context) -> list[Deprecated]:
-    """Returns a list of deprecated parameters that have been used.
+def get_used_deprecated_params(ctx: typer.Context) -> list[Deprecated]:
+    """Returns a list of deprecated parameters that have been used in the given context.
 
     Parameters
     ----------
@@ -71,7 +71,7 @@ def used_deprecated(ctx: typer.Context) -> list[Deprecated]:
     return used
 
 
-def check_deprecated_options(ctx: typer.Context) -> None:
+def issue_deprecation_warnings(ctx: typer.Context) -> None:
     """Checks if any deprecated options have been used when invoking the
     current command and logs a warning for each one.
 
@@ -80,7 +80,7 @@ def check_deprecated_options(ctx: typer.Context) -> None:
     ctx : typer.Context
         The context to check for deprecated parameters.
     """
-    deprecated = used_deprecated(ctx)
+    deprecated = get_used_deprecated_params(ctx)
     for param in deprecated:
         if param in sys.argv:
             msg = f"Option {param} is deprecated."

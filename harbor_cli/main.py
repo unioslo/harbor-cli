@@ -14,8 +14,8 @@ from .app import app
 from .commands.cli.init import run_config_wizard
 from .config import EnvVar
 from .config import HarborCLIConfig
-from .deprecation import check_deprecated_options
 from .deprecation import Deprecated
+from .deprecation import issue_deprecation_warnings
 from .exceptions import ConfigError
 from .exceptions import handle_exception
 from .exceptions import HarborCLIError
@@ -314,7 +314,7 @@ def main_callback(
     file values. If an option is omitted, the config file value will be used.
     """
     check_version_param(ctx, version)
-    check_deprecated_options(ctx)
+    issue_deprecation_warnings(ctx)
 
     # These commands don't require state management
     # and can be run without a config file or client.
