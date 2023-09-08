@@ -128,7 +128,7 @@ class BaseModel(HarborBaseModel):
         for key in values:
             if key not in cls.__fields__:
                 logger.warning(
-                    "{}: Got unknown config key {!r}.",
+                    "%s: Got unknown config key '%s'.",
                     getattr(cls, "__name__", str(cls)),
                     key,
                 )
