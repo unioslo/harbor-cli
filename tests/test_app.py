@@ -8,6 +8,7 @@ import pytest
 import pytest_mock
 import typer
 from harborapi.utils import get_basicauth
+from keyring.errors import PasswordDeleteError
 from typer.testing import Result
 
 from .conftest import PartialInvoker
@@ -135,7 +136,12 @@ def reset_keyring() -> None:
     """Clears the test user from the keyring.
     Should only be used by functions decorated with @requires_keyring"""
     yield
-    delete_password(HARBOR_CLI_TEST_USERNAME)
+    try:
+        delete_password(HARBOR_CLI_TEST_USERNAME)
+    except PasswordDeleteError as e:
+        # Ignore if password was deleted by the test
+        if "not found" not in str(e):  # pragma: no cover
+            raise
 
 
 class SecretMethod(IntEnum):
