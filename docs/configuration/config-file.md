@@ -44,18 +44,19 @@ The order in which they are specified here is also the order they are evaluated.
 
 #### `harbor.url`
 
-The URL of your Harbor instance.
+Fully qualified domain name of the Harbor instance. Must include the full API path (e.g. `/api/v2.0`).
+```toml
 
 ```toml
 [harbor]
-url = "https://harbor.example.com/api/v2.0"
+url = "https://demo.goharbor.io/api/v2.0"
 ```
 
 ----
 
 #### `harbor.username`
 
-One of the 3 ways to authenticate with Harbor. The username to use when authenticating with Harbor. When `username` is specified, `secret` must also be specified.
+The username to use when authenticating with Harbor. When `username` is specified, `secret` must also be specified.
 
 ```toml
 [harbor]
@@ -129,6 +130,17 @@ verify_ssl = true
 
 !!! info
     In the future, this option might be expanded to allow for more fine-grained control of the SSL verification.
+
+----
+
+#### `harbor.keyring`
+
+Retrieve password from keyring. This value is automatically set by the configuration wizard. See [Authentication](../auth/) for more information. The default is `false`.
+
+```toml
+[harbor]
+keyring = true
+```
 
 ----
 

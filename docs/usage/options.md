@@ -1,8 +1,6 @@
-# Global Options
+# Options
 
-Global options are options that apply to every command, and are usually overrides for configuration file options. For persistent configuration of these options, see [Configuration](../configuration/config-file).
-
-Global options must be specified before the command to run, e.g.:
+The application provides a wide range of options that can be used to customize its behavior. Common for all these options is that they must be specified before the command to run:
 
 ```
 harbor \
@@ -11,6 +9,9 @@ harbor \
 --secret my-secret \
 project list
 ```
+
+Many of these options can override configuration file options, and will always take precedence if used. For a more in-depth look at persistent configuration, see [Configuration](../../configuration/config-file). Each option listed below has a link to the relevant section in the configuration file if applicable.
+
 
 {% for option in options %}
 

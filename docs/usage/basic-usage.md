@@ -117,7 +117,7 @@ Global options must be specified before the command to run, e.g.:
 harbor --format json project list
 ```
 
-See the [Global options](./options.md) page for more information on the available global options.
+See the [Options](./options.md) page for more information on the available global options.
 
 
 
