@@ -19,6 +19,7 @@ from rich.table import Table
 from ...harbor.artifact import get_artifact_architecture
 from ...harbor.artifact import get_artifact_severity
 from ...models import ArtifactVulnerabilitySummary
+from ...output.console import warning
 from ...style.color import SeverityColor
 from ..formatting.builtin import bool_str
 from ..formatting.builtin import float_str
@@ -95,8 +96,11 @@ def artifact_vulnerability_summary_table(
 
     full_digest = kwargs.pop("full_digest", False)
     for artifact in artifacts:
+        if not artifact.summary or not artifact.summary.summary:
+            warning(f"No summary for artifact: {artifact.artifact!r}")
+            continue
         name = artifact.artifact if full_digest else artifact.artifact_short
-        vulns = vuln_summary_table(artifact.summary, **kwargs)
+        vulns = vuln_summary_table(artifact.summary.summary, **kwargs)
         table.add_row(
             name,
             ", ".join(artifact.tags),

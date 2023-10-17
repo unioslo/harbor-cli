@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import os
 from datetime import datetime
 from pathlib import Path
@@ -14,10 +13,12 @@ from typing import Union
 import tomli
 import tomli_w
 from harborapi.models.base import BaseModel as HarborBaseModel
+from pydantic import ConfigDict
 from pydantic import Field
-from pydantic import root_validator
+from pydantic import field_serializer
+from pydantic import field_validator
+from pydantic import model_validator
 from pydantic import SecretStr
-from pydantic import validator
 from strenum import StrEnum
 
 from .dirs import CONFIG_DIR
@@ -111,7 +112,8 @@ class BaseModel(HarborBaseModel):
 
     # https://pydantic-docs.helpmanual.io/usage/model_config/#change-behaviour-globally
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     def _pre_root_validator(cls, values: dict[str, Any]) -> dict[str, Any]:
         """Checks for unknown fields and logs a warning if any are found.
 
@@ -122,7 +124,7 @@ class BaseModel(HarborBaseModel):
         See: Config class below.
         """
         for key in values:
-            if key not in cls.__fields__:
+            if key not in cls.model_fields:
                 logger.warning(
                     "%s: Got unknown config key '%s'.",
                     getattr(cls, "__name__", str(cls)),
@@ -130,11 +132,7 @@ class BaseModel(HarborBaseModel):
                 )
         return values
 
-    class Config:
-        # Allow for future fields to be added to the config file without
-        # breaking older versions of Harbor CLI
-        extra = "allow"
-        validate_assignment = True
+    model_config = ConfigDict(extra="allow", validate_assignment=True)
 
 
 class HarborCredentialsKwargs(TypedDict):
@@ -159,14 +157,15 @@ class HarborSettings(BaseModel):
     username: str = ""
     secret: SecretStr = SecretStr("")
     basicauth: SecretStr = SecretStr("")
-    credentials_file: Optional[Path] = ""  # type: ignore # validator below
+    credentials_file: Optional[Path] = None
     validate_data: bool = Field(True, alias="validate")
     raw_mode: bool = False
     verify_ssl: bool = True
     retry: RetrySettings = RetrySettings()
     keyring: bool = False
 
-    @validator("credentials_file", pre=True)
+    @field_validator("credentials_file", mode="before")
+    @classmethod
     def _empty_string_is_none(cls, v: Any) -> Any:
         """We can't serialize None to TOML, so we convert it to an empty string.
         However, passing an empty string to Path() will return the current working
@@ -176,7 +175,10 @@ class HarborSettings(BaseModel):
             return None
         return v
 
-    @validator("credentials_file", always=True)
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
+    @field_validator("credentials_file", mode="after")
+    @classmethod
     def _validate_credentials_file(cls, v: Path | None) -> Path | None:
         if v is not None:
             if not v.exists():
@@ -184,6 +186,10 @@ class HarborSettings(BaseModel):
             elif not v.is_file():
                 raise ValueError(f"Credentials file {v} is not a file")
         return v
+
+    @field_serializer("secret", "basicauth")
+    def _serialize_secret_str(self, v: SecretStr) -> str:
+        return v.get_secret_value()
 
     @property
     def secret_value(self) -> str:
@@ -282,7 +288,8 @@ class TableStyleSettings(BaseModel):
     bool_emoji: bool = False
     # TODO: box
 
-    @validator("rows", pre=True)
+    @field_validator("rows", mode="before")
+    @classmethod
     def _validate_rows(
         cls, v: Optional[Union[Tuple[str, str], str]]
     ) -> Optional[Tuple[str, ...]]:
@@ -322,7 +329,8 @@ class TableStyleSettings(BaseModel):
         return vv
 
     # TODO add * validator that turns empty strings into None?
-    @validator("*")
+    @field_validator("*")
+    @classmethod
     def _empty_string_is_none(cls, v: Any) -> Any:
         """TOML has no None support, but we need to pass these kwargs to
         Rich's Table constructor, which does uses None. So we convert
@@ -364,7 +372,8 @@ class TableSettings(BaseModel):
     # max_width: Optional[int] = None
     # max_lines: Optional[int] = None
 
-    @validator("max_depth", pre=True)
+    @field_validator("max_depth", mode="before")
+    @classmethod
     def check_max_depth(cls, v: Any) -> Any:
         """Converts max_depth to an integer, and checks that it is not negative."""
         if v is None:
@@ -402,7 +411,8 @@ class OutputSettings(BaseModel):
     table: TableSettings = Field(default_factory=TableSettings)
     JSON: JSONSettings = Field(default_factory=JSONSettings, alias="json")
 
-    @validator("pager")
+    @field_validator("pager")
+    @classmethod
     def set_pager(cls, v: Optional[str]) -> Optional[str]:
         """Validator that sets the MANPAGER environment variable if a pager is set.
         https://rich.readthedocs.io/en/stable/console.html#paging
@@ -413,8 +423,7 @@ class OutputSettings(BaseModel):
         os.environ["PAGER"] = v
         return v
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class GeneralSettings(BaseModel):
@@ -447,17 +456,16 @@ class REPLSettings(BaseModel):
         description="Path to custom location of history file.",
     )
 
-    @validator("history_file", always=True)
-    def _create_history_file_if_not_exists(
-        cls, v: Path, values: dict[str, Any]
-    ) -> Path:
-        history_enabled = values.get("history", False)
-        if not history_enabled:
-            return v
-        if not v.exists():
-            v.parent.mkdir(parents=True, exist_ok=True)
-            v.touch()
-        return v
+    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
+    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
+    @model_validator(mode="after")
+    def _create_history_file_if_not_exists(self) -> "REPLSettings":
+        if not self.history:
+            return self
+        if not self.history_file.exists():
+            self.history_file.parent.mkdir(parents=True, exist_ok=True)
+            self.history_file.touch()
+        return self
 
 
 class CacheSettings(BaseModel):
@@ -486,21 +494,6 @@ class HarborCLIConfig(BaseModel):
     config_file: Optional[Path] = Field(
         None, exclude=True, description="Path to config file (if any)."
     )  # populated by CLI if loaded from file
-
-    class Config:
-        json_encoders = {
-            SecretStr: lambda v: v.get_secret_value() if v else None,
-        }
-
-    def __copy__(self) -> HarborCLIConfig:
-        """Create a copy of the config object that includes the config file
-        path, so that it can be saved to the same file."""
-        return self.copy(update={"config_file": self.config_file})
-
-    def __deepcopy__(self, memo: dict) -> HarborCLIConfig:
-        """Create a copy of the config object that includes the config file
-        path, so that it can be saved to the same file."""
-        return self.copy(update={"config_file": self.config_file}, deep=True)
 
     @classmethod
     def from_file(
@@ -554,8 +547,7 @@ class HarborCLIConfig(BaseModel):
         **kwargs: Any,
     ) -> str:
         """Return a TOML representation of the config object.
-        In order to serialize all types properly, the serialization takes
-        a round-trip through the Pydantic JSON converter.
+        None values are replaced with empty strings (bad?)
 
         Parameters
         ----------
@@ -572,19 +564,9 @@ class HarborCLIConfig(BaseModel):
         -------
         str
             TOML representation of the config as a string.
-
-        See Also
-        --------
-        `BaseModel.json()` <https://pydantic-docs.helpmanual.io/usage/exporting_models/#modeljson>
         """
         tomli_kwargs = tomli_kwargs or {}
-
-        # Roundtrip through JSON to get dict of builtin types
-        #
-        # Also replace None values with empty strings, because:
-        # 1. TOML doesn't have a None type
-        # 2. Show users that these values _can_ be configured
-        dict_basic_types = replace_none(json.loads(self.json(**kwargs)))
+        dict_basic_types = replace_none(self.model_dump(mode="json", **kwargs))
 
         if not expose_secrets:
             for key in ["secret", "basicauth", "credentials_file"]:

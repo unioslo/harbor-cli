@@ -37,6 +37,7 @@ for group in commands.ALL_GROUPS:
     app.add_typer(group)
 
 _PRE_OVERRIDE_CONFIG = None  # type: HarborCLIConfig | None
+"""A copy of the config before any REPL command overrides were applied."""
 
 
 def _restore_config(state: State) -> None:
@@ -55,13 +56,7 @@ def _restore_config(state: State) -> None:
     if _PRE_OVERRIDE_CONFIG is not None:
         state.config = _PRE_OVERRIDE_CONFIG
     if state.repl:
-        # NOTE: when we copy a model, fields that are marked as "exclude"
-        # are _not_ copied, which is kind of insane? You would think
-        # "exclude" only affects dumping dict/JSON, as the docstring implies,
-        # but it also affects copying!
-        _PRE_OVERRIDE_CONFIG = state.config.copy(
-            update={"config_file": state.config.config_file}
-        )
+        _PRE_OVERRIDE_CONFIG = state.config.model_copy(deep=True)
 
 
 CONFIG_EXEMPT_GROUPS = {"cli-config", "find", "sample-config", "version"}

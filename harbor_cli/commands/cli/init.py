@@ -176,7 +176,7 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
     )
 
     # Clear all previous credentials if we provide new credentials
-    hconf_pre = hconf.copy()  # use for defaults in prompts
+    hconf_pre = hconf.model_copy()  # use for defaults in prompts
     if not auth_method == "s":
         hconf.clear_credentials()
 

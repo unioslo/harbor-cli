@@ -339,31 +339,32 @@ def test_harbor_cli_config_toml_expose_secrets(
         assert "***" in toml_str  # don't be too specific about the number of stars
 
 
-def test_dunder_copy(config: HarborCLIConfig, tmp_path: Path) -> None:
-    """Test that the __copy__ method works as expected with excluded fields."""
+@pytest.mark.parametrize("deep", [True, False])
+def test_config_model_copy_keeps_excluded_config_field(
+    config: HarborCLIConfig, tmp_path: Path, deep: bool
+) -> None:
+    """In Pydantic V1, copying a model with excluded fields would exclude the
+    field ENTIRELY from the copied model (i.e. no attribute at all).
+
+    In Pydantic V2, this behavior should be changed and the field should be copied
+    properly. We rely on this behavior to restore the config file between
+    command invocations in the REPL, and as such we need to make sure that the
+    config_file field is copied properly."""
     mock_path = tmp_path / "config.toml"
     mock_path.touch()
     config.config_file = mock_path
     assert config.config_file is not None
-    copied = config.__copy__()
+
+    # Copy with Pydantic model_copy first:
+    copied = config.model_copy(deep=True)
+    assert copied is not config
     assert hasattr(copied, "config_file")
     assert copied.config_file == config.config_file
 
-    copied_with_copy = copy.copy(config)
-    assert copied_with_copy.config_file == config.config_file
-
-
-def test_dunder_deepcopy(config: HarborCLIConfig, tmp_path: Path) -> None:
-    """Test that the __deepcopy__ method works as expected with excluded fields."""
-    mock_path = tmp_path / "config.toml"
-    mock_path.touch()
-    config.config_file = mock_path
-    assert config.config_file is not None
-    copied = config.__deepcopy__({})
-    assert hasattr(copied, "config_file")
-    assert copied.config_file == config.config_file
-
-    copied_with_copy = copy.deepcopy(config)
+    # Copy with stdlib copy:
+    func = copy.deepcopy if deep else copy.copy
+    copied_with_copy = func(config)
+    assert copied_with_copy is not config
     assert copied_with_copy.config_file == config.config_file
 
 

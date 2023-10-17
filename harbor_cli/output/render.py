@@ -9,7 +9,7 @@ from typing import Union
 
 import typer
 from harborapi.models.base import BaseModel as HarborBaseModel
-from pydantic import BaseModel
+from pydantic import RootModel
 
 from ..exceptions import OverwriteError
 from ..format import OutputFormat
@@ -122,25 +122,20 @@ def render_json(
     indent = state.config.output.JSON.indent
     sort_keys = state.config.output.JSON.sort_keys
 
-    # We need to convert the types to JSON serializable types (base types)
-    # Pydantic can handle this for us to some extent.
-    # https://twitter.com/samuel_colvin/status/1617531798367645696
-    #
-    # To make the JSON serialization compatible with a wider range of
-    # data types, we wrap the data in a Pydantic model with a single field
-    # named __root__, which renders the data as the root value of the JSON object:
-    # Output(__root__={"foo": "bar"}).json() -> '{"foo": "bar"}'
-    # This is especially useful for serializing types like Paths and Timestamps,
-    # since they are not natively supported by the stdlib json module.
-    #
-    # In pydantic v2, the __root__ field is going away, and we will
-    # be able to serialize/marshal any data type directly.
+    # We use a Pydantic RootModel to render any type as JSON
+    class Output(RootModel[Union[T, Sequence[T]]]):
+        root: Union[T, Sequence[T]]
 
-    class Output(BaseModel):
-        __root__: Union[T, Sequence[T]]
+    o = Output(root=result)
+    o_json = o.model_dump_json(indent=indent)
 
-    o = Output(__root__=result)
-    o_json = o.json(indent=indent)
+    # TODO: Take a look at this. We probably _do_ want to support file output
+    # since we have a REPL and thus users can't use a shell redirect there,
+    # and as such we need some way to natively support writing the JSON output
+    # to a file. This, however, is a bit confusing with the `--with-stdout` option.
+    # Maybe the answer is to just remove the `--with-stdout` option and always
+    # print the output to the terminal regardles, and PERHAPS add a `--no-stdout` option.
+
     if p:
         if p.exists() and no_overwrite:
             raise OverwriteError(f"File {p.resolve()} exists.")

@@ -147,7 +147,7 @@ def inject_help(
 
     def decorator(func: Any) -> Any:
         sig = inspect.signature(func)
-        for field_name, field in model.__fields__.items():
+        for field_name, field in model.model_fields.items():
             # only overwrite help if not already set
             param = sig.parameters.get(field_name, None)
             if not param:
@@ -162,7 +162,7 @@ def inject_help(
                 addition = field_additions.get(field_name, "")
                 if addition:
                     addition = f" {addition}"  # add leading space
-                param.default.help = f"{field.field_info.description or ''}{addition}"
+                param.default.help = f"{field.description or ''}{addition}"
         return func
 
     return decorator

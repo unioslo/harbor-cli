@@ -83,7 +83,7 @@ def get_project_info(
     """Get information about a project."""
     arg = get_project_arg(project_name_or_id)
     project = get_project(arg)
-    p = ProjectExtended(**project.dict())
+    p = ProjectExtended(**project.model_dump())
     render_result(p, ctx)
 
 
@@ -572,7 +572,7 @@ def get_project_metadata_field(
         state.client.get_project_metadata_entry(arg, field),
         f"Fetching metadata field {field!r} for {project_repr}...",
     )
-    md = MetadataFields.parse_obj(metadata)
+    md = MetadataFields.model_validate(metadata)
     render_result(md, ctx)
 
 
@@ -591,13 +591,13 @@ def set_project_metadata_field(
     ),
 ) -> None:
     """Set a single field in the metadata for a project."""
-    if field not in ProjectMetadata.__fields__:
+    if field not in ProjectMetadata.model_fields:
         warning(f"Field {field!r} is not a known project metadata field.")
 
     arg = get_project_arg(project_name_or_id)
     project_repr = get_project_repr(arg)
 
-    metadata = ProjectMetadata.parse_obj({field: value})
+    metadata = ProjectMetadata.model_validate({field: value})
 
     state.run(
         state.client.update_project_metadata_entry(arg, field, metadata),
@@ -619,7 +619,7 @@ def delete_project_metadata_field(
 ) -> None:
     """Delete a single field in the metadata for a project."""
     delete_prompt(state.config, force, resource="metadata field", name=field)
-    if field not in ProjectMetadata.__fields__:
+    if field not in ProjectMetadata.model_fields:
         warning(f"Field {field!r} is not a known project metadata field.")
 
     arg = get_project_arg(project_name_or_id)

@@ -75,9 +75,10 @@ def _state_fixture(
 ) -> state.State:
     """Fixture for testing the state."""
     st = state.get_state()  # Initialize the state
+    st.config.config_file = config_file
     st.config = config
     st.client = harbor_client
-    yield state.get_state()
+    yield st
 
 
 class PartialInvoker(Protocol):
@@ -124,7 +125,7 @@ def output_format_arg(output_format: OutputFormat) -> list[str]:
 @pytest.fixture(scope="function", autouse=True)
 def revert_state_config(state: state.State) -> Generator[None, None, None]:
     """Reverts the global state config back to its original value after the test is run."""
-    original_config = deepcopy(state.config)
+    original_config = state.config.model_copy(deep=True)
     yield
     state.config = original_config
 

@@ -26,7 +26,7 @@ def registryproviders_table(
         logger.warning("Can only display one list of registry providers at a time")
     prov = providers[0]
     table = get_table("Registry Providers", columns=["Name", "Info"], show_lines=True)
-    for name, provider in prov.providers.items():
+    for name, provider in prov.root.items():
         table.add_row(name, _registryproviderinfo_table(provider))
     return table
 

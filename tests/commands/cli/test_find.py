@@ -73,7 +73,7 @@ def test_find_param(
         ]
     )
     if any([not p.ok for p in [limit, names, descriptions]]):
-        assert result.exit_code != 0, result.output
+        assert result.exit_code != 0, result.stderr
     else:
         assert result.exit_code == 0, result.output
 

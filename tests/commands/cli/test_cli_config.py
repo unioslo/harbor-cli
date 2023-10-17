@@ -7,6 +7,8 @@ from pytest import LogCaptureFixture
 
 from harbor_cli.config import EnvVar
 from harbor_cli.config import HarborCLIConfig
+from harbor_cli.format import OutputFormat
+from harbor_cli.state import State
 
 
 # TODO: test more keys and more levels of nesting
@@ -35,7 +37,7 @@ def test_cli_config_get_key(invoke, config: HarborCLIConfig, config_file: Path) 
     # we have no good way (yet) to test that
     # In the future, all config models should be serializable to TOML,
     # so that we can test this.
-    for key in config.harbor.__fields__.keys():
+    for key in config.harbor.model_fields.keys():
         assert key in result.stdout
 
 
@@ -63,6 +65,30 @@ def test_cli_config_get(
     stdout_config.harbor.credentials_file = config.harbor.credentials_file
 
     assert stdout_config == config
+
+
+def test_cli_config_set(invoke, state: State, config_file: Path) -> None:
+    state.config.config_file = config_file
+
+    state.config.output.format = OutputFormat.TABLE
+    result = invoke(["cli-config", "set", "output.format", "json"])
+    assert result.exit_code == 0, result.stderr
+    assert state.config.output.format == OutputFormat.JSON
+    assert (
+        state.config.from_file(config_file).output.format == OutputFormat.JSON
+    )  # Saved to disk
+
+
+def test_cli_config_set_session(invoke, state: State, config_file: Path) -> None:
+    state.config.config_file = config_file
+
+    state.config.output.format = OutputFormat.TABLE
+    result = invoke(["cli-config", "set", "output.format", "json", "--session"])
+    assert result.exit_code == 0, result.stderr
+    assert state.config.output.format == OutputFormat.JSON  # Changed in session
+    assert (
+        state.config.from_file(config_file).output.format == OutputFormat.TABLE
+    )  # Not saved to disk
 
 
 def test_env_no_vars(invoke) -> None:

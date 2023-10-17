@@ -58,7 +58,7 @@ def model_params_from_ctx(
     return {
         key: value
         for key, value in ctx.params.items()
-        if key in model.__fields__ and (not filter_none or value is not None)
+        if key in model.model_fields and (not filter_none or value is not None)
     }
 
 
@@ -141,9 +141,9 @@ def create_updated_model(
         exit_err("No parameters provided to update")
 
     # Cast existing model to dict, update it with the new values
-    d = existing.dict(include=None if extra else set(new.__fields__))
+    d = existing.model_dump(include=None if extra else set(new.model_fields))
     d.update(params)
-    return new.parse_obj(d)
+    return new.model_validate(d)
 
 
 def parse_commalist(arg: Optional[List[str]]) -> List[str]:

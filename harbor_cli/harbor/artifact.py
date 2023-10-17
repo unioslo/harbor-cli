@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from typing import NamedTuple
-from typing import Type
 from typing import TypeVar
 
 from harborapi.models import Artifact
@@ -59,24 +58,16 @@ AttrType = TypeVar("AttrType")
 
 
 def get_artifact_architecture(artifact: Artifact) -> str | None:
-    return _get_extra_attrs_field(artifact, "architecture", str)
+    try:
+        return str(artifact.extra_attrs["architecture"])  # type: ignore[index]
+    except KeyError:
+        return None
 
 
 def get_artifact_os(artifact: Artifact) -> str | None:
-    return _get_extra_attrs_field(artifact, "os", str)
-
-
-def _get_extra_attrs_field(
-    artifact: Artifact, field: str, type_: Type[AttrType]
-) -> AttrType | None:
-    # the ExtraAttrs model has no documented fields, so we just
-    # attempt to access the field and return None if it
-    # doesn't exist
     try:
-        attr = getattr(artifact.extra_attrs, field)
-        assert isinstance(attr, type_)
-        return attr
-    except AttributeError:
+        return str(artifact.extra_attrs["os"])  # type: ignore[index]
+    except KeyError:
         return None
 
 
@@ -86,6 +77,6 @@ def get_artifact_severity(artifact: Artifact) -> str | None:
     has a severity string.
     """
     try:
-        return artifact.scan_overview.severity  # type: ignore
+        return artifact.scan.severity  # type: ignore
     except AttributeError:
         return None

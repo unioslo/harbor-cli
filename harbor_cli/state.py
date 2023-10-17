@@ -9,6 +9,7 @@ from typing import TypeVar
 
 from harborapi import HarborAsyncClient
 from pydantic import BaseModel
+from pydantic import ConfigDict
 from rich.console import Console
 
 # This module generally shouldn't import from other local modules
@@ -35,9 +36,7 @@ class CommonOptions(BaseModel):
     # File
     output_file: Optional[Path] = None
     no_overwrite: bool = False
-
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")
 
 
 class State:

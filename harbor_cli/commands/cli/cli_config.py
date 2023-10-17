@@ -9,6 +9,7 @@ from typing import Optional
 from typing import TYPE_CHECKING
 
 import typer
+from pydantic import BaseModel as PydanticBaseModel
 from pydantic import ValidationError
 
 from ...config import DEFAULT_CONFIG_FILE
@@ -30,12 +31,9 @@ from ...style import render_cli_command
 from ...style import render_cli_value
 from ...style import render_config_option
 from ...style.style import render_cli_option
-from ...utils.utils import forbid_extra
 
 if TYPE_CHECKING:
     from rich.table import Table
-
-state = get_state()
 
 # Create a command group
 app = typer.Typer(
@@ -78,6 +76,7 @@ def get_cli_config(
     ),
 ) -> None:
     """Show the current CLI configuration."""
+    state = get_state()
     if key:
         try:
             if (attrs := key.split(".")) and len(attrs) > 1:
@@ -102,6 +101,8 @@ def get_cli_config(
     help=f"Show all config keys that can be modified with {render_cli_command('cli-config set')}.",
 )
 def get_cli_config_keys(ctx: typer.Context) -> None:
+    state = get_state()
+
     def get_fields(field: dict[str, Any], current: str) -> list[str]:
         fields = []
         if isinstance(field, dict):
@@ -113,7 +114,7 @@ def get_cli_config_keys(ctx: typer.Context) -> None:
         return fields
 
     ff = []
-    d = state.config.dict()
+    d = state.config.model_dump()
     for key, value in d.items():
         if isinstance(value, dict):
             ff.extend(get_fields(value, key))
@@ -155,30 +156,36 @@ def set_cli_config(
     if not key:
         exit_err("No key specified.")
 
-    # Forbid extra temporarily so config key typos trigger errors
-    with forbid_extra(state.config):
-        try:
-            if (attrs := key.split(".")) and len(attrs) > 1:
-                obj = getattr(state.config, attrs[0])
-                for attr in attrs[1:-1]:
-                    obj = getattr(obj, attr)
-                setattr(obj, attrs[-1], value)
-            else:
-                # Top-level keys are supported, but we shouldn't have any!
-                # It's just here in case we do add it in the future.
-                # That saves us a potential bug in the future where this
-                # command fails to set a top-level key.
-                setattr(state.config, key, value)
-        except ValidationError as e:
-            # There should be at least one error, but we play it safe
-            errors = e.errors()
-            error = errors[0]["msg"] if errors else str(e)
-            exit_err(f"Invalid value for key {key!r}: {error}")
-        except (
-            ValueError,  # setattr failed for unknown model field (Pydantic)
-            AttributeError,  # getattr failed
-        ):
-            exit_err(f"Invalid config key: {key!r}")
+    state = get_state()
+
+    try:
+        if (attrs := key.split(".")) and len(attrs) > 1:
+            obj = getattr(state.config, attrs[0])
+            for attr in attrs[1:-1]:
+                obj = getattr(obj, attr)
+            assert isinstance(obj, PydanticBaseModel)
+            to_set = attrs[-1]
+            if to_set not in obj.model_fields:
+                raise AttributeError
+            setattr(obj, attrs[-1], value)
+        else:
+            # Top-level primitive keys are supported, but we shouldn't have any!
+            # It's just here in case we do add it in the future.
+            # Overwriting top-level model keys is not allowed.
+            obj = getattr(state.config, key)
+            if isinstance(obj, PydanticBaseModel):
+                raise AttributeError("Overwriting config tables is not allowed.")
+            setattr(state.config, key, value)
+    except ValidationError as e:
+        # There should be at least one error, but we play it safe
+        errors = e.errors()
+        error = errors[0]["msg"] if errors else str(e)
+        exit_err(f"Invalid value for key {key!r}: {error}")
+    except (
+        ValueError,  # setattr failed for unknown model field (Pydantic)
+        AttributeError,  # getattr failed
+    ):
+        exit_err(f"Invalid config key: {key!r}")
 
     if not session:
         state.config.save(path=path)
@@ -204,6 +211,7 @@ def write_session_config(
         help="Path to save configuration file. Uses current config file path if not specified.",
     ),
 ) -> None:
+    state = get_state()
     save_path = path or state.config.config_file
     if save_path is None:
         exit_err(
@@ -218,6 +226,7 @@ def write_session_config(
     help="Show the path to the current configuration file, or default path if no config is loaded.",
 )
 def show_config_path(ctx: typer.Context) -> None:
+    state = get_state()
     path = state.config.config_file or DEFAULT_CONFIG_FILE
     if not path.exists():
         info("File does not exist.")
