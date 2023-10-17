@@ -102,14 +102,10 @@ def load_toml_file(config_file: Path) -> dict[str, Any]:
     return conf
 
 
-# We use the harborapi.models.BaseModel as our base class
+# HACK: We use the harborapi.models.BaseModel as our base class
 # for the config models. This isn't ideal, and we should instead
 # be able to import as_table from harborapi and add it to our own
 # BaseModel class. But for now, this works.
-#
-# The reason we can't do the above is because as_table is a bound method
-# on the harborapi.models.BaseModel class, and we can't add it to our own
-# until the method is moved out of the class.
 class BaseModel(HarborBaseModel):
     """Base model shared by all config models."""
 
