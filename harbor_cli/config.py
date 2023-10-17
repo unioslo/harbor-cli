@@ -175,8 +175,6 @@ class HarborSettings(BaseModel):
             return None
         return v
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @field_validator("credentials_file", mode="after")
     @classmethod
     def _validate_credentials_file(cls, v: Path | None) -> Path | None:
@@ -456,8 +454,6 @@ class REPLSettings(BaseModel):
         description="Path to custom location of history file.",
     )
 
-    # TODO[pydantic]: We couldn't refactor the `validator`, please replace it by `field_validator` manually.
-    # Check https://docs.pydantic.dev/dev-v2/migration/#changes-to-validators for more information.
     @model_validator(mode="after")
     def _create_history_file_if_not_exists(self) -> "REPLSettings":
         if not self.history:
