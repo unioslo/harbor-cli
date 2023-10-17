@@ -3,6 +3,8 @@
 <!-- [![PyPI - Version](https://img.shields.io/pypi/v/harbor-cli.svg)](https://pypi.org/project/harbor-cli)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/harbor-cli.svg)](https://pypi.org/project/harbor-cli) -->
 
+![Tests](https://github.com/pederhan/harbor-cli/workflows/test/badge.svg) [![Docs](https://github.com/pederhan/harbor-cli/workflows/build-docs/badge.svg)](https://pederhan.github.io/harbor-cli/) ![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json) ![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)
+
 ![Demo](docs/assets/readme/demo.gif)
 
 
@@ -44,39 +46,43 @@
 
 The name `harbor-cli` is in the process of being acquired from its current owner on PyPI.
 
-In the meantime, you can install the package from GitHub,:
-
-```
-pipx install git+https://github.com/pederhan/harbor-cli
-```
-
-On certain platforms this is not sufficient to install all [keyring](https://github.com/jaraco/keyring) dependencies.
-
-Keyring functionality is not mandatory, and the application will function without it. Consult your platform's section below for more information.
-
+In the meantime, the package can be installed directly from GitHub.
 
 ### MacOS
 
+Install as a pipx app:
+
 ```
 pipx install git+https://github.com/pederhan/harbor-cli
 ```
 
-Keyring should work out of the box on MacOS >=11 with Python >=3.8.7.
+or through Homebrew:
+
+```
+brew tap add pederhan/harbor-cli
+brew install harbor-cli
+```
+
+Keyring functionality should work out of the box on MacOS >=11 with Python >=3.8.7.
 
 
 ### Linux
 
-Depending on your Linux flavor and choice of keyring backend, you may need to install additional packages. See the [keyring documentation](https://keyring.readthedocs.io/en/latest/#installing-keyring) for more information.
-
-To inject a package into the application's pipx environment, use the `pipx inject` command:
-
 
 ```
 pipx install git+https://github.com/pederhan/harbor-cli
+```
+
+Depending on your Linux flavor and choice of keyring backend, you may need to install additional packages to enable keyring functionality. See the [keyring documentation](https://keyring.readthedocs.io/en/latest/#installing-keyring) for more information.
+
+
+If you need to inject a package into the application's pipx environment, use the `pipx inject` command:
+
+
+```
 pipx inject harbor-cli <package to inject>
 ```
 
-Follow the instructions for your Linux flavor and keyring backend to determine which package to inject (if any). If a package requires compilation and you don't have the necessary prerequisites installed, installing the package as a system package through your system's package manager may be easier.
 
 ### Windows
 
