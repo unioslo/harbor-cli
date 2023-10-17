@@ -145,14 +145,14 @@ def main_callback(
     harbor_validate: Optional[bool] = Option(
         None,
         "--validate/--no-validate",
-        help=f"Validate Harbor API response data. Forces JSON output format.",
+        help=f"Validate Harbor API response data. Forces JSON output format if disabled.",
         envvar=EnvVar.HARBOR_VALIDATE_DATA,
         config_override="harbor.validate_data",
     ),
     harbor_raw_mode: Optional[bool] = Option(
         None,
         "--raw/--no-raw",
-        help=f"Return raw data from Harbor API. Ignores output format and formatting options.",
+        help=f"Return raw data from Harbor API. Overrides all output formatting options.",
         envvar=EnvVar.HARBOR_RAW_MODE,
         config_override="harbor.raw_mode",
     ),
