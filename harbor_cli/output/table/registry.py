@@ -5,7 +5,6 @@ from typing import Sequence
 
 from harborapi.models.models import Registry
 from harborapi.models.models import RegistryCredential
-from harborapi.models.models import RegistryProviderInfo
 from harborapi.models.models import RegistryProviders
 from rich.table import Table
 
@@ -25,27 +24,21 @@ def registryproviders_table(
     if len(providers) != 1:
         logger.warning("Can only display one list of registry providers at a time")
     prov = providers[0]
-    table = get_table("Registry Providers", columns=["Name", "Info"], show_lines=True)
-    for name, provider in prov.root.items():
-        table.add_row(name, _registryproviderinfo_table(provider))
-    return table
-
-
-def _registryproviderinfo_table(provider: RegistryProviderInfo, **kwargs: Any) -> Table:
     table = get_table(
-        columns=[
-            "Endpoint",
-            "URL",
-        ],
-        pluralize=False,
+        "Registry Providers", columns=["Name", "Endpoint", "URL"], show_lines=False
     )
-
-    if provider.endpoint_pattern and provider.endpoint_pattern.endpoints:
-        for endpoint in provider.endpoint_pattern.endpoints:
+    for name, provider in prov.root.items():
+        if not provider.endpoint_pattern or not provider.endpoint_pattern.endpoints:
+            continue
+        for idx, endpoint in enumerate(provider.endpoint_pattern.endpoints):
+            name = name if idx == 0 else ""
             table.add_row(
+                str_str(name),
                 str_str(endpoint.key),
                 str_str(endpoint.value),
             )
+        else:
+            table.add_section()
     return table
 
 
