@@ -4,8 +4,8 @@ import typer
 from typer.models import OptionInfo
 
 from harbor_cli.config import env_var
+from harbor_cli.option import help_config_override
 from harbor_cli.option import Option
-from harbor_cli.style import help_config_override
 
 
 def test_option() -> None:

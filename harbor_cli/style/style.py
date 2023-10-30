@@ -70,8 +70,3 @@ def render_cli_value(value: Any) -> str:
 def render_cli_command(value: str) -> str:
     """Render a CLI command."""
     return f"[{STYLE_CLI_COMMAND}]{value}[/]"
-
-
-def help_config_override(option: str) -> str:
-    """Render a help string for a configuration file option/key/entry."""
-    return f"Overrides config option {render_config_option(option)}."
