@@ -151,7 +151,7 @@ def artifact_vulnerabilities_table(
         for vulnerability in vulns:
             row = [
                 str_str(vulnerability.id),
-                SeverityColor.as_markup(vulnerability.severity),
+                SeverityColor.as_markup(vulnerability.severity.value),
                 float_str(vulnerability.get_cvss_score()),
                 str_str(vulnerability.package),
                 str_str(vulnerability.version),
