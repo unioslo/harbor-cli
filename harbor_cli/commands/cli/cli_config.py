@@ -248,10 +248,7 @@ class EnvVars(BaseModel):
     envvars: Dict[str, str] = {}
 
     def as_table(self, **kwargs: Any) -> Iterable[Table]:  # type: ignore
-        table = get_table("Environment Variables")
-        table.add_column("Variable")
-        table.add_column("Value")
-
+        table = get_table("Environment Variables", columns=["Variable", "Value"])
         for envvar, value in self.envvars.items():
             table.add_row(envvar, value)
         yield table

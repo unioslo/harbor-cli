@@ -7,6 +7,7 @@ from typing import Any
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
+from typing import TYPE_CHECKING
 from typing import TypedDict
 from typing import Union
 
@@ -37,6 +38,9 @@ from .style import STYLE_TABLE_HEADER
 from .utils import replace_none
 from .utils.keyring import get_password
 from .utils.keyring import KeyringUnsupportedError
+
+if TYPE_CHECKING:
+    from harbor_cli.types import RichTableKwargs
 
 
 DEFAULT_CONFIG_FILE = CONFIG_DIR / "config.toml"
@@ -337,17 +341,15 @@ class TableStyleSettings(BaseModel):
             return None
         return v
 
-    def as_rich_kwargs(self) -> dict[str, Optional[Union[str, Tuple[str, str], bool]]]:
+    def as_rich_kwargs(self) -> RichTableKwargs:
         """Converts the TableStyleSettings to a dictionary that can be passed
         to Rich's Table constructor.
 
         Returns
         -------
-        Dict[str, Optional[str]]
+        RichTableKwargs
             A dictionary of Rich Table style settings.
         """
-        # TODO: define return type as a TypedDict, which can then be used
-        # to type check the kwargs we pass to Rich's Table constructor.
         return {
             "border_style": self.border,
             "caption_style": self.caption,

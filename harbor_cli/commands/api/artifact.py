@@ -800,12 +800,14 @@ class AffectedArtifactList(BaseModel):
         a.packages.update(artifact.packages)
 
     def as_table(self, **kwargs: Any) -> Iterable[Table]:  # type: ignore
-        table = get_table("Artifacts")
-        table.add_column("Name", overflow="fold")
-        table.add_column("Tags")
-        table.add_column("Matches")
-        # table.add_column("Vulnerabilities")
-        # table.add_column("Packages")
+        table = get_table(
+            "Artifacts",
+            columns=[
+                "Name",
+                "Tags",
+                "Matches",
+            ],
+        )
 
         for artifact in self.artifacts.values():
             match_table = get_table(columns=["Vulnerabilities", "Packages"])

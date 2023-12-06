@@ -22,12 +22,11 @@ class AnySequence(BaseModel):
 def anysequence_table(s: Sequence[AnySequence], **kwargs: Any) -> Table:
     """Renders an AnySequence as a table."""
     # No title here I think...?
-    table = get_table()
     try:
         title = s[0].title
     except IndexError:
         title = "Values"
-    table.add_column(title)
+    table = get_table(columns=[title])
     for idx, seq in enumerate(s):
         for item in seq.values:
             table.add_row(

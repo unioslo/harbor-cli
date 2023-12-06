@@ -13,12 +13,17 @@ from ._utils import get_table
 
 
 def cveallowlist_table(c: Sequence[CVEAllowlist], **kwargs: Any) -> Table:
-    table = get_table("CVE Allowlist", c)
-    table.add_column("ID")
-    table.add_column("Items")
-    table.add_column("Expires")
-    table.add_column("Created")
-    table.add_column("Updated")
+    table = get_table(
+        "CVE Allowlist",
+        c,
+        columns=[
+            "ID",
+            "Items",
+            "Expires",
+            "Created",
+            "Updated",
+        ],
+    )
     for allowlist in c:
         if allowlist.items:
             items = "\n".join(

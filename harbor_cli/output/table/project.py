@@ -30,12 +30,17 @@ from .registry import registry_table
 
 def project_table(p: Sequence[Project], **kwargs: Any) -> Table:
     """Display one or more projects in a table."""
-    table = get_table("Project", p)
-    table.add_column("ID")
-    table.add_column("Name", overflow="fold")
-    table.add_column("Public")
-    table.add_column("Repositories")
-    table.add_column("Created")
+    table = get_table(
+        "Project",
+        p,
+        columns=[
+            "ID",
+            "Name",
+            "Public",
+            "Repositories",
+            "Created",
+        ],
+    )
     for project in p:
         # TODO: handle ProjectMetadata fields that can be `'true'`, `'false'`, or `None`
         # Other tables can use bool_str, but here we need to handle strings
@@ -84,15 +89,20 @@ def project_extended_table(p: Sequence[ProjectExtended], **kwargs: Any) -> Table
 
 
 def project_metadata_table(p: Sequence[ProjectMetadata], **kwargs: Any) -> Table:
-    table = get_table("Metadata", p)
-    table.add_column("Public")
-    table.add_column("Content Trust")
-    table.add_column("Content Trust Cosign")
-    table.add_column("Vuln Prevention")
-    table.add_column("Max Severity")
-    table.add_column("Auto Scan")
-    table.add_column("Reuse Sys CVE List")
-    table.add_column("Retention ID")
+    table = get_table(
+        "Metadata",
+        p,
+        columns=[
+            "Public",
+            "Content Trust",
+            "Content Trust Cosign",
+            "Vuln Prevention",
+            "Max Severity",
+            "Auto Scan",
+            "Reuse Sys CVE List",
+            "Retention ID",
+        ],
+    )
     for metadata in p:
         table.add_row(
             boolstr_str(metadata.public),
@@ -102,7 +112,7 @@ def project_metadata_table(p: Sequence[ProjectMetadata], **kwargs: Any) -> Table
             str_str(metadata.severity),
             boolstr_str(metadata.auto_scan),
             boolstr_str(metadata.reuse_sys_cve_allowlist),
-            str_str(metadata.retention_id),
+            str_str(str(metadata.retention_id)),
         )
     return table
 
