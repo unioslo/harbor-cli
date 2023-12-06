@@ -36,14 +36,19 @@ DOUBLE_SPACE_PATTERN = re.compile(" +")
 
 def artifact_table(artifacts: Sequence[Artifact], **kwargs: Any) -> Table:
     """Display one or more artifacts in a table."""
-    table = get_table("Artifact", artifacts)
-    table.add_column("ID")
-    table.add_column("Project ID")
-    table.add_column("Repository ID")
-    table.add_column("Tags")
-    table.add_column("Digest", overflow="fold")
-    table.add_column("Created")
-    table.add_column("Size")
+    table = get_table(
+        "Artifact",
+        artifacts,
+        columns=[
+            "ID",
+            "Project ID",
+            "Repository ID",
+            "Tags",
+            "Digest",
+            "Created",
+            "Size",
+        ],
+    )
     for artifact in artifacts:
         tags = []
         if artifact.tags:
@@ -54,7 +59,7 @@ def artifact_table(artifacts: Sequence[Artifact], **kwargs: Any) -> Table:
             int_str(artifact.project_id),
             int_str(artifact.repository_id),
             str_str(t),
-            str_str(artifact.digest),
+            str_str(artifact.digest)[:15],
             datetime_str(artifact.push_time),
             bytesize_str(artifact.size or 0),
         )
@@ -63,21 +68,26 @@ def artifact_table(artifacts: Sequence[Artifact], **kwargs: Any) -> Table:
 
 def artifactinfo_table(artifacts: Sequence[ArtifactInfo], **kwargs: Any) -> Table:
     """Display one or more artifacts (ArtifactInfo) in a table."""
-    table = get_table("Artifact", artifacts)
-    table.add_column("Project")
-    table.add_column("Repository")
-    table.add_column("Tags")
-    table.add_column("Digest", overflow="fold")
-    table.add_column("Arch")
-    table.add_column("Severity")
-    table.add_column("Created")
-    table.add_column("Size")
+    table = get_table(
+        "Artifact",
+        artifacts,
+        columns=[
+            "Project",
+            "Repository",
+            "Tags",
+            "Digest",
+            "Arch",
+            "Severity",
+            "Created",
+            "Size",
+        ],
+    )
     for artifact in artifacts:
         table.add_row(
             str_str(artifact.project_name),
             str_str(artifact.repository_name),
             str_str(", ".join(artifact.tags)),
-            str_str(artifact.artifact.digest),
+            str_str(artifact.artifact.digest)[:15],
             str_str(get_artifact_architecture(artifact.artifact)),
             str_str(get_artifact_severity(artifact.artifact)),
             datetime_str(artifact.artifact.push_time),

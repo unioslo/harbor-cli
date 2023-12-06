@@ -19,6 +19,7 @@ The **third number** is the patch version (bug fixes)
 
 ### Changed
 
+- Artifact digests are now always displayed in the short format in tables to limit the width of the table.
 - `project member` commands now take a username or ID instead of a project member ID.
   - Affected commands:
     - `project member update-role`
