@@ -278,6 +278,7 @@ class MemberRoleType(Enum):
     DEVELOPER = "developer"
     GUEST = "guest"
     MAINTAINER = "maintainer"
+    LIMITED_GUEST = "limited_guest"
 
     @classmethod
     def from_int(cls, value: int) -> MemberRoleType:
@@ -293,11 +294,16 @@ class MemberRoleType(Enum):
             raise ValueError(f"Unknown role type: {self}")
 
 
+# NOTE: I have no idea how I managed to determine these integer values.
+# They do seem correct though, but I'd love to know how I got them, because
+# to add a new role type, we need to manually test it out in the Web UI
+# and inspect the request payload to see what integer value it sends.
 _MEMBERROLETYPE_MAPPING = {
     1: MemberRoleType.ADMIN,
     2: MemberRoleType.DEVELOPER,
     3: MemberRoleType.GUEST,
     4: MemberRoleType.MAINTAINER,
+    5: MemberRoleType.LIMITED_GUEST,
 }  # type: dict[int, MemberRoleType]
 
 _MEMBERROLETYPE_MAPPING_REVERSE = {

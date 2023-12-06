@@ -14,6 +14,8 @@ The **third number** is the patch version (bug fixes)
 
 ### Added
 
+- "limited guest" role for the relevant `project member` commands.
+
 
 ### Changed
 
