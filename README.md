@@ -43,17 +43,14 @@
 
 ## Installation
 
-
-The name `harbor-cli` is in the process of being acquired from its current owner on PyPI.
-
-In the meantime, the package can be installed directly from GitHub.
+It is highly recommended to install `harbor-cli` with [pipx](https://pipx.pypa.io/stable/). pipx installs the application in an isolated environment to avoid dependency conflicts, and makes it easy to upgrade or uninstall it afterwards.
 
 ### MacOS
 
 Install as a pipx app:
 
 ```
-pipx install git+https://github.com/pederhan/harbor-cli
+pipx install harbor-cli
 ```
 
 or through Homebrew:
@@ -70,7 +67,7 @@ Keyring functionality should work out of the box on MacOS >=11 with Python >=3.8
 
 
 ```
-pipx install git+https://github.com/pederhan/harbor-cli
+pipx install harbor-cli
 ```
 
 Depending on your Linux flavor and choice of keyring backend, you may need to install additional packages to enable keyring functionality. See the [keyring documentation](https://keyring.readthedocs.io/en/latest/#installing-keyring) for more information.
@@ -87,12 +84,10 @@ pipx inject harbor-cli <package to inject>
 ### Windows
 
 ```
-pipx install git+https://github.com/pederhan/harbor-cli
+pipx install harbor-cli
 ```
 
 Keyring functionality is untested on Windows, but should work out of the box. If you run into any issues, consult the [keyring documentation](https://github.com/jaraco/keyring#readme) for more information. Otherwise, please open an issue.
-
-
 
 
 ## Documentation
