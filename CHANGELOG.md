@@ -14,45 +14,17 @@ The **third number** is the patch version (bug fixes)
 
 ### Added
 
-- Command `find`: Search for commands by name or description.
-- Command `commands`: list all available commands.
-- Option: `user list --sort [id|username|name]`.
-- `UserResp` compact table format (used by `user list`).
-- `--paging`, `--pager` options and corresponding config options for displaying results in a pager.
-- `[output.table.style]` config section for styling Rich tables.
-- `--confirm-enumeration` option and corresponding config option `[output.confirm_enumeration]` for enabling/disabling confirmation before enumerating certain types of resources that can return a very large number of results without a limit or query.
 
 ### Changed
 
-- Global option `--format` is now case-insensitive.
-- Global options `--harbor-username`, `--harbor-secret` and `--harbor-url` have been deprecated in favor of `--username`, `--secret` and `--url`.
+- `project member` commands now take a username or ID instead of a project member ID.
+  - Affected commands:
+    - `project member update-role`
+    - `project member remove`
+  - This is more consistent with the rest of application, but less consistent with the API. In most cases, we will not know the project member ID for a given user, so this change makes it easier to use the CLI to manage project members.
+- Application now uses Pydantic V2 internally, which allows us to leverage the newest version of the API library ([harborapi](https://github.com/pederhan/harborapi/))
 
-### Fixed
-
-- Use of Python3.10 style annotations in class definitions, causing the program to not run on Python3.9 and below.
-
-### Removed
-
-- JSONSchema output format. Back to the drawing board on this one. [16b4ae6](https://github.com/pederhan/harbor-cli/commit/16b4ae608dfd41ea4dc9b94df1952d35aa2fd7b2)
-
-## [0.1.0](https://github.com/pederhan/harbor-cli/tree/harbor-cli-v0.1.0)
-
-### Changed
-
-- Update command semantics. See [#25](https://github.com/pederhan/harbor-cli/pull/25) and the [docs](https://pederhan.github.io/harbor-cli/usage/terminology/#actions-terminology).
-- Type of `str` parameters that take `"true"` and `"false"` have been changed to `bool`.
-  - Bool parameters for API commands now take the args `True`/`true`/`1` and `False`/`false`/`0`. Global options that override config commands are still flags in the form `--foo/--no-foo`.
-  - We use the validators defined on the models from `harborapi` to automatically convert these values to the strings `"true"`/`"false"` under the hood.
-
-### Fixed
-
-- Some commands were missing custom text for their spinner.
-
-### Removed
-
-- All `update --replace` parameters. Updates are now partial updates only.
-
-## [0.0.1](https://github.com/pederhan/harbor-cli/tree/harbor-cli-v0.0.1) - 2023-xx-yy
+## [0.1.0](https://github.com/pederhan/harbor-cli/tree/harbor-cli-v0.0.1) - 2023-12-06
 
 ### Added
 
