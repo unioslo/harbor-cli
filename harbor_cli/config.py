@@ -162,7 +162,7 @@ class HarborSettings(BaseModel):
     secret: SecretStr = SecretStr("")
     basicauth: SecretStr = SecretStr("")
     credentials_file: Optional[Path] = None
-    validate_data: bool = Field(True, alias="validate")
+    validate_data: bool = Field(default=True, alias="validate")
     raw_mode: bool = False
     verify_ssl: bool = True
     retry: RetrySettings = RetrySettings()
@@ -199,7 +199,12 @@ class HarborSettings(BaseModel):
         returns the secret value from the config file."""
         if self.keyring:
             try:
-                return get_password(self.username) or ""
+                password = get_password(self.username)
+                if password:
+                    return password
+                warning(
+                    f"Keyring is enabled, but no password was found for user {self.username}"
+                )
             except KeyringUnsupportedError:
                 warning(
                     "Keyring is not supported on this platform. "
@@ -207,8 +212,7 @@ class HarborSettings(BaseModel):
                 )
                 self.keyring = False  # patch it so we don't try again
                 return self.secret.get_secret_value()
-        else:
-            return self.secret.get_secret_value()
+        return self.secret.get_secret_value()
 
     @property
     def has_auth_method(self) -> bool:
@@ -402,10 +406,10 @@ class JSONSettings(BaseModel):
 class OutputSettings(BaseModel):
     format: OutputFormat = OutputFormat.TABLE
     paging: bool = Field(
-        False,
+        default=False,
         description="Show output in pager (if supported). Default pager does not support color output currently.",
     )
-    pager: str = Field("", description="Pager to use if paging is enabled.")
+    pager: str = Field(default="", description="Pager to use if paging is enabled.")
     # Naming: Don't shadow the built-in .json() method
     # The config file can still use the key "json" because of the alias
     table: TableSettings = Field(default_factory=TableSettings)
@@ -430,29 +434,31 @@ class GeneralSettings(BaseModel):
     """General settings for Harbor CLI."""
 
     confirm_deletion: bool = Field(
-        True,
+        default=True,
         description=(
             "Show confirmation prompt for resource deletion "
             "commands. E.g. `project delete`"
         ),
     )
     confirm_enumeration: bool = Field(
-        True,
+        default=True,
         description=(
             "Show confirmation prompt for certain resource enumeration "
             "commands when invoked without a limit or filter. E.g. `auditlog list`"
         ),
     )
     warnings: bool = Field(
-        True,
+        default=True,
         description="Show warning messages in terminal. Warnings are always logged regardless of this option.",
     )
 
 
 class REPLSettings(BaseModel):
-    history: bool = Field(True, description="Enable persistent history in the REPL.")
+    history: bool = Field(
+        default=True, description="Enable persistent history in the REPL."
+    )
     history_file: Path = Field(
-        DEFAULT_HISTORY_FILE,
+        default=DEFAULT_HISTORY_FILE,
         description="Path to custom location of history file.",
     )
 
@@ -468,16 +474,16 @@ class REPLSettings(BaseModel):
 
 class CacheSettings(BaseModel):
     enabled: bool = Field(
-        False,
+        default=False,
         description="Enable in-memory caching of API responses. This can significantly speed up Harbor CLI, but should be considered experimental for now.",
     )
     ttl: int = Field(
-        300,
+        default=300,
         description="Time to live for cached responses, in seconds.",
     )
     # TODO: implement max_size
     # max_size: int = Field(
-    #     1000,
+    #     default=1000,
     #     description="Maximum number of cached responses.",
     # )
 
@@ -490,7 +496,7 @@ class HarborCLIConfig(BaseModel):
     cache: CacheSettings = Field(default_factory=CacheSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     config_file: Optional[Path] = Field(
-        None, exclude=True, description="Path to config file (if any)."
+        default=None, exclude=True, description="Path to config file (if any)."
     )  # populated by CLI if loaded from file
 
     @classmethod
