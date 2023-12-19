@@ -27,30 +27,45 @@ err_console = Console(
 )
 
 
-def info(message: str, icon: str = Icon.INFO, *args, **kwargs) -> None:
+def _do_rule(rule: bool) -> None:
+    if rule:
+        err_console.rule()
+
+
+def info(message: str, icon: str = Icon.INFO, rule: bool = False, **kwargs) -> None:
     """Log with INFO level and print an informational message."""
     logger.info(message, extra=dict(**kwargs))
+    _do_rule(rule)
     err_console.print(f"{green(icon)} {message}")
 
 
-def success(message: str, icon: str = Icon.OK, **kwargs) -> None:
+def success(message: str, icon: str = Icon.OK, rule: bool = False, **kwargs) -> None:
     """Log with DEBUG level and print a success message."""
     logger.debug(message, extra=dict(**kwargs))
+    _do_rule(rule)
     err_console.print(f"{green(icon)} {message}")
 
 
-def warning(message: str, icon: str = Icon.WARNING, **kwargs) -> None:
+def warning(
+    message: str, icon: str = Icon.WARNING, rule: bool = False, **kwargs
+) -> None:
     """Log with WARNING level and optionally print a warning message."""
     logger.warning(message, extra=dict(**kwargs))
     if get_state().config.general.warnings:
+        _do_rule(rule)
         err_console.print(bold(f"{yellow(icon)} {message}"))
 
 
 def error(
-    message: str, icon: str = Icon.ERROR, exc_info: bool = False, **kwargs
+    message: str,
+    icon: str = Icon.ERROR,
+    exc_info: bool = False,
+    rule: bool = False,
+    **kwargs,
 ) -> None:
     """Log with ERROR level and print an error message."""
     logger.error(message, extra=dict(**kwargs), exc_info=exc_info)
+    _do_rule(rule)
     err_console.print(bold(f"{red(icon)} {message}"))
 
 
