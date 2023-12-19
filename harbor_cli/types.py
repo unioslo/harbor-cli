@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 import typing
 from collections import abc
 from typing import Any
@@ -50,6 +51,13 @@ if TYPE_CHECKING:
 
 
 T = TypeVar("T")
+
+if sys.version_info >= (3, 10):
+    from types import EllipsisType as EllipsisType
+else:
+    # EllipsisType was introduced in 3.10
+    # NOTE: not really sure why mypy doesn't accept type(Ellipsis) as a type...
+    EllipsisType = Any
 
 SEQUENCE_TYPES = (Sequence, abc.Sequence, list, List, tuple, Tuple, set, Set)
 

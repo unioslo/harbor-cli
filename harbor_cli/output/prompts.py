@@ -1,11 +1,17 @@
 from __future__ import annotations
 
 import math
+import os
+from functools import wraps
 from pathlib import Path
 from typing import Any
+from typing import Callable
+from typing import cast
 from typing import overload
 from typing import Type
 from typing import TYPE_CHECKING
+from typing import TypeVar
+from typing import Union
 
 from rich.prompt import Confirm
 from rich.prompt import FloatPrompt
@@ -19,7 +25,7 @@ if TYPE_CHECKING:
     from ..state import State
 
 from ..style import STYLE_CLI_OPTION
-from .console import console
+from .console import console, exit_err
 from .console import error
 from .console import exit
 from .console import warning
@@ -27,12 +33,54 @@ from ..style.color import yellow
 from ..style.color import green
 from ..style import Icon
 from .formatting.path import path_link
+from ..types import EllipsisType
+
+from typing_extensions import ParamSpec
+
+
+T = TypeVar("T")
+P = ParamSpec("P")
+
+
+def no_headless(f: Callable[P, T]) -> Callable[P, T]:
+    """Decorator that causes application to exit if called from a headless environment."""
+
+    @wraps(f)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+        if is_headless():
+            # TODO: determine caller etc. via the stack
+            # If a default argument was passed in, we can return that:
+            # NOTE: this disallows None as a default value, but that is consistent
+            # with the type annotations of the prompt functions, so it's fine...?
+            default = cast(Union[T, EllipsisType], kwargs.get("default"))
+            if "default" in kwargs and default not in [None, ...]:
+                return default
+            prompt = args[0] if args else kwargs.get("prompt") or ""
+            exit_err(
+                f"Headless session detected; user input required when prompting for {prompt!r}.",
+                args=args,
+                kwargs=kwargs,
+            )
+        return f(*args, **kwargs)
+
+    return wrapper
+
+
+def is_headless() -> bool:
+    """Determines if we are running in a headless environment (e.g. CI, Docker, etc.)"""
+    if os.environ.get("CI", None):
+        return True
+    elif os.environ.get("DEBIAN_FRONTEND", None) == "noninteractive":
+        return True
+    # Probably not safe to test "DISPLAY" here
+    return False
 
 
 def prompt_msg(*msgs: str) -> str:
     return f"[bold]{green(Icon.PROMPT)} {' '.join(msg.strip() for msg in filter(None, msgs))}[/bold]"
 
 
+@no_headless
 def str_prompt(
     prompt: str,
     default: Any = ...,
@@ -96,6 +144,7 @@ def str_prompt(
     return inp
 
 
+@no_headless
 def int_prompt(
     prompt: str,
     default: int | None = None,
@@ -221,6 +270,7 @@ def _number_prompt(
         return val
 
 
+@no_headless
 def bool_prompt(
     prompt: str,
     default: Any = ...,
@@ -237,6 +287,7 @@ def bool_prompt(
     )
 
 
+@no_headless
 def path_prompt(
     prompt: str,
     default: Any = ...,
@@ -269,6 +320,7 @@ def path_prompt(
             return path
 
 
+@no_headless
 def delete_prompt(
     config: HarborCLIConfig,
     force: bool,
