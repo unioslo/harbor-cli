@@ -193,7 +193,7 @@ def handle_exception(e: Exception) -> NoReturn:
     """Handles an exception and exits with the appropriate message."""
     from .output.console import exit_err  # avoid circular import
 
-    # TODO: resolve circular imports by lazy-importig OverwriteError in output.render
+    # TODO: resolve circular imports by lazy-importing OverwriteError in output.render
 
     exiter = cast(Exiter, exit_err)
 

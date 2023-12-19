@@ -359,7 +359,6 @@ def main_callback(
         state.config.harbor.retry.max_tries = harbor_retry_max_tries
     if harbor_retry_max_time is not None:
         state.config.harbor.retry.max_time = harbor_retry_max_time
-
     # Output
     if compact is not None:
         state.config.output.table.compact = compact

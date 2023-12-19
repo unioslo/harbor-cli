@@ -18,7 +18,8 @@ BaseModelType = TypeVar("BaseModelType", bound=BaseModel)
 def model_params_from_ctx(
     ctx: typer.Context, model: Type[BaseModel], filter_none: bool = True
 ) -> dict[str, Any]:
-    """Get fields from a Typer context that are valid for a model.
+    """Get CLI options from a Typer context that correspond with Pydantic
+    model field names.
 
     Given a command where the function parameter names match the
     model field names, the function returns a dict of the parameters
@@ -339,7 +340,7 @@ def _get_id_name_arg(resource_type: str, name_or_id: str) -> str | int:
     try:
         return int(resource_id)
     except ValueError:
-        exit_err(f"Invalid {resource_type} ID: {name_or_id} is not an integer.")
+        exit_err(f"Invalid {resource_type} ID: {name_or_id}.")
 
 
 def get_project_arg(project_name_or_id: str) -> str | int:
