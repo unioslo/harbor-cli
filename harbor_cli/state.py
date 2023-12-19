@@ -41,7 +41,8 @@ class CommonOptions(BaseModel):
 
 class State:
     """Object that encapsulates the current state of the application.
-    Holds the current configuration, harbor client, and other stateful objects.
+    Holds the current configuration, harbor client, and other stateful objects
+    that we want access to inside commands.
     """
 
     _instance = None
@@ -84,7 +85,10 @@ class State:
             self.config = config
         if client:
             self.client = client
-        self.loop = asyncio.get_event_loop()
+        try:
+            self.loop = asyncio.get_running_loop()
+        except RuntimeError:
+            self.loop = asyncio.new_event_loop()
         self.options = CommonOptions()
 
     @property
@@ -99,7 +103,7 @@ class State:
         # and then we can prompt the user for it.
         # We have to keep re-using this client object, because it's directly
         # referenced by the various commands, so we have to patch it in-place
-        # when we get the authentication info.
+        # when we receive new authentication info.
         if self._client is None:
             # Direct assignment to avoid triggering the setter
             self._client = HarborAsyncClient(
@@ -198,10 +202,7 @@ class State:
             warning(
                 "Harbor authentication method is missing or incomplete in configuration file."
             )
-            username, secret = prompt_username_secret(
-                self.config.harbor.username,
-                self.config.harbor.secret_value,
-            )
+            username, secret = prompt_username_secret(self.config.harbor.username, "")
             self.config.harbor.username = username
             self.config.harbor.secret = secret  # type: ignore # pydantic.SecretStr
             warning(
@@ -275,9 +276,6 @@ class State:
             handle_exception(e)
             # fmt: on
         return resp
-
-
-_STATE = None  # type: State | None
 
 
 def get_state() -> State:
