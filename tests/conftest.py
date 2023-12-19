@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 from typing import Generator
 from typing import IO
+from typing import Iterator
 from typing import Mapping
 from typing import Protocol
 
@@ -14,6 +15,7 @@ import click
 import pytest
 import typer
 from harborapi import HarborAsyncClient
+from pydantic import SecretStr
 from typer.testing import CliRunner
 from typer.testing import Result
 
@@ -42,18 +44,20 @@ def dumb_terminal():
 
 
 @pytest.fixture(scope="function")
-def config() -> HarborCLIConfig:
+def config(log_dir: Path) -> HarborCLIConfig:
+    """Config object for testing."""
     conf = HarborCLIConfig()
     # These are required to run commands
     conf.harbor.url = "https://harbor.example.com/api/v2.0"
     conf.harbor.username = "admin"
-    conf.harbor.secret = "password"  # type: ignore
+    conf.harbor.secret = SecretStr("password")
+    conf.logging.directory = log_dir
     return conf
 
 
 @pytest.fixture()
 def config_file(tmp_path: Path, config: HarborCLIConfig) -> Path:  # type: ignore
-    """Setup the CLI config for testing."""
+    """Creates a file containing the contents of the testing config."""
     conf_path = tmp_path / "config.toml"
     config.save(conf_path)
     yield conf_path
@@ -71,7 +75,10 @@ def harbor_client(config: HarborCLIConfig) -> HarborAsyncClient:
 
 @pytest.fixture(name="state", scope="function")
 def _state_fixture(
-    config: HarborCLIConfig, harbor_client: HarborAsyncClient, config_file: Path
+    config: HarborCLIConfig,
+    harbor_client: HarborAsyncClient,
+    config_file: Path,
+    tmp_path: Path,
 ) -> state.State:
     """Fixture for testing the state."""
     st = state.get_state()  # Initialize the state
@@ -79,6 +86,13 @@ def _state_fixture(
     st.config = config
     st.client = harbor_client
     yield st
+
+
+@pytest.fixture(scope="session")
+def log_dir(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path]:
+    """Creates a session-scoped temp dir for log files."""
+    log_dir = tmp_path_factory.mktemp("logs")
+    yield log_dir
 
 
 class PartialInvoker(Protocol):
