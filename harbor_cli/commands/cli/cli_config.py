@@ -16,11 +16,11 @@ from ...config import DEFAULT_CONFIG_FILE
 from ...config import EnvVar
 from ...config import HarborCLIConfig
 from ...models import BaseModel
-from ...output.console import console
 from ...output.console import error
 from ...output.console import exit
 from ...output.console import exit_err
 from ...output.console import info
+from ...output.console import print_toml
 from ...output.console import success
 from ...output.formatting.path import path_link
 from ...output.render import render_result
@@ -45,7 +45,7 @@ app = typer.Typer(
 
 def render_config(config: HarborCLIConfig, as_toml: bool) -> None:
     if as_toml:
-        console.print(config.toml(expose_secrets=False), markup=False)
+        print_toml(config.toml(expose_secrets=False))
     else:
         render_result(config)
 
@@ -93,7 +93,7 @@ def get_cli_config(
     else:
         render_config(state.config, as_toml)
         if state.config.config_file is not None:
-            info(f"Source: {path_link(state.config.config_file)}")
+            info(f"Source: {path_link(state.config.config_file)}", rule=True)
 
 
 @app.command(

@@ -86,3 +86,13 @@ def exit_err(message: str, code: int = 1, **kwargs: Any) -> NoReturn:
     """
     error(message, **kwargs)
     raise SystemExit(code)
+
+
+def print_toml(toml_str: str, end: str = "\n") -> None:
+    """Prints TOML to stdout using the default console."""
+    console.print(
+        toml_str,
+        markup=False,  # TOML tables could be interpreted as rich markup
+        soft_wrap=True,  # prevents mangling whitespace
+        end=end,  # Allow control of trailing newline
+    )
