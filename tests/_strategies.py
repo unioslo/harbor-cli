@@ -30,7 +30,7 @@ for model in RENDER_FUNCTIONS.keys():
             warnings.simplefilter("ignore")
             strategy.example()
     except (ValidationError, TypeError):
-        logging.debug(f"Skipping {model} for table rendering tests.")
+        logging.warning(f"Skipping {model} for table rendering tests.")
         continue
     COMPACT_TABLE_MODELS.append(strategy)
     if not COMPACT_TABLE_MODELS:
