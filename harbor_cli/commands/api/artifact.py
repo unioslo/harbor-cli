@@ -3,7 +3,6 @@ from __future__ import annotations
 import re
 from datetime import datetime
 from typing import Any
-from typing import cast
 from typing import Dict
 from typing import Iterable
 from typing import List
@@ -20,7 +19,6 @@ from harborapi.ext.api import get_artifacts
 from harborapi.ext.artifact import ArtifactInfo
 from harborapi.ext.report import ArtifactReport
 from harborapi.models import Label
-from harborapi.models import NativeReportSummary
 from harborapi.models import Tag
 from harborapi.models.scanner import Severity
 from pydantic import BaseModel as PydanticBaseModel
@@ -35,8 +33,8 @@ from ...models import ArtifactVulnerabilitySummary
 from ...models import BaseModel
 from ...models import Operator
 from ...output.console import error
-from ...output.console import exit
 from ...output.console import exit_err
+from ...output.console import exit_ok
 from ...output.console import info
 from ...output.console import warning
 from ...output.prompts import bool_prompt
@@ -548,18 +546,11 @@ class ArtifactDeletion:
         return self._check_criteria()
 
     def exceeds_severity(self) -> bool:
-        if self.severity and self.artifact.artifact.scan_overview is not None:
-            overview = self.artifact.artifact.scan_overview
-            # As long as we do metaprogramming magic in the constructor of
-            # Artifact.scan_overview, we need to do this check.
-            if not hasattr(overview, "severity_enum"):
+        if self.severity and self.artifact.artifact.scan is not None:
+            overview = self.artifact.artifact.scan
+            if not overview.severity_enum:
                 return False
-            o = cast(
-                NativeReportSummary, overview
-            )  # Not sure why mypy won't let us do this cast to the overview var
-            if not o.severity_enum:
-                return False
-            if o.severity_enum >= self.severity:
+            if overview.severity_enum >= self.severity:
                 return True
         return False
 
@@ -700,7 +691,7 @@ def cleanup_artifacts(
             if not artifact.artifact.digest:
                 exit_err(
                     f"Artifact {artifact.name_with_tag!r} has no digest, this should not happen. Check the logs for more information.",
-                    artifact=artifact.dict(),
+                    artifact=artifact.model_dump(),
                 )
             to_delete.append(d)
             logger.debug(
@@ -809,12 +800,14 @@ class AffectedArtifactList(BaseModel):
         a.packages.update(artifact.packages)
 
     def as_table(self, **kwargs: Any) -> Iterable[Table]:  # type: ignore
-        table = get_table("Artifacts")
-        table.add_column("Name", overflow="fold")
-        table.add_column("Tags")
-        table.add_column("Matches")
-        # table.add_column("Vulnerabilities")
-        # table.add_column("Packages")
+        table = get_table(
+            "Artifacts",
+            columns=[
+                "Name",
+                "Tags",
+                "Matches",
+            ],
+        )
 
         for artifact in self.artifacts.values():
             match_table = get_table(columns=["Vulnerabilities", "Packages"])
@@ -878,30 +871,24 @@ def list_artifact_vulnerabilities_summary(
     ),
 ) -> None:
     """Show a summary of vulnerabilities for artifacts in a project or repository."""
-    ctx_key = f"{ctx.command_path} {sorted(ctx.params['project'])} {sorted(ctx.params['repo'])} {ctx.params['query']}"
-
-    if (cached := state.cache.get(ctx_key, List[ArtifactInfo])) is not None:
-        result = cached
-    else:
-        # TODO: check_enumeration_options when no projects and no repos
-        result = state.run(
-            get_artifacts(
-                state.client,
-                projects=project if project else None,
-                repositories=repo if repo else None,
-                query=query,
-                with_report=True,
-            ),
-            "Fetching artifacts...",
-        )
-        state.cache.set(ctx_key, result)
+    # TODO: check_enumeration_options when no projects and no repos
+    result = state.run(
+        get_artifacts(
+            state.client,
+            projects=project if project else None,
+            repositories=repo if repo else None,
+            query=query,
+            with_report=True,
+        ),
+        "Fetching artifacts...",
+    )
 
     # fmt: off
     if sort == ArtifactSummarySorting.total:
         # Most -> Least (total vulnerabilities)
         def sort_key(a: ArtifactInfo) -> int:
             try:
-                return a.artifact.scan_overview.summary.total or 0  # type: ignore
+                return a.artifact.scan.summary.total or 0  # type: ignore
             except AttributeError:
                 return 0
     elif sort == ArtifactSummarySorting.severity:
@@ -920,7 +907,7 @@ def list_artifact_vulnerabilities_summary(
         #
         # Example:
         # try:
-        #    summary = a.artifact.scan_overview.summary
+        #    summary = a.artifact.scan.summary
         # except AttributeError:
         #    return 0
         #
@@ -930,7 +917,7 @@ def list_artifact_vulnerabilities_summary(
         # return 0
         def sort_key(a: ArtifactInfo) -> int:
             try:
-                return a.artifact.scan_overview.summary.critical or 0  # type: ignore
+                return a.artifact.scan.summary.critical or 0  # type: ignore
             except AttributeError:
                 return 0
     elif sort == ArtifactSummarySorting.name:
@@ -1031,7 +1018,7 @@ def get_vulnerabilities(
             "to limit the scope of the operation."
         )
         if not bool_prompt("Continue", default=False):
-            exit()
+            exit_ok()
     elif not project:
         warning("Fetching from all projects can be slow even with a repository filter.")
 

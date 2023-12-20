@@ -3,7 +3,6 @@ from __future__ import annotations
 import sys
 from pathlib import Path
 from typing import NamedTuple
-from typing import Sequence
 
 import yaml  # type: ignore
 
@@ -15,21 +14,25 @@ sys.path.append(Path(__file__).parent.as_posix())
 from common import DATA_DIR  # noqa
 
 
-def maybe_list_to_str(text: str | list[str] | None) -> str | None:
+def convert_envvar_value(text: str | list[str] | None) -> list[str] | None:
     # The envvars might actually be instances of `harbor_cli.config.EnvVar`,
     # which the YAML writer does not convert to strings. Hence `str(...)`
-    if text is None:
-        return None
-    if isinstance(text, str):
-        return str(text)
-    return ", ".join([str(t) for t in text])
+    if isinstance(text, list):
+        return [str(t) for t in text]
+    elif isinstance(text, str):
+        # convert to str (might be enum) and wrap in list
+        return [str(text)]
+    elif text is None:
+        return []
+    else:
+        raise ValueError(f"Unexpected option env var type {type(text)} ({text})")
 
 
 # name it OptInfo to avoid confusion with typer.models.OptionInfo
 class OptInfo(NamedTuple):
-    params: Sequence[str]
+    params: list[str]
     help: str | None
-    envvar: str | list[str] | None
+    envvar: list[str]
     config_value: str | None
 
     @property
@@ -38,11 +41,11 @@ class OptInfo(NamedTuple):
             return None
         return self.config_value.replace(".", "")
 
-    def to_dict(self) -> dict[str, str | None]:
+    def to_dict(self) -> dict[str, str | list[str] | None]:
         return {
             "params": ", ".join(f"`{p}`" for p in self.params),
             "help": self.help or "",
-            "envvar": maybe_list_to_str(self.envvar),
+            "envvar": convert_envvar_value(self.envvar),
             "config_value": self.config_value,
             "fragment": self.fragment,
         }

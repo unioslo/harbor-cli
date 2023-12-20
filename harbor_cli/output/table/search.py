@@ -34,11 +34,16 @@ def search_panel(search: Sequence[Search], **kwargs: Any) -> Panel:
 
 
 def searchrepo_table(repos: Sequence[SearchRepository], **kwargs: Any) -> Table:
-    table = get_table("Repository", repos)
-    table.add_column("Project")
-    table.add_column("Name")
-    table.add_column("Artifacts")
-    table.add_column("Public")
+    table = get_table(
+        "Repository",
+        repos,
+        columns=[
+            "Project",
+            "Name",
+            "Artifacts",
+            "Public",
+        ],
+    )
     for repo in repos:
         table.add_row(
             str(repo.project_name),

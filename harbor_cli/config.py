@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import json
 import os
 from datetime import datetime
 from pathlib import Path
@@ -8,16 +7,20 @@ from typing import Any
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
+from typing import TYPE_CHECKING
 from typing import TypedDict
 from typing import Union
 
 import tomli
 import tomli_w
 from harborapi.models.base import BaseModel as HarborBaseModel
+from pydantic import AliasChoices
+from pydantic import ConfigDict
 from pydantic import Field
-from pydantic import root_validator
+from pydantic import field_serializer
+from pydantic import field_validator
+from pydantic import model_validator
 from pydantic import SecretStr
-from pydantic import validator
 from strenum import StrEnum
 
 from .dirs import CONFIG_DIR
@@ -36,6 +39,9 @@ from .style import STYLE_TABLE_HEADER
 from .utils import replace_none
 from .utils.keyring import get_password
 from .utils.keyring import KeyringUnsupportedError
+
+if TYPE_CHECKING:
+    from harbor_cli.types import RichTableKwargs
 
 
 DEFAULT_CONFIG_FILE = CONFIG_DIR / "config.toml"
@@ -78,8 +84,6 @@ class EnvVar(StrEnum):
     CONFIRM_DELETION = env_var("confirm_deletion")
     CONFIRM_ENUMERATION = env_var("confirm_enumeration")
     WARNINGS = env_var("warnings")
-    CACHE_ENABLED = env_var("cache_enabled")
-    CACHE_TTL = env_var("cache_ttl")
 
     def __str__(self) -> str:
         return self.value
@@ -111,7 +115,8 @@ class BaseModel(HarborBaseModel):
 
     # https://pydantic-docs.helpmanual.io/usage/model_config/#change-behaviour-globally
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
+    @classmethod
     def _pre_root_validator(cls, values: dict[str, Any]) -> dict[str, Any]:
         """Checks for unknown fields and logs a warning if any are found.
 
@@ -122,7 +127,7 @@ class BaseModel(HarborBaseModel):
         See: Config class below.
         """
         for key in values:
-            if key not in cls.__fields__:
+            if key not in cls.model_fields:
                 logger.warning(
                     "%s: Got unknown config key '%s'.",
                     getattr(cls, "__name__", str(cls)),
@@ -130,11 +135,7 @@ class BaseModel(HarborBaseModel):
                 )
         return values
 
-    class Config:
-        # Allow for future fields to be added to the config file without
-        # breaking older versions of Harbor CLI
-        extra = "allow"
-        validate_assignment = True
+    model_config = ConfigDict(extra="allow", validate_assignment=True)
 
 
 class HarborCredentialsKwargs(TypedDict):
@@ -159,14 +160,15 @@ class HarborSettings(BaseModel):
     username: str = ""
     secret: SecretStr = SecretStr("")
     basicauth: SecretStr = SecretStr("")
-    credentials_file: Optional[Path] = ""  # type: ignore # validator below
-    validate_data: bool = Field(True, alias="validate")
+    credentials_file: Optional[Path] = None
+    validate_data: bool = Field(default=True, alias="validate")
     raw_mode: bool = False
     verify_ssl: bool = True
     retry: RetrySettings = RetrySettings()
     keyring: bool = False
 
-    @validator("credentials_file", pre=True)
+    @field_validator("credentials_file", mode="before")
+    @classmethod
     def _empty_string_is_none(cls, v: Any) -> Any:
         """We can't serialize None to TOML, so we convert it to an empty string.
         However, passing an empty string to Path() will return the current working
@@ -176,7 +178,8 @@ class HarborSettings(BaseModel):
             return None
         return v
 
-    @validator("credentials_file", always=True)
+    @field_validator("credentials_file", mode="after")
+    @classmethod
     def _validate_credentials_file(cls, v: Path | None) -> Path | None:
         if v is not None:
             if not v.exists():
@@ -185,13 +188,22 @@ class HarborSettings(BaseModel):
                 raise ValueError(f"Credentials file {v} is not a file")
         return v
 
+    @field_serializer("secret", "basicauth")
+    def _serialize_secret_str(self, v: SecretStr) -> str:
+        return v.get_secret_value()
+
     @property
     def secret_value(self) -> str:
         """Returns the secret value from the keyring if enabled, otherwise
         returns the secret value from the config file."""
         if self.keyring:
             try:
-                return get_password(self.username) or ""
+                password = get_password(self.username)
+                if password:
+                    return password
+                warning(
+                    f"Keyring is enabled, but no password was found for user {self.username}"
+                )
             except KeyringUnsupportedError:
                 warning(
                     "Keyring is not supported on this platform. "
@@ -199,8 +211,7 @@ class HarborSettings(BaseModel):
                 )
                 self.keyring = False  # patch it so we don't try again
                 return self.secret.get_secret_value()
-        else:
-            return self.secret.get_secret_value()
+        return self.secret.get_secret_value()
 
     @property
     def has_auth_method(self) -> bool:
@@ -258,15 +269,23 @@ class LoggingSettings(BaseModel):
     enabled: bool = True
     level: LogLevel = LogLevel.WARNING
     directory: Path = LOGS_DIR
-    filename: str = "harbor_cli-{time}.log"
-    timeformat: str = "%Y-%m-%d"
+    filename: str = "harbor-cli.log"
+    datetime_format: str = Field(
+        default="%Y-%m-%d",
+        validation_alias=AliasChoices(
+            "datetime_format",
+            "timeformat",  # Old name (deprecated)
+        ),
+    )
     retention: int = 30
 
     @property
     def path(self) -> Path:
         """Full time-formatted path to log file."""
         return self.directory / self.filename.format(
-            time=datetime.now().strftime(self.timeformat)
+            dt=datetime.now().strftime(self.datetime_format),
+            # Deprecated format placeholder:
+            time=datetime.now().strftime(self.datetime_format),
         )
 
 
@@ -282,7 +301,8 @@ class TableStyleSettings(BaseModel):
     bool_emoji: bool = False
     # TODO: box
 
-    @validator("rows", pre=True)
+    @field_validator("rows", mode="before")
+    @classmethod
     def _validate_rows(
         cls, v: Optional[Union[Tuple[str, str], str]]
     ) -> Optional[Tuple[str, ...]]:
@@ -322,7 +342,8 @@ class TableStyleSettings(BaseModel):
         return vv
 
     # TODO add * validator that turns empty strings into None?
-    @validator("*")
+    @field_validator("*")
+    @classmethod
     def _empty_string_is_none(cls, v: Any) -> Any:
         """TOML has no None support, but we need to pass these kwargs to
         Rich's Table constructor, which does uses None. So we convert
@@ -331,17 +352,15 @@ class TableStyleSettings(BaseModel):
             return None
         return v
 
-    def as_rich_kwargs(self) -> dict[str, Optional[Union[str, Tuple[str, str], bool]]]:
+    def as_rich_kwargs(self) -> RichTableKwargs:
         """Converts the TableStyleSettings to a dictionary that can be passed
         to Rich's Table constructor.
 
         Returns
         -------
-        Dict[str, Optional[str]]
+        RichTableKwargs
             A dictionary of Rich Table style settings.
         """
-        # TODO: define return type as a TypedDict, which can then be used
-        # to type check the kwargs we pass to Rich's Table constructor.
         return {
             "border_style": self.border,
             "caption_style": self.caption,
@@ -364,7 +383,8 @@ class TableSettings(BaseModel):
     # max_width: Optional[int] = None
     # max_lines: Optional[int] = None
 
-    @validator("max_depth", pre=True)
+    @field_validator("max_depth", mode="before")
+    @classmethod
     def check_max_depth(cls, v: Any) -> Any:
         """Converts max_depth to an integer, and checks that it is not negative."""
         if v is None:
@@ -393,16 +413,17 @@ class JSONSettings(BaseModel):
 class OutputSettings(BaseModel):
     format: OutputFormat = OutputFormat.TABLE
     paging: bool = Field(
-        False,
+        default=False,
         description="Show output in pager (if supported). Default pager does not support color output currently.",
     )
-    pager: str = Field("", description="Pager to use if paging is enabled.")
+    pager: str = Field(default="", description="Pager to use if paging is enabled.")
     # Naming: Don't shadow the built-in .json() method
     # The config file can still use the key "json" because of the alias
     table: TableSettings = Field(default_factory=TableSettings)
     JSON: JSONSettings = Field(default_factory=JSONSettings, alias="json")
 
-    @validator("pager")
+    @field_validator("pager")
+    @classmethod
     def set_pager(cls, v: Optional[str]) -> Optional[str]:
         """Validator that sets the MANPAGER environment variable if a pager is set.
         https://rich.readthedocs.io/en/stable/console.html#paging
@@ -413,65 +434,65 @@ class OutputSettings(BaseModel):
         os.environ["PAGER"] = v
         return v
 
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class GeneralSettings(BaseModel):
     """General settings for Harbor CLI."""
 
     confirm_deletion: bool = Field(
-        True,
+        default=True,
         description=(
             "Show confirmation prompt for resource deletion "
             "commands. E.g. `project delete`"
         ),
     )
     confirm_enumeration: bool = Field(
-        True,
+        default=True,
         description=(
             "Show confirmation prompt for certain resource enumeration "
             "commands when invoked without a limit or filter. E.g. `auditlog list`"
         ),
     )
     warnings: bool = Field(
-        True,
+        default=True,
         description="Show warning messages in terminal. Warnings are always logged regardless of this option.",
     )
 
 
 class REPLSettings(BaseModel):
-    history: bool = Field(True, description="Enable persistent history in the REPL.")
+    history: bool = Field(
+        default=True, description="Enable persistent history in the REPL."
+    )
     history_file: Path = Field(
-        DEFAULT_HISTORY_FILE,
+        default=DEFAULT_HISTORY_FILE,
         description="Path to custom location of history file.",
     )
 
-    @validator("history_file", always=True)
-    def _create_history_file_if_not_exists(
-        cls, v: Path, values: dict[str, Any]
-    ) -> Path:
-        history_enabled = values.get("history", False)
-        if not history_enabled:
-            return v
-        if not v.exists():
-            v.parent.mkdir(parents=True, exist_ok=True)
-            v.touch()
-        return v
+    @model_validator(mode="after")
+    def _create_history_file_if_not_exists(self) -> "REPLSettings":
+        if not self.history:
+            return self
+        if not self.history_file.exists():
+            self.history_file.parent.mkdir(parents=True, exist_ok=True)
+            self.history_file.touch()
+        return self
 
 
 class CacheSettings(BaseModel):
+    """DEPRECATED: Caching was removed in 0.2.0. This class is left here for compatibility."""
+
     enabled: bool = Field(
-        False,
+        default=False,
         description="Enable in-memory caching of API responses. This can significantly speed up Harbor CLI, but should be considered experimental for now.",
     )
     ttl: int = Field(
-        300,
+        default=300,
         description="Time to live for cached responses, in seconds.",
     )
     # TODO: implement max_size
     # max_size: int = Field(
-    #     1000,
+    #     default=1000,
     #     description="Maximum number of cached responses.",
     # )
 
@@ -484,23 +505,8 @@ class HarborCLIConfig(BaseModel):
     cache: CacheSettings = Field(default_factory=CacheSettings)
     logging: LoggingSettings = Field(default_factory=LoggingSettings)
     config_file: Optional[Path] = Field(
-        None, exclude=True, description="Path to config file (if any)."
+        default=None, exclude=True, description="Path to config file (if any)."
     )  # populated by CLI if loaded from file
-
-    class Config:
-        json_encoders = {
-            SecretStr: lambda v: v.get_secret_value() if v else None,
-        }
-
-    def __copy__(self) -> HarborCLIConfig:
-        """Create a copy of the config object that includes the config file
-        path, so that it can be saved to the same file."""
-        return self.copy(update={"config_file": self.config_file})
-
-    def __deepcopy__(self, memo: dict) -> HarborCLIConfig:
-        """Create a copy of the config object that includes the config file
-        path, so that it can be saved to the same file."""
-        return self.copy(update={"config_file": self.config_file}, deep=True)
 
     @classmethod
     def from_file(
@@ -554,8 +560,7 @@ class HarborCLIConfig(BaseModel):
         **kwargs: Any,
     ) -> str:
         """Return a TOML representation of the config object.
-        In order to serialize all types properly, the serialization takes
-        a round-trip through the Pydantic JSON converter.
+        None values are replaced with empty strings (bad?)
 
         Parameters
         ----------
@@ -572,19 +577,9 @@ class HarborCLIConfig(BaseModel):
         -------
         str
             TOML representation of the config as a string.
-
-        See Also
-        --------
-        `BaseModel.json()` <https://pydantic-docs.helpmanual.io/usage/exporting_models/#modeljson>
         """
         tomli_kwargs = tomli_kwargs or {}
-
-        # Roundtrip through JSON to get dict of builtin types
-        #
-        # Also replace None values with empty strings, because:
-        # 1. TOML doesn't have a None type
-        # 2. Show users that these values _can_ be configured
-        dict_basic_types = replace_none(json.loads(self.json(**kwargs)))
+        dict_basic_types = replace_none(self.model_dump(mode="json", **kwargs))
 
         if not expose_secrets:
             for key in ["secret", "basicauth", "credentials_file"]:

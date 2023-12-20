@@ -25,7 +25,7 @@ def main() -> None:
         category = command.category or ""
         if category not in categories:
             categories[category] = []
-        cmd_dict = command.dict()
+        cmd_dict = command.model_dump()
         cmd_dict["usage"] = command.usage
         categories[category].append(cmd_dict)
 

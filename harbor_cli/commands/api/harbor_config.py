@@ -52,7 +52,7 @@ def flatten_config_response(response: ConfigurationsResponse) -> dict[str, Any]:
     """
     # A ConfigurationsResponse contains {String,Int,Bool}ConfigItem objects
     # which has the fields "value" and "editable".
-    c = response.dict()
+    c = response.model_dump()
     for key, value in list(c.items()):
         if value is None:
             del c[key]
@@ -79,7 +79,7 @@ def get_config(
         # In order to print a flattened response, we turn it from a
         # ConfigurationsResponse to a Configurations object.
         flattened = flatten_config_response(system_info)
-        c = Configurations.parse_obj(flattened)
+        c = Configurations.model_validate(flattened)
         render_result(c, ctx)
     else:
         render_result(system_info, ctx)
@@ -360,7 +360,7 @@ def update_config(
     c = flatten_config_response(current_config)
     c.update(params)
 
-    configuration = Configurations.parse_obj(c)
+    configuration = Configurations.model_validate(c)
 
     state.run(
         state.client.update_config(configuration),

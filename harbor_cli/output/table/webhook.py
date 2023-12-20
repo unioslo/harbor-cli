@@ -27,7 +27,7 @@ def supported_events_table(
         nt = events.notify_type or []
         for event, notify in zip_longest(ev, nt, fillvalue=None):
             table.add_row(
-                str_str(event.__root__ if event else ""),
-                str_str(notify.__root__ if notify else ""),
+                str_str(event.root if event else ""),
+                str_str(notify.root if notify else ""),
             )
     return table

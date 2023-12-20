@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 from typing import Generator
 from typing import IO
+from typing import Iterator
 from typing import Mapping
 from typing import Protocol
 
@@ -14,9 +15,11 @@ import click
 import pytest
 import typer
 from harborapi import HarborAsyncClient
+from pydantic import SecretStr
 from typer.testing import CliRunner
 from typer.testing import Result
 
+from harbor_cli import logs
 from harbor_cli import state
 from harbor_cli.config import EnvVar
 from harbor_cli.config import HarborCLIConfig
@@ -25,6 +28,28 @@ from harbor_cli.main import app as main_app
 from harbor_cli.utils.keyring import keyring_supported
 
 runner = CliRunner(mix_stderr=False)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def unset_ci_env_vars() -> None:
+    """Unset environment variables that may be set by CI.
+
+    Our tests mock stdin for prompts, so the @no_headless decorator
+    does not apply for these tests. Instead of adding some complicated
+    logic to the decorator, we just pretend like we're not in CI
+    for the entire test session.
+
+    Tests that need to test the @no_headless decorator should
+    explicitly set the environment variables."""
+    for var in ["CI", "DEBIAN_FRONTEND"]:
+        os.environ.pop(var, None)
+
+
+@pytest.fixture(scope="function")
+def monkeypatch_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Fixture that monkeypatches the environment."""
+    monkeypatch.setenv("CI", "1")
+    monkeypatch.setenv("DEBIAN_FRONTEND", "noninteractive")
 
 
 @pytest.fixture(scope="session")
@@ -42,18 +67,26 @@ def dumb_terminal():
 
 
 @pytest.fixture(scope="function")
-def config() -> HarborCLIConfig:
+def config(log_dir: Path) -> HarborCLIConfig:
+    """Config object for testing."""
     conf = HarborCLIConfig()
     # These are required to run commands
     conf.harbor.url = "https://harbor.example.com/api/v2.0"
     conf.harbor.username = "admin"
-    conf.harbor.secret = "password"  # type: ignore
+    conf.harbor.secret = SecretStr("password")
+    conf.logging.directory = log_dir
     return conf
+
+
+@pytest.fixture(scope="function", autouse=True)
+def ensure_logging_enabled(config: HarborCLIConfig) -> None:
+    """Ensures the logging config is always set to the testing config."""
+    logs.update_logging(config.logging)
 
 
 @pytest.fixture()
 def config_file(tmp_path: Path, config: HarborCLIConfig) -> Path:  # type: ignore
-    """Setup the CLI config for testing."""
+    """Creates a file containing the contents of the testing config."""
     conf_path = tmp_path / "config.toml"
     config.save(conf_path)
     yield conf_path
@@ -71,13 +104,24 @@ def harbor_client(config: HarborCLIConfig) -> HarborAsyncClient:
 
 @pytest.fixture(name="state", scope="function")
 def _state_fixture(
-    config: HarborCLIConfig, harbor_client: HarborAsyncClient, config_file: Path
+    config: HarborCLIConfig,
+    harbor_client: HarborAsyncClient,
+    config_file: Path,
+    tmp_path: Path,
 ) -> state.State:
     """Fixture for testing the state."""
     st = state.get_state()  # Initialize the state
+    st.config.config_file = config_file
     st.config = config
     st.client = harbor_client
-    yield state.get_state()
+    yield st
+
+
+@pytest.fixture(scope="session")
+def log_dir(tmp_path_factory: pytest.TempPathFactory) -> Iterator[Path]:
+    """Creates a session-scoped temp dir for log files."""
+    log_dir = tmp_path_factory.mktemp("logs")
+    yield log_dir
 
 
 class PartialInvoker(Protocol):
@@ -124,7 +168,7 @@ def output_format_arg(output_format: OutputFormat) -> list[str]:
 @pytest.fixture(scope="function", autouse=True)
 def revert_state_config(state: state.State) -> Generator[None, None, None]:
     """Reverts the global state config back to its original value after the test is run."""
-    original_config = deepcopy(state.config)
+    original_config = state.config.model_copy(deep=True)
     yield
     state.config = original_config
 

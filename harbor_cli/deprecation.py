@@ -15,6 +15,7 @@ class Deprecated(str):
     contains the replacement option (if any)."""
 
     replacement: Optional[str] = None
+    remove_in: Optional[str] = None
 
     def __new__(cls, s, replacement: str | None = None) -> Deprecated:
         obj = str.__new__(cls, s)

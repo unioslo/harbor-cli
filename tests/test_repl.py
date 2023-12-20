@@ -36,6 +36,8 @@ def test_repl_reset_between_commands(
     def test_cmd(ctx: typer.Context) -> None:
         return render.render_result(MockResult(), ctx)
 
+    # Set output format to table before running
+    state.config.output.format = OutputFormat.TABLE
     res = invoke("repl", input="--format json test-cmd\ntest-cmd\n:q\n")
     assert res.exit_code == 0
 

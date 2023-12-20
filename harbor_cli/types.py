@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 import typing
 from collections import abc
 from typing import Any
@@ -10,10 +11,53 @@ from typing import Sequence
 from typing import Set
 from typing import Tuple
 from typing import Type
+from typing import TYPE_CHECKING
 from typing import TypeVar
 
 
+if TYPE_CHECKING:
+    from rich import box
+    from rich.console import JustifyMethod
+    from rich.style import StyleType
+    from rich.text import TextType
+    from rich.padding import PaddingDimensions
+    from typing import Iterable, TypedDict, Optional
+
+    class RichTableKwargs(TypedDict, total=False):
+        caption: Optional[TextType]
+        width: Optional[int]
+        min_width: Optional[int]
+        box: Optional[box.Box]
+        safe_box: Optional[bool]
+        padding: PaddingDimensions
+        collapse_padding: bool
+        pad_edge: bool
+        expand: bool
+        show_header: bool
+        show_footer: bool
+        show_edge: bool
+        show_lines: bool
+        leading: int
+        style: StyleType
+        row_styles: Optional[Iterable[StyleType]]
+        header_style: Optional[StyleType]
+        footer_style: Optional[StyleType]
+        border_style: Optional[StyleType]
+        title_style: Optional[StyleType]
+        caption_style: Optional[StyleType]
+        title_justify: "JustifyMethod"
+        caption_justify: "JustifyMethod"
+        highlight: bool
+
+
 T = TypeVar("T")
+
+if sys.version_info >= (3, 10):
+    from types import EllipsisType as EllipsisType
+else:
+    # EllipsisType was introduced in 3.10
+    # NOTE: not really sure why mypy doesn't accept type(Ellipsis) as a type...
+    EllipsisType = Any
 
 SEQUENCE_TYPES = (Sequence, abc.Sequence, list, List, tuple, Tuple, set, Set)
 

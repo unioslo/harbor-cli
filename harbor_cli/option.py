@@ -6,7 +6,12 @@ from typing import Optional
 
 from typer.models import OptionInfo as _OptionInfo
 
-from .style import help_config_override
+from .style import render_config_option
+
+
+def help_config_override(option: str) -> str:
+    """Render a help string for a configuration file option/key/entry."""
+    return f"Overrides config option {render_config_option(option)}."
 
 
 class OptionInfo(_OptionInfo):

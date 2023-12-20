@@ -19,6 +19,7 @@ from harbor_cli.config import HarborCLIConfig
 from harbor_cli.config import HarborSettings
 from harbor_cli.config import load_config
 from harbor_cli.config import load_toml_file
+from harbor_cli.config import LoggingSettings
 from harbor_cli.config import sample_config
 from harbor_cli.config import save_config
 from harbor_cli.config import TableSettings
@@ -339,40 +340,51 @@ def test_harbor_cli_config_toml_expose_secrets(
         assert "***" in toml_str  # don't be too specific about the number of stars
 
 
-def test_dunder_copy(config: HarborCLIConfig, tmp_path: Path) -> None:
-    """Test that the __copy__ method works as expected with excluded fields."""
+@pytest.mark.parametrize("deep", [True, False])
+def test_config_model_copy_keeps_excluded_config_field(
+    config: HarborCLIConfig, tmp_path: Path, deep: bool
+) -> None:
+    """In Pydantic V1, copying a model with excluded fields would exclude the
+    field ENTIRELY from the copied model (i.e. no attribute at all).
+
+    In Pydantic V2, this behavior should be changed and the field should be copied
+    properly. We rely on this behavior to restore the config file between
+    command invocations in the REPL, and as such we need to make sure that the
+    config_file field is copied properly."""
     mock_path = tmp_path / "config.toml"
     mock_path.touch()
     config.config_file = mock_path
     assert config.config_file is not None
-    copied = config.__copy__()
+
+    # Copy with Pydantic model_copy first:
+    copied = config.model_copy(deep=True)
+    assert copied is not config
     assert hasattr(copied, "config_file")
     assert copied.config_file == config.config_file
 
-    copied_with_copy = copy.copy(config)
+    # Copy with stdlib copy:
+    func = copy.deepcopy if deep else copy.copy
+    copied_with_copy = func(config)
+    assert copied_with_copy is not config
     assert copied_with_copy.config_file == config.config_file
 
 
-def test_dunder_deepcopy(config: HarborCLIConfig, tmp_path: Path) -> None:
-    """Test that the __deepcopy__ method works as expected with excluded fields."""
-    mock_path = tmp_path / "config.toml"
-    mock_path.touch()
-    config.config_file = mock_path
-    assert config.config_file is not None
-    copied = config.__deepcopy__({})
-    assert hasattr(copied, "config_file")
-    assert copied.config_file == config.config_file
-
-    copied_with_copy = copy.deepcopy(config)
-    assert copied_with_copy.config_file == config.config_file
-
-
-@freeze_time("1970-01-01 00:00:00")
 def test_loggingsettings_path_defaults(config: HarborCLIConfig, tmp_path: Path) -> None:
     """Default filename and time formatting directive."""
     lconfig = config.logging
     lconfig.directory = tmp_path / "logs"
-    assert lconfig.path == tmp_path / "logs" / "harbor_cli-1970-01-01.log"
+    assert lconfig.path == tmp_path / "logs" / "harbor-cli.log"
+
+
+@freeze_time("1970-01-01 00:00:00")
+def test_loggingsettings_path_with_datetime_defaults(
+    config: HarborCLIConfig, tmp_path: Path
+) -> None:
+    """Default filename and time formatting directive."""
+    lconfig = config.logging
+    lconfig.directory = tmp_path / "logs"
+    lconfig.filename = "harbor-cli_{dt}.log"
+    assert lconfig.path == tmp_path / "logs" / "harbor-cli_1970-01-01.log"
 
 
 def test_loggingsettings_path_notime(config: HarborCLIConfig, tmp_path: Path) -> None:
@@ -383,6 +395,12 @@ def test_loggingsettings_path_notime(config: HarborCLIConfig, tmp_path: Path) ->
     # With no time formatting directive in the filename, the filename should be
     # the same as the one we set.
     assert lconfig.path == tmp_path / "logs" / "somefile.log"
+
+
+def test_loggingsettings_datetime_format_deprecated_name() -> None:
+    """Test that we can still use the old name for the datetime_format field."""
+    l = LoggingSettings(timeformat="%Y-%m-%d")  # type: ignore
+    assert l.datetime_format == "%Y-%m-%d"
 
 
 @freeze_time("1970-01-01")
@@ -400,7 +418,7 @@ def test_loggingsettings_path_custom_time_formatting(
     lconfig = config.logging
     lconfig.filename = "somefile-{time}.log"
     lconfig.directory = tmp_path / "logs"
-    lconfig.timeformat = "%Y-%m-%d-%H-%M-%S"
+    lconfig.datetime_format = "%Y-%m-%d-%H-%M-%S"
     assert lconfig.path == tmp_path / "logs" / "somefile-1970-01-01-12-00-00.log"
 
 

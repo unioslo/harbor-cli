@@ -6,7 +6,7 @@ import typer
 from harborapi.models.models import CVEAllowlist
 from harborapi.models.models import CVEAllowlistItem
 
-from ...output.console import exit
+from ...output.console import exit_ok
 from ...output.console import info
 from ...output.render import render_result
 from ...state import get_state
@@ -51,7 +51,7 @@ def update_allowlist(
     # Check if the current allowlist is defined
     if current.items is None:
         if remove:
-            exit("CVE allowlist is empty, nothing to remove.")
+            exit_ok("CVE allowlist is empty, nothing to remove.")
         current.items = []
 
     if remove:

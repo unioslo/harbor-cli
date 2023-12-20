@@ -35,7 +35,7 @@ def test_setup_logging(config: HarborCLIConfig) -> None:
 
 
 def test_update_logging(config: HarborCLIConfig, tmp_path: Path) -> None:
-    logging_settings_pre = config.logging.copy()
+    logging_settings_pre = config.logging.model_copy()
     config.logging.level = LogLevel.WARNING
     config.logging.directory = tmp_path / "test_update_logging"
     config.logging.directory.mkdir(parents=True, exist_ok=True)

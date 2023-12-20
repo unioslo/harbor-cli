@@ -32,10 +32,11 @@ def systeminfo_table(systeminfo: Sequence[SystemInfo], **kwargs: Any) -> Table:
         logger.warning("Can only display one system info at a time.")
     info = systeminfo[0]
 
-    table = get_table("System Info", pluralize=False)
-    table.add_column("Total Capacity")
-    table.add_column("Free Space")
-    table.add_column("Used Space")  # calculated
+    table = get_table(
+        "System Info",
+        pluralize=False,
+        columns=["Total Capacity", "Free Space", "Used Space"],
+    )
 
     # Add empty row if no storage
     if not info.storage:
@@ -65,10 +66,14 @@ def overallhealthstatus_panel(health: OverallHealthStatus, **kwargs) -> Panel:
     status_table.add_row("Status: ", status)
 
     # Individual component statuses in a table
-    table = get_table("Components")
-    table.add_column("Component")
-    table.add_column("Status")
-    table.add_column("Error")
+    table = get_table(
+        "Components",
+        columns=[
+            "Component",
+            "Status",
+            "Error",
+        ],
+    )
     health.components = health.components or []
     for component in health.components:
         status_style = "green" if component.status == "healthy" else "red"

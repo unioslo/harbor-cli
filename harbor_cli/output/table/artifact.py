@@ -19,6 +19,7 @@ from rich.table import Table
 from ...harbor.artifact import get_artifact_architecture
 from ...harbor.artifact import get_artifact_severity
 from ...models import ArtifactVulnerabilitySummary
+from ...output.console import warning
 from ...style.color import SeverityColor
 from ..formatting.builtin import bool_str
 from ..formatting.builtin import float_str
@@ -26,6 +27,7 @@ from ..formatting.builtin import int_str
 from ..formatting.builtin import str_str
 from ..formatting.bytes import bytesize_str
 from ..formatting.dates import datetime_str
+from ._utils import add_column
 from ._utils import get_panel
 from ._utils import get_table
 
@@ -35,14 +37,19 @@ DOUBLE_SPACE_PATTERN = re.compile(" +")
 
 def artifact_table(artifacts: Sequence[Artifact], **kwargs: Any) -> Table:
     """Display one or more artifacts in a table."""
-    table = get_table("Artifact", artifacts)
-    table.add_column("ID")
-    table.add_column("Project ID")
-    table.add_column("Repository ID")
-    table.add_column("Tags")
-    table.add_column("Digest", overflow="fold")
-    table.add_column("Created")
-    table.add_column("Size")
+    table = get_table(
+        "Artifact",
+        artifacts,
+        columns=[
+            "ID",
+            "Project ID",
+            "Repository ID",
+            "Tags",
+            "Digest",
+            "Created",
+            "Size",
+        ],
+    )
     for artifact in artifacts:
         tags = []
         if artifact.tags:
@@ -53,7 +60,7 @@ def artifact_table(artifacts: Sequence[Artifact], **kwargs: Any) -> Table:
             int_str(artifact.project_id),
             int_str(artifact.repository_id),
             str_str(t),
-            str_str(artifact.digest),
+            str_str(artifact.digest)[:15],
             datetime_str(artifact.push_time),
             bytesize_str(artifact.size or 0),
         )
@@ -62,21 +69,26 @@ def artifact_table(artifacts: Sequence[Artifact], **kwargs: Any) -> Table:
 
 def artifactinfo_table(artifacts: Sequence[ArtifactInfo], **kwargs: Any) -> Table:
     """Display one or more artifacts (ArtifactInfo) in a table."""
-    table = get_table("Artifact", artifacts)
-    table.add_column("Project")
-    table.add_column("Repository")
-    table.add_column("Tags")
-    table.add_column("Digest", overflow="fold")
-    table.add_column("Arch")
-    table.add_column("Severity")
-    table.add_column("Created")
-    table.add_column("Size")
+    table = get_table(
+        "Artifact",
+        artifacts,
+        columns=[
+            "Project",
+            "Repository",
+            "Tags",
+            "Digest",
+            "Arch",
+            "Severity",
+            "Created",
+            "Size",
+        ],
+    )
     for artifact in artifacts:
         table.add_row(
             str_str(artifact.project_name),
             str_str(artifact.repository_name),
             str_str(", ".join(artifact.tags)),
-            str_str(artifact.artifact.digest),
+            str_str(artifact.artifact.digest)[:15],
             str_str(get_artifact_architecture(artifact.artifact)),
             str_str(get_artifact_severity(artifact.artifact)),
             datetime_str(artifact.artifact.push_time),
@@ -88,15 +100,22 @@ def artifactinfo_table(artifacts: Sequence[ArtifactInfo], **kwargs: Any) -> Tabl
 def artifact_vulnerability_summary_table(
     artifacts: Sequence[ArtifactVulnerabilitySummary], **kwargs: Any
 ) -> Table:
-    table = get_table("Artifacts")
-    table.add_column("Artifact", overflow="fold")
-    table.add_column("Tags", overflow="fold")
-    table.add_column("Vulnerabilities", overflow="fold")
+    table = get_table(
+        "Artifacts",
+        columns=[
+            "Artifact",
+            "Tags",
+            "Vulnerabilities",
+        ],
+    )
 
     full_digest = kwargs.pop("full_digest", False)
     for artifact in artifacts:
+        if not artifact.summary or not artifact.summary.summary:
+            warning(f"No summary for artifact: {artifact.artifact!r}")
+            continue
         name = artifact.artifact if full_digest else artifact.artifact_short
-        vulns = vuln_summary_table(artifact.summary, **kwargs)
+        vulns = vuln_summary_table(artifact.summary.summary, **kwargs)
         table.add_row(
             name,
             ", ".join(artifact.tags),
@@ -129,16 +148,21 @@ def artifactinfo_panel(artifact: ArtifactInfo, **kwargs: Any) -> Panel:
 def artifact_vulnerabilities_table(
     reports: Sequence[HarborVulnerabilityReport], **kwargs: Any
 ) -> Table:
-    table = get_table("Vulnerabilities", show_lines=True)
-    table.add_column("CVE ID")
-    table.add_column("Severity")
-    table.add_column("Score")
-    table.add_column("Package")
-    table.add_column("Version", overflow="fold")
-    table.add_column("Fix Version", overflow="fold")
+    table = get_table(
+        "Vulnerabilities",
+        show_lines=True,
+        columns=[
+            "CVE ID",
+            "Severity",
+            "Score",
+            "Package",
+            "Version",
+            "Fix Version",
+        ],
+    )
     with_desc = kwargs.get("with_description", False)
     if with_desc:
-        table.add_column("Description")
+        add_column(table, "Description")
 
     # TODO: add vulnerability sorting
     for report in reports:
@@ -147,7 +171,7 @@ def artifact_vulnerabilities_table(
         for vulnerability in vulns:
             row = [
                 str_str(vulnerability.id),
-                SeverityColor.as_markup(vulnerability.severity),
+                SeverityColor.as_markup(vulnerability.severity.value),
                 float_str(vulnerability.get_cvss_score()),
                 str_str(vulnerability.package),
                 str_str(vulnerability.version),
@@ -163,9 +187,9 @@ def artifact_vulnerabilities_table(
 #     artifacts: Sequence["ScheduledArtifactDeletion"],
 # ) -> Table:
 #     """Display one or more artifacts in a table."""
-#     table = get_table("Scheduled Artifact Deletion", artifacts)
-#     table.add_column("Artifact")
-#     table.add_column("Reasons")
+#     table = get_table(
+#         "Scheduled Artifact Deletion", artifacts, columns=["Artifact", "Reasons"]
+#     )
 #     for artifact in artifacts:
 #         table.add_row(
 #             str_str(artifact.artifact),
@@ -178,6 +202,7 @@ class ColKwargs(TypedDict):  # mypy complains if we use a normal dict
     min_width: int
     max_width: int
     justify: Literal["right", "left", "center"]
+    overflow: Literal["fold"]
 
 
 def vuln_summary_table(summary: VulnerabilitySummary, **kwargs: Any) -> Table:
@@ -188,7 +213,7 @@ def vuln_summary_table(summary: VulnerabilitySummary, **kwargs: Any) -> Table:
         show_lines=False, show_header=False, show_edge=False, box=box.SIMPLE_HEAD
     )
     # NOTE: column is truncated if category has >9999 vulnerabilities, but that's unlikely
-    col_kwargs = ColKwargs(min_width=5, max_width=5, justify="right")
+    col_kwargs = ColKwargs(min_width=5, max_width=5, justify="right", overflow="fold")
     table.add_column(
         "Critical", style=f"black on {SeverityColor.CRITICAL}", **col_kwargs
     )
@@ -196,9 +221,10 @@ def vuln_summary_table(summary: VulnerabilitySummary, **kwargs: Any) -> Table:
     table.add_column("Medium", style=f"black on {SeverityColor.MEDIUM}", **col_kwargs)
     table.add_column("Low", style=f"black on {SeverityColor.LOW}", **col_kwargs)
     # not adding unknown for now
-    # TODO: add kwargs toggle for this
-    # table.add_column("Unknown", style="black on grey")
-    table.add_column("Total")  # no style, use default (respecting theme)
+    # TODO: add kwargs toggle for unknown severity vulns
+    table.add_column(
+        "Total", overflow="fold"
+    )  # no style, use default (respecting theme)
 
     table.add_row(
         f"{summary.critical or 0}C",

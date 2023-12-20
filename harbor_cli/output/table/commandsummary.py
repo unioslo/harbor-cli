@@ -7,6 +7,7 @@ from rich.table import Table
 
 from ...models import CommandSummary
 from ..formatting.builtin import int_str
+from ._utils import add_column
 from ._utils import get_table
 
 
@@ -16,7 +17,7 @@ def commandsummary_table(c: Sequence[CommandSummary], **kwargs: Any) -> Table:
     # If we got these commands from a search, we can show a score
     has_score = any(cmd.score for cmd in c)
     if has_score:
-        table.add_column("Match", justify="right")
+        add_column(table, "Match", justify="right")
 
     for cmd in c:
         row = [cmd.name, cmd.help]

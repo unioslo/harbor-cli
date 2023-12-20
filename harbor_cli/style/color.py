@@ -1,5 +1,9 @@
 from __future__ import annotations
 
+from typing import Callable
+from typing import Dict
+from typing import Literal
+
 from harborapi.models.scanner import Severity
 from strenum import StrEnum
 
@@ -30,6 +34,23 @@ def yellow(message: str) -> str:
 
 def bold(message: str) -> str:
     return f"[bold]{message}[/]"
+
+
+Color = Literal["blue", "cyan", "green", "magenta", "red", "yellow", "bold"]
+ColorFunc = Callable[[str], str]
+COLOR_FUNCTIONS: Dict[Color, ColorFunc] = {
+    "blue": blue,
+    "cyan": cyan,
+    "green": green,
+    "magenta": magenta,
+    "red": red,
+    "yellow": yellow,
+    "bold": bold,
+}
+
+
+def get_color_func(color: Color) -> ColorFunc:
+    return COLOR_FUNCTIONS[color]
 
 
 class HealthColor(StrEnum):

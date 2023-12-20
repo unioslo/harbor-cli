@@ -199,12 +199,12 @@ def create_replication_policy(
     replication_trigger_type: Optional[str] = typer.Option(
         None,
         "--trigger-type",
-        help=ReplicationTrigger.__fields__["type"].field_info.description,
+        help=ReplicationTrigger.model_fields["type"].description,
     ),
     replication_trigger_cron: Optional[str] = typer.Option(
         None,
         "--trigger-cron",
-        help=ReplicationTriggerSettings.__fields__["cron"].field_info.description,
+        help=ReplicationTriggerSettings.model_fields["cron"].description,
     ),
     filter_name: Optional[str] = typer.Option(
         None,

@@ -161,19 +161,19 @@ def create_user(
     ),
     password: Optional[str] = typer.Option(
         None,
-        help="Password of the user to create.",
+        help="Password for user.",
     ),
     email: Optional[str] = typer.Option(
         None,
-        help="Email of the user to create.",
+        help="Email for user.",
     ),
     realname: Optional[str] = typer.Option(
         None,
-        help="Real name of the user to create.",
+        help="Real name of user. Enclose multiple names in quotes.",
     ),
     comment: Optional[str] = typer.Option(
         None,
-        help="Comment of the user to create.",
+        help="Comment for user.",
     ),
 ) -> None:
     """Create a new user."""

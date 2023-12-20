@@ -3,6 +3,8 @@ from __future__ import annotations
 import io
 import os
 from pathlib import Path
+from typing import Any
+from typing import Callable
 from typing import Iterator
 
 import pytest
@@ -151,3 +153,22 @@ def test_path_prompt(monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
 )
 def test_prompt_msg(inp: tuple[str, ...], expected: str) -> None:
     assert prompt_msg(*inp) == f"[bold]{green(Icon.PROMPT)} {expected}[/bold]"
+
+
+@pytest.mark.timeout(1)
+@pytest.mark.parametrize(
+    "prompt_func",
+    [
+        str_prompt,
+        int_prompt,
+        float_prompt,
+        path_prompt,
+    ],
+)
+def test_no_headless_decorator(
+    monkeypatch_env, caplog: pytest.LogCaptureFixture, prompt_func: Callable[[Any], Any]
+) -> None:
+    """Test that the no_headless decorator causes ."""
+    with pytest.raises(SystemExit):
+        prompt_func("This should fail")
+    assert "Headless session" in caplog.text

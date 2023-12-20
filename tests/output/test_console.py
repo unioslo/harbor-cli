@@ -31,7 +31,7 @@ def _configure_logging(
 @pytest.fixture(scope="function", autouse=True)
 def revert_logging(state: State) -> None:
     """Revert logging to the default settings after each test."""
-    settings_pre = state.config.logging.copy()
+    settings_pre = state.config.logging.model_copy()
     yield
     update_logging(settings_pre)
 

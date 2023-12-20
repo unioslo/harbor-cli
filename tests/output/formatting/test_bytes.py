@@ -11,8 +11,8 @@ from harbor_cli.output.formatting.constants import NONE_STR
     [
         (-1, NONE_STR),
         (None, NONE_STR),
-        (0, "0.0B"),
-        (1, "1.0B"),
+        (0, "0B"),
+        (1, "1B"),
         (1000, "1.0KB"),
         (1023, "1.0KB"),
         (1024, "1.0KB"),
@@ -34,9 +34,9 @@ def test_bytesize_str_decimal(b: int | None, expected: str) -> None:
     [
         (-1, NONE_STR),
         (None, NONE_STR),
-        (0, "0.0B"),
-        (1, "1.0B"),
-        (1023, "1023.0B"),
+        (0, "0B"),
+        (1, "1B"),
+        (1023, "1023B"),
         (1024, "1.0KiB"),
         (1024 * 1024, "1.0MiB"),
         (1024 * 1024 * 1024, "1.0GiB"),

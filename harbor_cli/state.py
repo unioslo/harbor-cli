@@ -9,6 +9,7 @@ from typing import TypeVar
 
 from harborapi import HarborAsyncClient
 from pydantic import BaseModel
+from pydantic import ConfigDict
 from rich.console import Console
 
 # This module generally shouldn't import from other local modules
@@ -17,7 +18,6 @@ from rich.console import Console
 
 if TYPE_CHECKING:
     from .config import HarborCLIConfig
-    from .cache import Cache
 
 
 T = TypeVar("T")
@@ -35,14 +35,13 @@ class CommonOptions(BaseModel):
     # File
     output_file: Optional[Path] = None
     no_overwrite: bool = False
-
-    class Config:
-        extra = "allow"
+    model_config = ConfigDict(extra="allow")
 
 
 class State:
     """Object that encapsulates the current state of the application.
-    Holds the current configuration, harbor client, and other stateful objects.
+    Holds the current configuration, harbor client, and other stateful objects
+    that we want access to inside commands.
     """
 
     _instance = None
@@ -57,7 +56,6 @@ class State:
     repl: bool = False
 
     # Attributes (exposed as properties)
-    _cache = None  # type: Cache | None
     _config = None  # type: HarborCLIConfig | None
     _client = None  # type: HarborAsyncClient | None
     _console = None  # type: Console | None
@@ -85,7 +83,10 @@ class State:
             self.config = config
         if client:
             self.client = client
-        self.loop = asyncio.get_event_loop()
+        try:
+            self.loop = asyncio.get_running_loop()
+        except RuntimeError:
+            self.loop = asyncio.new_event_loop()
         self.options = CommonOptions()
 
     @property
@@ -100,7 +101,7 @@ class State:
         # and then we can prompt the user for it.
         # We have to keep re-using this client object, because it's directly
         # referenced by the various commands, so we have to patch it in-place
-        # when we get the authentication info.
+        # when we receive new authentication info.
         if self._client is None:
             # Direct assignment to avoid triggering the setter
             self._client = HarborAsyncClient(
@@ -155,25 +156,6 @@ class State:
         return self._console
         # fmt: on
 
-    @property
-    def cache(self) -> Cache:
-        """The program cache.
-        Initializes the cache if it's not already initialized."""
-        # fmt: off
-        if self._cache is None:
-            from .cache import Cache
-            self._cache = Cache()
-        return self._cache
-        # fmt: on
-
-    def configure_cache(self) -> None:
-        """Configure the cache based on the config."""
-        self.cache.ttl = self.config.cache.ttl
-        self.cache.enabled = self.config.cache.enabled
-        # Start the cache flushing loop
-        if not self.cache._loop_running:
-            self.loop.create_task(self.cache.start_flush_loop())
-
     def authenticate_harbor(self) -> None:
         self.client.authenticate(**self.config.harbor.credentials)
 
@@ -199,10 +181,7 @@ class State:
             warning(
                 "Harbor authentication method is missing or incomplete in configuration file."
             )
-            username, secret = prompt_username_secret(
-                self.config.harbor.username,
-                self.config.harbor.secret_value,
-            )
+            username, secret = prompt_username_secret(self.config.harbor.username, "")
             self.config.harbor.username = username
             self.config.harbor.secret = secret  # type: ignore # pydantic.SecretStr
             warning(
@@ -276,9 +255,6 @@ class State:
             handle_exception(e)
             # fmt: on
         return resp
-
-
-_STATE = None  # type: State | None
 
 
 def get_state() -> State:

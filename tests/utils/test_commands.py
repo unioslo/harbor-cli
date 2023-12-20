@@ -186,7 +186,7 @@ def test_inject_resource_options() -> None:
     assert parameters["page"].default.help == "(Advanced) Page to begin fetching from."
     assert (
         parameters["page_size"].default.help
-        == "(Advanced) Number of results to fetch per API call."
+        == "(Advanced) Results to fetch per API call."
     )
     assert parameters["page_size"].default.default == 123
     assert parameters["limit"].default.help == "Maximum number of results to fetch."

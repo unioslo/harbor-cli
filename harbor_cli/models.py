@@ -16,12 +16,13 @@ from typing import Optional
 from click.core import Argument
 from click.core import Parameter
 from harborapi.ext.artifact import ArtifactInfo
+from harborapi.models import NativeReportSummary
 from harborapi.models import Project
 from harborapi.models import ProjectReq
-from harborapi.models import VulnerabilitySummary
 from harborapi.models.base import BaseModel as HarborAPIBaseModel
 from pydantic import Field
-from pydantic import root_validator
+from pydantic import model_validator
+from pydantic import RootModel
 from rich.table import Table
 from strenum import StrEnum
 from typer.core import TyperArgument
@@ -54,6 +55,7 @@ class ParamSummary(BaseModel):
     hidden: Optional[bool] = None
     human_readable_name: str
     is_argument: bool
+    is_eager: bool = False
     is_bool_flag: Optional[bool] = None
     is_flag: Optional[bool] = None
     is_option: Optional[bool]
@@ -61,12 +63,13 @@ class ParamSummary(BaseModel):
     min: Optional[int] = None
     metavar: Optional[str]
     multiple: bool
-    name: str
+    name: Optional[str]
     nargs: int
     opts: List[str]
     prompt: Optional[str] = None
     prompt_required: Optional[bool] = None
     required: bool
+    secondary_opts: List[str] = []
     show_choices: Optional[bool] = None
     show_default: Optional[bool] = None
     show_envvar: Optional[bool] = None
@@ -88,7 +91,7 @@ class ParamSummary(BaseModel):
             count=get(param, "count"),
             choices=get(param.type, "choices"),
             default=param.default,
-            envvar=param.envvar,
+            envvar=param.envvar,  # TODO: support list of envvars
             expose_value=param.expose_value,
             flag_value=get(param, "flag_value"),
             help=help_,
@@ -114,6 +117,7 @@ class ParamSummary(BaseModel):
             show_default=get(param, "show_default"),
             show_envvar=get(param, "show_envvar"),
             type=param.type.name,
+            value_from_envvar=param.value_from_envvar,
         )
 
     @property
@@ -124,17 +128,17 @@ class ParamSummary(BaseModel):
     def help_md(self) -> str:
         return markup_to_markdown(self.help)
 
-    @root_validator
-    def _fmt_metavar(cls, values: dict[str, Any]) -> dict[str, Any]:
-        metavar = values.get("metavar") or values.get("human_readable_name", "")
+    @model_validator(mode="before")
+    def _fmt_metavar(cls, data: dict[str, Any]) -> dict[str, Any]:
+        metavar = data.get("metavar") or data.get("human_readable_name", "")
         assert isinstance(metavar, str)
         metavar = metavar.upper()
-        if values.get("multiple"):
+        if data.get("multiple"):
             new_metavar = f"<{metavar},[{metavar}...]>"
         else:
             new_metavar = f"<{metavar}>"
-        values["metavar"] = new_metavar
-        return values
+        data["metavar"] = new_metavar
+        return data
 
 
 # TODO: split up CommandSummary into CommandSummary and CommandSearchResult
@@ -276,6 +280,7 @@ class MemberRoleType(Enum):
     DEVELOPER = "developer"
     GUEST = "guest"
     MAINTAINER = "maintainer"
+    LIMITED_GUEST = "limited_guest"
 
     @classmethod
     def from_int(cls, value: int) -> MemberRoleType:
@@ -291,11 +296,16 @@ class MemberRoleType(Enum):
             raise ValueError(f"Unknown role type: {self}")
 
 
+# NOTE: I have no idea how I managed to determine these integer values.
+# They do seem correct though, but I'd love to know how I got them, because
+# to add a new role type, we need to manually test it out in the Web UI
+# and inspect the request payload to see what integer value it sends.
 _MEMBERROLETYPE_MAPPING = {
     1: MemberRoleType.ADMIN,
     2: MemberRoleType.DEVELOPER,
     3: MemberRoleType.GUEST,
     4: MemberRoleType.MAINTAINER,
+    5: MemberRoleType.LIMITED_GUEST,
 }  # type: dict[int, MemberRoleType]
 
 _MEMBERROLETYPE_MAPPING_REVERSE = {
@@ -306,35 +316,24 @@ _MEMBERROLETYPE_MAPPING_REVERSE = {
 class ArtifactVulnerabilitySummary(BaseModel):
     artifact: str
     tags: List[str]
-    summary: VulnerabilitySummary = Field(..., exclude={"summary"})
+    summary: Optional[NativeReportSummary]
     # Not a property since we don't keep the original artifact around
     artifact_short: str = Field(..., exclude=True)
 
     @classmethod
     def from_artifactinfo(cls, artifact: ArtifactInfo) -> ArtifactVulnerabilitySummary:
-        summary = None
-        report = artifact.artifact.scan_overview
-        if report:
-            summary = report.summary
-        # Report either had no summary or we had no report to begin with
-        if not summary or not report:
-            summary = VulnerabilitySummary()
-
         return cls(
             artifact=artifact.name_with_digest_full,
             artifact_short=artifact.name_with_digest,
             tags=artifact.tags,
-            summary=summary,
+            summary=artifact.artifact.scan,
         )
 
-    # def json(self, *args, **kwargs):
-    #     return super().json(*args, **kwargs, exclude={"summary."}
 
-
-class MetadataFields(BaseModel):
+class MetadataFields(RootModel):
     """Renders a mapping of one or more metadata fields as a table."""
 
-    __root__: Dict[str, Any]
+    root: Dict[str, Any]
 
     def as_table(self, **kwargs: Any) -> Iterable[Table]:  # type: ignore
         from .output.table._utils import get_table
@@ -342,9 +341,9 @@ class MetadataFields(BaseModel):
         table = get_table(
             "Metadata Field",
             columns=["Field", "Value"],
-            data=list(self.__root__),
+            data=list(self.root),
         )
-        for k, v in self.__root__.items():
+        for k, v in self.root.items():
             table.add_row(k, str(v))
         yield table
 

@@ -13,8 +13,8 @@ from ...models import MemberRoleType
 from ...models import MetadataFields
 from ...models import ProjectCreateResult
 from ...models import ProjectExtended
-from ...output.console import exit
 from ...output.console import exit_err
+from ...output.console import exit_ok
 from ...output.console import info
 from ...output.console import warning
 from ...output.prompts import check_enumeration_options
@@ -83,7 +83,7 @@ def get_project_info(
     """Get information about a project."""
     arg = get_project_arg(project_name_or_id)
     project = get_project(arg)
-    p = ProjectExtended(**project.dict())
+    p = ProjectExtended(**project.model_dump())
     render_result(p, ctx)
 
 
@@ -137,7 +137,7 @@ def project_exists(
         f"Checking if {project_repr} exists...",
     )
     render_result(exists, ctx)
-    exit(code=0 if exists else 1)
+    exit_ok(code=0 if exists else 1)
 
 
 # HarborAsyncClient.create_project()
@@ -349,7 +349,7 @@ def update_project(
     arg = get_project_arg(project_name_or_id)
     project = get_project(arg)
     if project.metadata is None:
-        project.metadata = ProjectMetadata()
+        project.metadata = ProjectMetadata()  # type: ignore[call-arg] # mypy bug
 
     # Create updated models from params
     req = create_updated_model(
@@ -572,7 +572,7 @@ def get_project_metadata_field(
         state.client.get_project_metadata_entry(arg, field),
         f"Fetching metadata field {field!r} for {project_repr}...",
     )
-    md = MetadataFields.parse_obj(metadata)
+    md = MetadataFields.model_validate(metadata)
     render_result(md, ctx)
 
 
@@ -591,13 +591,13 @@ def set_project_metadata_field(
     ),
 ) -> None:
     """Set a single field in the metadata for a project."""
-    if field not in ProjectMetadata.__fields__:
+    if field not in ProjectMetadata.model_fields:
         warning(f"Field {field!r} is not a known project metadata field.")
 
     arg = get_project_arg(project_name_or_id)
     project_repr = get_project_repr(arg)
 
-    metadata = ProjectMetadata.parse_obj({field: value})
+    metadata = ProjectMetadata.model_validate({field: value})
 
     state.run(
         state.client.update_project_metadata_entry(arg, field, metadata),
@@ -619,7 +619,7 @@ def delete_project_metadata_field(
 ) -> None:
     """Delete a single field in the metadata for a project."""
     delete_prompt(state.config, force, resource="metadata field", name=field)
-    if field not in ProjectMetadata.__fields__:
+    if field not in ProjectMetadata.model_fields:
         warning(f"Field {field!r} is not a known project metadata field.")
 
     arg = get_project_arg(project_name_or_id)
@@ -646,7 +646,7 @@ def get_project_member(
     render_result(member, ctx)
 
 
-# HarborAsyncClient.add_project_member() # NYI
+# HarborAsyncClient.add_project_member() # NYI (probably no point?)
 
 
 # HarborAsyncClient.add_project_member_user()
@@ -691,19 +691,40 @@ def add_project_member_group(
     render_result(member, ctx)
 
 
+def project_member_id_from_username_or_id(
+    project_arg: str | int, username_or_id: str
+) -> int:
+    """Get a project member ID from a username or ID."""
+    members = state.run(
+        state.client.get_project_members(project_arg),
+    )
+    for member in members:
+        if (
+            member.id is not None
+            and member.entity_type == "u"
+            and (
+                member.entity_name == username_or_id
+                or member.entity_id == username_or_id
+            )
+        ):
+            return member.id
+    exit_err(f"Could not find member with username or ID {username_or_id!r}.")
+
+
 # HarborAsyncClient.update_project_member_role()
 @member_cmd.command("update-role")
 def update_project_member_role(
     ctx: typer.Context,
     # Required args
     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
-    member_id: int = typer.Argument(..., help="The ID of the member to update."),
+    username_or_id: str = ARG_USERNAME_OR_ID,
     role: MemberRoleType = typer.Argument(
         ..., help="The type of role to give the user."
     ),
 ) -> None:
     """Add a user as a member of a project."""
     project_arg = get_project_arg(project_name_or_id)
+    member_id = project_member_id_from_username_or_id(project_arg, username_or_id)
     member = state.run(
         state.client.update_project_member_role(
             project_arg, member_id, RoleRequest(role_id=role.as_int())
@@ -719,9 +740,10 @@ def remove_project_member(
     ctx: typer.Context,
     # Required args
     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
-    member_id: int = typer.Argument(..., help="The ID of the member to remove."),
+    username_or_id: str = ARG_USERNAME_OR_ID,
 ) -> None:
     project_arg = get_project_arg(project_name_or_id)
+    member_id = project_member_id_from_username_or_id(project_arg, username_or_id)
     state.run(
         state.client.remove_project_member(project_arg, member_id),
         f"Removing member...",

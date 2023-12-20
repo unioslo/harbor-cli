@@ -147,7 +147,7 @@ def inject_help(
 
     def decorator(func: Any) -> Any:
         sig = inspect.signature(func)
-        for field_name, field in model.__fields__.items():
+        for field_name, field in model.model_fields.items():
             # only overwrite help if not already set
             param = sig.parameters.get(field_name, None)
             if not param:
@@ -162,7 +162,7 @@ def inject_help(
                 addition = field_additions.get(field_name, "")
                 if addition:
                     addition = f" {addition}"  # add leading space
-                param.default.help = f"{field.field_info.description or ''}{addition}"
+                param.default.help = f"{field.description or ''}{addition}"
         return func
 
     return decorator
@@ -184,7 +184,7 @@ OPTION_SORT = typer.Option(
 OPTION_PAGE_SIZE = typer.Option(
     10,
     "--page-size",
-    help="(Advanced) Number of results to fetch per API call.",
+    help="(Advanced) Results to fetch per API call.",
 )
 OPTION_PAGE = typer.Option(
     1,
@@ -196,20 +196,10 @@ OPTION_LIMIT = typer.Option(
     "--limit",
     help="Maximum number of results to fetch.",
 )
-OPTION_PROJECT_ID = typer.Option(
-    None,
-    "--project-id",
-    help="ID of the project to use. Overrides project name.",
-)
-OPTION_PROJECT_NAME = typer.Option(
-    None,
-    "--project",
-    help="Name of the project to use.",
-)
 OPTION_PROJECT_NAME_OR_ID = typer.Option(
     None,
     "--project",
-    help=f"Name or ID of the project to use. {_USE_ID_HELP}",
+    help=f"Project name or ID. {_USE_ID_HELP}",
 )
 OPTION_FORCE = typer.Option(
     False,

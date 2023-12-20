@@ -18,7 +18,8 @@ BaseModelType = TypeVar("BaseModelType", bound=BaseModel)
 def model_params_from_ctx(
     ctx: typer.Context, model: Type[BaseModel], filter_none: bool = True
 ) -> dict[str, Any]:
-    """Get fields from a Typer context that are valid for a model.
+    """Get CLI options from a Typer context that correspond with Pydantic
+    model field names.
 
     Given a command where the function parameter names match the
     model field names, the function returns a dict of the parameters
@@ -58,7 +59,7 @@ def model_params_from_ctx(
     return {
         key: value
         for key, value in ctx.params.items()
-        if key in model.__fields__ and (not filter_none or value is not None)
+        if key in model.model_fields and (not filter_none or value is not None)
     }
 
 
@@ -141,9 +142,9 @@ def create_updated_model(
         exit_err("No parameters provided to update")
 
     # Cast existing model to dict, update it with the new values
-    d = existing.dict(include=None if extra else set(new.__fields__))
+    d = existing.model_dump(include=None if extra else set(new.model_fields))
     d.update(params)
-    return new.parse_obj(d)
+    return new.model_validate(d)
 
 
 def parse_commalist(arg: Optional[List[str]]) -> List[str]:
@@ -339,7 +340,7 @@ def _get_id_name_arg(resource_type: str, name_or_id: str) -> str | int:
     try:
         return int(resource_id)
     except ValueError:
-        exit_err(f"Invalid {resource_type} ID: {name_or_id} is not an integer.")
+        exit_err(f"Invalid {resource_type} ID: {name_or_id}.")
 
 
 def get_project_arg(project_name_or_id: str) -> str | int:
