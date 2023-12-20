@@ -19,6 +19,7 @@ from pydantic import SecretStr
 from typer.testing import CliRunner
 from typer.testing import Result
 
+from harbor_cli import logs
 from harbor_cli import state
 from harbor_cli.config import EnvVar
 from harbor_cli.config import HarborCLIConfig
@@ -27,6 +28,28 @@ from harbor_cli.main import app as main_app
 from harbor_cli.utils.keyring import keyring_supported
 
 runner = CliRunner(mix_stderr=False)
+
+
+@pytest.fixture(scope="session", autouse=True)
+def unset_ci_env_vars() -> None:
+    """Unset environment variables that may be set by CI.
+
+    Our tests mock stdin for prompts, so the @no_headless decorator
+    does not apply for these tests. Instead of adding some complicated
+    logic to the decorator, we just pretend like we're not in CI
+    for the entire test session.
+
+    Tests that need to test the @no_headless decorator should
+    explicitly set the environment variables."""
+    for var in ["CI", "DEBIAN_FRONTEND"]:
+        os.environ.pop(var, None)
+
+
+@pytest.fixture(scope="function")
+def monkeypatch_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Fixture that monkeypatches the environment."""
+    monkeypatch.setenv("CI", "1")
+    monkeypatch.setenv("DEBIAN_FRONTEND", "noninteractive")
 
 
 @pytest.fixture(scope="session")
@@ -53,6 +76,12 @@ def config(log_dir: Path) -> HarborCLIConfig:
     conf.harbor.secret = SecretStr("password")
     conf.logging.directory = log_dir
     return conf
+
+
+@pytest.fixture(scope="function", autouse=True)
+def ensure_logging_enabled(config: HarborCLIConfig) -> None:
+    """Ensures the logging config is always set to the testing config."""
+    logs.update_logging(config.logging)
 
 
 @pytest.fixture()

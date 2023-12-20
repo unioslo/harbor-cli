@@ -58,8 +58,8 @@ def no_headless(f: Callable[P, T]) -> Callable[P, T]:
             prompt = args[0] if args else kwargs.get("prompt") or ""
             exit_err(
                 f"Headless session detected; user input required when prompting for {prompt!r}.",
-                args=args,
-                kwargs=kwargs,
+                prompt_args=args,
+                prompt_kwargs=kwargs,
             )
         return f(*args, **kwargs)
 
@@ -166,6 +166,7 @@ def int_prompt(
     )
 
 
+@no_headless
 def float_prompt(
     prompt: str,
     default: float | None = None,
