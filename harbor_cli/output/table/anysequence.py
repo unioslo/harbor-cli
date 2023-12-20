@@ -33,5 +33,5 @@ def anysequence_table(s: Sequence[AnySequence], **kwargs: Any) -> Table:
                 item,
             )
         if idx < len(s) - 1:  # add a section between each sequence
-            table.add_section()  # type: ignore # it definitely has this method?!
+            table.add_section()
     return table

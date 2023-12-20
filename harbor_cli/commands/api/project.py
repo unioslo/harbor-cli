@@ -13,8 +13,8 @@ from ...models import MemberRoleType
 from ...models import MetadataFields
 from ...models import ProjectCreateResult
 from ...models import ProjectExtended
-from ...output.console import exit
 from ...output.console import exit_err
+from ...output.console import exit_ok
 from ...output.console import info
 from ...output.console import warning
 from ...output.prompts import check_enumeration_options
@@ -137,7 +137,7 @@ def project_exists(
         f"Checking if {project_repr} exists...",
     )
     render_result(exists, ctx)
-    exit(code=0 if exists else 1)
+    exit_ok(code=0 if exists else 1)
 
 
 # HarborAsyncClient.create_project()

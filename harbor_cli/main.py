@@ -24,8 +24,8 @@ from .logs import disable_logging
 from .logs import setup_logging
 from .option import Option
 from .output.console import error
-from .output.console import exit
 from .output.console import exit_err
+from .output.console import exit_ok
 from .output.console import info
 from .output.formatting.path import path_link
 from .state import get_state
@@ -75,7 +75,7 @@ def check_version_param(ctx: typer.Context, version: bool) -> None:
     """Check if --version was passed, and if so, print version and exit."""
     # Print version and exit if --version
     if version:
-        exit(f"{APP_NAME} version {__version__}")
+        exit_ok(f"{APP_NAME} version {__version__}")
     # Show error if no command and no version option
     if not version and not ctx.invoked_subcommand:
         raise click.UsageError("Missing command.")
@@ -102,6 +102,7 @@ def main_callback(
         help=f"Harbor API URL.",
         envvar=EnvVar.URL,
         config_override="harbor.url",
+        rich_help_panel="Harbor",
     ),
     harbor_username: Optional[str] = Option(
         None,
@@ -111,6 +112,7 @@ def main_callback(
         help=f"Harbor username.",
         envvar=EnvVar.USERNAME,
         config_override="harbor.username",
+        rich_help_panel="Harbor",
     ),
     harbor_secret: Optional[str] = Option(
         None,
@@ -120,14 +122,16 @@ def main_callback(
         help=f"Harbor secret (password).",
         envvar=EnvVar.SECRET,
         config_override="harbor.secret",
+        rich_help_panel="Harbor",
     ),
     harbor_basicauth: Optional[str] = Option(
         None,
-        "--basicauth",
-        "-B",
+        Deprecated("--basicauth"),
+        Deprecated("-B"),
         help=f"Harbor basic access credentials (base64).",
         envvar=EnvVar.BASICAUTH,
         config_override="harbor.basicauth",
+        rich_help_panel="Harbor",
     ),
     harbor_credentials_file: Optional[Path] = Option(
         None,
@@ -136,6 +140,7 @@ def main_callback(
         help=f"Path to Harbor JSON credentials file.",
         envvar=EnvVar.CREDENTIALS_FILE,
         config_override="harbor.credentials_file",
+        rich_help_panel="Harbor",
     ),
     harbor_validate: Optional[bool] = Option(
         None,
@@ -143,6 +148,7 @@ def main_callback(
         help=f"Validate Harbor API response data. Forces JSON output format if disabled.",
         envvar=EnvVar.HARBOR_VALIDATE_DATA,
         config_override="harbor.validate_data",
+        rich_help_panel="Harbor",
     ),
     harbor_raw_mode: Optional[bool] = Option(
         None,
@@ -150,6 +156,7 @@ def main_callback(
         help=f"Return raw data from Harbor API. Overrides all output formatting options.",
         envvar=EnvVar.HARBOR_RAW_MODE,
         config_override="harbor.raw_mode",
+        rich_help_panel="Harbor",
     ),
     harbor_verify_ssl: Optional[bool] = Option(
         None,
@@ -157,6 +164,7 @@ def main_callback(
         help=f"Verify SSL certificates when connecting to Harbor.",
         envvar=EnvVar.HARBOR_VERIFY_SSL,
         config_override="harbor.verify_ssl",
+        rich_help_panel="Harbor",
     ),
     harbor_retry_enabled: Optional[bool] = Option(
         None,
@@ -164,6 +172,7 @@ def main_callback(
         help=f"Retry failed HTTP requests.",
         envvar=EnvVar.HARBOR_RETRY_ENABLED,
         config_override="harbor.retry.enabled",
+        rich_help_panel="Harbor",
     ),
     harbor_retry_max_tries: Optional[int] = Option(
         None,
@@ -171,6 +180,7 @@ def main_callback(
         help=f"Number of times to retry failed HTTP requests.",
         envvar=EnvVar.HARBOR_RETRY_MAX_TRIES,
         config_override="harbor.retry.max_tries",
+        rich_help_panel="Harbor",
     ),
     harbor_retry_max_time: Optional[float] = Option(
         None,
@@ -178,6 +188,7 @@ def main_callback(
         help=f"Maximum number of seconds to retry failed HTTP requests.",
         envvar=EnvVar.HARBOR_RETRY_MAX_TIME,
         config_override="harbor.retry.max_time",
+        rich_help_panel="Harbor",
     ),
     # Formatting
     show_description: Optional[bool] = Option(
@@ -186,6 +197,7 @@ def main_callback(
         help="Include field descriptions in tables.",
         envvar=EnvVar.TABLE_DESCRIPTION,
         config_override="output.table.description",
+        rich_help_panel="Output",
     ),
     max_depth: Optional[int] = Option(
         None,
@@ -193,6 +205,7 @@ def main_callback(
         help="Maximum depth to print nested objects in tables.",
         envvar=EnvVar.TABLE_MAX_DEPTH,
         config_override="output.table.max_depth",
+        rich_help_panel="Output",
     ),
     compact: Optional[bool] = Option(
         None,
@@ -200,6 +213,7 @@ def main_callback(
         help="Compact table output. Has no effect on other formats. ",
         envvar=EnvVar.TABLE_COMPACT,
         config_override="output.table.compact",
+        rich_help_panel="Output",
     ),
     json_indent: Optional[int] = Option(
         None,
@@ -207,6 +221,7 @@ def main_callback(
         help="Indentation level for JSON output.",
         envvar=EnvVar.JSON_INDENT,
         config_override="output.json.indent",
+        rich_help_panel="Output",
     ),
     json_sort_keys: Optional[bool] = Option(
         None,
@@ -214,6 +229,7 @@ def main_callback(
         help="Sort keys in JSON output.",
         envvar=EnvVar.JSON_SORT_KEYS,
         config_override="output.json.sort_keys",
+        rich_help_panel="Output",
     ),
     # Output options
     output_format: Optional[OutputFormat] = Option(
@@ -224,6 +240,7 @@ def main_callback(
         envvar=EnvVar.OUTPUT_FORMAT,
         case_sensitive=False,
         config_override="output.format",
+        rich_help_panel="Output",
     ),
     paging: Optional[bool] = Option(
         None,
@@ -231,6 +248,7 @@ def main_callback(
         help="Display output in a pager (less, etc.).",
         envvar=EnvVar.PAGING,
         config_override="output.paging",
+        rich_help_panel="Output",
     ),
     pager: Optional[str] = Option(
         None,
@@ -238,6 +256,7 @@ def main_callback(
         help="Pager command to use. The default Rich pager will be used.",
         envvar=EnvVar.PAGER,
         config_override="output.pager",
+        rich_help_panel="Output",
     ),
     # General options
     confirm_deletion: Optional[bool] = Option(
@@ -246,6 +265,7 @@ def main_callback(
         help="Confirm before deleting resources.",
         envvar=EnvVar.CONFIRM_DELETION,
         config_override="general.confirm_deletion",
+        rich_help_panel="Confirmation & Alerts",
     ),
     confirm_enumeration: Optional[bool] = Option(
         None,
@@ -253,6 +273,7 @@ def main_callback(
         help="Confirm before enumerating all resources without a limit or query.",
         envvar=EnvVar.CONFIRM_ENUMERATION,
         config_override="general.confirm_enumeration",
+        rich_help_panel="Confirmation & Alerts",
     ),
     warnings: Optional[bool] = Option(
         None,
@@ -260,21 +281,22 @@ def main_callback(
         help="Show/hide warnings.",
         envvar=EnvVar.WARNINGS,
         config_override="general.warnings",
+        rich_help_panel="Confirmation & Alerts",
     ),
-    # Cache options
+    # Cache options (DEPRECATED)
     cache_enabled: Optional[bool] = Option(
         None,
-        "--cache/--no-cache",
+        Deprecated("--cache/--no-cache"),
         help="Enable caching of API responses.",
-        envvar=EnvVar.CACHE_ENABLED,
         config_override="cache.enabled",
+        hidden=True,
     ),
     cache_ttl: Optional[int] = Option(
         None,
-        "--cache-ttl",
+        Deprecated("--cache-ttl"),
         help="Cache TTL in seconds.",
-        envvar=EnvVar.CACHE_TTL,
         config_override="cache.ttl",
+        hidden=True,
     ),
     # Output options that don't belong to the config file
     output_file: Optional[Path] = Option(
@@ -282,18 +304,27 @@ def main_callback(
         "--output",
         "-o",
         help="Output file, by default None, which means output to stdout. If the file already exists, it will be overwritten.",
+        rich_help_panel="Output",
     ),
     no_overwrite: bool = Option(
         False,
         "--no-overwrite",
         help="Do not overwrite the output file if it already exists.",
+        rich_help_panel="Output",
     ),
     # stdout/stderr options
-    verbose: bool = Option(False, "--verbose", "-v", help="Enable verbose output."),
+    verbose: bool = Option(
+        False,
+        "--verbose",
+        "-v",
+        help="Enable verbose output.",
+        rich_help_panel="Output",
+    ),
     with_stdout: bool = Option(
         False,
         "--with-stdout",
         help="Output to stdout in addition to the specified output file, if any. Has no effect if no output file is specified.",
+        rich_help_panel="Output",
     ),
     # Version
     version: bool = Option(
@@ -383,12 +414,6 @@ def main_callback(
         state.config.general.confirm_deletion = confirm_deletion
     if warnings is not None:
         state.config.general.warnings = warnings
-    # Cache
-    if cache_enabled is not None:
-        state.config.cache.enabled = cache_enabled
-    if cache_ttl is not None:
-        state.config.cache.ttl = cache_ttl
-    state.configure_cache()  # NOTE: move to configure_from_config?
 
     # Set global options
     state.options.verbose = verbose
@@ -449,7 +474,7 @@ def main() -> None:
         app()
     except HarborCLIError as e:
         # exceptions of this type are expected, and if they're
-        # not handled internally (i.e. other function calls exit()),
+        # not handled internally (i.e. other function calls exit_ok()),
         # we want to only display their message and exit with a
         # non-zero status code.
         exit_err(str(e))

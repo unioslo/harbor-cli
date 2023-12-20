@@ -14,6 +14,7 @@ from typing import Union
 import tomli
 import tomli_w
 from harborapi.models.base import BaseModel as HarborBaseModel
+from pydantic import AliasChoices
 from pydantic import ConfigDict
 from pydantic import Field
 from pydantic import field_serializer
@@ -83,8 +84,6 @@ class EnvVar(StrEnum):
     CONFIRM_DELETION = env_var("confirm_deletion")
     CONFIRM_ENUMERATION = env_var("confirm_enumeration")
     WARNINGS = env_var("warnings")
-    CACHE_ENABLED = env_var("cache_enabled")
-    CACHE_TTL = env_var("cache_ttl")
 
     def __str__(self) -> str:
         return self.value
@@ -270,15 +269,23 @@ class LoggingSettings(BaseModel):
     enabled: bool = True
     level: LogLevel = LogLevel.WARNING
     directory: Path = LOGS_DIR
-    filename: str = "harbor_cli-{time}.log"
-    timeformat: str = "%Y-%m-%d"
+    filename: str = "harbor-cli.log"
+    datetime_format: str = Field(
+        default="%Y-%m-%d",
+        validation_alias=AliasChoices(
+            "datetime_format",
+            "timeformat",  # Old name (deprecated)
+        ),
+    )
     retention: int = 30
 
     @property
     def path(self) -> Path:
         """Full time-formatted path to log file."""
         return self.directory / self.filename.format(
-            time=datetime.now().strftime(self.timeformat)
+            dt=datetime.now().strftime(self.datetime_format),
+            # Deprecated format placeholder:
+            time=datetime.now().strftime(self.datetime_format),
         )
 
 
@@ -473,6 +480,8 @@ class REPLSettings(BaseModel):
 
 
 class CacheSettings(BaseModel):
+    """DEPRECATED: Caching was removed in 0.2.0. This class is left here for compatibility."""
+
     enabled: bool = Field(
         default=False,
         description="Enable in-memory caching of API responses. This can significantly speed up Harbor CLI, but should be considered experimental for now.",

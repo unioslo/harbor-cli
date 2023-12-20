@@ -18,7 +18,6 @@ from rich.console import Console
 
 if TYPE_CHECKING:
     from .config import HarborCLIConfig
-    from .cache import Cache
 
 
 T = TypeVar("T")
@@ -57,7 +56,6 @@ class State:
     repl: bool = False
 
     # Attributes (exposed as properties)
-    _cache = None  # type: Cache | None
     _config = None  # type: HarborCLIConfig | None
     _client = None  # type: HarborAsyncClient | None
     _console = None  # type: Console | None
@@ -157,25 +155,6 @@ class State:
             self._console = console
         return self._console
         # fmt: on
-
-    @property
-    def cache(self) -> Cache:
-        """The program cache.
-        Initializes the cache if it's not already initialized."""
-        # fmt: off
-        if self._cache is None:
-            from .cache import Cache
-            self._cache = Cache()
-        return self._cache
-        # fmt: on
-
-    def configure_cache(self) -> None:
-        """Configure the cache based on the config."""
-        self.cache.ttl = self.config.cache.ttl
-        self.cache.enabled = self.config.cache.enabled
-        # Start the cache flushing loop
-        if not self.cache._loop_running:
-            self.loop.create_task(self.cache.start_flush_loop())
 
     def authenticate_harbor(self) -> None:
         self.client.authenticate(**self.config.harbor.credentials)

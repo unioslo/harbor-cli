@@ -19,7 +19,7 @@ Many of these options can override configuration file options, and will always t
 
 ## {{ option['params'] }}
 {% if option['envvar'] %}
-**Environment variable:** `{{ option['envvar'] }}`
+**Environment variable:** `{{ '`' + (option['envvar'] | join('`, `')) + '`' }}`
 {%- endif %}
 {% if option['config_value'] %}
 **Configuration option:** [`{{ option['config_value'] }}`](../configuration/config-file.md#{{option['fragment']}})

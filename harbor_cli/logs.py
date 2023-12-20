@@ -14,6 +14,8 @@ import logging
 # Create logger
 logger = logging.getLogger("harbor-cli")
 logger.setLevel(logging.DEBUG)  # Capture all log messages
+logger.disabled = True
+logger.handlers.clear()
 
 
 class LogLevel(Enum):
@@ -63,10 +65,11 @@ class LogLevel(Enum):
 
 def setup_logging(config: LoggingSettings) -> None:
     """Set up file logging."""
-    if logger.handlers:  # prevent re-configuring in REPL
+    if not logger.disabled:  # prevent re-configuring in REPL
         return
     file_handler = _get_file_handler(config)
     logger.addHandler(file_handler)
+    logger.disabled = False
 
 
 def _get_file_handler(config: LoggingSettings) -> logging.FileHandler:
@@ -100,3 +103,4 @@ def replace_handler(handler: logging.Handler) -> None:
 def disable_logging() -> None:
     """Disable logging."""
     logger.handlers.clear()
+    logger.disabled = True

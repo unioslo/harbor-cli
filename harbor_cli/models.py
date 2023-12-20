@@ -55,6 +55,7 @@ class ParamSummary(BaseModel):
     hidden: Optional[bool] = None
     human_readable_name: str
     is_argument: bool
+    is_eager: bool = False
     is_bool_flag: Optional[bool] = None
     is_flag: Optional[bool] = None
     is_option: Optional[bool]
@@ -68,6 +69,7 @@ class ParamSummary(BaseModel):
     prompt: Optional[str] = None
     prompt_required: Optional[bool] = None
     required: bool
+    secondary_opts: List[str] = []
     show_choices: Optional[bool] = None
     show_default: Optional[bool] = None
     show_envvar: Optional[bool] = None

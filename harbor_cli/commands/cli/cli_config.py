@@ -17,8 +17,8 @@ from ...config import EnvVar
 from ...config import HarborCLIConfig
 from ...models import BaseModel
 from ...output.console import error
-from ...output.console import exit
 from ...output.console import exit_err
+from ...output.console import exit_ok
 from ...output.console import info
 from ...output.console import print_toml
 from ...output.console import success
@@ -93,7 +93,10 @@ def get_cli_config(
     else:
         render_config(state.config, as_toml)
         if state.config.config_file is not None:
-            info(f"Source: {path_link(state.config.config_file)}", rule=True)
+            info(
+                f"[bold]Source:[/bold] {path_link(state.config.config_file)}",
+                panel=True,
+            )
 
 
 @app.command(
@@ -270,6 +273,6 @@ def env(
         active[str(env_var)] = val or ""
 
     if not active:
-        exit("No environment variables set.")
+        exit_ok("No environment variables set.")
 
     render_result(EnvVars(envvars=active))

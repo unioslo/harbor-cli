@@ -26,7 +26,6 @@ The configuration file is divided into the following tables:
 - [output.table.style](#outputtablestyle)
 - [output.JSON](#outputjson)
 - [repl](#repl)
-- [cache](#cache)
 - [logging](#logging)
 
 ### `harbor`
@@ -482,37 +481,6 @@ Custom path for the command history file. The default path is based on OS, and i
 history_file = "/path/to/history_file"
 ```
 
-
-----
-
-### `cache`
-
-The `cache` table contains settings related to caching of Harbor API responses.
-
-----
-
-#### `cache.enabled`
-
-Enable caching of Harbor API responses. Disabled by default.
-
-
-```toml
-[cache]
-enabled = false
-```
-
-----
-
-#### `cache.ttl`
-
-Time to Live (TTL) for cached responses. The default is `300` seconds (5 minutes).
-
-
-```toml
-[cache]
-ttl = 300
-```
-
 ----
 
 ### `logging`
@@ -561,22 +529,22 @@ directory = "/path/to/logdir"
 
 #### `logging.filename`
 
-Filename to use for log files. Can be automatically timed by adding `{time}` to the filename. Defaults to `"harbor_cli_{time}.log"`.
+Filename to use for log files. If `{dt}` is included in the filename, it will be replaced with the current time. The default is `harbor_cli.log` (no automatic date and/or time).
 
 ```toml
 [logging]
-filename = "harbor_cli_{time}.log"
+filename = "harbor_cli_{dt}.log"
 ```
 
 ----
 
-#### `logging.timeformat`
+#### `logging.datetime_format`
 
-The time format that is used when automatically timing log files. Defaults to `"%Y-%m-%d"`. See [Python's strftime documentation](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes) for more information on how to format the time.
+The datetime format that is used when automatically timing log files. Defaults to `"%Y-%m-%d"`. See [Python's strftime documentation](https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes) for more information on how to format the time.
 
 ```toml
 [logging]
-timeformat = "%Y-%m-%d"
+datetime_format = "%Y-%m-%d"
 ```
 
 ----

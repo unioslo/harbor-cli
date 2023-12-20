@@ -119,14 +119,6 @@ def test_envvars(
     inv(EnvVar.CONFIRM_ENUMERATION, "0")
     assert state.config.general.confirm_enumeration is False
 
-    inv(EnvVar.CACHE_ENABLED, "1")
-    assert state.config.cache.enabled is True
-    inv(EnvVar.CACHE_ENABLED, "0")
-    assert state.config.cache.enabled is False
-
-    inv(EnvVar.CACHE_TTL, "3600")
-    assert state.config.cache.ttl == 3600
-
 
 HARBOR_CLI_TEST_USERNAME = "harbor_cli_test_user"
 

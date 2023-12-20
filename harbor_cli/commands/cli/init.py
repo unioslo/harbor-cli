@@ -136,10 +136,6 @@ def run_config_wizard(config_path: Optional[Path] = None) -> HarborCLIConfig:
         init_repl_settings(config)
         console.print()
 
-    if bool_prompt("Configure cache settings?", default=False):
-        init_cache_settings(config)
-        console.print()
-
     if bool_prompt("Configure logging settings?", default=False):
         init_logging_settings(config)
         console.print()
@@ -506,31 +502,6 @@ def init_general_settings(config: HarborCLIConfig) -> None:
         f"Confirm deletion of resources when {render_cli_option('--force')} is omitted",
         default=conf.confirm_deletion,
     )
-
-
-def init_cache_settings(config: HarborCLIConfig) -> None:
-    conf = config.cache
-
-    print_title("Cache Settings", emoji=":floppy_disk:")
-
-    conf.enabled = bool_prompt(
-        "Enable caching",
-        default=conf.enabled,
-    )
-
-    if conf.enabled:
-        conf.ttl = int_prompt(
-            "Cache Time-to-live (seconds)",
-            default=conf.ttl,
-            show_default=True,
-        )
-
-        # TODO: implement cache max size
-        # conf.max_size = int_prompt(
-        #     "Cache max size (bytes)",
-        #     default=conf.max_size,
-        #     show_default=True,
-        # )
 
 
 def print_title(title: str, emoji: str = ":gear:") -> None:

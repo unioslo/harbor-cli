@@ -33,8 +33,8 @@ from ...models import ArtifactVulnerabilitySummary
 from ...models import BaseModel
 from ...models import Operator
 from ...output.console import error
-from ...output.console import exit
 from ...output.console import exit_err
+from ...output.console import exit_ok
 from ...output.console import info
 from ...output.console import warning
 from ...output.prompts import bool_prompt
@@ -871,23 +871,17 @@ def list_artifact_vulnerabilities_summary(
     ),
 ) -> None:
     """Show a summary of vulnerabilities for artifacts in a project or repository."""
-    ctx_key = f"{ctx.command_path} {sorted(ctx.params['project'])} {sorted(ctx.params['repo'])} {ctx.params['query']}"
-
-    if (cached := state.cache.get(ctx_key, List[ArtifactInfo])) is not None:
-        result = cached
-    else:
-        # TODO: check_enumeration_options when no projects and no repos
-        result = state.run(
-            get_artifacts(
-                state.client,
-                projects=project if project else None,
-                repositories=repo if repo else None,
-                query=query,
-                with_report=True,
-            ),
-            "Fetching artifacts...",
-        )
-        state.cache.set(ctx_key, result)
+    # TODO: check_enumeration_options when no projects and no repos
+    result = state.run(
+        get_artifacts(
+            state.client,
+            projects=project if project else None,
+            repositories=repo if repo else None,
+            query=query,
+            with_report=True,
+        ),
+        "Fetching artifacts...",
+    )
 
     # fmt: off
     if sort == ArtifactSummarySorting.total:
@@ -1024,7 +1018,7 @@ def get_vulnerabilities(
             "to limit the scope of the operation."
         )
         if not bool_prompt("Continue", default=False):
-            exit()
+            exit_ok()
     elif not project:
         warning("Fetching from all projects can be slow even with a repository filter.")
 

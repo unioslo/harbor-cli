@@ -12,20 +12,22 @@ The **third number** is the patch version (bug fixes)
 
 ## [Unreleased]
 
-### Added
-
-- "limited guest" role for the relevant `project member` commands.
-
-
 ### Changed
 
-- Artifact digests are now always displayed in the short format in tables to limit the width of the table.
-- `project member` commands now take a username or ID instead of a project member ID.
-  - Affected commands:
-    - `project member update-role`
-    - `project member remove`
-  - This is more consistent with the rest of application, but less consistent with the API. In most cases, we will not know the project member ID for a given user, so this change makes it easier to use the CLI to manage project members.
-- Application now uses Pydantic V2 internally, which allows us to leverage the newest version of the API library ([harborapi](https://github.com/pederhan/harborapi/))
+- Automatic datetime log file naming now uses the tag `{dt}` (was `{time}`).
+
+### Fixed
+
+- Double printing of messages in terminal if logging wasn't properly configured.
+
+### Deprecated
+
+- `{time}` tag for automatic datetime log file naming. Use `{dt}` instead.
+- `[cache]` section in configuration file. Caching of API responses has been removed.
+
+### Removed
+
+- Caching of API responses. This was a premature optimization that caused more problems than it solved. It will be re-introduced in a future release.
 
 ## [0.1.0](https://github.com/pederhan/harbor-cli/tree/harbor-cli-v0.0.1) - 2023-12-06
 
@@ -33,5 +35,9 @@ The **third number** is the patch version (bug fixes)
 
 - Initial release.
 
+<!-- ### Added -->
 <!-- ### Changed -->
+<!-- ### Deprecated -->
+<!-- ### Removed -->
 <!-- ### Fixed -->
+<!-- ### Security -->

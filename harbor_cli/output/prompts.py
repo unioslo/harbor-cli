@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 from ..style import STYLE_CLI_OPTION
 from .console import console, exit_err
 from .console import error
-from .console import exit
+from .console import exit_ok
 from .console import warning
 from ..style.color import yellow
 from ..style.color import green
@@ -338,7 +338,7 @@ def delete_prompt(
         name = f" {name!r}" if name else ""
         message = f"Are you sure you want to delete the {resource}{name}?"
         if not bool_prompt(message, default=False):
-            exit("Deletion aborted.")
+            exit_ok("Deletion aborted. Delete with --force to skip this prompt.")
     return
 
 
@@ -356,4 +356,4 @@ def check_enumeration_options(
             "This could result in a large amount of data being returned. "
         )
         if not bool_prompt("Continue?"):
-            exit()
+            exit_ok()
