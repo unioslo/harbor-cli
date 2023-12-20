@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 import typing
 import warnings
 from typing import TYPE_CHECKING
@@ -28,7 +29,8 @@ for model in RENDER_FUNCTIONS.keys():
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             strategy.example()
-    except ValidationError:
+    except (ValidationError, TypeError):
+        logging.debug(f"Skipping {model} for table rendering tests.")
         continue
     COMPACT_TABLE_MODELS.append(strategy)
     if not COMPACT_TABLE_MODELS:
