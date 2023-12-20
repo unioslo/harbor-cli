@@ -127,6 +127,11 @@ def main(
         help="Version bump to perform or new version to set.",
         metavar="[" + "|".join(versions) + "|x.y.z],[" + "|".join(statuses) + "]",
     ),
+    dry_run: bool = typer.Option(
+        False,
+        "--dry-run",
+        help="Perform a dry run, don't actually change anything.",
+    ),
 ):
     """Bump the version of the project and create a new git tag.
 
@@ -140,7 +145,7 @@ def main(
     """
     state = StateMachine()
     try:
-        _main(version, state)
+        _main(version, dry_run, state)
     except Exception as e:
         cleanup(state)
         raise e
@@ -178,9 +183,21 @@ def _check_commands() -> None:
             console.print(f"{command.program} :white_check_mark:")
 
 
-def _main(version: str, state: StateMachine) -> None:
-    _check_commands()
+def dryrun_subprocess_run(args, *aargs, **kwargs):
+    """Wrapper around subprocess.run that prints the command and returns a dummy CompletedProcess"""
+    print(f"Running: {args}")
+    # We want to return the real version if we're checking the version
+    if args == ["hatch", "version"]:
+        return subprocess.run_orig(args=args, *aargs, **kwargs)
+    return subprocess.CompletedProcess(args=args, returncode=0, stdout=b"", stderr=b"")
 
+
+def _main(version: str, dry_run: bool, state: StateMachine) -> None:
+    if dry_run:
+        setattr(subprocess, "run_orig", subprocess.run)
+        subprocess.run = dryrun_subprocess_run
+
+    _check_commands()
     old_version = subprocess.check_output(["hatch", "version"])
     state.old_version = old_version.decode().strip()
 

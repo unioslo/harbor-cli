@@ -87,6 +87,9 @@ dependencies = [
 test = "pytest {args}"
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=harbor_cli --cov=tests {args}"
 no-cov = "cov --no-cov {args}"
+# Version bumping
+bump = "python scripts/bump_version.py {args}"
+bump-dry = "python scripts/bump_version.py --dry-run {args}"
 
 [tool.hatch.envs.docs]
 dependencies = [
