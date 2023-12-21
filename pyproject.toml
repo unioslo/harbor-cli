@@ -71,6 +71,10 @@ pattern = "<!-- changelog follows -->\n\n(.*)"
 [tool.hatch.version]
 path = "harbor_cli/__about__.py"
 
+[tool.hatch.build.targets.app]
+pyapp-version = "0.12.0"
+python-version = "3.11"
+
 [tool.hatch.envs.default]
 dependencies = [
   "pytest>=7.2.0",
