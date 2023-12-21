@@ -9,7 +9,8 @@
 
 # Directories
 dist
-.dev
+build
+pyapp
 
 # Single files
 TODO
