@@ -54,26 +54,26 @@ jobs:
         - target: aarch64-unknown-linux-gnu
           os: ubuntu-22.04
           cross: true
-        - target: x86_64-unknown-linux-gnu
-          os: ubuntu-22.04
-          cross: true
-        - target: x86_64-unknown-linux-musl
-          os: ubuntu-22.04
-          cross: true
-        - target: i686-unknown-linux-gnu
-          os: ubuntu-22.04
-          cross: true
-        - target: powerpc64le-unknown-linux-gnu
-          os: ubuntu-22.04
-          cross: true
-        # Windows
-        - target: x86_64-pc-windows-msvc
-          os: windows-2022
-        # macOS
-        - target: aarch64-apple-darwin
-          os: macos-12
-        - target: x86_64-apple-darwin
-          os: macos-12
+        # - target: x86_64-unknown-linux-gnu
+        #   os: ubuntu-22.04
+        #   cross: true
+        # - target: x86_64-unknown-linux-musl
+        #   os: ubuntu-22.04
+        #   cross: true
+        # - target: i686-unknown-linux-gnu
+        #   os: ubuntu-22.04
+        #   cross: true
+        # - target: powerpc64le-unknown-linux-gnu
+        #   os: ubuntu-22.04
+        #   cross: true
+        # # Windows
+        # - target: x86_64-pc-windows-msvc
+        #   os: windows-2022
+        # # macOS
+        # - target: aarch64-apple-darwin
+        #   os: macos-12
+        # - target: x86_64-apple-darwin
+        #   os: macos-12
 
     outputs:
       version: ${{ steps.version.outputs.version }}
