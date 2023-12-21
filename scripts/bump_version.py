@@ -10,9 +10,14 @@ from typing import Sequence
 
 import typer
 from rich.console import Console
+from rich.panel import Panel
 
 console = Console()
 err_console = Console(stderr=True, style="red")
+
+
+class BumpError(Exception):
+    pass
 
 
 class VersionType(Enum):
@@ -88,15 +93,13 @@ class StateMachine:
             yield self.revert()
 
 
-def set_version(version: str) -> str:
+def set_version(version: str) -> None:
     # We don't verify that the version arg is valid, we just pass it
     # to hatch and let it handle it.
     # Worst case scenario, we get a non-zero exit code and the script exits
     p_version = subprocess.run(["hatch", "version", version])
     if p_version.returncode != 0:
-        err_console.print(f"Failed to set version: {p_version.stderr.decode()}")
-        raise typer.Exit(1)
-    return p_version.stdout.decode().strip()  # the new version
+        raise BumpError(f"Failed to set version: {p_version.stderr.decode()}")
 
 
 def cleanup(state: StateMachine) -> None:
@@ -147,6 +150,7 @@ def main(
     try:
         _main(version, dry_run, state)
     except Exception as e:
+        err_console.print(e)
         cleanup(state)
         raise e
 
@@ -194,6 +198,21 @@ def dryrun_subprocess_run(args, *aargs, **kwargs):
 
 def _main(version: str, dry_run: bool, state: StateMachine) -> None:
     if dry_run:
+        lines = [
+            "[bold]Running in dry-run mode.[/bold]",
+            "Commands will not be executed.",
+            "",
+            "[bold]NOTE:[/bold] The old package version will be shown in the previewed commands.",
+        ]
+
+        warning_console = Console(stderr=True, style="yellow")
+        warning_console.print(
+            Panel("\n".join(lines), title="Dry-run mode", expand=False)
+        )
+        # warning_console.print("[bold]Commands will not be executed.[/bold]")
+        # warning_console.print(
+        #     "[bold]NOTE: The old version package version will be shown in the Git commands in dry-run mode[/bold]"
+        # )
         setattr(subprocess, "run_orig", subprocess.run)
         subprocess.run = dryrun_subprocess_run
 
@@ -211,10 +230,10 @@ def _main(version: str, dry_run: bool, state: StateMachine) -> None:
     state.new_version = new_version
 
     # Create a new commit with the changed version file
+    # TODO: add CHANGELOG.md too
     p_git_add = subprocess.run(["git", "add", "harbor_cli/__about__.py"])
     if p_git_add.returncode != 0:
-        err_console.print(f"Failed to add version file: {p_git_add.stderr.decode()}")
-        raise typer.Exit(1)
+        raise BumpError(f"Failed to add version file: {p_git_add.stderr.decode()}")
     state.advance()
     assert state.state == State.GIT_ADD
 
@@ -222,25 +241,22 @@ def _main(version: str, dry_run: bool, state: StateMachine) -> None:
         ["git", "commit", "-m", f"Bump version to {new_version}"]
     )
     if p_git_commit.returncode != 0:
-        err_console.print(
+        raise BumpError(
             f"Failed to commit version bump: {p_git_commit.stderr.decode()}"
         )
-        raise typer.Exit(1)
     state.advance()
     assert state.state == State.GIT_COMMIT
 
     tag = f"harbor-cli-v{new_version}"
     p_git_tag = subprocess.run(["git", "tag", tag])
     if p_git_tag.returncode != 0:
-        err_console.print(f"Failed to tag version: {p_git_tag.stderr.decode()}")
-        raise typer.Exit(1)
+        raise BumpError(f"Failed to tag version: {p_git_tag.stderr.decode()}")
     state.advance()
     assert state.state == State.GIT_TAG
 
     p_git_push = subprocess.run(["git", "push", "--tags", "origin", "main"])
     if p_git_push.returncode != 0:
-        err_console.print(f"Failed to push new version: {p_git_push.stderr.decode()}")
-        raise typer.Exit(1)
+        raise BumpError(f"Failed to push new version: {p_git_push.stderr.decode()}")
     state.advance()
     assert state.state == State.GIT_PUSH
 
