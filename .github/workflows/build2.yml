@@ -143,6 +143,9 @@ jobs:
         mv "$wheel" "../$PYAPP_REPO"
         echo "PYAPP_PROJECT_PATH=$wheel" >> $GITHUB_ENV
 
+    - name: Install Hatch
+      run: pip install hatch
+
     - name: Build binary
       run: hatch build --target app
 
