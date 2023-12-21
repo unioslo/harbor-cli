@@ -36,7 +36,6 @@ dependencies = [
   "tomli>=2.0.1",
   "tomli-w>=1.0.0",
   "rich>=12.6.0",
-  "shellingham>=1.5.0",
   "click-repl==0.2.0",
   "fuzzywuzzy>=0.18.0",
   "python-Levenshtein>=0.20.9",
