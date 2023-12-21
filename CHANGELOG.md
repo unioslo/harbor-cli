@@ -10,15 +10,13 @@ The **third number** is the patch version (bug fixes)
 
 <!-- changelog follows -->
 
-## [Unreleased]
+## [0.2.0](https://github.com/pederhan/harbor-cli/tree/harbor-cli-v0.2.0) - 2023-12-21
 
 ### Changed
 
 - Automatic datetime log file naming now uses the tag `{dt}` (was `{time}`).
-
-### Fixed
-
-- Double printing of messages in terminal if logging wasn't properly configured.
+- Log file is now named `harbor-cli.log` by default (no longer includes datetime).
+  - Automatic datetime naming is now opt-in instead of being the default.
 
 ### Deprecated
 
@@ -29,7 +27,12 @@ The **third number** is the patch version (bug fixes)
 
 - Caching of API responses. This was a premature optimization that caused more problems than it solved. It will be re-introduced in a future release.
 
-## [0.1.0](https://github.com/pederhan/harbor-cli/tree/harbor-cli-v0.0.1) - 2023-12-06
+### Fixed
+
+- Double printing of messages in terminal if logging wasn't properly configured.
+
+
+## [0.1.0](https://github.com/pederhan/harbor-cli/tree/ca08e7e8830ff3a10e1be447b5555acd5ed672ed) - 2023-12-06
 
 ### Added
 
