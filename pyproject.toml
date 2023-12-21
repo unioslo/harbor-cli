@@ -41,7 +41,7 @@ dependencies = [
   "fuzzywuzzy>=0.18.0",
   "python-Levenshtein>=0.20.9",
   "keyring>=24.2.0",
-  "httpx[socks]",
+  "httpx[socks]>=0.26.0",
   "strenum>=0.4.15",
 ]
 dynamic = ["version", "readme"]
