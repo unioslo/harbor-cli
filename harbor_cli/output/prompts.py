@@ -17,26 +17,25 @@ from rich.prompt import Confirm
 from rich.prompt import FloatPrompt
 from rich.prompt import IntPrompt
 from rich.prompt import Prompt
+from typing_extensions import ParamSpec
 
+from ..style import Icon
+from ..style import STYLE_CLI_OPTION
+from ..style.color import green
+from ..style.color import yellow
 from ..style.style import render_cli_option
+from ..types import EllipsisType
+from .console import err_console
+from .console import error
+from .console import exit_err
+from .console import exit_ok
+from .console import warning
+from .formatting.path import path_link
+
 
 if TYPE_CHECKING:
     from ..config import HarborCLIConfig
     from ..state import State
-
-from ..style import STYLE_CLI_OPTION
-from .console import console, exit_err
-from .console import error
-from .console import exit_ok
-from .console import warning
-from ..style.color import yellow
-from ..style.color import green
-from ..style import Icon
-from .formatting.path import path_link
-from ..types import EllipsisType
-
-from typing_extensions import ParamSpec
-
 
 T = TypeVar("T")
 P = ParamSpec("P")
@@ -125,7 +124,7 @@ def str_prompt(
     while not inp:
         inp = Prompt.ask(
             msg,
-            console=console,
+            console=err_console,
             password=password,
             show_default=show_default,
             default=default,
@@ -248,7 +247,7 @@ def _number_prompt(
     while True:
         val = prompt_type.ask(
             msg,
-            console=console,
+            console=err_console,
             default=default_arg,
             show_default=show_default,
             **kwargs,
@@ -281,7 +280,7 @@ def bool_prompt(
 ) -> bool:
     return Confirm.ask(
         prompt_msg(prompt),
-        console=console,
+        console=err_console,
         show_default=show_default,
         default=default,
         **kwargs,

@@ -10,6 +10,12 @@ The **third number** is the patch version (bug fixes)
 
 <!-- changelog follows -->
 
+## [Unreleased]() - 2024-mm-dd
+
+### Changed
+
+- Prompts are now printed to stderr instead of stdout.
+
 ## [0.2.0](https://github.com/pederhan/harbor-cli/tree/harbor-cli-v0.2.0) - 2023-12-21
 
 ### Changed

@@ -112,7 +112,8 @@ def test_float_prompt(
     assert float_prompt("foo") == inp
     if leading_newline:
         # Rich prints this message to stdout for some reason
-        assert "Please enter a number" in capsys.readouterr().out
+        _, stderr = capsys.readouterr()
+        assert "Please enter a number" in stderr
 
 
 @pytest.mark.timeout(1)
@@ -127,11 +128,11 @@ def test_float_prompt_nan(
     stdin_str = leading_newline + "nan\n" + "0.0\n"
     monkeypatch.setattr("sys.stdin", io.StringIO(stdin_str))
     assert float_prompt("foo") == 0.0
-    stdout, stderr = capsys.readouterr()
+    _, stderr = capsys.readouterr()
     assert "NaN" in stderr
     if leading_newline:
         # Rich prints this message to stdout for some reason
-        assert "Please enter a number" in stdout
+        assert "Please enter a number" in stderr
 
 
 def test_path_prompt(monkeypatch: MonkeyPatch, tmp_path: Path) -> None:
