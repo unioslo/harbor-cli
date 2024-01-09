@@ -16,7 +16,7 @@ The **third number** is the patch version (bug fixes)
 
 - Prompts are now printed to stderr instead of stdout.
 
-## [0.2.0](https://github.com/pederhan/harbor-cli/tree/harbor-cli-v0.2.0) - 2023-12-21
+## [0.2.0](https://github.com/unioslo/harbor-cli/tree/harbor-cli-v0.2.0) - 2023-12-21
 
 ### Changed
 
@@ -38,7 +38,7 @@ The **third number** is the patch version (bug fixes)
 - Double printing of messages in terminal if logging wasn't properly configured.
 
 
-## [0.1.0](https://github.com/pederhan/harbor-cli/tree/ca08e7e8830ff3a10e1be447b5555acd5ed672ed) - 2023-12-06
+## [0.1.0](https://github.com/unioslo/harbor-cli/tree/ca08e7e8830ff3a10e1be447b5555acd5ed672ed) - 2023-12-06
 
 ### Added
 

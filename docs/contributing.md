@@ -7,7 +7,7 @@
 Start by cloning the repository.
 
 ```
-git clone git@github.com:pederhan/harbor-cli.git
+git clone git@github.com:unioslo/harbor-cli.git
 ```
 
 Use [Hatch](https://hatch.pypa.io/latest/) to set up the required development environments.
@@ -92,7 +92,7 @@ When submitting a pull request, please make sure to run the pre-commit hooks and
 
     In general, managing releases and versioning should only be handled by the project maintainer(s), but it is documented here for completeness.
 
-Releases are handled by a GitHub actions workflow found [here](https://github.com/pederhan/harbor-cli/blob/main/.github/workflows/build.yml). Whenever a new tag whose name starts `harbor-cli-v` is pushed to the repository on the `main` branch, the workflow will build and publish a new release to PyPI.
+Releases are handled by a GitHub actions workflow found [here](https://github.com/unioslo/harbor-cli/blob/main/.github/workflows/build.yml). Whenever a new tag whose name starts `harbor-cli-v` is pushed to the repository on the `main` branch, the workflow will build and publish a new release to PyPI.
 
 ```
 $ python scripts/bump_version.py --help

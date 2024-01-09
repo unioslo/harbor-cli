@@ -46,7 +46,7 @@ sort_keys = false
 
 [repl]
 history = true
-history_file = "/Users/pederhan/Library/Application Support/harbor-cli/history"
+history_file = "/Users/unioslo/Library/Application Support/harbor-cli/history"
 
 [cache]
 enabled = false
@@ -55,7 +55,7 @@ ttl = 300
 [logging]
 enabled = true
 level = "WARNING"
-directory = "/Users/pederhan/Library/Logs/harbor-cli"
+directory = "/Users/unioslo/Library/Logs/harbor-cli"
 filename = "harbor-cli.log"
 datetime_format = "%Y-%m-%d"
 retention = 30

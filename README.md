@@ -3,7 +3,7 @@
 <!-- [![PyPI - Version](https://img.shields.io/pypi/v/harbor-cli.svg)](https://pypi.org/project/harbor-cli)
 [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/harbor-cli.svg)](https://pypi.org/project/harbor-cli) -->
 
-![Tests](https://github.com/pederhan/harbor-cli/workflows/test/badge.svg) [![Docs](https://github.com/pederhan/harbor-cli/workflows/build-docs/badge.svg)](https://pederhan.github.io/harbor-cli/) ![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json) ![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)
+![Tests](https://github.com/unioslo/harbor-cli/workflows/test/badge.svg) [![Docs](https://github.com/unioslo/harbor-cli/workflows/build-docs/badge.svg)](https://unioslo.github.io/harbor-cli/) ![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v2.json) ![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)
 
 ![Demo](docs/assets/readme/demo.gif)
 
@@ -25,7 +25,7 @@
 
 ## Features
 
-- [150+ commands](https://pederhan.github.io/harbor-cli/commands/)
+- [150+ commands](https://unioslo.github.io/harbor-cli/commands/)
 - Beautiful command-line interface powered by [Typer](https://github.com/tiangolo/typer) and [Rich](https://github.com/Textualize/rich).
 - REPL mode (`harbor repl`)
 - TUI mode (`harbor tui`)
@@ -56,7 +56,7 @@ pipx install harbor-cli
 or through Homebrew:
 
 ```
-brew tap add pederhan/harbor-cli
+brew tap add unioslo/harbor-cli
 brew install harbor-cli
 ```
 
@@ -92,7 +92,7 @@ Keyring functionality is untested on Windows, but should work out of the box. If
 
 ## Documentation
 
-Documentation can be found [here](https://pederhan.github.io/harbor-cli/).
+Documentation can be found [here](https://unioslo.github.io/harbor-cli/).
 
 The documentation includes extensive setup and usage guides, as well as a list of all commands and their options.
 
