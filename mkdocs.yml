@@ -1,7 +1,7 @@
 site_name: harbor-cli
 
-repo_url: https://github.com/pederhan/harbor-cli
-repo_name: pederhan/harbor-cli
+repo_url: https://github.com/unioslo/harbor-cli
+repo_name: unioslo/harbor-cli
 edit_uri: edit/main/docs/
 
 theme:

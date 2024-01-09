@@ -5,4 +5,4 @@ from __future__ import annotations
 
 __version__ = "0.2.0"
 APP_NAME = "harbor-cli"
-AUTHOR = "pederhan"
+AUTHOR = "unioslo"

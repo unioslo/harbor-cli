@@ -26,7 +26,7 @@ def boolstr_str(boolstr: str | bool | None, default: bool | None = False) -> str
     See Also
     --------
     [harbor_cli.output.formatting.builtin.bool_str][]
-    <https://pederhan.github.io/harborapi/usage/models/#string-fields-with-true-and-false-values-in-api-spec>
+    <https://unioslo.github.io/harborapi/usage/models/#string-fields-with-true-and-false-values-in-api-spec>
     """
     # Strings that do not match either 'true' or 'false' are
     # treated as `None` by default, and then we let `bool_str`

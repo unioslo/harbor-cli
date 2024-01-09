@@ -46,8 +46,8 @@ The final subcommand is the _action_ to perform on the resource, such as `create
 * `list` - List resources.
     * Most of these commands expose the options `--query`, `--sort`, `--limit`, `--page` and `--page-size` to filter and limit the output.
     * Each command may have its own set of options for more granular filtering of the resources such as `--tag`, `--architecture`. Some of this behavior can be achieved with `--query` as well.
-    * See [harborapi `--query` docs](https://pederhan.github.io/harborapi/usage/methods/read/#query) for more information about the different parameters that can be used to filter the resources using `--query`.
-    * See [harborapi `--sort` docs](https://pederhan.github.io/harborapi/usage/methods/read/#sort) for information on how to use the `--sort` parameter.
+    * See [harborapi `--query` docs](https://unioslo.github.io/harborapi/usage/methods/read/#query) for more information about the different parameters that can be used to filter the resources using `--query`.
+    * See [harborapi `--sort` docs](https://unioslo.github.io/harborapi/usage/methods/read/#sort) for information on how to use the `--sort` parameter.
 * `update` - Update a resource.
     * The behavior of these commands mimic a PATCH request. A `update` command performs a partial update to an existing resource replacing a subset of the resource's fields with new values.
     * Parameter names attempt to be 1:1 with the resource's field names. I.e. `project update --public trueAny divergences are specified in the relevant command's help text.

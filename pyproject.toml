@@ -46,10 +46,10 @@ dependencies = [
 dynamic = ["version", "readme"]
 
 [project.urls]
-Source = "https://github.com/pederhan/harbor-cli"
-Documentation = "https://pederhan.github.io/harbor-cli/"
-Changelog = "https://github.com/pederhan/harbor-cli/blob/main/CHANGELOG.md"
-Issues = "https://github.com/pederhan/harbor-cli/issues"
+Source = "https://github.com/unioslo/harbor-cli"
+Documentation = "https://unioslo.github.io/harbor-cli/"
+Changelog = "https://github.com/unioslo/harbor-cli/blob/main/CHANGELOG.md"
+Issues = "https://github.com/unioslo/harbor-cli/issues"
 
 [project.scripts]
 harbor = "harbor_cli.main:main"
