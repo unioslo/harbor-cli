@@ -38,7 +38,6 @@ def keyring_supported() -> bool:
         pass  # does not need to be logged
     except KeyringError as e:
         logger.error("Keyring error: %s", e, exc_info=True)
-        return False
     except Exception as e:
         logger.error(
             "Unknown error when checking keyring availability: %s", e, exc_info=True
