@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import keyring
 import pytest
+from keyring.errors import NoKeyringError
 
 from .conftest import requires_keyring
 from .conftest import requires_no_keyring
@@ -25,13 +26,13 @@ def test_get_password():
 
 @requires_no_keyring
 def test_set_password_no_keyring():
-    with pytest.raises(KeyringUnsupportedError) as exc_info:
+    with pytest.raises(NoKeyringError) as exc_info:
         set_password("harbor_cli_test_user", "harbor_cli_test_password")
     assert "not supported" in str(exc_info.value)
 
 
 @requires_no_keyring
 def test_get_password_no_keyring():
-    with pytest.raises(KeyringUnsupportedError) as exc_info:
+    with pytest.raises(NoKeyringError) as exc_info:
         get_password("harbor_cli_test_user")
     assert "not supported" in str(exc_info.value)

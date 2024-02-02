@@ -32,7 +32,7 @@ def keyring_supported() -> bool:
     password back, we assume that keyring is supported."""
     try:
         backend = get_backend()
-        if backend == keyring.backends.fail.Keyring:
+        if isinstance(backend, keyring.backends.fail.Keyring):
             raise NoKeyringError
         logger.debug("Using keyring backend: %s", backend)
         return True

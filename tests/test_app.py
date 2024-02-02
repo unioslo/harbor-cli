@@ -160,8 +160,6 @@ def test_auth_precedence(
     reset_keyring: None,
     mocker: pytest_mock.MockFixture,
 ) -> None:
-    assert get_backend() == "foo"
-
     @app.command("test-cmd")
     def test_cmd(ctx: typer.Context) -> int:
         async def some_func() -> None:
