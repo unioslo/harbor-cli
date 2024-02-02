@@ -5,7 +5,7 @@ from typing import Callable
 from typing import TYPE_CHECKING
 from typing import TypeVar
 
-import keyring
+import keyring.backends.fail
 from keyring.errors import KeyringError
 from keyring.errors import NoKeyringError
 from typing_extensions import ParamSpec
@@ -32,6 +32,8 @@ def keyring_supported() -> bool:
     password back, we assume that keyring is supported."""
     try:
         backend = get_backend()
+        if backend == keyring.backends.fail.Keyring:
+            raise NoKeyringError
         logger.debug("Using keyring backend: %s", backend)
         return True
     except NoKeyringError:
