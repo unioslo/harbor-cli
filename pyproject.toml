@@ -78,9 +78,8 @@ dependencies = [
   "pytest-mock>=3.10.0",
   "pytest-timeout>=2.1.0",
   "mypy>=0.991",
-  "black>=22.10.0",
   "hypothesis>=6.62.1",
-  "ruff>=0.0.275",
+  "ruff>=0.2.0",
   "freezegun>=1.2.2",
 ]
 [tool.hatch.envs.default.scripts]
@@ -129,7 +128,7 @@ select = [
   "F", # pyflakes
 ]
 ignore = [
-  "E501", # line too long (we let black handle this)
+  "E501", # line too long (we let ruff formatter handle this)
   "F541", # f-string is missing placeholders
 ]
 src = ["harbor_cli"]

@@ -26,7 +26,7 @@ See the [Hatch docs](https://hatch.pypa.io/latest/environment/) for more informa
 
 ## Pre-commit hooks
 
-The code is linted and formatted using a pre-commmit configuration consisting of tools such as [Black](https://github.com/psf/black), [Ruff](https://github.com/charliermarsh/ruff), [reorder_python_imports](https://github.com/asottile/reorder_python_imports) and [mypy](https://github.com/python/mypy/).
+The code is linted and formatted using a pre-commmit configuration consisting of tools such as [Ruff](https://github.com/charliermarsh/ruff), [reorder_python_imports](https://github.com/asottile/reorder_python_imports) and [mypy](https://github.com/python/mypy/).
 
 Install pre-commit:
 
