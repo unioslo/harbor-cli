@@ -20,6 +20,7 @@ from harbor_cli.config import EnvVar
 from harbor_cli.format import OutputFormat
 from harbor_cli.state import State
 from harbor_cli.utils.keyring import delete_password
+from harbor_cli.utils.keyring import get_backend
 from harbor_cli.utils.keyring import keyring_supported
 from harbor_cli.utils.keyring import set_password
 
@@ -159,7 +160,7 @@ def test_auth_precedence(
     reset_keyring: None,
     mocker: pytest_mock.MockFixture,
 ) -> None:
-    assert keyring_supported()
+    assert get_backend() == "foo"
 
     @app.command("test-cmd")
     def test_cmd(ctx: typer.Context) -> int:
