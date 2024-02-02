@@ -297,5 +297,9 @@ def env(
 def keyring_status(ctx: typer.Context) -> None:
     """Show the current keyring backend and its status."""
     from harbor_cli.utils.keyring import get_backend
+    from keyring.errors import NoKeyringError
 
-    info(f"Keyring backend: {get_backend()}")
+    try:
+        info(f"Keyring backend: {get_backend()}")
+    except NoKeyringError:
+        error("Keyring is not supported on this platform.")
