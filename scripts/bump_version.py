@@ -254,7 +254,7 @@ def _main(version: str, dry_run: bool, state: StateMachine) -> None:
     state.advance()
     assert state.state == State.GIT_TAG
 
-    p_git_push = subprocess.run(["git", "push", "--tags", "origin", "main"])
+    p_git_push = subprocess.run(["git", "push", "--tags", "upstream", "main"])
     if p_git_push.returncode != 0:
         raise BumpError(f"Failed to push new version: {p_git_push.stderr.decode()}")
     state.advance()
