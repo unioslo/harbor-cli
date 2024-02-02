@@ -8,9 +8,11 @@ The **first number** is the major version (API changes, breaking changes)
 The **second number** is the minor version (new features)
 The **third number** is the patch version (bug fixes)
 
+<!-- ## [Unreleased]() - 2024-mm-dd -->
+
 <!-- changelog follows -->
 
-## [Unreleased]() - 2024-mm-dd
+## [0.2.1](https://github.com/unioslo/harbor-cli/tree/harbor-cli-v0.2.1) - 2024-02-02
 
 ### Added
 
