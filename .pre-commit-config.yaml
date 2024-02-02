@@ -20,7 +20,7 @@ repos:
       - id: reorder-python-imports
         args: [--py38-plus, --add-import, "from __future__ import annotations"]
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.1.6"
+    rev: "v0.2.0"
     hooks:
       # Run the linter.
       - id: ruff
