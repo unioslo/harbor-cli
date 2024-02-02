@@ -17,15 +17,18 @@ The **third number** is the patch version (bug fixes)
 - Help for MacOS users if Keychain is returning a `-25244` `errSecInvalidOwnerEdit` error.
 - `self keyring` command to manage the keyring.
   - `self keyring status` to see information about the keyring used.
+- `self config` command to manage the configuration file.
+  - Has the same commands as `cli-config`, which is now deprecated.
 
 ### Changed
 
-- Prompts are printed to stderr instead of stdout for POSIX compliance.
+- Prompts now printed to stderr instead of stdout for POSIX compliance.
 
 ### Fixed
 
 - Coroutines not being properly cancelled when the application exits abnormally.
 - Password not being stored in keyring after user is prompted for missing authentication info.
+- Repeated keyring warnings if keyring is not available.
 
 ### Deprecated
 
