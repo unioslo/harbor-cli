@@ -9,7 +9,6 @@ from ...app import app
 from ...config import create_config
 from ...config import DEFAULT_CONFIG_FILE
 from ...config import HarborCLIConfig
-from ...config import HarborSettings
 from ...config import save_config
 from ...exceptions import ConfigError
 from ...exceptions import OverwriteError
@@ -18,7 +17,6 @@ from ...format import output_format_repr
 from ...format import OutputFormat
 from ...harbor.common import prompt_basicauth
 from ...harbor.common import prompt_credentials_file
-from ...harbor.common import prompt_username_secret
 from ...logs import LogLevel
 from ...output.console import console
 from ...output.console import error
@@ -34,8 +32,6 @@ from ...output.prompts import str_prompt
 from ...state import get_state
 from ...style import render_cli_option
 from ...style.style import render_cli_command
-from ...utils.keyring import keyring_supported
-from ...utils.keyring import set_password
 
 state = get_state()
 
@@ -177,7 +173,7 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
         hconf.clear_credentials()
 
     if auth_method == "u":
-        set_username_secret(hconf, hconf_pre.username, hconf_pre.secret_value)
+        hconf.set_username_secret(hconf_pre.username, hconf_pre.secret_value)
     elif auth_method == "b":
         hconf.basicauth = prompt_basicauth(hconf_pre.basicauth.get_secret_value())  # type: ignore # pydantic.SecretStr
     elif auth_method == "f":
@@ -189,36 +185,6 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
             "No authentication info provided. "
             "You will be prompted for username and password when required.",
         )
-
-
-def set_username_secret(
-    hconf: HarborSettings, current_username: str, current_secret: str
-) -> None:
-    username, secret = prompt_username_secret(current_username, current_secret)
-    if keyring_supported():
-        _set_username_secret_keyring(hconf, username, secret)
-    else:
-        _set_username_secret_config(hconf, username, secret)
-
-
-def _set_username_secret_config(
-    hconf: HarborSettings, username: str, secret: str
-) -> None:
-    """Stores both username and config in config file.
-    Insecure fallback in case keyring is not supported."""
-    hconf.username = username
-    hconf.secret = secret  # type: ignore # pydantic.SecretStr
-    hconf.keyring = False
-
-
-def _set_username_secret_keyring(
-    hconf: HarborSettings, username: str, secret: str
-) -> None:
-    """Set username and secret using keyring.
-    Stores the secret in the keyring and the username in the config file."""
-    hconf.username = username
-    set_password(username, secret)
-    hconf.keyring = True
 
 
 def _init_advanced_harbor_settings(config: HarborCLIConfig) -> None:

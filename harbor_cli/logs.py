@@ -72,9 +72,18 @@ def setup_logging(config: LoggingSettings) -> None:
     logger.disabled = False
 
 
+class LogLineFormatter(logging.Formatter):
+    """Replaces newlines in log messages with spaces."""
+
+    def format(self, record: logging.LogRecord) -> str:
+        """Format the log message."""
+        record.msg = record.msg.replace("\n", " ")
+        return super().format(record)
+
+
 def _get_file_handler(config: LoggingSettings) -> logging.FileHandler:
     file_handler = logging.FileHandler(config.path)
-    formatter = logging.Formatter(
+    formatter = LogLineFormatter(
         "%(asctime)s [%(levelname)s] [%(module)s:%(filename)s:%(lineno)s - %(funcName)s()] %(message)s"
     )
     file_handler.setFormatter(formatter)

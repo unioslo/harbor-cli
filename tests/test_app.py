@@ -3,11 +3,14 @@ from __future__ import annotations
 from enum import Enum
 from enum import IntEnum
 from pathlib import Path
+from typing import Iterable
 
+import keyring
 import pytest
 import pytest_mock
 import typer
 from harborapi.utils import get_basicauth
+from keyring.errors import NoKeyringError
 from keyring.errors import PasswordDeleteError
 from typer.testing import Result
 
@@ -17,6 +20,8 @@ from harbor_cli.config import EnvVar
 from harbor_cli.format import OutputFormat
 from harbor_cli.state import State
 from harbor_cli.utils.keyring import delete_password
+from harbor_cli.utils.keyring import get_backend
+from harbor_cli.utils.keyring import keyring_supported
 from harbor_cli.utils.keyring import set_password
 
 
@@ -124,12 +129,14 @@ HARBOR_CLI_TEST_USERNAME = "harbor_cli_test_user"
 
 
 @pytest.fixture(scope="function")
-def reset_keyring() -> None:
+def reset_keyring() -> Iterable[None]:
     """Clears the test user from the keyring.
     Should only be used by functions decorated with @requires_keyring"""
     yield
     try:
         delete_password(HARBOR_CLI_TEST_USERNAME)
+    except NoKeyringError:
+        pass
     except PasswordDeleteError as e:
         # Ignore if password was deleted by the test
         if "not found" not in str(e):  # pragma: no cover
@@ -154,7 +161,7 @@ def test_auth_precedence(
     mocker: pytest_mock.MockFixture,
 ) -> None:
     @app.command("test-cmd")
-    def test_cmd(ctx: typer.Context) -> None:
+    def test_cmd(ctx: typer.Context) -> int:
         async def some_func() -> None:
             pass
 
@@ -177,7 +184,7 @@ def test_auth_precedence(
     for method in secret_values:
         # Configure from lowest to highest precedence
         if method <= SecretMethod.CONFIG:
-            state.config.harbor.secret = secret_values[SecretMethod.CONFIG]
+            state.config.harbor.secret = secret_values[SecretMethod.CONFIG]  # type: ignore # converted by pydantic
             state.config.harbor.keyring = False
         if method <= SecretMethod.KEYRING:
             set_password(HARBOR_CLI_TEST_USERNAME, secret_values[SecretMethod.KEYRING])

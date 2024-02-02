@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import keyring
 import pytest
 
 from .conftest import requires_keyring

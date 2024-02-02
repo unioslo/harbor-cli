@@ -106,7 +106,9 @@ def test_state_console() -> None:
 def test_state_client() -> None:
     """Ensure that the client property re-uses the same client object"""
     # de-init singleton for testing
-    State._instance = None
+    State._instance = None  # type: ignore
+    State._initialized = False  # type: ignore
+
     state = State()
     assert not state.is_client_loaded
     default_client = state.client  # the default client
@@ -130,7 +132,9 @@ def test_state_client() -> None:
 def test_state_config() -> None:
     """Ensure that the client property re-uses the same client object"""
     # de-init singleton for testing
-    State._instance = None
+    State._instance = None  # type: ignore
+    State._initialized = False  # type: ignore
+
     state = State()
     # for testing purposes we
     assert not state.is_config_loaded

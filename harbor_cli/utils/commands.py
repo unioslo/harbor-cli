@@ -59,13 +59,16 @@ def _get_app_commands(
     else:
         raise TypeError(f"Unexpected app type: {type(app)}")
 
+    groups: dict[str, TyperGroup | TyperCommand] = {}
     try:
         groups = cmd.commands  # type: ignore
     except AttributeError:
-        groups = {}
+        pass
 
     # If we have subcommands, we need to go deeper.
     for command in groups.values():
+        if command.deprecated:  # skip deprecated commands
+            continue
         if current == "":
             cmd_name = command.name or ""
         else:

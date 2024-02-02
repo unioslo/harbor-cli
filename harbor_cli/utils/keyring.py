@@ -2,42 +2,49 @@ from __future__ import annotations
 
 import functools
 from typing import Callable
+from typing import TYPE_CHECKING
 from typing import TypeVar
 
-import keyring
+import keyring.backends.fail
+from keyring.errors import KeyringError
+from keyring.errors import NoKeyringError
 from typing_extensions import ParamSpec
 
-from ..logs import logger
-from ..output.console import info
+from harbor_cli.exceptions import KeyringUnsupportedError
+from harbor_cli.logs import logger
+from harbor_cli.output.console import info
+
+if TYPE_CHECKING:
+    from keyring.backend import KeyringBackend
 
 KEYRING_SERVICE_NAME = "harbor_cli"
 
 
-class KeyringUnsupportedError(Exception):
-    pass
+class DummyPasswordNoMatchError(Exception):
+    """Raised when the keyring dummy password does not match."""
 
 
 @functools.lru_cache(maxsize=1)
-def keyring_supported():
-    dummy_user = "test_user"
-    dummy_password = "test_password"
-    try:
-        # Set and get a dummy password to test the backend
-        keyring.set_password(KEYRING_SERVICE_NAME, dummy_user, dummy_password)
-        password = keyring.get_password(KEYRING_SERVICE_NAME, dummy_user)
+def keyring_supported() -> bool:
+    """Very naively checks if we can use keyring on the current system.
 
-        # Check if the password was correctly retrieved
-        if password == dummy_password:
-            return True
-        else:
-            raise keyring.errors.KeyringError(
-                "Keyring backend did not return the correct password."
-            )
-    # TODO: make this error handling more robust. Differentiate between different
-    # keyring errors and handle them accordingly.
-    except (keyring.errors.KeyringError, KeyringUnsupportedError) as e:
-        logger.debug(f"Keyring is not supported on this platform: {e}", exc_info=True)
-        return False
+    We set a dummy password and then try to retrieve it. If we get the same
+    password back, we assume that keyring is supported."""
+    try:
+        backend = get_backend()
+        if isinstance(backend, keyring.backends.fail.Keyring):
+            raise NoKeyringError
+        logger.debug("Using keyring backend: %s", backend)
+        return True
+    except NoKeyringError:
+        pass  # does not need to be logged
+    except KeyringError as e:
+        logger.error("Keyring error: %s", e, exc_info=True)
+    except Exception as e:
+        logger.error(
+            "Unknown error when checking keyring availability: %s", e, exc_info=True
+        )
+    return False
 
 
 P = ParamSpec("P")
@@ -70,3 +77,12 @@ def set_password(username: str, password: str) -> None:
 def delete_password(username: str) -> None:
     keyring.delete_password(KEYRING_SERVICE_NAME, username)
     info("Deleted password from keyring.", user=username)
+
+
+def get_backend() -> KeyringBackend:
+    return keyring.get_keyring()
+
+
+def clear_supported_cache() -> None:
+    """Clears the keyring availability cache."""
+    keyring_supported.cache_clear()

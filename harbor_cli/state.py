@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import asyncio
+from functools import cached_property
 from pathlib import Path
-from typing import Awaitable
+from typing import Coroutine
 from typing import Optional
 from typing import TYPE_CHECKING
 from typing import TypeVar
@@ -18,6 +19,7 @@ from rich.console import Console
 
 if TYPE_CHECKING:
     from .config import HarborCLIConfig
+    from logging import Logger
 
 
 T = TypeVar("T")
@@ -49,6 +51,7 @@ class State:
     def __new__(cls, *args, **kwargs):
         if cls._instance is None:
             cls._instance = super().__new__(cls, *args, **kwargs)
+            cls._initialized = False
         return cls._instance
 
     options: CommonOptions = CommonOptions()
@@ -78,6 +81,9 @@ class State:
         client : HarborAsyncClient | None
             Harbor client to override the default client with.
         """
+        if self._initialized:  # prevent __init__ from running more than once
+            return
+
         # NOTE: these overrides are used mainly for testing
         if config:
             self.config = config
@@ -88,6 +94,8 @@ class State:
         except RuntimeError:
             self.loop = asyncio.new_event_loop()
         self.options = CommonOptions()
+
+        self._initialized = True
 
     @property
     def client(self) -> HarborAsyncClient:
@@ -156,6 +164,13 @@ class State:
         return self._console
         # fmt: on
 
+    @cached_property
+    def logger(self) -> Logger:
+        """Logger object."""
+        from .logs import logger
+
+        return logger
+
     def authenticate_harbor(self) -> None:
         self.client.authenticate(**self.config.harbor.credentials)
 
@@ -165,10 +180,6 @@ class State:
         Prompts for necessary authentication info if it's missing from the config.
         """
         from .harbor.common import prompt_url
-        from .harbor.common import prompt_username_secret
-        from .style.style import render_cli_command
-        from .style.style import render_cli_option
-        from .style.style import render_cli_value
         from .output.console import warning
 
         if not self.config.harbor.url:
@@ -181,13 +192,9 @@ class State:
             warning(
                 "Harbor authentication method is missing or incomplete in configuration file."
             )
-            username, secret = prompt_username_secret(self.config.harbor.username, "")
-            self.config.harbor.username = username
-            self.config.harbor.secret = secret  # type: ignore # pydantic.SecretStr
-            warning(
-                "Authentication info updated. "
-                f"Run {render_cli_command('harbor init')} to configure it permanently. "
-                f"Suppress this warning by setting {render_cli_option('general.warnings')} to {render_cli_value('false')}."
+            self.config.harbor.set_username_secret(
+                current_username=self.config.harbor.username,
+                current_secret=self.config.harbor.secret_value,
             )
 
         self.authenticate_harbor()
@@ -204,9 +211,66 @@ class State:
 
         self._client_loaded = True
 
+    def try_load_config(self, config_file: Optional[Path], create: bool = True) -> None:
+        """Attempts to load the config given a config file path.
+        Assigns the loaded config to the state object.
+
+        Parameters
+        ----------
+        config_file : Optional[Path]
+            The path to the config file.
+        create : bool, optional
+            Whether to create a new config file if one is not found, by default True
+        """
+        from harbor_cli.output.console import info
+        from harbor_cli.output.console import error
+        from harbor_cli.output.console import exit_err
+        from harbor_cli.output.formatting.path import path_link
+        from harbor_cli.commands.cli.init import run_config_wizard
+        from harbor_cli.exceptions import ConfigError
+        from harbor_cli.config import HarborCLIConfig
+
+        # Don't load the config if it's already loaded (e.g. in REPL)
+        if not self.is_config_loaded:
+            try:
+                conf = HarborCLIConfig.from_file(config_file)
+            except FileNotFoundError:
+                if not create:
+                    return
+                # Create a new config file and run wizard
+                info("Config file not found. Creating new config file.")
+                conf = HarborCLIConfig.from_file(config_file, create=create)
+                if conf.config_file is None:
+                    exit_err("Unable to create config file.")
+                info(f"Created config file: {path_link(conf.config_file)}")
+                info("Running configuration wizard...")
+                conf = run_config_wizard(conf.config_file)
+            except ConfigError as e:
+                error(f"Unable to load config: {str(e)}", exc_info=True)
+                return
+
+            self.config = conf
+
+    def check_keyring_available(self) -> None:
+        """Checks if the keyring is available if it's enabled in the config file.
+
+        Important to call this method BEFORE saving a snapshot of the config!
+        Otherwise, we risk enabling and disabling the keyring over and over again.
+        """
+
+        if self.config.harbor.keyring:
+            from harbor_cli.utils.keyring import keyring_supported
+            from harbor_cli.output.console import warning
+
+            if not keyring_supported():
+                warning(
+                    "Keyring is not available on this platform. Set [i default]keyring = false[/] in config to suppress this warning."
+                )
+                self.config.harbor.keyring = False
+
     def run(
         self,
-        coro: Awaitable[T],
+        coro: Coroutine[None, None, T],
         status: Optional[str] = None,
         no_handle: type[Exception] | tuple[type[Exception], ...] | None = None,
     ) -> T:
@@ -214,7 +278,7 @@ class State:
 
         Parameters
         ----------
-        coro : Awaitable[T]
+        coro : Coroutine[None, None, T]
             The coroutine to run, which returns type T.
         status : str, optional
             The status message to display while the coroutine is running.
@@ -232,29 +296,39 @@ class State:
         --------
         [harbor_cli.exceptions.handle_exception][]
         """
-        # Make sure client is loaded and configured
-        if not self.is_client_loaded:
-            self._init_client()
-        else:
-            self.authenticate_harbor()  # ensure we use newest credentials
-
-        if not status:
-            status = "Working..."
-        if not status.endswith("..."):  # aesthetic :)
-            status += "..."
-
-        # show spinner when running a coroutine
         try:
-            with self.console.status(status):
-                resp = self.loop.run_until_complete(coro)
-        except Exception as e:
-            if no_handle and isinstance(e, no_handle):
-                raise e
-            # fmt: off
-            from .exceptions import handle_exception
-            handle_exception(e)
-            # fmt: on
-        return resp
+            # Make sure client is loaded and configured
+            if not self.is_client_loaded:
+                self._init_client()
+            else:
+                self.authenticate_harbor()  # ensure we use newest credentials
+
+            if not status:
+                status = "Working..."
+            if not status.endswith("..."):  # aesthetic :)
+                status += "..."
+
+            # show spinner when running a coroutine
+            try:
+                with self.console.status(status):
+                    resp = self.loop.run_until_complete(coro)
+            except Exception as e:
+                if no_handle and isinstance(e, no_handle):
+                    raise e
+                # fmt: off
+                from .exceptions import handle_exception
+                handle_exception(e)
+                # fmt: on
+            return resp
+        finally:
+            # Close coro in case we never got to run it
+            # Unawaited coros emit warnings which we ideally want to know about
+            # But if we error before getting to run it, we don't need a warning
+            try:
+                coro.close()
+            except Exception:
+                self.logger.debug("Failed to close coroutine.", exc_info=True)
+                pass
 
 
 def get_state() -> State:

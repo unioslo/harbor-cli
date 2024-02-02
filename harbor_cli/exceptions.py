@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 from typing import Any
 from typing import cast
 from typing import Dict
@@ -24,6 +25,9 @@ from httpx._exceptions import CookieConflict
 from httpx._exceptions import HTTPError
 from httpx._exceptions import InvalidURL
 from httpx._exceptions import StreamError
+from keyring.errors import KeyringError
+from keyring.errors import PasswordDeleteError
+from keyring.errors import PasswordSetError
 from pydantic import ValidationError
 
 
@@ -49,6 +53,10 @@ class CredentialsError(HarborCLIError):
 
 class OverwriteError(HarborCLIError, FileExistsError):
     """Error overwriting an existing file."""
+
+
+class KeyringUnsupportedError(HarborCLIError):
+    """Keyring is not supported on this system."""
 
 
 class ArtifactNameFormatError(HarborCLIError):
@@ -155,6 +163,47 @@ def handle_status_error(e: StatusError, exiter: Exiter) -> NoReturn:
     exit_err(msg)
 
 
+def handle_keyring_error(e: KeyringError, exiter: Exiter) -> NoReturn:
+    """Handles a keyring error and exits with the appropriate message."""
+    if sys.platform == "darwin":
+        if (
+            isinstance(e, (PasswordSetError, PasswordDeleteError))
+            and e.__context__
+            and e.__context__.args
+            and e.__context__.args[0] == -25244
+        ):
+            _handle_keyring_error_25244_macos(e, exiter)
+    exiter(f"A keyring error occurred: {e}", exc_info=True)
+
+
+def _handle_keyring_error_25244_macos(e: KeyringError, exiter: Exiter) -> bool:
+    """Handles macOS keyring error -25244 (errSecInvalidOwnerEdit error) when setting
+    a password
+
+    This very likely happens if we try to access the keyring from an application
+    that is not signed with the same certificate as the one that created the keychain
+    item initially.
+
+    See: https://developer.apple.com/forums/thread/69841
+    See: https://github.com/python-poetry/poetry/issues/2692#issuecomment-1382387632
+    """
+    from harbor_cli.utils.keyring import KEYRING_SERVICE_NAME
+
+    actions = {
+        PasswordSetError: "set",
+        PasswordDeleteError: "delete",
+    }
+    action = actions.get(type(e), "access")
+
+    exiter(
+        f"An error occurred while trying to {action} a password in your keyring.\n"
+        f"Please delete any passwords related to [i]{KEYRING_SERVICE_NAME}[/] from your keyring "
+        "and try again.\n"
+        "If this issue persists, please report it and disable keyring in your config file.\n"
+        "Run [i]harbor cli-config path[/] to find the location of your config file."
+    )
+
+
 def handle_validationerror(e: ValidationError, exiter: Exiter) -> NoReturn:
     """Handles a pydantic ValidationError and exits with the appropriate message."""
     exiter(f"Failed to validate data from API: {e}", errors=e.errors(), exc_info=True)
@@ -173,6 +222,7 @@ EXC_HANDLERS: Mapping[Type[Exception], HandleFunc] = {
     InvalidURL: handle_notraceback,
     CookieConflict: handle_notraceback,
     StreamError: handle_notraceback,
+    KeyringError: handle_keyring_error,
 }
 
 

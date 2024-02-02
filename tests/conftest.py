@@ -74,6 +74,7 @@ def config(log_dir: Path) -> HarborCLIConfig:
     conf.harbor.url = "https://harbor.example.com/api/v2.0"
     conf.harbor.username = "admin"
     conf.harbor.secret = SecretStr("password")
+    conf.harbor.keyring = False
     conf.logging.directory = log_dir
     return conf
 
