@@ -22,7 +22,8 @@ The **third number** is the patch version (bug fixes)
 
 ### Changed
 
-- Prompts now printed to stderr instead of stdout for POSIX compliance.
+- Prompts are now printed to stderr instead of stdout for POSIX compliance.
+- Newlines are now logged as spaces in the log file.
 
 ### Fixed
 
