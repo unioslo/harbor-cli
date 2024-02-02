@@ -3,6 +3,7 @@ from __future__ import annotations
 from enum import Enum
 from enum import IntEnum
 from pathlib import Path
+from typing import Iterable
 
 import pytest
 import pytest_mock
@@ -124,7 +125,7 @@ HARBOR_CLI_TEST_USERNAME = "harbor_cli_test_user"
 
 
 @pytest.fixture(scope="function")
-def reset_keyring() -> None:
+def reset_keyring() -> Iterable[None]:
     """Clears the test user from the keyring.
     Should only be used by functions decorated with @requires_keyring"""
     yield
