@@ -32,11 +32,24 @@ def yellow(message: str) -> str:
     return f"[yellow]{message}[/]"
 
 
+def gold3(message: str) -> str:
+    return f"[gold3]{message}[/]"
+
+
 def bold(message: str) -> str:
     return f"[bold]{message}[/]"
 
 
-Color = Literal["blue", "cyan", "green", "magenta", "red", "yellow", "bold"]
+Color = Literal[
+    "blue",
+    "cyan",
+    "green",
+    "magenta",
+    "red",
+    "yellow",
+    "bold",
+    "gold3",
+]
 ColorFunc = Callable[[str], str]
 COLOR_FUNCTIONS: Dict[Color, ColorFunc] = {
     "blue": blue,
@@ -46,11 +59,23 @@ COLOR_FUNCTIONS: Dict[Color, ColorFunc] = {
     "red": red,
     "yellow": yellow,
     "bold": bold,
+    "gold3": gold3,
 }
 
 
+def fallback_color(message: str) -> str:
+    """Returns the string as-is."""
+    return message
+
+
 def get_color_func(color: Color) -> ColorFunc:
-    return COLOR_FUNCTIONS[color]
+    try:
+        return COLOR_FUNCTIONS[color]
+    except KeyError:
+        from harbor_cli.logs import logger
+
+        logger.error("Invalid color: %s", color, stacklevel=2)
+        return fallback_color
 
 
 class HealthColor(StrEnum):
@@ -89,6 +114,10 @@ class SeverityColor(StrEnum):
 
     @classmethod
     def as_markup(cls, severity: str | Severity) -> str:
-        """Return the given severity as a Rich markup-formatted string."""
+        """Return the given severity as a Rich markup-formatted string.
+
+        I.e. "[dark_red]CRITICAL[/]" for Severity.CRITICAL, etc."""
         color = cls.from_severity(severity)
-        return f"[{color}]{severity}[/]"
+        if isinstance(severity, Severity):
+            severity = severity.value
+        return f"[{color}]{severity.upper()}[/]"

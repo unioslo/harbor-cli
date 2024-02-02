@@ -12,9 +12,24 @@ The **third number** is the patch version (bug fixes)
 
 ## [Unreleased]() - 2024-mm-dd
 
+### Added
+
+- Help for MacOS users if Keychain is returning a `-25244` `errSecInvalidOwnerEdit` error.
+- `self keyring` command to manage the keyring.
+  - `self keyring status` to see information about the keyring used.
+
 ### Changed
 
-- Prompts are now printed to stderr instead of stdout.
+- Prompts are printed to stderr instead of stdout for POSIX compliance.
+
+### Fixed
+
+- Coroutines not being properly cancelled when the application exits abnormally.
+- Password not being stored in keyring after user is prompted for missing authentication info.
+
+### Deprecated
+
+- `cli-config` command. Use `self config`
 
 ## [0.2.0](https://github.com/unioslo/harbor-cli/tree/harbor-cli-v0.2.0) - 2023-12-21
 

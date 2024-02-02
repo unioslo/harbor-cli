@@ -154,7 +154,7 @@ def test_auth_precedence(
     mocker: pytest_mock.MockFixture,
 ) -> None:
     @app.command("test-cmd")
-    def test_cmd(ctx: typer.Context) -> None:
+    def test_cmd(ctx: typer.Context) -> int:
         async def some_func() -> None:
             pass
 
@@ -177,7 +177,7 @@ def test_auth_precedence(
     for method in secret_values:
         # Configure from lowest to highest precedence
         if method <= SecretMethod.CONFIG:
-            state.config.harbor.secret = secret_values[SecretMethod.CONFIG]
+            state.config.harbor.secret = secret_values[SecretMethod.CONFIG]  # type: ignore # converted by pydantic
             state.config.harbor.keyring = False
         if method <= SecretMethod.KEYRING:
             set_password(HARBOR_CLI_TEST_USERNAME, secret_values[SecretMethod.KEYRING])

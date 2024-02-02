@@ -2,10 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from ..output.prompts import no_headless
 from ..output.prompts import path_prompt
 from ..output.prompts import str_prompt
 
 
+@no_headless
 def prompt_username_secret(
     default_username: str | None = None, default_secret: str | None = None
 ) -> tuple[str, str]:

@@ -38,7 +38,10 @@ from .output.console import warning
 from .style import STYLE_TABLE_HEADER
 from .utils import replace_none
 from .utils.keyring import get_password
+from .utils.keyring import keyring_supported
 from .utils.keyring import KeyringUnsupportedError
+from .utils.keyring import set_password
+from harbor_cli.harbor.common import prompt_username_secret
 
 if TYPE_CHECKING:
     from harbor_cli.types import RichTableKwargs
@@ -263,6 +266,27 @@ class HarborSettings(BaseModel):
         self.secret = ""  # type: ignore # pydantic.SecretStr
         self.basicauth = ""  # type: ignore # pydantic.SecretStr
         self.credentials_file = None
+
+    def set_username_secret(self, current_username: str, current_secret: str) -> None:
+        username, secret = prompt_username_secret(current_username, current_secret)
+        if keyring_supported():
+            self._set_username_secret_keyring(username, secret)
+        else:
+            self._set_username_secret_config(username, secret)
+
+    def _set_username_secret_config(self, username: str, secret: str) -> None:
+        """Stores both username and config in config file.
+        Insecure fallback in case keyring is not supported."""
+        self.username = username
+        self.secret = secret  # type: ignore # pydantic.SecretStr
+        self.keyring = False
+
+    def _set_username_secret_keyring(self, username: str, secret: str) -> None:
+        """Set username and secret using keyring.
+        Stores the secret in the keyring and the username in the config file."""
+        self.username = username
+        set_password(username, secret)
+        self.keyring = True
 
 
 class LoggingSettings(BaseModel):

@@ -89,6 +89,9 @@ def get_renderable(
     if bold:
         msg = bold_func(msg)
 
+    # Indent multiline strings to follow icon + space
+    msg = msg.replace("\n", "\n" + " " * (len(str(icon)) + 1))
+
     if panel:
         renderables.append(Panel(msg, expand=False))
     else:
@@ -136,7 +139,7 @@ def warning(
             get_renderable(
                 message,
                 icon=Icon.WARNING,
-                color="yellow",
+                color="gold3",
                 preamble="WARNING",
                 color_all=True,  # entire message is yellow
                 rule=rule,
@@ -157,7 +160,13 @@ def error(
     logger.error(message, extra=dict(**kwargs), exc_info=exc_info)
     err_console.print(
         get_renderable(
-            message, icon=Icon.ERROR, color="red", rule=rule, panel=panel, bold=True
+            message,
+            icon=Icon.ERROR,
+            color="red",
+            color_all=True,
+            rule=rule,
+            panel=panel,
+            bold=True,
         )
     )
 

@@ -51,6 +51,10 @@ class OverwriteError(HarborCLIError, FileExistsError):
     """Error overwriting an existing file."""
 
 
+class KeyringUnsupportedError(HarborCLIError):
+    """Keyring is not supported on this system."""
+
+
 class ArtifactNameFormatError(HarborCLIError):
     def __init__(self, s: str) -> None:
         super().__init__(

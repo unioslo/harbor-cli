@@ -55,7 +55,7 @@ def update_quota(
             "[red]NOTE:[/red] It is likely the property should always be [green]'storage'[/green] and the value an integer representing the quota size in bytes."
         ),
         metavar="PROP=VALUE, ...",
-    )
+    ),
     # status omitted
 ) -> None:
     """Update a quota."""

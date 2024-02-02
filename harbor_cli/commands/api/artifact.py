@@ -261,7 +261,7 @@ def get(
         "--with-vuln-desc",
         "-d",
         help="Include descriptions of each vulnerability in the output.",
-    )
+    ),
     # TODO: --tag
 ) -> None:
     """Get information about a specific artifact."""
@@ -269,7 +269,13 @@ def get(
     an = parse_artifact_name(artifact)
     # Just use normal endpoint method for a single artifact
     art = state.run(
-        get_artifact(state.client, an.project, an.repository, an.reference, with_report=with_vulnerabilities),  # type: ignore
+        get_artifact(
+            state.client,
+            an.project,
+            an.repository,
+            an.reference,
+            with_report=with_vulnerabilities,
+        ),  # type: ignore
         f"Fetching artifact(s)...",
     )
 
@@ -1038,7 +1044,7 @@ def get_vulnerabilities(
         f"Fetching artifacts...",
     )
 
-    report = ArtifactReport(artifacts)
+    report = ArtifactReport(artifacts=artifacts)
 
     affected = AffectedArtifactList()
     if operator == Operator.OR:
