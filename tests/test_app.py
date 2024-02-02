@@ -9,6 +9,7 @@ import pytest
 import pytest_mock
 import typer
 from harborapi.utils import get_basicauth
+from keyring.errors import NoKeyringError
 from keyring.errors import PasswordDeleteError
 from typer.testing import Result
 
@@ -131,6 +132,8 @@ def reset_keyring() -> Iterable[None]:
     yield
     try:
         delete_password(HARBOR_CLI_TEST_USERNAME)
+    except NoKeyringError:
+        pass
     except PasswordDeleteError as e:
         # Ignore if password was deleted by the test
         if "not found" not in str(e):  # pragma: no cover
