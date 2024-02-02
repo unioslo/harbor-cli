@@ -268,9 +268,7 @@ _USERGROUPTYPE_MAPPING = {
     3: UserGroupType.OIDC,
 }  # type: dict[int, str]
 
-_USERGROUPTYPE_MAPPING_REVERSE = {
-    v: k for k, v in _USERGROUPTYPE_MAPPING.items()
-}  # type: dict[str, int]
+_USERGROUPTYPE_MAPPING_REVERSE = {v: k for k, v in _USERGROUPTYPE_MAPPING.items()}  # type: dict[str, int]
 
 
 # We use this enum to provide choices in the CLI, but we also use it to determine
@@ -308,9 +306,7 @@ _MEMBERROLETYPE_MAPPING = {
     5: MemberRoleType.LIMITED_GUEST,
 }  # type: dict[int, MemberRoleType]
 
-_MEMBERROLETYPE_MAPPING_REVERSE = {
-    v: k for k, v in _MEMBERROLETYPE_MAPPING.items()
-}  # type: dict[MemberRoleType, int]
+_MEMBERROLETYPE_MAPPING_REVERSE = {v: k for k, v in _MEMBERROLETYPE_MAPPING.items()}  # type: dict[MemberRoleType, int]
 
 
 class ArtifactVulnerabilitySummary(BaseModel):
