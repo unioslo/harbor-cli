@@ -211,6 +211,63 @@ class State:
 
         self._client_loaded = True
 
+    def try_load_config(self, config_file: Optional[Path], create: bool = True) -> None:
+        """Attempts to load the config given a config file path.
+        Assigns the loaded config to the state object.
+
+        Parameters
+        ----------
+        config_file : Optional[Path]
+            The path to the config file.
+        create : bool, optional
+            Whether to create a new config file if one is not found, by default True
+        """
+        from harbor_cli.output.console import info
+        from harbor_cli.output.console import error
+        from harbor_cli.output.console import exit_err
+        from harbor_cli.output.formatting.path import path_link
+        from harbor_cli.commands.cli.init import run_config_wizard
+        from harbor_cli.exceptions import ConfigError
+        from harbor_cli.config import HarborCLIConfig
+
+        # Don't load the config if it's already loaded (e.g. in REPL)
+        if not self.is_config_loaded:
+            try:
+                conf = HarborCLIConfig.from_file(config_file)
+            except FileNotFoundError:
+                if not create:
+                    return
+                # Create a new config file and run wizard
+                info("Config file not found. Creating new config file.")
+                conf = HarborCLIConfig.from_file(config_file, create=create)
+                if conf.config_file is None:
+                    exit_err("Unable to create config file.")
+                info(f"Created config file: {path_link(conf.config_file)}")
+                info("Running configuration wizard...")
+                conf = run_config_wizard(conf.config_file)
+            except ConfigError as e:
+                error(f"Unable to load config: {str(e)}", exc_info=True)
+                return
+
+            self.config = conf
+
+    def check_keyring_available(self) -> None:
+        """Checks if the keyring is available if it's enabled in the config file.
+
+        Important to call this method BEFORE saving a snapshot of the config!
+        Otherwise, we risk enabling and disabling the keyring over and over again.
+        """
+
+        if self.config.harbor.keyring:
+            from harbor_cli.utils.keyring import keyring_supported
+            from harbor_cli.output.console import warning
+
+            if not keyring_supported():
+                warning(
+                    "Keyring is not available on this platform. Set [i default]keyring = false[/] in config to suppress this warning."
+                )
+                self.config.harbor.keyring = False
+
     def run(
         self,
         coro: Coroutine[None, None, T],

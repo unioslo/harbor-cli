@@ -11,23 +11,18 @@ from . import commands
 from .__about__ import __version__
 from .__about__ import APP_NAME
 from .app import app
-from .commands.cli.init import run_config_wizard
 from .config import EnvVar
 from .config import HarborCLIConfig
 from .deprecation import Deprecated
 from .deprecation import issue_deprecation_warnings
-from .exceptions import ConfigError
 from .exceptions import handle_exception
 from .exceptions import HarborCLIError
 from .format import OutputFormat
 from .logs import disable_logging
 from .logs import setup_logging
 from .option import Option
-from .output.console import error
 from .output.console import exit_err
 from .output.console import exit_ok
-from .output.console import info
-from .output.formatting.path import path_link
 from .state import get_state
 from .state import State
 
@@ -342,26 +337,24 @@ def main_callback(
     check_version_param(ctx, version)
     issue_deprecation_warnings(ctx)
 
+    state = get_state()
+
     # These commands don't require state management
     # and can be run without a config file or client.
     if is_config_exempt(ctx):
         # try to load the config file, but don't fail if it doesn't exist
-        try_load_config(config_file, create=False)
+        state.try_load_config(config_file, create=False)
         return
 
-    # TODO: find a better way to do this
-    # We don't want to run the rest of the callback if the user is asking
-    # for help, so we check for the help option names and exit early if
-    # any are present. The problem is that if the --help option is passed
-    # to a subcommand, we can't access it through the ctx object here,
-    # so we have to check the sys.argv list.
+    # TODO: Can we do this more efficiently?
+    # Abort callback if help is requested.
     if any(help_arg in sys.argv for help_arg in ctx.help_option_names):
         return
 
     # At this point we require an active configuation, be it from a file
     # loaded from disk or a default configuration.
-    try_load_config(config_file, create=True)
-    state = get_state()
+    state.try_load_config(config_file, create=True)
+    state.check_keyring_available()
     _restore_config(state)  # necessary for overrides to to reset in REPL
 
     # Set config overrides
@@ -432,40 +425,6 @@ def configure_from_config(config: HarborCLIConfig) -> None:
         setup_logging(config.logging)
     else:
         disable_logging()
-
-
-def try_load_config(config_file: Optional[Path], create: bool = True) -> None:
-    """Attempts to load the config given a config file path.
-    Assigns the loaded config to the global state.
-
-    Parameters
-    ----------
-    config_file : Optional[Path]
-        The path to the config file.
-    create : bool, optional
-        Whether to create a new config file if one is not found, by default True
-    """
-    # Don't load the config if it's already loaded (e.g. in REPL)
-    state = get_state()
-    if not state.is_config_loaded:
-        try:
-            conf = HarborCLIConfig.from_file(config_file)
-        except FileNotFoundError:
-            if not create:
-                return
-            # Create a new config file and run wizard
-            info("Config file not found. Creating new config file.")
-            conf = HarborCLIConfig.from_file(config_file, create=create)
-            if conf.config_file is None:
-                exit_err("Unable to create config file.")
-            info(f"Created config file: {path_link(conf.config_file)}")
-            info("Running configuration wizard...")
-            conf = run_config_wizard(conf.config_file)
-        except ConfigError as e:
-            error(f"Unable to load config: {str(e)}", exc_info=True)
-            return
-
-        state.config = conf
 
 
 def main() -> None:
