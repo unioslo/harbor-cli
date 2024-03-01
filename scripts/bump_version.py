@@ -132,7 +132,7 @@ def main(
     ),
     dry_run: bool = typer.Option(
         False,
-        "--dry-run",
+        "--dryrun",
         help="Perform a dry run, don't actually change anything.",
     ),
 ):
@@ -189,7 +189,7 @@ def _check_commands() -> None:
 
 def dryrun_subprocess_run(args, *aargs, **kwargs):
     """Wrapper around subprocess.run that prints the command and returns a dummy CompletedProcess"""
-    print(f"Running: {args}")
+    print(f"Running: {' '.join(args)}")
     # We want to return the real version if we're checking the version
     if args == ["hatch", "version"]:
         return subprocess.run_orig(args=args, *aargs, **kwargs)
@@ -202,17 +202,13 @@ def _main(version: str, dry_run: bool, state: StateMachine) -> None:
             "[bold]Running in dry-run mode.[/bold]",
             "Commands will not be executed.",
             "",
-            "[bold]NOTE:[/bold] The old package version will be shown in the previewed commands.",
+            "[bold]NOTE:[/bold] The previewed commands will show the current package version.",
         ]
 
         warning_console = Console(stderr=True, style="yellow")
         warning_console.print(
             Panel("\n".join(lines), title="Dry-run mode", expand=False)
         )
-        # warning_console.print("[bold]Commands will not be executed.[/bold]")
-        # warning_console.print(
-        #     "[bold]NOTE: The old version package version will be shown in the Git commands in dry-run mode[/bold]"
-        # )
         setattr(subprocess, "run_orig", subprocess.run)
         subprocess.run = dryrun_subprocess_run
 
