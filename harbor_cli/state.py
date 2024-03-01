@@ -172,7 +172,9 @@ class State:
         return logger
 
     def authenticate_harbor(self) -> None:
-        self.client.authenticate(**self.config.harbor.credentials)
+        self.client.authenticate(
+            **self.config.harbor.credentials, verify=self.config.harbor.verify_ssl
+        )
 
     def _init_client(self) -> None:
         """Configures Harbor client if it hasn't been configured yet.
@@ -305,7 +307,7 @@ class State:
 
             if not status:
                 status = "Working..."
-            if not status.endswith("..."):  # aesthetic :)
+            elif not status.endswith("..."):  # aesthetic :)
                 status += "..."
 
             # show spinner when running a coroutine

@@ -12,6 +12,12 @@ The **third number** is the patch version (bug fixes)
 
 <!-- changelog follows -->
 
+## [0.2.2](https://github.com/unioslo/harbor-cli/tree/harbor-cli-v0.2.2) - 2024-03-01
+
+### Fixed
+
+- Configuration option `verify_ssl` not having any effect.
+
 ## [0.2.1](https://github.com/unioslo/harbor-cli/tree/harbor-cli-v0.2.1) - 2024-02-02
 
 ### Added

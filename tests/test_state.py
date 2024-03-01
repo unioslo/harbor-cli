@@ -28,6 +28,23 @@ def test_state_run_nohandle(state: State) -> None:
         state.run(coro(TypeError), no_handle=(ValueError, TypeError))
 
 
+@pytest.mark.parametrize("client_loaded", [True, False])
+@pytest.mark.parametrize("verify,expect_mode", [(True, 2), (False, 0)])
+def test_state_run_verify_ssl(
+    state: State, client_loaded: bool, verify: bool, expect_mode: int
+) -> None:
+    async def func() -> None:
+        return
+
+    # Ensure verify_ssl acts the same regardless of whether client
+    # has already been configured or not
+    state._client_loaded = client_loaded
+
+    state.config.harbor.verify_ssl = verify
+    state.run(func())
+    assert state.client.client._transport._pool._ssl_context.verify_mode == expect_mode
+
+
 @pytest.mark.timeout(1)  # timeout to avoid hanging on prompt
 @pytest.mark.parametrize(
     "url",
