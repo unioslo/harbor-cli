@@ -1,0 +1,175 @@
+- params: '`--config`, `-c`'
+  help: Path to config file.
+  envvar:
+  - HARBOR_CLI_CONFIG
+  config_value: null
+  fragment: null
+- params: '`--url`, `-u`'
+  help: Harbor API URL.
+  envvar:
+  - HARBOR_CLI_URL
+  config_value: harbor.url
+  fragment: harborurl
+- params: '`--username`, `-U`'
+  help: Harbor username.
+  envvar:
+  - HARBOR_CLI_USERNAME
+  config_value: harbor.username
+  fragment: harborusername
+- params: '`--secret`, `-S`'
+  help: Harbor secret (password).
+  envvar:
+  - HARBOR_CLI_SECRET
+  config_value: harbor.secret
+  fragment: harborsecret
+- params: ''
+  help: Harbor basic access credentials (base64).
+  envvar:
+  - HARBOR_CLI_BASICAUTH
+  config_value: harbor.basicauth
+  fragment: harborbasicauth
+- params: '`--credentials-file`, `-F`'
+  help: Path to Harbor JSON credentials file.
+  envvar:
+  - HARBOR_CLI_CREDENTIALS_FILE
+  config_value: harbor.credentials_file
+  fragment: harborcredentials_file
+- params: '`--validate/--no-validate`'
+  help: Validate Harbor API response data. Forces JSON output format if disabled.
+  envvar:
+  - HARBOR_CLI_HARBOR_VALIDATE_DATA
+  config_value: harbor.validate_data
+  fragment: harborvalidate_data
+- params: '`--raw/--no-raw`'
+  help: Return raw data from Harbor API. Overrides all output formatting options.
+  envvar:
+  - HARBOR_CLI_HARBOR_RAW_MODE
+  config_value: harbor.raw_mode
+  fragment: harborraw_mode
+- params: '`--verify-ssl/--no-verify-ssl`'
+  help: Verify SSL certificates when connecting to Harbor.
+  envvar:
+  - HARBOR_CLI_HARBOR_VERIFY_SSL
+  config_value: harbor.verify_ssl
+  fragment: harborverify_ssl
+- params: '`--retry/--no-retry`'
+  help: Retry failed HTTP requests.
+  envvar:
+  - HARBOR_CLI_HARBOR_RETRY_ENABLED
+  config_value: harbor.retry.enabled
+  fragment: harborretryenabled
+- params: '`--retry-max-tries`'
+  help: Number of times to retry failed HTTP requests.
+  envvar:
+  - HARBOR_CLI_HARBOR_RETRY_MAX_TRIES
+  config_value: harbor.retry.max_tries
+  fragment: harborretrymax_tries
+- params: '`--retry-max-time`'
+  help: Maximum number of seconds to retry failed HTTP requests.
+  envvar:
+  - HARBOR_CLI_HARBOR_RETRY_MAX_TIME
+  config_value: harbor.retry.max_time
+  fragment: harborretrymax_time
+- params: '`--table-description/--no-table-description`'
+  help: Include field descriptions in tables.
+  envvar:
+  - HARBOR_CLI_TABLE_DESCRIPTION
+  config_value: output.table.description
+  fragment: outputtabledescription
+- params: '`--table-max-depth`'
+  help: Maximum depth to print nested objects in tables.
+  envvar:
+  - HARBOR_CLI_TABLE_MAX_DEPTH
+  config_value: output.table.max_depth
+  fragment: outputtablemax_depth
+- params: '`--table-compact/--no-table-compact`'
+  help: 'Compact table output. Has no effect on other formats. '
+  envvar:
+  - HARBOR_CLI_TABLE_COMPACT
+  config_value: output.table.compact
+  fragment: outputtablecompact
+- params: '`--json-indent`'
+  help: Indentation level for JSON output.
+  envvar:
+  - HARBOR_CLI_JSON_INDENT
+  config_value: output.json.indent
+  fragment: outputjsonindent
+- params: '`--json-sort-keys/--no-json-sort-keys`'
+  help: Sort keys in JSON output.
+  envvar:
+  - HARBOR_CLI_JSON_SORT_KEYS
+  config_value: output.json.sort_keys
+  fragment: outputjsonsort_keys
+- params: '`--format`, `-f`'
+  help: Specifies the output format to use.
+  envvar:
+  - HARBOR_CLI_OUTPUT_FORMAT
+  config_value: output.format
+  fragment: outputformat
+- params: '`--paging/--no-paging`'
+  help: Display output in a pager (less, etc.).
+  envvar:
+  - HARBOR_CLI_PAGING
+  config_value: output.paging
+  fragment: outputpaging
+- params: '`--pager`'
+  help: Pager command to use. The default Rich pager will be used.
+  envvar:
+  - HARBOR_CLI_PAGER
+  config_value: output.pager
+  fragment: outputpager
+- params: '`--confirm-deletion/--no-confirm-deletion`'
+  help: Confirm before deleting resources.
+  envvar:
+  - HARBOR_CLI_CONFIRM_DELETION
+  config_value: general.confirm_deletion
+  fragment: generalconfirm_deletion
+- params: '`--confirm-enumeration/--no-confirm-enumeration`'
+  help: Confirm before enumerating all resources without a limit or query.
+  envvar:
+  - HARBOR_CLI_CONFIRM_ENUMERATION
+  config_value: general.confirm_enumeration
+  fragment: generalconfirm_enumeration
+- params: '`--warnings/--no-warnings`'
+  help: Show/hide warnings.
+  envvar:
+  - HARBOR_CLI_WARNINGS
+  config_value: general.warnings
+  fragment: generalwarnings
+- params: ''
+  help: Enable caching of API responses.
+  envvar: []
+  config_value: cache.enabled
+  fragment: cacheenabled
+- params: ''
+  help: Cache TTL in seconds.
+  envvar: []
+  config_value: cache.ttl
+  fragment: cachettl
+- params: '`--output`, `-o`'
+  help: Output file, by default None, which means output to stdout. If the file already
+    exists, it will be overwritten.
+  envvar: []
+  config_value: null
+  fragment: null
+- params: '`--no-overwrite`'
+  help: Do not overwrite the output file if it already exists.
+  envvar: []
+  config_value: null
+  fragment: null
+- params: '`--verbose`, `-v`'
+  help: Enable verbose output.
+  envvar: []
+  config_value: null
+  fragment: null
+- params: '`--with-stdout`'
+  help: Output to stdout in addition to the specified output file, if any. Has no
+    effect if no output file is specified.
+  envvar: []
+  config_value: null
+  fragment: null
+- params: '`--version`'
+  help: Show application version and exit.
+  envvar: []
+  config_value: null
+  fragment: null

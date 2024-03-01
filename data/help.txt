@@ -1,0 +1,184 @@
+                                                                                
+ Usage: harbor [OPTIONS] COMMAND [ARGS]...                                      
+                                                                                
+ Harbor CLI                                                                     
+                                                                                
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│ --config              -c      PATH                   Path to config file.    │
+│ --version                                            Show application        │
+│                                                      version and exit.       │
+│ --install-completion          [bash|zsh|fish|powers  Install completion for  │
+│                               hell|pwsh]             the specified shell.    │
+│                                                      [default: None]         │
+│ --show-completion             [bash|zsh|fish|powers  Show completion for the │
+│                               hell|pwsh]             specified shell, to     │
+│                                                      copy it or customize    │
+│                                                      the installation.       │
+│                                                      [default: None]         │
+│ --help                                               Show this message and   │
+│                                                      exit.                   │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Harbor ─────────────────────────────────────────────────────────────────────╮
+│ --url,--harbor-url     -u                     TEXT     Harbor API URL.       │
+│                                                        Overrides config      │
+│                                                        option harbor.url.    │
+│ --username,--harbor-…  -U                     TEXT     Harbor username.      │
+│                                                        Overrides config      │
+│                                                        option                │
+│                                                        harbor.username.      │
+│ --secret,--harbor-se…  -S                     TEXT     Harbor secret         │
+│                                                        (password). Overrides │
+│                                                        config option         │
+│                                                        harbor.secret.        │
+│ --basicauth            -B                     TEXT     Harbor basic access   │
+│                                                        credentials (base64). │
+│                                                        Overrides config      │
+│                                                        option                │
+│                                                        harbor.basicauth.     │
+│ --credentials-file     -F                     PATH     Path to Harbor JSON   │
+│                                                        credentials file.     │
+│                                                        Overrides config      │
+│                                                        option                │
+│                                                        harbor.credentials_f… │
+│ --validate                 --no-validate               Validate Harbor API   │
+│                                                        response data. Forces │
+│                                                        JSON output format if │
+│                                                        disabled. Overrides   │
+│                                                        config option         │
+│                                                        harbor.validate_data. │
+│ --raw                      --no-raw                    Return raw data from  │
+│                                                        Harbor API. Overrides │
+│                                                        all output formatting │
+│                                                        options. Overrides    │
+│                                                        config option         │
+│                                                        harbor.raw_mode.      │
+│ --verify-ssl               --no-verify-ssl             Verify SSL            │
+│                                                        certificates when     │
+│                                                        connecting to Harbor. │
+│                                                        Overrides config      │
+│                                                        option                │
+│                                                        harbor.verify_ssl.    │
+│ --retry                    --no-retry                  Retry failed HTTP     │
+│                                                        requests. Overrides   │
+│                                                        config option         │
+│                                                        harbor.retry.enabled. │
+│ --retry-max-tries                             INTEGER  Number of times to    │
+│                                                        retry failed HTTP     │
+│                                                        requests. Overrides   │
+│                                                        config option         │
+│                                                        harbor.retry.max_tri… │
+│ --retry-max-time                              FLOAT    Maximum number of     │
+│                                                        seconds to retry      │
+│                                                        failed HTTP requests. │
+│                                                        Overrides config      │
+│                                                        option                │
+│                                                        harbor.retry.max_tim… │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Output ─────────────────────────────────────────────────────────────────────╮
+│ --table-descripti…      --no-table-desc…                  Include field      │
+│                                                           descriptions in    │
+│                                                           tables. Overrides  │
+│                                                           config option      │
+│                                                           output.table.desc… │
+│ --table-max-depth                           INTEGER       Maximum depth to   │
+│                                                           print nested       │
+│                                                           objects in tables. │
+│                                                           Overrides config   │
+│                                                           option             │
+│                                                           output.table.max_… │
+│ --table-compact         --no-table-comp…                  Compact table      │
+│                                                           output. Has no     │
+│                                                           effect on other    │
+│                                                           formats. Overrides │
+│                                                           config option      │
+│                                                           output.table.comp… │
+│ --json-indent                               INTEGER       Indentation level  │
+│                                                           for JSON output.   │
+│                                                           Overrides config   │
+│                                                           option             │
+│                                                           output.json.inden… │
+│ --json-sort-keys        --no-json-sort-…                  Sort keys in JSON  │
+│                                                           output. Overrides  │
+│                                                           config option      │
+│                                                           output.json.sort_… │
+│ --format            -f                      [table|json]  Specifies the      │
+│                                                           output format to   │
+│                                                           use. Overrides     │
+│                                                           config option      │
+│                                                           output.format.     │
+│ --paging                --no-paging                       Display output in  │
+│                                                           a pager (less,     │
+│                                                           etc.). Overrides   │
+│                                                           config option      │
+│                                                           output.paging.     │
+│ --pager                                     TEXT          Pager command to   │
+│                                                           use. The default   │
+│                                                           Rich pager will be │
+│                                                           used. Overrides    │
+│                                                           config option      │
+│                                                           output.pager.      │
+│ --output            -o                      PATH          Output file, by    │
+│                                                           default None,      │
+│                                                           which means output │
+│                                                           to stdout. If the  │
+│                                                           file already       │
+│                                                           exists, it will be │
+│                                                           overwritten.       │
+│ --no-overwrite                                            Do not overwrite   │
+│                                                           the output file if │
+│                                                           it already exists. │
+│ --verbose           -v                                    Enable verbose     │
+│                                                           output.            │
+│ --with-stdout                                             Output to stdout   │
+│                                                           in addition to the │
+│                                                           specified output   │
+│                                                           file, if any. Has  │
+│                                                           no effect if no    │
+│                                                           output file is     │
+│                                                           specified.         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Confirmation & Alerts ──────────────────────────────────────────────────────╮
+│ --confirm-deletion       --no-confirm-deletion       Confirm before deleting │
+│                                                      resources. Overrides    │
+│                                                      config option           │
+│                                                      general.confirm_deleti… │
+│ --confirm-enumeration    --no-confirm-enumerat…      Confirm before          │
+│                                                      enumerating all         │
+│                                                      resources without a     │
+│                                                      limit or query.         │
+│                                                      Overrides config option │
+│                                                      general.confirm_enumer… │
+│ --warnings               --no-warnings               Show/hide warnings.     │
+│                                                      Overrides config option │
+│                                                      general.warnings.       │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│ artifact         Manage artifacts.                                           │
+│ auditlog         Audit log management and access                             │
+│ commands         List all commands.                                          │
+│ config           Manage Harbor configuration.                                │
+│ cve-allowlist    Manage the system-wide CVE allowlist.                       │
+│ find             Search for commands based on names and descriptions.        │
+│ gc               Garbage Collection scheduling and information               │
+│ init             Initialize Harbor CLI configuration file.                   │
+│ ldap             LDAP configuration                                          │
+│ project          Manage projects.                                            │
+│ quota            Quota management                                            │
+│ registry         Registry management                                         │
+│ repl             Start an interactive REPL.                                  │
+│ replication      Registry replication execution and policy.                  │
+│ repository       Manage repositories.                                        │
+│ retention        Artifact retention policy management and execution.         │
+│ sample-config    Print a sample config file to stdout.                       │
+│ scan             Scanning of individual artifacts.                           │
+│ scan-all         Scanning of all artifacts.                                  │
+│ scanner          Manage scanners.                                            │
+│ search           Search for projects and repositories.                       │
+│ self             Manage the CLI itself.                                      │
+│ system           System information                                          │
+│ tui              Start a TUI (text-based user interface).                    │
+│ user             Manage users.                                               │
+│ usergroup        Manage user groups.                                         │
+│ webhook          Manage webhooks                                             │
+╰──────────────────────────────────────────────────────────────────────────────╯
+
