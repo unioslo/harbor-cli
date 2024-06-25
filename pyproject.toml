@@ -131,7 +131,7 @@ ignore = [
   "F541", # f-string is missing placeholders
 ]
 src = ["harbor_cli"]
-extend-exclude = ["tests"]
+extend-exclude = ["tests", "harbor_cli/__init__.py"]
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["E402", "F401", "F403"]
