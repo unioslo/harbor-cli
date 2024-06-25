@@ -144,21 +144,20 @@ def list_artifacts(
     # TODO: warn if no projects or repos match the given names
 
     # The presence of an asterisk trumps all other arguments
-    # None signals that we want to enumerate over all projects
-    if any(x == "*" for x in project) or not project:
-        project = None  # type: ignore
-    repositories = repo if repo else None
+    if "*" in project:
+        project = []
     query = add_to_query(query, tags=tag)
 
     # Confirm enumeration over all artifacts in all projects
-    if project is None and repositories is None:
+    if not project and not repo:
         check_enumeration_options(state, query=query, limit=None)
 
     artifacts = state.run(
         get_artifacts(
             state.client,
-            projects=project,
-            repositories=repositories,
+            # None signals that we want to enumerate over all projects
+            projects=project if project else None,
+            repositories=repo if repo else None,
             query=query,
             with_report=with_report,
         ),
@@ -275,7 +274,7 @@ def get(
             an.repository,
             an.reference,
             with_report=with_vulnerabilities,
-        ),  # type: ignore
+        ),
         f"Fetching artifact(s)...",
     )
 
@@ -404,7 +403,7 @@ def add_artifact_label(
         description=description,
         color=color,
         scope=scope,
-    )
+    )  # type: ignore[call-arg]
     state.run(
         state.client.add_artifact_label(an.project, an.repository, an.reference, label),
         f"Adding label {label.name!r} to {artifact}...",
