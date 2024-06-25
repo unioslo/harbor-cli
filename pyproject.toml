@@ -45,6 +45,17 @@ dependencies = [
 ]
 dynamic = ["version", "readme"]
 
+[project.optional-dependencies]
+dev = [
+  "pytest>=7.2.0",
+  "pytest-cov>=4.0.0",
+  "pytest-mock>=3.10.0",
+  "pytest-timeout>=2.1.0",
+  "hypothesis>=6.62.1",
+  "ruff>=0.2.0",
+  "freezegun>=1.2.2",
+]
+
 [project.urls]
 Source = "https://github.com/unioslo/harbor-cli"
 Documentation = "https://unioslo.github.io/harbor-cli/"
@@ -72,15 +83,7 @@ pattern = "<!-- changelog follows -->\n\n(.*)"
 path = "harbor_cli/__about__.py"
 
 [tool.hatch.envs.default]
-dependencies = [
-  "pytest>=7.2.0",
-  "pytest-cov>=4.0.0",
-  "pytest-mock>=3.10.0",
-  "pytest-timeout>=2.1.0",
-  "hypothesis>=6.62.1",
-  "ruff>=0.2.0",
-  "freezegun>=1.2.2",
-]
+dependencies = ["harbor_cli[dev]"]
 [tool.hatch.envs.default.scripts]
 test = "pytest {args}"
 cov = "pytest --cov-report=term-missing --cov-config=pyproject.toml --cov=harbor_cli --cov=tests {args}"
@@ -147,3 +150,10 @@ ignore_missing_imports = true
 strict = false
 exclude = ["tests"]
 enable_incomplete_feature = ["Unpack"]
+
+
+[tool.pyright]
+pythonVersion = "3.8"
+venvPath = "."
+venv = ".venv"
+ignore = ["tests"]
