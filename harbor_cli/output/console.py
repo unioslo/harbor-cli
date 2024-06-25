@@ -104,7 +104,7 @@ def info(
     message: str,
     panel: bool = False,
     rule: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Log with INFO level and print an informational message."""
     logger.info(message, extra=dict(**kwargs))
@@ -117,7 +117,7 @@ def success(
     message: str,
     panel: bool = False,
     rule: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Log with DEBUG level and print a success message."""
     logger.debug(message, extra=dict(**kwargs))
@@ -130,7 +130,7 @@ def warning(
     message: str,
     rule: bool = False,
     panel: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Log with WARNING level and optionally print a warning message."""
     logger.warning(message, extra=dict(**kwargs))
@@ -154,7 +154,7 @@ def error(
     rule: bool = False,
     panel: bool = False,
     exc_info: bool = False,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     """Log with ERROR level and print an error message."""
     logger.error(message, extra=dict(**kwargs), exc_info=exc_info)
@@ -171,7 +171,7 @@ def error(
     )
 
 
-def exit_ok(message: Optional[str] = None, code: int = 0, **kwargs) -> NoReturn:
+def exit_ok(message: Optional[str] = None, code: int = 0, **kwargs: Any) -> NoReturn:
     """Logs a message with INFO level and exits with the given code (default: 0)
 
     Parameters
