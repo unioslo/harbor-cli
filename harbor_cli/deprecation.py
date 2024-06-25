@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import sys
+from typing import Any
+from typing import List
 from typing import Optional
 
 import typer
@@ -12,12 +14,13 @@ class Deprecated(str):
     """String type used to mark a parameter as deprecated.
 
     Acts like a string, but has an extra attribute 'replacement' that
-    contains the replacement option (if any)."""
+    contains the replacement option (if any).
+    """
 
     replacement: Optional[str] = None
     remove_in: Optional[str] = None
 
-    def __new__(cls, s, replacement: str | None = None) -> Deprecated:
+    def __new__(cls, s: Any, replacement: str | None = None) -> Deprecated:
         obj = str.__new__(cls, s)
         obj.replacement = replacement
         return obj
@@ -42,7 +45,7 @@ def get_deprecated_params(ctx: typer.Context) -> list[Deprecated]:
     """
     info_dict = ctx.to_info_dict()
     params = info_dict["command"]["params"]
-    deprected_params = []
+    deprected_params: List[Deprecated] = []
     for param in params:
         for opt in param["opts"]:
             if isinstance(opt, Deprecated):
@@ -65,7 +68,7 @@ def get_used_deprecated_params(ctx: typer.Context) -> list[Deprecated]:
         the current command.
     """
     deprecated = get_deprecated_params(ctx)
-    used = []
+    used: List[Deprecated] = []
     for param in deprecated:
         if param in sys.argv:
             used.append(param)

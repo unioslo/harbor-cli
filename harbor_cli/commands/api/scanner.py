@@ -12,9 +12,9 @@ from ...output.render import render_result
 from ...state import get_state
 from ...utils.args import create_updated_model
 from ...utils.args import model_params_from_ctx
+from ...utils.commands import OPTION_FORCE
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
-from ...utils.commands import OPTION_FORCE
 
 state = get_state()
 
@@ -35,7 +35,6 @@ def get_scanner(scanner_id: str) -> ScannerRegistration:
 def get_csanner(
     ctx: typer.Context,
     scanner_id: str = typer.Argument(
-        ...,
         help="ID of the scanner to retrieve.",
     ),
 ) -> None:
@@ -49,12 +48,8 @@ def get_csanner(
 @inject_help(ScannerRegistrationReq)
 def create_scanner(
     ctx: typer.Context,
-    name: str = typer.Argument(
-        ...,
-    ),
-    url: str = typer.Argument(
-        ...,
-    ),
+    name: str = typer.Argument(),
+    url: str = typer.Argument(),
     description: Optional[str] = typer.Option(
         None,
         "--description",
@@ -96,7 +91,7 @@ def create_scanner(
 @inject_help(ScannerRegistrationReq)
 def update_scanner(
     ctx: typer.Context,
-    scanner_id: str = typer.Argument(..., help="ID of the scanner to update."),
+    scanner_id: str = typer.Argument(help="ID of the scanner to update."),
     name: Optional[str] = typer.Option(
         None,
         "--name",
@@ -149,7 +144,6 @@ def update_scanner(
 def delete_scanner(
     ctx: typer.Context,
     scanner_id: str = typer.Argument(
-        ...,
         help="ID of the scanner to delete.",
     ),
     force: bool = OPTION_FORCE,
@@ -190,7 +184,6 @@ def list_scanners(
 def set_default_scanner(
     ctx: typer.Context,
     scanner_id: str = typer.Argument(
-        ...,
         help="ID of the scanner to set as default.",
     ),
     unset_default: bool = typer.Option(

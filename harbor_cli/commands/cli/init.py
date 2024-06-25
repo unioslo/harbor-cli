@@ -4,17 +4,18 @@ from pathlib import Path
 from typing import Optional
 
 import typer
+from rich import markup
 
 from ...app import app
-from ...config import create_config
 from ...config import DEFAULT_CONFIG_FILE
 from ...config import HarborCLIConfig
+from ...config import create_config
 from ...config import save_config
 from ...exceptions import ConfigError
 from ...exceptions import OverwriteError
+from ...format import OutputFormat
 from ...format import output_format_emoji
 from ...format import output_format_repr
-from ...format import OutputFormat
 from ...harbor.common import prompt_basicauth
 from ...harbor.common import prompt_credentials_file
 from ...logs import LogLevel
@@ -88,7 +89,8 @@ def run_config_wizard(config_path: Optional[Path] = None) -> HarborCLIConfig:
     """Loads the config file, and runs the configuration wizard.
 
     Delegates to subroutines for each config category, that modify
-    the loaded config object in-place."""
+    the loaded config object in-place.
+    """
     conf_exists = config_path is None
 
     try:
@@ -157,7 +159,8 @@ def init_harbor_settings(config: HarborCLIConfig) -> None:
     )
 
     # Determine auth method
-    base_msg = "Authentication method [bold magenta](\[u]sername/password, \[b]asic auth, \[f]ile, \[s]kip)[/]"
+
+    base_msg = f"Authentication method [bold magenta]{markup.escape('([u]sername/password, [b]asic auth, [f]ile, [s]kip)')}[/]"
     choices = ["u", "b", "f", "s"]
     if hconf.has_auth_method:
         default_choice = "s"

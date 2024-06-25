@@ -1,4 +1,5 @@
 """Generate the code reference pages and navigation."""
+
 from __future__ import annotations
 
 import sys
@@ -8,11 +9,10 @@ from typing import List
 
 import jinja2
 import yaml  # type: ignore
-from sanitize_filename import sanitize
-
 from harbor_cli.main import app
 from harbor_cli.models import CommandSummary
 from harbor_cli.utils.commands import get_app_commands
+from sanitize_filename import sanitize
 
 sys.path.append(Path(__file__).parent.as_posix())
 sys.path.append(Path(__file__).parent.parent.parent.as_posix())

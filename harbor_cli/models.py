@@ -4,6 +4,7 @@ Defined here to avoid circular imports when using these models in multiple
 modules that otherwise can't mutually import each other.
 Refactor to module (directory with __init__.py) if needed.
 """
+
 from __future__ import annotations
 
 from enum import Enum
@@ -12,6 +13,8 @@ from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Optional
+from typing import Sequence
+from typing import Union
 
 from click.core import Argument
 from click.core import Parameter
@@ -21,8 +24,8 @@ from harborapi.models import Project
 from harborapi.models import ProjectReq
 from harborapi.models.base import BaseModel as HarborAPIBaseModel
 from pydantic import Field
-from pydantic import model_validator
 from pydantic import RootModel
+from pydantic import model_validator
 from rich.table import Table
 from strenum import StrEnum
 from typer.core import TyperArgument
@@ -48,7 +51,7 @@ class ParamSummary(BaseModel):
     choices: Optional[List[str]] = None
     count: Optional[bool] = None
     default: Optional[Any] = None
-    envvar: Optional[str]
+    envvar: Optional[Union[str, Sequence[str]]]
     expose_value: bool
     flag_value: Optional[Any] = None
     help: str
@@ -80,7 +83,7 @@ class ParamSummary(BaseModel):
     def from_param(cls, param: Parameter) -> ParamSummary:
         """Construct a new ParamSummary from a click.Parameter."""
         try:
-            help_ = param.help or ""  # type: ignore
+            help_ = str(getattr(param, "help", None) or "")
         except AttributeError:
             help_ = ""
 
@@ -91,7 +94,7 @@ class ParamSummary(BaseModel):
             count=get(param, "count"),
             choices=get(param.type, "choices"),
             default=param.default,
-            envvar=param.envvar,  # TODO: support list of envvars
+            envvar=param.envvar,
             expose_value=param.expose_value,
             flag_value=get(param, "flag_value"),
             help=help_,
@@ -244,7 +247,7 @@ class UserGroupType(StrEnum):
     OIDC = "OIDC"
 
     @classmethod
-    def from_int(cls, value: int) -> str:
+    def from_int(cls, value: int) -> UserGroupType:
         try:
             return _USERGROUPTYPE_MAPPING[value]
         except KeyError:
@@ -257,18 +260,16 @@ class UserGroupType(StrEnum):
             raise ValueError(f"Unknown user group type: {self}")
 
 
-# NOTE: Dict keys are typed as str instead of UserGroupType
-# https://github.com/python/mypy/issues/14688
-
-
 # NOTE: could replace with a bidict or similar
-_USERGROUPTYPE_MAPPING = {
+_USERGROUPTYPE_MAPPING: Dict[int, UserGroupType] = {
     1: UserGroupType.LDAP,
     2: UserGroupType.HTTP,
     3: UserGroupType.OIDC,
-}  # type: dict[int, str]
+}
 
-_USERGROUPTYPE_MAPPING_REVERSE = {v: k for k, v in _USERGROUPTYPE_MAPPING.items()}  # type: dict[str, int]
+_USERGROUPTYPE_MAPPING_REVERSE: Dict[UserGroupType, int] = {
+    v: k for k, v in _USERGROUPTYPE_MAPPING.items()
+}
 
 
 # We use this enum to provide choices in the CLI, but we also use it to determine
@@ -298,15 +299,17 @@ class MemberRoleType(Enum):
 # They do seem correct though, but I'd love to know how I got them, because
 # to add a new role type, we need to manually test it out in the Web UI
 # and inspect the request payload to see what integer value it sends.
-_MEMBERROLETYPE_MAPPING = {
+_MEMBERROLETYPE_MAPPING: Dict[int, MemberRoleType] = {
     1: MemberRoleType.ADMIN,
     2: MemberRoleType.DEVELOPER,
     3: MemberRoleType.GUEST,
     4: MemberRoleType.MAINTAINER,
     5: MemberRoleType.LIMITED_GUEST,
-}  # type: dict[int, MemberRoleType]
+}
 
-_MEMBERROLETYPE_MAPPING_REVERSE = {v: k for k, v in _MEMBERROLETYPE_MAPPING.items()}  # type: dict[MemberRoleType, int]
+_MEMBERROLETYPE_MAPPING_REVERSE: Dict[MemberRoleType, int] = {
+    v: k for k, v in _MEMBERROLETYPE_MAPPING.items()
+}
 
 
 class ArtifactVulnerabilitySummary(BaseModel):
@@ -326,12 +329,12 @@ class ArtifactVulnerabilitySummary(BaseModel):
         )
 
 
-class MetadataFields(RootModel):
+class MetadataFields(RootModel[Dict[str, Any]]):
     """Renders a mapping of one or more metadata fields as a table."""
 
     root: Dict[str, Any]
 
-    def as_table(self, **kwargs: Any) -> Iterable[Table]:  # type: ignore
+    def as_table(self, **kwargs: Any) -> Iterable[Table]:
         from .output.table._utils import get_table
 
         table = get_table(

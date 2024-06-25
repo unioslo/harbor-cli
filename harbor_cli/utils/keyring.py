@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import functools
-from typing import Callable
 from typing import TYPE_CHECKING
+from typing import Callable
 from typing import TypeVar
 
 import keyring.backends.fail
@@ -29,7 +29,8 @@ def keyring_supported() -> bool:
     """Very naively checks if we can use keyring on the current system.
 
     We set a dummy password and then try to retrieve it. If we get the same
-    password back, we assume that keyring is supported."""
+    password back, we assume that keyring is supported.
+    """
     try:
         backend = get_backend()
         if isinstance(backend, keyring.backends.fail.Keyring):

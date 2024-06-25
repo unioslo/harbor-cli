@@ -3,9 +3,10 @@ from __future__ import annotations
 import asyncio
 from functools import cached_property
 from pathlib import Path
+from typing import TYPE_CHECKING
+from typing import Any
 from typing import Coroutine
 from typing import Optional
-from typing import TYPE_CHECKING
 from typing import TypeVar
 
 from harborapi import HarborAsyncClient
@@ -18,8 +19,9 @@ from rich.console import Console
 # to create circular import issues. It sucks, but it's the way it is.
 
 if TYPE_CHECKING:
-    from .config import HarborCLIConfig
     from logging import Logger
+
+    from .config import HarborCLIConfig
 
 
 T = TypeVar("T")
@@ -48,7 +50,7 @@ class State:
 
     _instance = None
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args: Any, **kwargs: Any):
         if cls._instance is None:
             cls._instance = super().__new__(cls, *args, **kwargs)
             cls._initialized = False
@@ -59,9 +61,9 @@ class State:
     repl: bool = False
 
     # Attributes (exposed as properties)
-    _config = None  # type: HarborCLIConfig | None
-    _client = None  # type: HarborAsyncClient | None
-    _console = None  # type: Console | None
+    _config: Optional[HarborCLIConfig] = None
+    _client: Optional[HarborAsyncClient] = None
+    _console: Optional[Console] = None
 
     # Flags to determine if the config or client have been loaded
     _config_loaded: bool = False
@@ -224,13 +226,13 @@ class State:
         create : bool, optional
             Whether to create a new config file if one is not found, by default True
         """
-        from harbor_cli.output.console import info
+        from harbor_cli.commands.cli.init import run_config_wizard
+        from harbor_cli.config import HarborCLIConfig
+        from harbor_cli.exceptions import ConfigError
         from harbor_cli.output.console import error
         from harbor_cli.output.console import exit_err
+        from harbor_cli.output.console import info
         from harbor_cli.output.formatting.path import path_link
-        from harbor_cli.commands.cli.init import run_config_wizard
-        from harbor_cli.exceptions import ConfigError
-        from harbor_cli.config import HarborCLIConfig
 
         # Don't load the config if it's already loaded (e.g. in REPL)
         if not self.is_config_loaded:
@@ -259,10 +261,9 @@ class State:
         Important to call this method BEFORE saving a snapshot of the config!
         Otherwise, we risk enabling and disabling the keyring over and over again.
         """
-
         if self.config.harbor.keyring:
-            from harbor_cli.utils.keyring import keyring_supported
             from harbor_cli.output.console import warning
+            from harbor_cli.utils.keyring import keyring_supported
 
             if not keyring_supported():
                 warning(
@@ -336,5 +337,6 @@ class State:
 def get_state() -> State:
     """Returns the global state object.
 
-    Instantiates a new state object with defaults if it doesn't exist."""
+    Instantiates a new state object with defaults if it doesn't exist.
+    """
     return State()

@@ -56,7 +56,7 @@ def ping(
 @search_cmd.command("users")
 def search_users(
     ctx: typer.Context,
-    username: str = typer.Argument(..., help="Username to search for"),
+    username: str = typer.Argument(help="Username to search for"),
 ) -> None:
     """Search for users in LDAP."""
     result = state.run(state.client.search_ldap_users(username))

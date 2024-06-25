@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Type
@@ -155,7 +156,7 @@ def parse_commalist(arg: Optional[List[str]]) -> List[str]:
     will be parsed as: `["foo", "bar", "baz"]`
 
     Examples
-    -------
+    --------
     ```py
     >>> parse_commalist(["foo", "bar,baz"])
     ["foo", "bar", "baz"]
@@ -172,7 +173,7 @@ def parse_commalist(arg: Optional[List[str]]) -> List[str]:
 
 def parse_commalist_int(arg: Optional[List[str]]) -> List[int]:
     """Parses a comma-separated list and converts the values to integers."""
-    int_list = []
+    int_list: List[int] = []
     for item in parse_commalist(arg):
         try:
             int_list.append(int(item))
@@ -185,7 +186,7 @@ def parse_key_value_args(arg: list[str]) -> dict[str, str]:
     """Parses a list of key=value arguments.
 
     Examples
-    -------
+    --------
     >>> parse_key_value_args(["foo=bar", "baz=qux"])
     {'foo': 'bar', 'baz': 'qux'}
 
@@ -199,7 +200,7 @@ def parse_key_value_args(arg: list[str]) -> dict[str, str]:
     dict[str, str]
         A dictionary mapping keys to values.
     """
-    metadata = {}
+    metadata: Dict[str, str] = {}
     for item in arg:
         try:
             key, value = item.split("=", maxsplit=1)
@@ -345,13 +346,15 @@ def _get_id_name_arg(resource_type: str, name_or_id: str) -> str | int:
 
 def get_project_arg(project_name_or_id: str) -> str | int:
     """Given a project name or ID argument (prefixed with 'id:'),
-    return a project name (str) or project ID (int)."""
+    return a project name (str) or project ID (int).
+    """
     return _get_id_name_arg("project", project_name_or_id)
 
 
 def get_user_arg(username_or_id: str) -> str | int:
     """Given a username or ID argument (prefixed with 'id:'),
-    return a username (str) or user ID (int)."""
+    return a username (str) or user ID (int).
+    """
     return _get_id_name_arg("user", username_or_id)
 
 

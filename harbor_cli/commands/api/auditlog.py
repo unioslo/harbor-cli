@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+from typing import Dict
 from typing import List
 from typing import Optional
-from typing import TYPE_CHECKING
 
 from ...output.console import info
 from ...utils.args import add_to_query
@@ -12,15 +13,15 @@ if TYPE_CHECKING:
     from typing import Any  # noqa: F401
 
 import typer
-from harborapi.models import Schedule, ScheduleObj
+from harborapi.models import Schedule
+from harborapi.models import ScheduleObj
 
-from ...style import render_cli_option, render_cli_value
-
+from ...output.prompts import check_enumeration_options
 from ...output.render import render_result
 from ...state import get_state
+from ...style import render_cli_option
+from ...style import render_cli_value
 from ...utils.commands import inject_resource_options
-from ...output.prompts import check_enumeration_options
-
 
 state = get_state()
 
@@ -69,14 +70,15 @@ def list_audit_logs(
         help=f"Username to filter audit logs by.",
         callback=parse_commalist,
     ),
-    query: Optional[str] = ...,  # type: ignore
-    sort: Optional[str] = ...,  # type: ignore
-    page: int = ...,  # type: ignore
-    page_size: int = ...,  # type: ignore
+    query: Optional[str] = ...,
+    sort: Optional[str] = ...,
+    page: int = ...,
+    page_size: int = ...,
     limit: Optional[int] = typer.Option(10),
 ) -> None:
     """List audit logs for projects the current user has access to.
-    Recommended to specify a search query and to limit the number of results."""
+    Recommended to specify a search query and to limit the number of results.
+    """
     # Add syntactic sugar options to query
     query = add_to_query(
         query,
@@ -117,7 +119,7 @@ def get_audit_log_rotation_history(
     """List log rotation job logs."""
     check_enumeration_options(state, limit=limit)
     logs = state.run(
-        state.client.get_audit_log_rotation_history(
+        state.client.get_purge_job_history(
             query=query,
             sort=sort,
             page=page,
@@ -133,11 +135,11 @@ def get_audit_log_rotation_history(
 @rotation_cmd.command("get")
 def get_audit_log_rotation(
     ctx: typer.Context,
-    job_id: int = typer.Argument(..., help="Log rotation job ID"),
+    job_id: int = typer.Argument(help="Log rotation job ID"),
 ) -> None:
     """Get a log rotation job."""
     result = state.run(
-        state.client.get_audit_log_rotation(job_id),
+        state.client.get_purge_job(job_id),
         f"Fetching log rotation result...",
     )
     render_result(result, ctx)
@@ -147,11 +149,11 @@ def get_audit_log_rotation(
 @rotation_cmd.command("log")
 def get_audit_log_rotation_log(
     ctx: typer.Context,
-    job_id: int = typer.Argument(..., help="Log rotation job ID"),
+    job_id: int = typer.Argument(help="Log rotation job ID"),
 ) -> None:
     """Get the log for a log rotation job."""
     status = state.run(
-        state.client.get_audit_log_rotation_log(job_id),
+        state.client.get_purge_job_log(job_id),
         f"Fetching log rotation status...",
     )
     render_result(status, ctx)
@@ -161,11 +163,11 @@ def get_audit_log_rotation_log(
 @rotation_cmd.command("stop")
 def stop_audit_log_rotation(
     ctx: typer.Context,
-    job_id: int = typer.Argument(..., help="Log rotation job ID"),
+    job_id: int = typer.Argument(help="Log rotation job ID"),
 ) -> None:
     """Stop a log rotation job."""
     state.run(
-        state.client.stop_audit_log_rotation(job_id),
+        state.client.stop_purge_job(job_id),
         f"Stopping log rotation...",
     )
 
@@ -177,7 +179,7 @@ def get_audit_log_rotation_schedule(
 ) -> None:
     """Get the log rotation schedule."""
     schedule = state.run(
-        state.client.get_audit_log_rotation_schedule(),
+        state.client.get_purge_job_schedule(),
         f"Fetching log rotation schedule...",
     )
     render_result(schedule, ctx)
@@ -194,7 +196,7 @@ def _get_schedule(
     dry_run: Optional[bool],
     type: Optional[str],
 ) -> Schedule:
-    params = {}  # type: dict[str, Any]
+    params: Dict[str, Any] = {}
     if audit_retention_hour:
         params["audit_retention_hour"] = audit_retention_hour
     if dry_run:
@@ -202,7 +204,7 @@ def _get_schedule(
     if include_operations:
         params["include_operations"] = include_operations
 
-    obj_kwargs = {}  # type: dict[str, Any]
+    obj_kwargs: Dict[str, Any] = {}
     if cron:
         obj_kwargs["cron"] = cron
     if type:
@@ -211,7 +213,7 @@ def _get_schedule(
     return Schedule(
         parameters=params,
         schedule=ScheduleObj(**obj_kwargs),
-    )
+    )  # pyright: ignore[reportCallIssue]
 
 
 # HarborAsyncClient.create_audit_log_rotation_schedule()
@@ -251,7 +253,7 @@ def create_audit_log_rotation_schedule(
     )
 
     s = state.run(
-        state.client.create_audit_log_rotation_schedule(schedule),
+        state.client.create_purge_job_schedule(schedule),
         f"Creating audit log rotation schedule...",
     )
     render_result(s, ctx)
@@ -290,7 +292,7 @@ def update_audit_log_rotation_schedule(
     )
 
     s = state.run(
-        state.client.update_audit_log_rotation_schedule(schedule),
+        state.client.update_purge_job_schedule(schedule),
         f"Updating audit log rotation schedule...",
     )
     render_result(s, ctx)

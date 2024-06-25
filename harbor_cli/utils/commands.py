@@ -4,6 +4,7 @@ import copy
 import inspect
 from functools import lru_cache
 from typing import Any
+from typing import List
 from typing import Type
 
 import click
@@ -54,10 +55,8 @@ def _get_app_commands(
 
     if isinstance(app, typer.Typer):
         cmd = typer.main.get_command(app)
-    elif isinstance(app, (TyperGroup, TyperCommand)):
-        cmd = app
     else:
-        raise TypeError(f"Unexpected app type: {type(app)}")
+        cmd = app
 
     groups: dict[str, TyperGroup | TyperCommand] = {}
     try:
@@ -85,7 +84,7 @@ def _get_app_commands(
 
 def get_app_callback_options(app: typer.Typer) -> list[typer.models.OptionInfo]:
     """Get the options of the main callback of a Typer app."""
-    options = []  # type: list[typer.models.OptionInfo]
+    options: List[typer.models.OptionInfo] = []
 
     if not app.registered_callback:
         return options
@@ -110,7 +109,7 @@ def inject_help(
     of Typer.Option() function parameters whose names match the field names.
 
     Examples
-    -------
+    --------
     ```python
     class MyModel(BaseModel):
         my_field: str = Field(..., description="Description of my_field")
@@ -227,16 +226,13 @@ def _arg_project_name_or_id(default: Any = ...) -> Any:  # typer.Argument is unt
 ARG_PROJECT_NAME_OR_ID = _arg_project_name_or_id()
 ARG_PROJECT_NAME_OR_ID_OPTIONAL = _arg_project_name_or_id(None)
 ARG_REPO_NAME = typer.Argument(
-    ...,
     help="Name of the repository to use.",
 )
 
 ARG_USERNAME_OR_ID = typer.Argument(
-    ...,
     help=f"Username or ID of the user to use. {_USE_ID_HELP}",
 )
 ARG_LDAP_GROUP_DN_OR_ID = typer.Argument(
-    ...,
     help=f"LDAP Group DN or ID of the group to use. {_USE_ID_HELP}",
 )
 
@@ -280,7 +276,7 @@ def inject_resource_options(
     `query`, `sort`, `page`, `page_size`, `limit`
 
     Examples
-    -------
+    --------
     ```python
     @app.command()
     @inject_resource_options()
@@ -335,7 +331,7 @@ def inject_resource_options(
         The decorated function
 
     Examples
-    -------
+    --------
     ```python
     @inject_resource_options(use_defaults=True)
     my_func(page_size: int = typer.Option(20)) -> None: ...
@@ -350,7 +346,6 @@ def inject_resource_options(
     my_func(page_size: int = 20) -> None: ... # will fail (for now)
     ```
     """
-
     # TODO: add check that the function signature is in the correct order
     # so we don't raise a cryptic error message later on!
 

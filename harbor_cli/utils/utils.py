@@ -1,32 +1,27 @@
 """Utility functions that can't be neatly categorized, or are so niche
-that they don't need their own module."""
+that they don't need their own module.
+"""
+
 from __future__ import annotations
 
 import string
 from typing import Any
 from typing import Iterable
+from typing import List
 from typing import MutableMapping
 from typing import NamedTuple
 from typing import Optional
-from typing import TYPE_CHECKING
 from typing import TypeVar
 
-if TYPE_CHECKING:
-    from typing import Literal  # noqa: F401
+MutableMappingType = TypeVar("MutableMappingType", bound=MutableMapping[Any, Any])
 
 
-MappingType = TypeVar("MappingType", bound=MutableMapping[str, Any])
-
-
-def replace_none(d: MappingType, replacement: Any = "") -> MappingType:
+def replace_none(d: MutableMappingType, replacement: Any = "") -> MutableMappingType:
     """Replaces None values in a dict with a given replacement value.
     Iterates recursively through nested dicts and iterables.
 
     Untested with iterables other than list, tuple, and set.
     """
-
-    if d is None:
-        return replacement
 
     def _try_convert_to_original_type(
         value: Iterable[Any], original_type: type
@@ -44,16 +39,18 @@ def replace_none(d: MappingType, replacement: Any = "") -> MappingType:
         """Iterates through an iterable recursively, replacing None values."""
         t = type(value)
         v_generator = (item if item is not None else replacement for item in value)
-        values = []
+        values: List[Any] = []
 
         for item in v_generator:
             v = None
             if isinstance(item, MutableMapping):
-                v = replace_none(item)
+                v = replace_none(  # pyright: ignore[reportUnknownVariableType]
+                    item  # pyright: ignore[reportUnknownArgumentType]
+                )
             elif isinstance(item, str):  # don't need to recurse into each char
-                v = item  # type: ignore
+                v = item
             elif isinstance(item, Iterable):
-                v = _iter_iterable(item)  # type: ignore
+                v = _iter_iterable(item)  # pyright: ignore[reportUnknownArgumentType]
             else:
                 v = item
             values.append(v)
@@ -63,12 +60,13 @@ def replace_none(d: MappingType, replacement: Any = "") -> MappingType:
             return value
 
     for key, value in d.items():
+        key = str(key)
         if isinstance(value, MutableMapping):
-            d[key] = replace_none(value)
+            d[key] = replace_none(value)  # pyright: ignore[reportUnknownArgumentType]
         elif isinstance(value, str):
             d[key] = value
         elif isinstance(value, Iterable):
-            d[key] = _iter_iterable(value)
+            d[key] = _iter_iterable(value)  # pyright: ignore[reportUnknownArgumentType]
         elif value is None:
             d[key] = replacement
     return d
@@ -86,7 +84,8 @@ def parse_version_string(package: str) -> PackageVersion:
 
     Must be in the form of `<package_name>[{~=,==,!=,<=,>=,<,>}{x.y.z}][,][{~=,==,!=,<=,>=,<,>}{x.y.z}]`
 
-    Examples:
+    Examples
+    --------
         - "foo"
         - "foo==1.2.3"
         - "foo>=1.2.3"
@@ -99,7 +98,7 @@ def parse_version_string(package: str) -> PackageVersion:
     package_name = parts[0]
     min_version = None
     max_version = None
-    not_version = None  # noqa # NYI
+    not_version = None  # pyright: ignore[reportUnusedVariable] # noqa # NYI
 
     operators = ["~=", "==", "<=", ">=", "<", ">"]  # no != for now
 

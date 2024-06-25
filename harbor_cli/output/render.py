@@ -5,7 +5,6 @@ from contextlib import nullcontext
 from typing import Any
 from typing import Sequence
 from typing import TypeVar
-from typing import Union
 
 import typer
 from harborapi.models.base import BaseModel as HarborBaseModel
@@ -22,13 +21,12 @@ from .table import BuiltinTypeException
 from .table import EmptySequenceError
 from .table import get_renderable
 
-
 T = TypeVar("T")
 
 # TODO: add ResultType = T | list[T] to types.py
 
 
-def render_result(result: T, ctx: typer.Context | None = None, **kwargs: Any) -> None:
+def render_result(result: Any, ctx: typer.Context | None = None, **kwargs: Any) -> None:
     """Render the result of a command stdout or file.
 
     Parameters
@@ -48,7 +46,7 @@ def render_result(result: T, ctx: typer.Context | None = None, **kwargs: Any) ->
     validation = state.config.harbor.validate_data
 
     ctx_manager = console.pager() if paging else nullcontext()
-    with ctx_manager:  # type: ignore # not quite sure why mypy is complaining here
+    with ctx_manager:
         if raw_mode:  # raw mode ignores output format
             render_raw(result, ctx, **kwargs)
         elif fmt == OutputFormat.JSON or not validation:
@@ -59,9 +57,7 @@ def render_result(result: T, ctx: typer.Context | None = None, **kwargs: Any) ->
             raise ValueError(f"Unknown output format {fmt!r}.")
 
 
-def render_table(
-    result: T | Sequence[T], ctx: typer.Context | None = None, **kwargs: Any
-) -> None:
+def render_table(result: Any, ctx: typer.Context | None = None, **kwargs: Any) -> None:
     """Render the result of a command as a table."""
     # TODO: handle "primitives" like strings and numbers
 
@@ -83,20 +79,21 @@ def render_table(
     render_table_full(result)
 
 
-def render_table_compact(result: T | Sequence[T], **kwargs) -> None:
+def render_table_compact(result: Any, **kwargs: Any) -> None:
     """Render the result of a command as a compact table."""
     renderable = get_renderable(result, **kwargs)
     console.print(renderable)
 
 
-def render_table_full(result: T | Sequence[T], **kwargs) -> None:
+def render_table_full(result: Any, **kwargs: Any) -> None:
     state = get_state()
     show_description = state.config.output.table.description
     max_depth = state.config.output.table.max_depth
 
-    def print_item(item: T | str) -> None:
+    def print_item(item: Any) -> None:
         """Prints a harbor base model as a table (optionally with description),
-        if it is a harborapi BaseModel, otherwise just prints the item."""
+        if it is a harborapi BaseModel, otherwise just prints the item.
+        """
         if isinstance(item, HarborBaseModel):
             console.print(
                 item.as_panel(with_description=show_description, max_depth=max_depth)
@@ -105,15 +102,13 @@ def render_table_full(result: T | Sequence[T], **kwargs) -> None:
             console.print(item)
 
     if isinstance(result, Sequence) and not isinstance(result, str):
-        for item in result:
+        for item in result:  # type: ignore # we can print anything
             print_item(item)
     else:
         print_item(result)
 
 
-def render_json(
-    result: T | Sequence[T], ctx: typer.Context | None = None, **kwargs: Any
-) -> None:
+def render_json(result: Any, ctx: typer.Context | None = None, **kwargs: Any) -> None:
     """Render the result of a command as JSON."""
     state = get_state()
     p = state.options.output_file
@@ -123,8 +118,7 @@ def render_json(
     sort_keys = state.config.output.JSON.sort_keys
 
     # We use a Pydantic RootModel to render any type as JSON
-    class Output(RootModel[Union[T, Sequence[T]]]):
-        root: Union[T, Sequence[T]]
+    Output = RootModel[Any]
 
     o = Output(root=result)
     o_json = o.model_dump_json(indent=indent)

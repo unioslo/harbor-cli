@@ -38,7 +38,6 @@ app.add_typer(export_cmd)
 def start_scan(
     ctx: typer.Context,
     artifact: str = typer.Argument(
-        ...,
         help=ARTIFACT_HELP_STRING,
     ),
 ) -> None:
@@ -57,7 +56,6 @@ def start_scan(
 def stop_scan(
     ctx: typer.Context,
     artifact: str = typer.Argument(
-        ...,
         help=ARTIFACT_HELP_STRING,
     ),
 ) -> None:
@@ -75,11 +73,9 @@ def stop_scan(
 def get_artifact_scan_report_log(
     ctx: typer.Context,
     artifact: str = typer.Argument(
-        ...,
         help=ARTIFACT_HELP_STRING,
     ),
     report_id: str = typer.Argument(
-        ...,
         help="ID of the report to retrieve logs of.",
     ),
 ) -> None:
@@ -99,7 +95,7 @@ def get_artifact_scan_report_log(
 def get_scan_export(
     ctx: typer.Context,
     execution_id: int = typer.Argument(
-        ..., help="The execution ID of the scan job to retrieve."
+        help="The execution ID of the scan job to retrieve."
     ),
 ) -> None:
     """Get a specific scan export."""
@@ -180,7 +176,7 @@ def start_scan_export(
 ) -> None:
     # TODO: resolve label names to IDs (?)
 
-    req = ScanDataExportRequest()
+    req = ScanDataExportRequest()  # pyright: ignore[reportCallIssue]
     if job_name:
         req.job_name = job_name
     if cve:
@@ -214,11 +210,9 @@ def start_scan_export(
 def download_scan_export(
     ctx: typer.Context,
     execution_id: int = typer.Argument(
-        ...,
         help="The execution ID of the scan job to download.",
     ),
     destination: Path = typer.Argument(
-        ...,
         help="Destination to download the export to.",
         # TODO: use automatic filename if omitted
         # Which location do we save to?

@@ -28,7 +28,7 @@ def flatten_config_response(response: ConfigurationsResponse) -> dict[str, Any]:
     any information about whether the fields are editable or not.
 
     Examples
-    -------
+    --------
     >>> response = ConfigurationsResponse(
     ...     auth_mode=StringConfigItem(value="db_auth", editable=True),
     ... )
@@ -60,7 +60,9 @@ def flatten_config_response(response: ConfigurationsResponse) -> dict[str, Any]:
             # NOTE: continue or delete?
             # add flag to keep or delete?
             continue
-        v = value.get("value")
+        v = value.get(  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
+            "value"
+        )
         c[key] = v
     return c
 
@@ -342,7 +344,8 @@ def update_config(
 ) -> None:
     """Update the Harbor configuration.
 
-    One or more configuration parameters must be provided."""
+    One or more configuration parameters must be provided.
+    """
     info("Updating configuration...")
     params = model_params_from_ctx(ctx, Configurations)
     if not params:

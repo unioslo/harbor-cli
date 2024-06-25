@@ -4,14 +4,14 @@ import math
 import os
 from functools import wraps
 from pathlib import Path
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
-from typing import cast
-from typing import overload
 from typing import Type
-from typing import TYPE_CHECKING
 from typing import TypeVar
 from typing import Union
+from typing import cast
+from typing import overload
 
 from rich.prompt import Confirm
 from rich.prompt import FloatPrompt
@@ -19,8 +19,8 @@ from rich.prompt import IntPrompt
 from rich.prompt import Prompt
 from typing_extensions import ParamSpec
 
-from ..style import Icon
 from ..style import STYLE_CLI_OPTION
+from ..style import Icon
 from ..style.color import green
 from ..style.color import yellow
 from ..style.style import render_cli_option
@@ -31,7 +31,6 @@ from .console import exit_err
 from .console import exit_ok
 from .console import warning
 from .formatting.path import path_link
-
 
 if TYPE_CHECKING:
     from ..config import HarborCLIConfig
@@ -200,8 +199,7 @@ def _number_prompt(
     max: int | float | None = ...,
     show_range: bool = ...,
     **kwargs: Any,
-) -> int:
-    ...
+) -> int: ...
 
 
 @overload
@@ -214,22 +212,19 @@ def _number_prompt(
     max: int | float | None = ...,
     show_range: bool = ...,
     **kwargs: Any,
-) -> float:
-    ...
+) -> float: ...
 
 
 def _number_prompt(
     prompt_type: Type[IntPrompt] | Type[FloatPrompt],
     prompt: str,
-    default: int | float | None = None,
+    default: int | float | None = ...,
     show_default: bool = True,
     min: int | float | None = None,
     max: int | float | None = None,
     show_range: bool = True,
     **kwargs: Any,
 ) -> int | float:
-    default_arg = ... if default is None else default
-
     _prompt_add = ""
     if show_range:
         if min is not None and max is not None:
@@ -248,7 +243,7 @@ def _number_prompt(
         val = prompt_type.ask(
             msg,
             console=err_console,
-            default=default_arg,
+            default=default,
             show_default=show_default,
             **kwargs,
         )

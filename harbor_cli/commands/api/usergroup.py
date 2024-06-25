@@ -11,8 +11,8 @@ from ...output.console import info
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
 from ...state import get_state
-from ...utils.commands import inject_resource_options
 from ...utils.commands import OPTION_FORCE
+from ...utils.commands import inject_resource_options
 
 state = get_state()
 
@@ -28,7 +28,7 @@ app = typer.Typer(
 @app.command("get")
 def get_usergroup(
     ctx: typer.Context,
-    group_id: int = typer.Argument(..., help="ID of the group to fetch."),
+    group_id: int = typer.Argument(help="ID of the group to fetch."),
 ) -> None:
     """Get a user group."""
     usergroup = state.run(
@@ -42,11 +42,10 @@ def get_usergroup(
 def create_usergroup(
     ctx: typer.Context,
     group_name: str = typer.Argument(
-        ...,
         help="Name of the group to create.",
     ),
     group_type: UserGroupType = typer.Argument(
-        ..., help="The type of user group to create."
+        help="The type of user group to create."
     ),
     ldap_group_dn: Optional[str] = typer.Option(
         None,
@@ -62,7 +61,7 @@ def create_usergroup(
         group_name=group_name,
         group_type=group_type.as_int(),
         ldap_group_dn=ldap_group_dn,
-    )
+    )  # pyright: ignore[reportCallIssue]
     location = state.run(
         state.client.create_usergroup(usergroup),
         f"Creating user group {group_name}...",
@@ -73,12 +72,12 @@ def create_usergroup(
 # HarborAsyncClient.update_usergroup()
 @app.command("update")
 def update_usergroup(
-    group_id: int = typer.Argument(..., help="ID of the user group to update."),
-    group_name: str = typer.Option(..., "--name", help="New name for the user group."),
+    group_id: int = typer.Argument(help="ID of the user group to update."),
+    group_name: str = typer.Option(..., "--name", help="New name for the user group."),  # type: ignore
     # NOTE: make group_name optional if we can update other fields in the future
 ) -> None:
     """Update a user group. Only the name can be updated currently."""
-    usergroup = UserGroup(group_name=group_name)
+    usergroup = UserGroup(group_name=group_name)  # pyright: ignore[reportCallIssue]
     state.run(
         state.client.update_usergroup(group_id, usergroup),
         f"Updating user group {group_id}...",
@@ -90,7 +89,7 @@ def update_usergroup(
 @app.command("delete")
 def delete_usergroup(
     ctx: typer.Context,
-    group_id: int = typer.Argument(..., help="ID of the user group to delete."),
+    group_id: int = typer.Argument(help="ID of the user group to delete."),
     force: bool = OPTION_FORCE,
 ) -> None:
     """Delete a user group."""
@@ -139,7 +138,7 @@ def get_usergroups(
 @inject_resource_options()
 def search_usergroups(
     ctx: typer.Context,
-    group_name: str = typer.Argument(..., help="Name of group to search for."),
+    group_name: str = typer.Argument(help="Name of group to search for."),
     page: int = 1,
     page_size: int = 10,
     # limit: Optional[int] = ...,  # type: ignore # NYI in harborapi

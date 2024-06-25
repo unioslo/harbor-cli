@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+from typing import List
 from typing import Sequence
 
 from harborapi.models.models import AuthproxySetting
@@ -58,7 +59,7 @@ def systeminfo_table(systeminfo: Sequence[SystemInfo], **kwargs: Any) -> Table:
     return table
 
 
-def overallhealthstatus_panel(health: OverallHealthStatus, **kwargs) -> Panel:
+def overallhealthstatus_panel(health: OverallHealthStatus, **kwargs: Any) -> Panel:
     # Show overall health status at the top
     status_color = HealthColor.from_health(health.status)
     status = f"[{status_color}]{health.status}[/]"
@@ -86,10 +87,10 @@ def overallhealthstatus_panel(health: OverallHealthStatus, **kwargs) -> Panel:
     return get_panel([status_table, table], title="System Health")
 
 
-def generalinfo_panel(info: GeneralInfo, **kwargs) -> Panel:
+def generalinfo_panel(info: GeneralInfo, **kwargs: Any) -> Panel:
     """Displays panel for `system info` command."""
     # Split up system info into multiple tables (categories)
-    tables = []
+    tables: List[Table] = []
 
     # General
     general_table = get_table(
@@ -139,7 +140,7 @@ def generalinfo_panel(info: GeneralInfo, **kwargs) -> Panel:
     return get_panel(tables, title="System Info")
 
 
-def authproxysetting_table(auth: AuthproxySetting, **kwargs) -> Table:
+def authproxysetting_table(auth: AuthproxySetting, **kwargs: Any) -> Table:
     table = get_table(
         "Auth Proxy Settings",
         columns=[
@@ -162,7 +163,7 @@ def authproxysetting_table(auth: AuthproxySetting, **kwargs) -> Table:
     return table
 
 
-def statistic_table(stats: Statistic, **kwargs) -> Table:
+def statistic_table(stats: Statistic, **kwargs: Any) -> Table:
     """Displays table for `system statistics` command."""
     table = get_table(
         "Statistics",
@@ -192,7 +193,7 @@ def statistic_table(stats: Statistic, **kwargs) -> Table:
 
 
 def _pubprivtotal_table(
-    public: int | None, private: int | None, total: int | None, **kwargs
+    public: int | None, private: int | None, total: int | None, **kwargs: Any
 ) -> Table:
     """Abstraction to display public/private/total counts in a table"""
     table = get_table(columns=["Public", "Private", "Total"], box=box.SQUARE)

@@ -6,14 +6,13 @@ from ...app import app
 from ...output.render import render_result
 from ...state import get_state
 
-
 state = get_state()
 
 
 @app.command()
 def search(
     ctx: typer.Context,
-    query: str = typer.Argument(..., help="The search query."),
+    query: str = typer.Argument(help="The search query."),
 ) -> None:
     """Search for projects and repositories.
 

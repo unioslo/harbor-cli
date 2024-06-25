@@ -59,9 +59,9 @@ def create_gc_schedule(
     schedule_obj = ScheduleObj(
         type=type,
         cron=cron,
-    )
+    )  # pyright: ignore[reportCallIssue]
     # TODO: investigate which parameters the `parameters` field takes
-    schedule = Schedule(schedule=schedule_obj)
+    schedule = Schedule(schedule=schedule_obj)  # pyright: ignore[reportCallIssue]
     state.run(
         state.client.create_gc_schedule(schedule),
         "Creating Garbage Collection schedule...",
@@ -133,9 +133,7 @@ def get_gc_jobs(
 @app.command("job", no_args_is_help=True)
 def get_gc_job(
     ctx: typer.Context,
-    job_id: int = typer.Argument(
-        ..., help="The ID of the Garbage Collection job to fetch."
-    ),
+    job_id: int = typer.Argument(help="The ID of the Garbage Collection job to fetch."),
 ) -> None:
     """Get garbage collection job by its ID."""
     job = state.run(
@@ -149,7 +147,7 @@ def get_gc_job(
 def get_gc_log(
     ctx: typer.Context,
     job_id: int = typer.Argument(
-        ..., help="The ID of the Garbage Collection job to fetch logs for."
+        help="The ID of the Garbage Collection job to fetch logs for."
     ),
 ) -> None:
     """Get garbage collection job by its ID."""

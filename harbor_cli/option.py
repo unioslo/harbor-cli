@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from typing import Any
-from typing import cast
 from typing import Optional
+from typing import cast
 
 from typer.models import OptionInfo as _OptionInfo
 
@@ -18,7 +18,7 @@ class OptionInfo(_OptionInfo):
     config_override: Optional[str] = None
     _help_original: Optional[str] = None
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         self.config_override = kwargs.pop("config_override", None)
         super().__init__(*args, **kwargs)
 

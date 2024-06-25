@@ -5,7 +5,6 @@ from platformdirs import PlatformDirs
 from .__about__ import APP_NAME
 from .__about__ import AUTHOR
 
-
 _PLATFORM_DIR = PlatformDirs(APP_NAME, AUTHOR)
 CONFIG_DIR = _PLATFORM_DIR.user_config_path
 DATA_DIR = _PLATFORM_DIR.user_data_path

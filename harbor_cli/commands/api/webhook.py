@@ -28,14 +28,13 @@ async def get_webhook_jobs(
     ctx: typer.Context,
     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
     policy_id: int = typer.Argument(
-        ...,
         help="ID of the webhook policy to list jobs for.",
     ),
-    query: Optional[str] = ...,  # type: ignore
-    sort: Optional[str] = ...,  # type: ignore
-    page: int = ...,  # type: ignore
-    page_size: int = ...,  # type: ignore
-    limit: Optional[int] = ...,  # type: ignore
+    query: Optional[str] = ...,
+    sort: Optional[str] = ...,
+    page: int = ...,
+    page_size: int = ...,
+    limit: Optional[int] = ...,
 ) -> None:
     """Get project webhook jobs for a given policy."""
     check_enumeration_options(state, query=query, limit=limit)
@@ -84,11 +83,11 @@ def get_webhook_policy_(
 def get_webhook_policies(
     ctx: typer.Context,
     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
-    query: Optional[str] = ...,  # type: ignore
-    sort: Optional[str] = ...,  # type: ignore
-    page: int = ...,  # type: ignore
-    page_size: int = ...,  # type: ignore
-    limit: Optional[int] = ...,  # type: ignore
+    query: Optional[str] = ...,
+    sort: Optional[str] = ...,
+    page: int = ...,
+    page_size: int = ...,
+    limit: Optional[int] = ...,
 ) -> None:
     """List webhook policies."""
     check_enumeration_options(state, query=query, limit=limit)
@@ -111,7 +110,7 @@ def get_webhook_policies(
 def get_webhook_policy(
     ctx: typer.Context,
     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
-    policy_id: int = typer.Option(..., help="ID of the webhook policy to get."),
+    policy_id: int = typer.Option(help="ID of the webhook policy to get."),
 ) -> None:
     """Get a webhook policy."""
     project_arg = get_project_arg(project_name_or_id)
@@ -126,8 +125,8 @@ def get_webhook_policy(
 # def create_webhook_policy(
 #     ctx: typer.Context,
 #     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
-#     name: str = typer.Option(..., "--name"),
-#     description: Optional[str] = typer.Option(..., "--description"),
+#     name: str = typer.Option( "--name"),
+#     description: Optional[str] = typer.Option( "--description"),
 # ) -> None:
 #     pass
 #  TODO: need to investigate what the API expects for the `targets` field.
@@ -140,7 +139,7 @@ def get_webhook_policy(
 def delete_webhook_policy(
     ctx: typer.Context,
     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
-    policy_id: int = typer.Option(..., help="ID of the webhook policy to delete."),
+    policy_id: int = typer.Option(help="ID of the webhook policy to delete."),
 ) -> None:
     """Delete a webhook policy."""
     project_arg = get_project_arg(project_name_or_id)

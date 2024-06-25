@@ -116,7 +116,8 @@ class SeverityColor(StrEnum):
     def as_markup(cls, severity: str | Severity) -> str:
         """Return the given severity as a Rich markup-formatted string.
 
-        I.e. "[dark_red]CRITICAL[/]" for Severity.CRITICAL, etc."""
+        I.e. "[dark_red]CRITICAL[/]" for Severity.CRITICAL, etc.
+        """
         color = cls.from_severity(severity)
         if isinstance(severity, Severity):
             severity = severity.value

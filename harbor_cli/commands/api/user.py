@@ -17,13 +17,12 @@ from ...state import get_state
 from ...utils.args import create_updated_model
 from ...utils.args import get_user_arg
 from ...utils.commands import ARG_USERNAME_OR_ID
-from ...utils.commands import inject_resource_options
 from ...utils.commands import OPTION_FORCE
 from ...utils.commands import OPTION_LIMIT
 from ...utils.commands import OPTION_PAGE
 from ...utils.commands import OPTION_PAGE_SIZE
 from ...utils.commands import OPTION_QUERY
-
+from ...utils.commands import inject_resource_options
 
 state = get_state()
 
@@ -156,7 +155,6 @@ def get_user(username_or_id: str | int) -> UserResp:
 def create_user(
     ctx: typer.Context,
     username: str = typer.Argument(
-        ...,
         help="Username of the user to create.",
     ),
     password: Optional[str] = typer.Option(
@@ -240,7 +238,6 @@ def search_users(
     page_size: int,
     limit: Optional[int],
     username: str = typer.Argument(
-        ...,
         help="Username or partial username to search for.",
     ),
 ) -> None:
@@ -289,14 +286,14 @@ def unset_user_admin(
 def set_user_password(
     username_or_id: str = ARG_USERNAME_OR_ID,
     old_password: str = typer.Option(
-        ...,
+        ...,  # type: ignore # pyright unable to infer type?
         "--old-password",
         prompt="Enter old password",
         hide_input=True,
         help="Old password for user. Prompted if not provided.",
     ),
     new_password: str = typer.Option(
-        ...,
+        ...,  # type: ignore
         "--new-password",
         prompt="Enter new password",
         hide_input=True,
@@ -324,7 +321,6 @@ def set_user_password(
 def set_user_cli_secret(
     username_or_id: str = ARG_USERNAME_OR_ID,
     secret: str = typer.Option(
-        ...,
         help="CLI secret to set for user. If omitted, a prompt will be shown.",
         prompt="Enter CLI secret",
         hide_input=True,

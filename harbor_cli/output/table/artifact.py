@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from typing import Any
+from typing import List
 from typing import Literal
 from typing import Sequence
 from typing import TypedDict
@@ -30,7 +31,6 @@ from ..formatting.dates import datetime_str
 from ._utils import add_column
 from ._utils import get_panel
 from ._utils import get_table
-
 
 DOUBLE_SPACE_PATTERN = re.compile(" +")
 
@@ -129,8 +129,7 @@ def artifactinfo_panel(artifact: ArtifactInfo, **kwargs: Any) -> Panel:
 
     The vulnerabilities of the artifact are shown separately from the artifact itself.
     """
-
-    tables = []
+    tables: List[Table] = []
 
     artifact_table = artifactinfo_table([artifact], **kwargs)
     tables.append(artifact_table)

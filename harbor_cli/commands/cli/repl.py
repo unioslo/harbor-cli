@@ -4,7 +4,9 @@ from pathlib import Path
 from typing import Optional
 
 import typer
-from click_repl import repl as start_repl
+from click_repl import (  # pyright: ignore[reportMissingTypeStubs]
+    repl as start_repl,  # pyright: ignore[reportUnknownVariableType]
+)
 from prompt_toolkit.history import FileHistory
 
 from ...app import app

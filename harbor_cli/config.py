@@ -3,13 +3,13 @@ from __future__ import annotations
 import os
 from datetime import datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
-from typing import TYPE_CHECKING
 from typing import TypedDict
-from typing import Union
+from typing import cast
 
 import tomli
 import tomli_w
@@ -17,11 +17,13 @@ from harborapi.models.base import BaseModel as HarborBaseModel
 from pydantic import AliasChoices
 from pydantic import ConfigDict
 from pydantic import Field
+from pydantic import SecretStr
 from pydantic import field_serializer
 from pydantic import field_validator
 from pydantic import model_validator
-from pydantic import SecretStr
 from strenum import StrEnum
+
+from harbor_cli.harbor.common import prompt_username_secret
 
 from .dirs import CONFIG_DIR
 from .dirs import DATA_DIR
@@ -32,18 +34,19 @@ from .exceptions import CredentialsError
 from .exceptions import HarborCLIError
 from .exceptions import OverwriteError
 from .format import OutputFormat
-from .logs import logger
 from .logs import LogLevel
+from .logs import logger
 from .output.console import warning
 from .style import STYLE_TABLE_HEADER
 from .utils import replace_none
+from .utils.keyring import KeyringUnsupportedError
 from .utils.keyring import get_password
 from .utils.keyring import keyring_supported
-from .utils.keyring import KeyringUnsupportedError
 from .utils.keyring import set_password
-from harbor_cli.harbor.common import prompt_username_secret
 
 if TYPE_CHECKING:
+    from typing_extensions import Self
+
     from harbor_cli.types import RichTableKwargs
 
 
@@ -175,7 +178,8 @@ class HarborSettings(BaseModel):
     def _empty_string_is_none(cls, v: Any) -> Any:
         """We can't serialize None to TOML, so we convert it to an empty string.
         However, passing an empty string to Path() will return the current working
-        directory, so we need to convert it back to None."""
+        directory, so we need to convert it back to None.
+        """
         # I really wish TOML had a None type...
         if v == "":
             return None
@@ -198,7 +202,8 @@ class HarborSettings(BaseModel):
     @property
     def secret_value(self) -> str:
         """Returns the secret value from the keyring if enabled, otherwise
-        returns the secret value from the config file."""
+        returns the secret value from the config file.
+        """
         if self.keyring:
             try:
                 password = get_password(self.username)
@@ -276,14 +281,16 @@ class HarborSettings(BaseModel):
 
     def _set_username_secret_config(self, username: str, secret: str) -> None:
         """Stores both username and config in config file.
-        Insecure fallback in case keyring is not supported."""
+        Insecure fallback in case keyring is not supported.
+        """
         self.username = username
         self.secret = secret  # type: ignore # pydantic.SecretStr
         self.keyring = False
 
     def _set_username_secret_keyring(self, username: str, secret: str) -> None:
         """Set username and secret using keyring.
-        Stores the secret in the keyring and the username in the config file."""
+        Stores the secret in the keyring and the username in the config file.
+        """
         self.username = username
         set_password(username, secret)
         self.keyring = True
@@ -327,9 +334,7 @@ class TableStyleSettings(BaseModel):
 
     @field_validator("rows", mode="before")
     @classmethod
-    def _validate_rows(
-        cls, v: Optional[Union[Tuple[str, str], str]]
-    ) -> Optional[Tuple[str, ...]]:
+    def _validate_rows(cls, v: Any) -> Optional[Tuple[str, ...]]:
         """Validates the rows field.
 
         Strings are turned into tuples of length 2 where both elements
@@ -351,7 +356,8 @@ class TableStyleSettings(BaseModel):
             return (v, v)
         if not isinstance(v, Sequence):
             raise TypeError("TableStyleSettings.rows must be a sequence.")
-
+        else:
+            v = cast(Sequence[Any], v)
         vv = tuple(v)
 
         # If all elements are None or empty, return None
@@ -371,7 +377,8 @@ class TableStyleSettings(BaseModel):
     def _empty_string_is_none(cls, v: Any) -> Any:
         """TOML has no None support, but we need to pass these kwargs to
         Rich's Table constructor, which does uses None. So we convert
-        empty strings to None."""
+        empty strings to None.
+        """
         if v == "":
             return None
         return v
@@ -494,7 +501,7 @@ class REPLSettings(BaseModel):
     )
 
     @model_validator(mode="after")
-    def _create_history_file_if_not_exists(self) -> "REPLSettings":
+    def _create_history_file_if_not_exists(self) -> Self:
         if not self.history:
             return self
         if not self.history_file.exists():

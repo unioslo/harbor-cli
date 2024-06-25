@@ -4,6 +4,7 @@ in the documentation.
 The commands are run in a limited environment (no color, limited width) to
 make the output more readable in the documentation.
 """
+
 from __future__ import annotations
 
 import os

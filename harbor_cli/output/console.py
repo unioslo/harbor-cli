@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from typing import Any
+from typing import List
 from typing import NoReturn
 from typing import Optional
-from typing import TYPE_CHECKING
 
 from rich.console import Console
 from rich.console import Group
@@ -13,8 +14,8 @@ from rich.rule import Rule
 from ..logs import logger
 from ..state import get_state
 from ..style import Icon
-from ..style.color import bold as bold_func
 from ..style.color import Color
+from ..style.color import bold as bold_func
 from ..style.color import get_color_func
 
 if TYPE_CHECKING:
@@ -70,7 +71,7 @@ def get_renderable(
         A group of renderables to print.
     """
     # NOTE: A rich.Group is immutable, so we have to collect renderables first
-    renderables = []  # type: list[RenderableType]
+    renderables: List[RenderableType] = []
     if rule:
         renderables.append(Rule(style="rule.line"))
 
