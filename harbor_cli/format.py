@@ -2,7 +2,9 @@
 
 Not a part of the output module to avoid circular imports caused by the
 instantiation of the global state object, which imports other modules
-that rely on output formats."""
+that rely on output formats.
+"""
+
 from __future__ import annotations
 
 from enum import Enum

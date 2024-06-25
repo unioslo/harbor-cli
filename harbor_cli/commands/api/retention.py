@@ -15,8 +15,8 @@ from ...state import get_state
 from ...style import render_cli_value
 from ...utils.args import get_project_arg
 from ...utils.commands import ARG_PROJECT_NAME_OR_ID_OPTIONAL
-from ...utils.commands import inject_resource_options
 from ...utils.commands import OPTION_FORCE
+from ...utils.commands import inject_resource_options
 
 state = get_state()
 
@@ -47,7 +47,8 @@ app.add_typer(policy_cmd)  # retention policy
 
 def policy_id_from_args(project_name_or_id: str | None, policy_id: int | None) -> int:
     """Helper function for functions that either take in a project name/id or a policy ID.
-    Returns the policy ID."""
+    Returns the policy ID.
+    """
     if policy_id is None and project_name_or_id is None:
         exit_err(f"Must provide an argument or use {render_cli_value('--id')}.")
 
@@ -245,7 +246,7 @@ def start_retention_job(
 def stop_retention_job(
     ctx: typer.Context,
     project_name_or_id: Optional[str] = ARG_PROJECT_NAME_OR_ID_OPTIONAL,
-    job_id: int = typer.Argument(..., help="ID of the job to stop."),
+    job_id: int = typer.Argument(help="ID of the job to stop."),
     policy_id: Optional[int] = OPTION_POLICY_ID,
 ) -> None:
     """Stop a retention job."""
@@ -263,7 +264,7 @@ def stop_retention_job(
 def list_retention_tasks(
     ctx: typer.Context,
     project_name_or_id: Optional[str] = ARG_PROJECT_NAME_OR_ID_OPTIONAL,
-    job_id: int = typer.Argument(..., help="ID of the job to list tasks for."),
+    job_id: int = typer.Argument(help="ID of the job to list tasks for."),
     policy_id: Optional[int] = OPTION_POLICY_ID,
     page: int = ...,  # type: ignore
     page_size: int = ...,  # type: ignore
@@ -285,8 +286,8 @@ def list_retention_tasks(
 def get_retention_job_task_log(
     ctx: typer.Context,
     project_name_or_id: Optional[str] = ARG_PROJECT_NAME_OR_ID_OPTIONAL,
-    job_id: int = typer.Argument(..., help="ID of job."),
-    task_id: int = typer.Argument(..., help="ID of job task."),
+    job_id: int = typer.Argument(help="ID of job."),
+    task_id: int = typer.Argument(help="ID of job task."),
     policy_id: Optional[int] = OPTION_POLICY_ID,
 ) -> None:
     """Get the log for a retention job task."""

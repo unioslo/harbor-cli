@@ -3,6 +3,7 @@ from __future__ import annotations
 import itertools
 from dataclasses import dataclass
 from functools import cmp_to_key
+from typing import List
 
 from rich.text import Text
 
@@ -48,7 +49,7 @@ class MarkdownSymbol:
 
     @property
     def symbol(self) -> str:
-        symbol = []
+        symbol: List[str] = []
         if self.italic:
             symbol.append("*")
         if self.bold:
@@ -88,7 +89,7 @@ def markup_to_markdown(s: str) -> str:
     good enough for our purposes.
     """
     t = Text.from_markup(s)
-    spans = []  # list[MarkdownSpan]
+    spans: List[MarkdownSpan] = []
     # Markdown has more limited styles than Rich markup, so we just
     # identify the ones we care about and ignore the rest.
     for span in t.spans:

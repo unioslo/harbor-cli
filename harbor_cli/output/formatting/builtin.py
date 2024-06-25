@@ -1,4 +1,5 @@
 """Formatting functions for builtin types."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -49,7 +50,8 @@ def int_str(value: Optional[int]) -> str:
 
 def plural_str(value: str, sequence: Sequence[Any]) -> str:
     """Format a string as a pluralized string if a given sequence is
-    not of length 1."""
+    not of length 1.
+    """
     if value.endswith("y"):
         plural_value = value[:-1] + "ies"
     elif value.endswith("ies"):

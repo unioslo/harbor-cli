@@ -21,36 +21,36 @@ class BumpError(Exception):
 
 
 class VersionType(Enum):
-    major: str = "major"
-    minor: str = "minor"
-    patch: str = "patch"
+    major = "major"
+    minor = "minor"
+    patch = "patch"
 
 
 class StatusType(Enum):
     # Release
-    release: str = "release"
+    release = "release"
 
     # Alpha
-    a: str = "a"
-    alpha: str = "alpha"
+    a = "a"
+    alpha = "alpha"
 
     # Beta
-    b: str = "b"
-    beta: str = "beta"
+    b = "b"
+    beta = "beta"
 
     # Release Candidate
-    c: str = "c"
-    rc: str = "rc"
-    pre: str = "pre"
-    preview: str = "preview"
+    c = "c"
+    rc = "rc"
+    pre = "pre"
+    preview = "preview"
 
     # Revision / Post
-    r: str = "r"
-    rev: str = "rev"
-    post: str = "post"
+    r = "r"
+    rev = "rev"
+    post = "post"
 
     # Dev
-    dev: str = "dev"
+    dev = "dev"
 
 
 # TODO: some sort of check to ensure we don't tag twice (??)
@@ -126,7 +126,6 @@ def cleanup(state: StateMachine) -> None:
 
 def main(
     version: str = typer.Argument(
-        ...,
         help="Version bump to perform or new version to set.",
         metavar="[" + "|".join(versions) + "|x.y.z],[" + "|".join(statuses) + "]",
     ),

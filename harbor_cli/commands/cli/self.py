@@ -1,12 +1,14 @@
 from __future__ import annotations
 
+import itertools
 import os
 from pathlib import Path
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Dict
 from typing import Iterable
+from typing import List
 from typing import Optional
-from typing import TYPE_CHECKING
 
 import typer
 from pydantic import BaseModel as PydanticBaseModel
@@ -121,24 +123,24 @@ def get_cli_config_keys(ctx: typer.Context) -> None:
     state = get_state()
 
     def get_fields(field: dict[str, Any], current: str) -> list[str]:
-        fields = []
-        if isinstance(field, dict):
-            for sub_key, sub_value in field.items():
-                f = get_fields(sub_value, f"{current}.{sub_key}")
-                fields.extend(f)
-        else:
-            fields.append(current)
+        fields: List[str] = []
+        for sub_key, sub_value in field.items():
+            if isinstance(sub_value, dict):
+                fields.extend(
+                    get_fields(
+                        sub_value,  # pyright: ignore[reportUnknownArgumentType]
+                        f"{current}.{sub_key}",
+                    )
+                )
+            else:
+                fields.append(f"{current}.{sub_key}")
         return fields
 
-    ff = []
     d = state.config.model_dump()
-    for key, value in d.items():
-        if isinstance(value, dict):
-            ff.extend(get_fields(value, key))
-        else:
-            ff.append(key)  # no subkeys
-
-    render_result(AnySequence(values=ff, title="Config Keys"))
+    keys = itertools.chain.from_iterable(
+        get_fields(value, key) for key, value in d.items()
+    )
+    render_result(AnySequence(values=list(keys), title="Config Keys"))
 
 
 @config_cmd.command(
@@ -149,10 +151,9 @@ def get_cli_config_keys(ctx: typer.Context) -> None:
 def set_cli_config(
     ctx: typer.Context,
     key: str = typer.Argument(
-        ...,
         help="Key to set. Subkeys can be specified using dot notation. e.g. [green]'harbor.url'[/]",
     ),
-    value: str = typer.Argument(..., help="Value to set."),
+    value: str = typer.Argument(help="Value to set."),
     path: Path = typer.Option(None, "--path", help="Path to save configuration file."),
     session: bool = typer.Option(
         False,
@@ -280,7 +281,7 @@ def env(
     ),
 ) -> None:
     """Show active Harbor CLI environment variables."""
-    active = {}
+    active: Dict[str, str] = {}
     for env_var in sorted(EnvVar):
         val = os.environ.get(env_var)
         if not all and val is None:

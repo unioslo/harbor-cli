@@ -36,11 +36,14 @@ for both sequences and non-sequences, we will always prioritize the
 non-sequence function when a single model instance is passed in. However,
 lists with a single item will always use a sequence function if available.
 """
+
 from __future__ import annotations
 
 import typing
 from typing import Any
 from typing import Callable
+from typing import Dict
+from typing import List
 from typing import Sequence
 from typing import TypeVar
 from typing import Union
@@ -48,10 +51,10 @@ from typing import Union
 from rich.panel import Panel
 from rich.table import Table
 
-from . import *
 from ...logs import logger
 from ...types import is_sequence_func
 from ...utils._types import is_builtin_obj
+from . import *
 from .anysequence import anysequence_table
 from .artifact import artifact_table
 from .artifact import artifact_vulnerabilities_table
@@ -80,16 +83,15 @@ from .user import usersearchrespitem_table
 from .usergroup import usergroupsearchitem_table
 from .webhook import supported_events_table
 
-
 T = TypeVar("T")
 
 RenderableType = Union[Table, Panel]
-RenderFuncSeq = Callable[[Sequence[T]], RenderableType]
-RenderFuncSingle = Callable[[T], RenderableType]
+RenderFuncSeq = Callable[..., RenderableType]
+RenderFuncSingle = Callable[..., RenderableType]
 RenderFuncType = Union[RenderFuncSeq, RenderFuncSingle]
 
 
-_RENDER_FUNCTIONS = [
+_RENDER_FUNCTIONS: List[RenderFuncType] = [
     anysequence_table,
     artifactinfo_table,
     artifactinfo_panel,
@@ -117,9 +119,11 @@ _RENDER_FUNCTIONS = [
     userresp_table,
     usersearchrespitem_table,
     usergroupsearchitem_table,
-]  # type: list[RenderFuncType]
+]
 
-RENDER_FUNCTIONS = {}  # dict of functions + type of first argument
+RENDER_FUNCTIONS: Dict[
+    Any, RenderFuncType
+] = {}  # dict of functions + type of first argument
 
 
 def _populate_render_functions_dict() -> None:
@@ -145,9 +149,7 @@ class EmptySequenceError(ValueError):
     pass
 
 
-def get_render_function(
-    obj: T | Sequence[T],
-) -> RenderFuncType:
+def get_render_function(obj: Any) -> RenderFuncType:
     """Get the render function for a given object.
 
     If the object is a sequence, only render functions that take in
@@ -165,7 +167,7 @@ def get_render_function(
 
     Parameters
     ----------
-    obj : T | Sequence[T]
+    obj : Any
         The object to get the render function for.
 
     Returns
@@ -181,13 +183,12 @@ def get_render_function(
     * [harbor_cli.types.is_sequence_func][]
     * [harbor_cli.output.render.render_table_compact][]
     """
-
     if isinstance(obj, Sequence) and not isinstance(obj, str):
-        if len(obj) == 0:
+        if len(obj) == 0:  # type: ignore # type of items is irrelevant
             raise EmptySequenceError("Cannot render empty sequence.")
         t = Sequence[type(obj[0])]  # type: ignore # TODO: find a way to type this
     else:
-        t = type(obj)
+        t = type(obj)  # type: ignore # type of obj is irrelevant
 
     def _get_render_func(t: Any) -> RenderFuncType:
         try:
@@ -205,13 +206,14 @@ def get_render_function(
         return _get_render_func(t)
     # fall back on the sequence render func
     except NotImplementedError:
-        return _get_render_func(Sequence[t])  # type: ignore # variable as type (mypy hates it)
+        return _get_render_func(Sequence[t])
 
 
-def get_renderable(obj: T | Sequence[T], **kwargs: Any) -> Table | Panel:
+def get_renderable(obj: Any, **kwargs: Any) -> Table | Panel:
     """Get the renderable for a given object."""
+    # TODO: add typeguard here to only allow BaseModel or list of BaseModel
     render_function = get_render_function(obj)
     # wrap object in sequence if necessary (use sequence func if we cant find a single func)
     if is_sequence_func(render_function) and not isinstance(obj, Sequence):
         return render_function([obj], **kwargs)
-    return render_function(obj, **kwargs)  # type: ignore
+    return render_function(obj, **kwargs)

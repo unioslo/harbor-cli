@@ -13,7 +13,8 @@ class AnySequence(BaseModel):
     """Pydantic model that can contain a sequence of any type.
 
     Used to render arbitrary sequences of objects as a table where
-    each row consists of 1 column showing 1 value."""
+    each row consists of 1 column showing 1 value.
+    """
 
     title: str = "Values"
     values: Sequence[Any] = []

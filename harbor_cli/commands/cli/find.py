@@ -1,12 +1,13 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import Any
 from typing import Callable
 from typing import List
 from typing import Optional
 
 import typer
-from fuzzywuzzy import fuzz
+from fuzzywuzzy import fuzz  # pyright: ignore[reportMissingTypeStubs]
 
 from ...app import app
 from ...models import CommandSummary
@@ -24,16 +25,16 @@ class MatchStrategy(Enum):
     TOKEN_SET_RATIO = "token-set-ratio"
 
 
-def get_match_func(strategy: MatchStrategy) -> Callable[[str, str], int]:
+def get_match_func(strategy: MatchStrategy) -> Callable[..., Any]:
     """Get the match function for a strategy."""
     if strategy == MatchStrategy.RATIO:
-        return fuzz.ratio
+        return fuzz.ratio  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
     elif strategy == MatchStrategy.PARTIAL_RATIO:
-        return fuzz.partial_ratio
+        return fuzz.partial_ratio  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
     elif strategy == MatchStrategy.TOKEN_SORT_RATIO:
-        return fuzz.token_sort_ratio
+        return fuzz.token_sort_ratio  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
     elif strategy == MatchStrategy.TOKEN_SET_RATIO:
-        return fuzz.token_set_ratio
+        return fuzz.token_set_ratio  # pyright: ignore[reportUnknownVariableType, reportUnknownMemberType]
     else:
         raise ValueError(f"Unknown match strategy: {strategy}")  # pragma: no cover
 
@@ -49,7 +50,7 @@ def match_commands(
     """Use fuzzy matching to find commands that match a query."""
     match_func = get_match_func(strategy)
 
-    matches = []
+    matches: List[CommandSummary] = []
     for command in commands:
         score = 0
         if names:
@@ -70,7 +71,6 @@ def match_commands(
 def find_command(
     ctx: typer.Context,
     query: List[str] = typer.Argument(
-        ...,
         help="The search query.",
     ),
     limit: Optional[int] = typer.Option(

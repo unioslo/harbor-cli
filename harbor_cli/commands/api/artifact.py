@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import re
 from datetime import datetime
+from typing import TYPE_CHECKING
 from typing import Any
+from typing import Callable
 from typing import Dict
 from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Set
-from typing import TYPE_CHECKING
 from typing import Union
 
 import typer
@@ -48,9 +49,9 @@ from ...style import render_cli_value
 from ...style import render_warning
 from ...utils.args import add_to_query
 from ...utils.args import parse_commalist
-from ...utils.commands import inject_resource_options
 from ...utils.commands import OPTION_FORCE
 from ...utils.commands import OPTION_QUERY
+from ...utils.commands import inject_resource_options
 from ...utils.utils import parse_version_string
 from ..help import ARTIFACT_HELP_STRING
 
@@ -105,7 +106,7 @@ def list_artifacts(
         help=f"Repository name(s).(e.g. {render_cli_value('hello-world')}).",
         callback=parse_commalist,
     ),
-    query: Optional[str] = ...,  # type: ignore
+    query: Optional[str] = ...,
     tag: List[str] = typer.Option(
         [],
         "--tag",
@@ -144,21 +145,20 @@ def list_artifacts(
     # TODO: warn if no projects or repos match the given names
 
     # The presence of an asterisk trumps all other arguments
-    # None signals that we want to enumerate over all projects
-    if any(x == "*" for x in project) or not project:
-        project = None  # type: ignore
-    repositories = repo if repo else None
+    if "*" in project:
+        project = []
     query = add_to_query(query, tags=tag)
 
     # Confirm enumeration over all artifacts in all projects
-    if project is None and repositories is None:
+    if not project and not repo:
         check_enumeration_options(state, query=query, limit=None)
 
     artifacts = state.run(
         get_artifacts(
             state.client,
-            projects=project,
-            repositories=repositories,
+            # None signals that we want to enumerate over all projects
+            projects=project if project else None,
+            repositories=repo if repo else None,
             query=query,
             with_report=with_report,
         ),
@@ -184,7 +184,6 @@ def list_artifacts(
 def delete_artifact(
     ctx: typer.Context,
     artifact: str = typer.Argument(
-        ...,
         help=ARTIFACT_HELP_STRING,
     ),
     force: bool = OPTION_FORCE,
@@ -209,20 +208,16 @@ def delete_artifact(
 def copy_artifact(
     ctx: typer.Context,
     artifact: str = typer.Argument(
-        ...,
         help=ARTIFACT_HELP_STRING,
     ),
     project: str = typer.Argument(
-        ...,
         help="Destination project.",
     ),
     repository: str = typer.Argument(
-        ...,
         help="Destination repository (without project name).",
     ),
 ) -> None:
     """Copy an artifact to a different repository."""
-
     # Warn user if they pass a project name in the repository name
     # e.g. project="foo", repository="foo/bar"
     # When it should be project="foo", repository="bar"
@@ -247,7 +242,6 @@ def copy_artifact(
 def get(
     ctx: typer.Context,
     artifact: str = typer.Argument(
-        ...,
         help=ARTIFACT_HELP_STRING,
     ),
     with_vulnerabilities: bool = typer.Option(
@@ -265,7 +259,6 @@ def get(
     # TODO: --tag
 ) -> None:
     """Get information about a specific artifact."""
-
     an = parse_artifact_name(artifact)
     # Just use normal endpoint method for a single artifact
     art = state.run(
@@ -275,7 +268,7 @@ def get(
             an.repository,
             an.reference,
             with_report=with_vulnerabilities,
-        ),  # type: ignore
+        ),
         f"Fetching artifact(s)...",
     )
 
@@ -292,14 +285,13 @@ def get(
 def list_artifact_tags(
     ctx: typer.Context,
     artifact: str = typer.Argument(
-        ...,
         help=ARTIFACT_HELP_STRING,
     ),
-    query: Optional[str] = ...,  # type: ignore
-    sort: Optional[str] = ...,  # type: ignore
-    page: int = ...,  # type: ignore
-    page_size: int = ...,  # type: ignore
-    limit: Optional[int] = ...,  # type: ignore
+    query: Optional[str] = ...,
+    sort: Optional[str] = ...,
+    page: int = ...,
+    page_size: int = ...,
+    limit: Optional[int] = ...,
 ) -> None:
     """List tags for an artifact."""
     an = parse_artifact_name(artifact)
@@ -324,17 +316,16 @@ def list_artifact_tags(
 def create_artifact_tag(
     ctx: typer.Context,
     artifact: str = typer.Argument(
-        ...,
         help=ARTIFACT_HELP_STRING,
     ),
-    tag: str = typer.Argument(..., help="Name of the tag to create."),
+    tag: str = typer.Argument(help="Name of the tag to create."),
     # signed (probably not. Deprecated in v2.9.0)
     # immutable?
 ) -> None:
     """Create a tag for an artifact."""
     an = parse_artifact_name(artifact)
     # NOTE: We might need to fetch repo and artifact IDs
-    t = Tag(name=tag)
+    t = Tag(name=tag)  # pyright: ignore[reportCallIssue]
     location = state.run(
         state.client.create_artifact_tag(an.project, an.repository, an.reference, t),
         f"Creating tag {tag!r} for {artifact}...",
@@ -347,10 +338,9 @@ def create_artifact_tag(
 def delete_artifact_tag(
     ctx: typer.Context,
     artifact: str = typer.Argument(
-        ...,
         help=ARTIFACT_HELP_STRING,
     ),
-    tag: str = typer.Argument(..., help="Name of the tag to delete."),
+    tag: str = typer.Argument(help="Name of the tag to delete."),
     force: bool = OPTION_FORCE,
 ) -> None:
     """Delete a tag for an artifact."""
@@ -370,7 +360,6 @@ def delete_artifact_tag(
 def add_artifact_label(
     ctx: typer.Context,
     artifact: str = typer.Argument(
-        ...,
         help=ARTIFACT_HELP_STRING,
     ),
     name: Optional[str] = typer.Option(
@@ -404,7 +393,7 @@ def add_artifact_label(
         description=description,
         color=color,
         scope=scope,
-    )
+    )  # pyright: ignore[reportCallIssue]
     state.run(
         state.client.add_artifact_label(an.project, an.repository, an.reference, label),
         f"Adding label {label.name!r} to {artifact}...",
@@ -417,11 +406,9 @@ def add_artifact_label(
 def delete_artifact_label(
     ctx: typer.Context,
     artifact: str = typer.Argument(
-        ...,
         help=ARTIFACT_HELP_STRING,
     ),
     label_id: int = typer.Argument(
-        ...,
         help="ID of the label to delete.",
     ),
     force: bool = OPTION_FORCE,
@@ -443,7 +430,6 @@ def delete_artifact_label(
 def get_accessories(
     ctx: typer.Context,
     artifact: str = typer.Argument(
-        ...,
         help=ARTIFACT_HELP_STRING,
     ),
 ) -> None:
@@ -461,7 +447,6 @@ def get_accessories(
 def get_buildhistory(
     ctx: typer.Context,
     artifact: str = typer.Argument(
-        ...,
         help=ARTIFACT_HELP_STRING,
     ),
 ) -> None:
@@ -509,7 +494,7 @@ class ArtifactDeletion:
         self.except_tag = except_tag
 
         # Construct a dictionary from the criteria passed in
-        self.criteria = {}  # type: dict[str, bool]
+        self.criteria: Dict[str, bool] = {}
         if age is not None:
             self.criteria[DeletionReason.AGE] = False
         if severity is not None:
@@ -536,7 +521,7 @@ class ArtifactDeletion:
         if self.except_project and re.search(self.except_project, a.repository_name):
             return False
         if self.except_tag and a.artifact.tags:
-            if any(  # type: ignore # mypy can't infer the type of a.artifact.tags for some reason
+            if any(
                 re.search(self.except_tag, tag)
                 for tag in filter(None, (t.name for t in a.artifact.tags))
             ):
@@ -588,7 +573,7 @@ class ScheduledArtifactDeletion(PydanticBaseModel):
 
     artifacts: Dict[str, List[Union[DeletionReason, str]]]
 
-    def as_table(self, **kwargs) -> Table:  # type: ignore
+    def as_table(self, **kwargs: Any) -> Iterable[Table]:
         from ...output.table._utils import get_table
 
         table = get_table(
@@ -680,7 +665,7 @@ def cleanup_artifacts(
         "Fetching artifacts...",
     )
 
-    to_delete = []  # type: list[ArtifactDeletion]
+    to_delete: List[ArtifactDeletion] = []
 
     # Determine which artifacts to delete
     for artifact in artifacts:
@@ -740,14 +725,12 @@ def cleanup_artifacts(
             info(f"Deleted {artifact.name_with_digest}")
         except Exception as e:
             msg = f"Failed to delete {artifact.name_with_digest}: {e}"
-            kwargs = {
-                "artifact": artifact.name_with_digest,
-                "error": str(e),
-            }
             if exit_on_error:
-                exit_err(msg, **kwargs)  # type: ignore # wrong mypy err? this isn't argument 2
+                exit_err(msg, artifact=artifact.name_with_digest, error=str(e))
             else:
-                error(msg, **kwargs, exc_info=True)
+                error(
+                    msg, exc_info=True, artifact=artifact.name_with_digest, error=str(e)
+                )
 
 
 class AffectedArtifact(BaseModel):
@@ -829,7 +812,7 @@ class AffectedArtifactList(BaseModel):
 class ArtifactSummarySorting(StrEnum):
     total = "total"
     severity = "severity"
-    name = "name"
+    name = "name"  # type: ignore # Pylance thinks we override the 'name' property here
     age = "age"
 
 
@@ -840,6 +823,60 @@ class SortOrder(StrEnum):
     @property
     def reverse(self) -> bool:
         return self == SortOrder.desc
+
+
+# Most -> Least (total vulnerabilities)
+def sort_total(a: ArtifactInfo) -> int:
+    """Sort by total vulnerabilities."""
+    try:
+        return a.artifact.scan.summary.total or 0  # type: ignore
+    except AttributeError:
+        return 0
+
+
+# Number of critical vulnerabilities
+def sort_severity(a: ArtifactInfo) -> int:
+    """Sort by number of critical vulnerabilities."""
+    # TODO: this could take into account other severities as well
+    # And we could just weight them by severity.
+    #
+    # Weighting:
+    #   Critical: 10
+    #   High: 5
+    #   Medium: 2
+    #   Low: 1
+    #   Negligible: 0
+    #   Unknown: 0
+    #
+    # Example:
+    # try:
+    #    summary = a.artifact.scan.summary
+    # except AttributeError:
+    #    return 0
+    #
+    # for attr in ["critical", ...]:
+    #    if getattr(summary, attr):
+    #        return getattr(summary, attr) * weight
+    # return 0
+    try:
+        return a.artifact.scan.summary.critical or 0  # type: ignore
+    except AttributeError:
+        return 0
+
+
+# A -> Z
+def sort_name(a: ArtifactInfo) -> str:
+    """Sort by name of artifact."""
+    return a.name_with_digest_full
+
+
+# new -> old
+def sort_age(a: ArtifactInfo) -> float:
+    """Sort by age of artifact."""
+    try:
+        return a.artifact.push_time.timestamp()  # type: ignore
+    except AttributeError:
+        return 0.0
 
 
 @vuln_cmd.command("summary")
@@ -889,57 +926,18 @@ def list_artifact_vulnerabilities_summary(
         "Fetching artifacts...",
     )
 
-    # fmt: off
+    # TODO: remove this when we switch pre-commit to pyright
+    sort_key: Callable[[ArtifactInfo], str | int | float]  # HACK: for mypy...
     if sort == ArtifactSummarySorting.total:
-        # Most -> Least (total vulnerabilities)
-        def sort_key(a: ArtifactInfo) -> int:
-            try:
-                return a.artifact.scan.summary.total or 0  # type: ignore
-            except AttributeError:
-                return 0
+        sort_key = sort_total
     elif sort == ArtifactSummarySorting.severity:
-        # Number of critical vulnerabilities
-
-        # TODO: this could take into account other severities as well
-        # And we could just weight them by severity.
-        #
-        # Weighting:
-        #   Critical: 10
-        #   High: 5
-        #   Medium: 2
-        #   Low: 1
-        #   Negligible: 0
-        #   Unknown: 0
-        #
-        # Example:
-        # try:
-        #    summary = a.artifact.scan.summary
-        # except AttributeError:
-        #    return 0
-        #
-        # for attr in ["critical", ...]:
-        #    if getattr(summary, attr):
-        #        return getattr(summary, attr) * weight
-        # return 0
-        def sort_key(a: ArtifactInfo) -> int:
-            try:
-                return a.artifact.scan.summary.critical or 0  # type: ignore
-            except AttributeError:
-                return 0
+        sort_key = sort_severity
     elif sort == ArtifactSummarySorting.name:
-        # A -> Z
-        def sort_key(a: ArtifactInfo) -> str: # type: ignore
-            return a.name_with_digest_full
+        sort_key = sort_name
     elif sort == ArtifactSummarySorting.age:
-        # new -> old
-        def sort_key(a: ArtifactInfo) -> float: # type: ignore
-            try:
-                return a.artifact.push_time.timestamp()  # type: ignore
-            except AttributeError:
-                return 0.0
+        sort_key = sort_age
     else:
         raise ValueError(f"Unknown sorting criteria: {sort}")
-    # fmt: on
     result = sorted(result, key=sort_key, reverse=order.reverse)
 
     summary = [ArtifactVulnerabilitySummary.from_artifactinfo(r) for r in result]
@@ -1029,7 +1027,7 @@ def get_vulnerabilities(
         warning("Fetching from all projects can be slow even with a repository filter.")
 
     # Check our package versions for validity _before_ we fetch the artifacts
-    packages = []  # type: list[PackageVersion]
+    packages: List[PackageVersion] = []  # type:
     for package_version in package:
         try:
             pkg = parse_version_string(package_version)

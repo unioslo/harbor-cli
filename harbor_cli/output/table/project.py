@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+from typing import List
 from typing import Sequence
 
 from harborapi.models.models import Project
@@ -118,21 +119,17 @@ def project_metadata_table(p: Sequence[ProjectMetadata], **kwargs: Any) -> Table
 
 
 def _get_quota(resource: ResourceList | None) -> int | None:
-    try:
-        quota = resource.storage  # type: ignore
-        if quota is not None:
-            # NOTE: try to convert to int in case this is a float or string?
-            assert isinstance(quota, int)
-    except (AttributeError, AssertionError) as e:
-        if isinstance(e, AssertionError):
+    quota = getattr(resource, "storage", None)
+    if quota is not None:
+        if not isinstance(quota, int):
             error(f"Resource quota is not an integer: {quota}")
-        quota = None
+            quota = None
     return quota
 
 
 def project_summary_panel(p: ProjectSummary, **kwargs: Any) -> Panel:
     """Panel showing summary of a project."""
-    tables = []  # type: list[Table]
+    tables: List[Table] = []
     counts_table = get_table(
         columns=[
             "Repos",
@@ -194,7 +191,7 @@ def project_req_table(p: ProjectReq, **kwargs: Any) -> Table:
 
 def project_create_result_panel(p: ProjectCreateResult, **kwargs: Any) -> Panel:
     """Display extended information about one or more projects."""
-    tables = []
+    tables: List[Table] = []
     pt_table = project_req_table(p.project)
     tables.append(pt_table)
     if p.project.metadata:

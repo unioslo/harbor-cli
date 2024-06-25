@@ -63,7 +63,7 @@ def create_scanall_schedule(
     cron: Optional[str] = typer.Option(None),
 ) -> None:
     params = model_params_from_ctx(ctx, ScheduleObj)
-    schedule = Schedule(schedule=ScheduleObj(**params))
+    schedule = Schedule(schedule=ScheduleObj(**params))  # pyright: ignore[reportCallIssue]
     state.run(
         state.client.create_scan_all_schedule(schedule),
         "Creating 'Scan All' schedule...",

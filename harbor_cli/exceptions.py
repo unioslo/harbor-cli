@@ -2,14 +2,14 @@ from __future__ import annotations
 
 import sys
 from typing import Any
-from typing import cast
 from typing import Dict
 from typing import Mapping
 from typing import NoReturn
 from typing import Optional
 from typing import Protocol
-from typing import runtime_checkable
 from typing import Type
+from typing import cast
+from typing import runtime_checkable
 
 from harborapi.exceptions import BadRequest
 from harborapi.exceptions import Conflict
@@ -78,8 +78,7 @@ class Exiter(Protocol):
 
     def __call__(
         self, msg: str, code: int = ..., prefix: str = ..., **extra: Any
-    ) -> NoReturn:
-        ...
+    ) -> NoReturn: ...
 
 
 @runtime_checkable
@@ -91,8 +90,7 @@ class HandleFunc(Protocol):
     cleanup and/or logging.
     """
 
-    def __call__(self, e: Any, exiter: Exiter) -> NoReturn:
-        ...
+    def __call__(self, e: Any, exiter: Exiter) -> NoReturn: ...
 
 
 MESSAGE_BADREQUEST = "400 Bad request: {method} {url}. Check your input. If you think this is a bug, please report it."
@@ -105,7 +103,7 @@ MESSAGE_PRECONDITIONFAILED = "412 Precondition Failed: {method} {url} Check your
 MESSAGE_UNSUPPORTEDMEDIATYPE = "415 Unsupported Media Type: {method} {url}. Check your input. If you think this is a bug, please report it."
 MESSAGE_INTERNALSERVERERROR = "500 Internal Server Error: {method} {url}. Check your input. If you think this is a bug, please report it."
 
-MESSAGE_MAPPING = {
+MESSAGE_MAPPING: Dict[Type[Exception], str] = {
     BadRequest: MESSAGE_BADREQUEST,
     Unauthorized: MESSAGE_UNAUTHORIZED,
     Forbidden: MESSAGE_FORBIDDEN,
@@ -120,7 +118,8 @@ MESSAGE_MAPPING = {
 
 class Default(Dict[str, Any]):
     """Dict subclass used for str.format_map() to provide default.
-    Missing keys are replaced with the key surrounded by curly braces."""
+    Missing keys are replaced with the key surrounded by curly braces.
+    """
 
     def __missing__(self, key: str) -> str:
         return "{" + key + "}"
@@ -130,8 +129,8 @@ def handle_status_error(e: StatusError, exiter: Exiter) -> NoReturn:
     """Handles an HTTP status error from the Harbor API and exits with
     the appropriate message.
     """
-    from .output.console import exit_err  # avoid circular import
     from .logs import logger
+    from .output.console import exit_err  # avoid circular import
 
     # It's not _guaranteed_ that the StatusError has a __cause__, but
     # in practice it should always have one. It is up to harborapi to
@@ -189,7 +188,7 @@ def _handle_keyring_error_25244_macos(e: KeyringError, exiter: Exiter) -> bool:
     """
     from harbor_cli.utils.keyring import KEYRING_SERVICE_NAME
 
-    actions = {
+    actions: Dict[Type[Exception], str] = {
         PasswordSetError: "set",
         PasswordDeleteError: "delete",
     }

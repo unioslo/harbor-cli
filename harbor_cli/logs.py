@@ -3,13 +3,11 @@ from __future__ import annotations
 from enum import Enum
 from typing import TYPE_CHECKING
 
-
 if TYPE_CHECKING:
     from .config import LoggingSettings
 
 
 import logging
-
 
 # Create logger
 logger = logging.getLogger("harbor-cli")

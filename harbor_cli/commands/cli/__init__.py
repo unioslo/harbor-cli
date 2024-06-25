@@ -1,9 +1,12 @@
 """Commands that are used to configure and interact with the CLI itself."""
+
 from __future__ import annotations
 
 import copy
 
 import typer
+
+from harbor_cli.style.style import render_cli_command
 
 from . import cache as cache
 from . import find as find
@@ -12,7 +15,6 @@ from . import repl as repl
 from . import sample_config as sample_config
 from . import self as self
 from . import tui as tui
-from harbor_cli.style.style import render_cli_command
 
 # Compatibility for deprecated `cli-config` command
 # Which now lives on as `self config`

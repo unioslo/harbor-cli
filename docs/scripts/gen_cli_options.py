@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import NamedTuple
 
 import yaml  # type: ignore
-
 from harbor_cli.deprecation import Deprecated
 from harbor_cli.main import app
 from harbor_cli.utils.commands import get_app_callback_options

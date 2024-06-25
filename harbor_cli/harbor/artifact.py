@@ -60,14 +60,14 @@ AttrType = TypeVar("AttrType")
 def get_artifact_architecture(artifact: Artifact) -> str | None:
     try:
         return str(artifact.extra_attrs["architecture"])  # type: ignore[index]
-    except KeyError:
+    except (TypeError, KeyError):
         return None
 
 
 def get_artifact_os(artifact: Artifact) -> str | None:
     try:
         return str(artifact.extra_attrs["os"])  # type: ignore[index]
-    except KeyError:
+    except (TypeError, KeyError):
         return None
 
 
@@ -77,6 +77,6 @@ def get_artifact_severity(artifact: Artifact) -> str | None:
     has a severity string.
     """
     try:
-        return artifact.scan.severity  # type: ignore
+        return artifact.scan.severity  # type: ignore[attr-defined]
     except AttributeError:
         return None

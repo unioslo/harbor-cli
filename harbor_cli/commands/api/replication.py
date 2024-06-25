@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import List
 from typing import Optional
 
 import typer
@@ -15,9 +16,9 @@ from ...output.prompts import delete_prompt
 from ...output.render import render_result
 from ...state import get_state
 from ...utils.args import model_params_from_ctx
+from ...utils.commands import OPTION_FORCE
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
-from ...utils.commands import OPTION_FORCE
 
 state = get_state()
 
@@ -46,7 +47,6 @@ app.add_typer(policy_cmd)
 def start_replication_execution(
     ctx: typer.Context,
     policy_id: int = typer.Argument(
-        ...,
         help="The ID of the policy to start a execution for.",
     ),
 ) -> None:
@@ -63,7 +63,6 @@ def start_replication_execution(
 def stop_replication_execution(
     ctx: typer.Context,
     execution_id: int = typer.Argument(
-        ...,
         help="The ID of the replication execution.",
     ),
 ) -> None:
@@ -80,7 +79,6 @@ def stop_replication_execution(
 def get_replication_execution(
     ctx: typer.Context,
     execution_id: int = typer.Argument(
-        ...,
         help="The ID of the replication execution.",
     ),
 ) -> None:
@@ -135,7 +133,6 @@ def list_replication_executions(
 def get_replication_policy(
     ctx: typer.Context,
     policy_id: int = typer.Argument(
-        ...,
         help="The ID of the replication policy.",
     ),
 ) -> None:
@@ -169,19 +166,17 @@ class FilterResourceMode(Enum):
 @inject_help(ReplicationPolicy)
 def create_replication_policy(
     ctx: typer.Context,
-    name: str = typer.Argument(...),
+    name: str = typer.Argument(),
     # Difference from spec: we take in the ID of registries instead of
     # the full registry definitions. In the Web UI, you can only select
     # existing registries, so this is more consistent.
     src_registry_id: int = typer.Argument(
-        ...,
         help=(
             "The ID of registry to replicate from. "
             "Typically an external registry such as [green]'hub.docker.com'[/], [green]'ghcr.io'[/], etc."
         ),
     ),
     dest_registry_id: int = typer.Argument(
-        ...,
         help="The ID of the registry to replicate to.",
     ),
     description: Optional[str] = typer.Option(
@@ -262,12 +257,12 @@ def create_replication_policy(
     dest_registry = state.run(state.client.get_registry(dest_registry_id))
 
     # Create the filter objects
-    filters = []
+    filters: List[ReplicationFilter] = []
     if filter_name:
         filters.append(
             ReplicationFilter(
                 type="name",
-                value=filter_name,  # type: ignore # takes Any type
+                value=filter_name,
                 decoration=None,
             )
         )
@@ -275,7 +270,7 @@ def create_replication_policy(
         filters.append(
             ReplicationFilter(
                 type="tag",
-                value=filter_tag,  # type: ignore # takes Any type
+                value=filter_tag,
                 decoration=filter_tag_mode.value,
             )
         )
@@ -283,7 +278,7 @@ def create_replication_policy(
         filters.append(
             ReplicationFilter(
                 type="label",
-                value=filter_label,  # type: ignore # takes Any type
+                value=filter_label,
                 decoration=filter_label_mode.value,
             )
         )
@@ -337,7 +332,6 @@ def create_replication_policy(
 def delete_replication_policy(
     ctx: typer.Context,
     policy_id: int = typer.Argument(
-        ...,
         help="The ID of the replication policy.",
     ),
     force: bool = OPTION_FORCE,
@@ -396,7 +390,7 @@ def list_execution_tasks(
     page: int = 1,
     page_size: int = 10,
     execution_id: int = typer.Argument(
-        ..., help="The ID of the replication execution to list tasks for."
+        help="The ID of the replication execution to list tasks for."
     ),
 ) -> None:
     """List replication tasks."""
@@ -419,9 +413,9 @@ def list_execution_tasks(
 def get_task_log(
     ctx: typer.Context,
     execution_id: int = typer.Argument(
-        ..., help="The ID of the execution the task belongs to."
+        help="The ID of the execution the task belongs to."
     ),
-    task_id: int = typer.Argument(..., help="The ID of the task to get the log for."),
+    task_id: int = typer.Argument(help="The ID of the task to get the log for."),
 ) -> None:
     """Get the log for a replication task."""
     log = state.run(

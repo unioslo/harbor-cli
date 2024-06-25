@@ -91,7 +91,7 @@ def test_get_app_commands() -> None:
     # Help text in decorator
     @subsub_app.command(name="sub-sub-app-command", help="Sub-sub-app command.")
     def sub_sub_app_command(
-        argument: str = typer.Argument(..., help="Positional argument"),
+        argument: str = typer.Argument(help="Positional argument"),
         option: Optional[int] = typer.Option(None, "-o", "--option", help="Option"),
     ) -> None:
         pass

@@ -32,9 +32,9 @@ from ...utils.args import parse_key_value_args
 from ...utils.commands import ARG_LDAP_GROUP_DN_OR_ID
 from ...utils.commands import ARG_PROJECT_NAME_OR_ID
 from ...utils.commands import ARG_USERNAME_OR_ID
+from ...utils.commands import OPTION_FORCE
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
-from ...utils.commands import OPTION_FORCE
 
 state = get_state()
 
@@ -98,7 +98,6 @@ def get_project_logs(
     page_size: int,
     limit: Optional[int],
     project_name: str = typer.Argument(
-        ...,
         help="Project name to fetch logs for.",
     ),
 ) -> None:
@@ -128,7 +127,7 @@ def get_project_logs(
 )
 def project_exists(
     ctx: typer.Context,
-    project_name: str = typer.Argument(..., help="Project name to check existence of."),
+    project_name: str = typer.Argument(help="Project name to check existence of."),
 ) -> None:
     """Check if a project exists."""
     project_repr = get_project_repr(project_name)
@@ -148,9 +147,7 @@ def project_exists(
 )  # inject this first so its "public" field takes precedence
 def create_project(
     ctx: typer.Context,
-    project_name: str = typer.Argument(
-        ...,
-    ),
+    project_name: str = typer.Argument(),
     storage_limit: Optional[int] = typer.Option(
         None,
         "--storage-limit",
@@ -209,12 +206,12 @@ def create_project(
         metadata=ProjectMetadata(
             # validator does bool -> str conversion for the string bool fields
             public=public,  # type: ignore
-            enable_content_trust=enable_content_trust,  # type: ignore
-            enable_content_trust_cosign=enable_content_trust_cosign,  # type: ignore
-            prevent_vul=prevent_vul,  # type: ignore
+            enable_content_trust=enable_content_trust,
+            enable_content_trust_cosign=enable_content_trust_cosign,
+            prevent_vul=prevent_vul,
             severity=severity,
-            auto_scan=auto_scan,  # type: ignore
-            reuse_sys_cve_allowlist=reuse_sys_cve_allowlist,  # type: ignore
+            auto_scan=auto_scan,
+            reuse_sys_cve_allowlist=reuse_sys_cve_allowlist,
             retention_id=retention_id,
         ),
     )
@@ -244,9 +241,9 @@ def list_projects(
             f"{render_cli_value('creation_time')}"
         ),
     ),
-    page: int = ...,  # type: ignore
-    page_size: int = ...,  # type: ignore
-    limit: Optional[int] = ...,  # type: ignore
+    page: int = ...,
+    page_size: int = ...,
+    limit: Optional[int] = ...,
     name: Optional[str] = typer.Option(
         None,
         "--name",
@@ -349,7 +346,7 @@ def update_project(
     arg = get_project_arg(project_name_or_id)
     project = get_project(arg)
     if project.metadata is None:
-        project.metadata = ProjectMetadata()  # type: ignore[call-arg] # mypy bug
+        project.metadata = ProjectMetadata()  # pyright: ignore[reportCallIssue] # mypy bug
 
     # Create updated models from params
     req = create_updated_model(
@@ -417,7 +414,6 @@ def set_project_scanner(
     ctx: typer.Context,
     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
     scanner_id: str = typer.Argument(
-        ...,
         help="ID of the scanner to set.",
     ),
 ) -> None:
@@ -561,7 +557,6 @@ def get_project_metadata_field(
     ctx: typer.Context,
     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
     field: str = typer.Argument(
-        ...,
         help="The name of the field to get.",
     ),
 ) -> None:
@@ -582,11 +577,9 @@ def set_project_metadata_field(
     ctx: typer.Context,
     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
     field: str = typer.Argument(
-        ...,
         help="The name of the field to set.",
     ),
     value: str = typer.Argument(
-        ...,
         help="The value to set.",
     ),
 ) -> None:
@@ -612,7 +605,6 @@ def delete_project_metadata_field(
     ctx: typer.Context,
     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
     field: str = typer.Argument(
-        ...,
         help="The metadata field to delete.",
     ),
     force: bool = OPTION_FORCE,
@@ -636,7 +628,7 @@ def delete_project_metadata_field(
 def get_project_member(
     ctx: typer.Context,
     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
-    member_id: int = typer.Argument(..., help="The ID of the member to get."),
+    member_id: int = typer.Argument(help="The ID of the member to get."),
 ) -> None:
     arg = get_project_arg(project_name_or_id)
     member = state.run(
@@ -656,9 +648,7 @@ def add_project_member(
     # Required args
     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
     username_or_id: str = ARG_USERNAME_OR_ID,
-    role: MemberRoleType = typer.Argument(
-        ..., help="The type of role to give the user."
-    ),
+    role: MemberRoleType = typer.Argument(help="The type of role to give the user."),
 ) -> None:
     """Add a user as a member of a project."""
     project_arg = get_project_arg(project_name_or_id)
@@ -677,9 +667,7 @@ def add_project_member_group(
     # Required args
     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
     ldap_group_dn_or_id: str = ARG_LDAP_GROUP_DN_OR_ID,
-    role: MemberRoleType = typer.Argument(
-        ..., help="The type of role to give the user."
-    ),
+    role: MemberRoleType = typer.Argument(help="The type of role to give the user."),
 ) -> None:
     """Add a group as a member of a project."""
     project_arg = get_project_arg(project_name_or_id)
@@ -704,7 +692,7 @@ def project_member_id_from_username_or_id(
             and member.entity_type == "u"
             and (
                 member.entity_name == username_or_id
-                or member.entity_id == username_or_id
+                or str(member.entity_id) == username_or_id
             )
         ):
             return member.id
@@ -718,9 +706,7 @@ def update_project_member_role(
     # Required args
     project_name_or_id: str = ARG_PROJECT_NAME_OR_ID,
     username_or_id: str = ARG_USERNAME_OR_ID,
-    role: MemberRoleType = typer.Argument(
-        ..., help="The type of role to give the user."
-    ),
+    role: MemberRoleType = typer.Argument(help="The type of role to give the user."),
 ) -> None:
     """Add a user as a member of a project."""
     project_arg = get_project_arg(project_name_or_id)

@@ -7,10 +7,8 @@ from typing import Dict
 from typing import List
 
 import yaml  # type: ignore
-
 from harbor_cli.main import app
 from harbor_cli.utils.commands import get_app_commands
-
 
 sys.path.append(Path(__file__).parent.as_posix())
 from common import DATA_DIR  # noqa

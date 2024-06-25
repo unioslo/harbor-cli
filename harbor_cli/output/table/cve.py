@@ -26,9 +26,7 @@ def cveallowlist_table(c: Sequence[CVEAllowlist], **kwargs: Any) -> Table:
     )
     for allowlist in c:
         if allowlist.items:
-            items = "\n".join(
-                str_str(i.cve_id) for i in allowlist.items if i is not None
-            )
+            items = "\n".join(str_str(i.cve_id) for i in allowlist.items)
         else:
             items = str_str(None)
 

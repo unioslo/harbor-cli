@@ -9,10 +9,9 @@ from ...output.console import info
 from ...output.prompts import delete_prompt
 from ...output.render import render_result
 from ...state import get_state
+from ...utils.commands import OPTION_FORCE
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
-from ...utils.commands import OPTION_FORCE
-
 
 state = get_state()
 
@@ -36,11 +35,9 @@ def get_repository(project: str, repository_name: str) -> Repository:
 def get_reposity_command(
     ctx: typer.Context,
     project: str = typer.Argument(
-        ...,
         help="Name of the project the repository belongs to.",
     ),
     repository: str = typer.Argument(
-        ...,
         help="Name of the repository to get.",
     ),
 ) -> None:
@@ -55,11 +52,9 @@ def get_reposity_command(
 def delete_artifact(
     ctx: typer.Context,
     project: str = typer.Argument(
-        ...,
         help="Name of the project the repository belongs to.",
     ),
     repository: str = typer.Argument(
-        ...,
         help="Name of the repository to get.",
     ),
     force: bool = OPTION_FORCE,
@@ -84,11 +79,9 @@ def delete_artifact(
 def update_repository(
     ctx: typer.Context,
     project: str = typer.Argument(
-        ...,
         help="Project name of repository to update.",
     ),
     repository: str = typer.Argument(
-        ...,
         help="Name of the repository to update.",
     ),
     description: Optional[str] = typer.Option(None),
@@ -119,7 +112,6 @@ def list_repos(
     limit: Optional[int] = ...,  # type: ignore
 ) -> None:
     """List repositories in all projects or a specific project."""
-
     repos = state.run(
         state.client.get_repositories(
             project,

@@ -17,9 +17,9 @@ from ...output.render import render_result
 from ...state import get_state
 from ...utils.args import create_updated_model
 from ...utils.args import model_params_from_ctx
+from ...utils.commands import OPTION_FORCE
 from ...utils.commands import inject_help
 from ...utils.commands import inject_resource_options
-from ...utils.commands import OPTION_FORCE
 
 state = get_state()
 
@@ -39,7 +39,6 @@ def get_registry(registry_id: int) -> Registry:
 def get_registry_cmd(
     ctx: typer.Context,
     registry_id: int = typer.Argument(
-        ...,
         help="ID of registry to get.",
     ),
 ) -> None:
@@ -53,12 +52,8 @@ def get_registry_cmd(
 @inject_help(Registry)
 def create_registry(
     ctx: typer.Context,
-    name: str = typer.Argument(
-        ...,
-    ),
-    url: str = typer.Argument(
-        ...,
-    ),
+    name: str = typer.Argument(),
+    url: str = typer.Argument(),
     credential_type: str = typer.Option(
         None,
         "--credential-type",
@@ -97,7 +92,7 @@ def create_registry(
         type=type,
         insecure=insecure,
         description=description,
-    )
+    )  # pyright: ignore[reportCallIssue]
     location = state.run(state.client.create_registry(registry), "Creating registry...")
     render_result(location, ctx)
 
@@ -107,7 +102,6 @@ def create_registry(
 def update_registry(
     ctx: typer.Context,
     registry_id: int = typer.Argument(
-        ...,
         help="ID of registry to update.",
     ),
     name: Optional[str] = typer.Option(
@@ -151,7 +145,6 @@ def update_registry(
 def delete_registry(
     ctx: typer.Context,
     registry_id: int = typer.Argument(
-        ...,
         help="ID of registry to delete.",
     ),
     force: bool = OPTION_FORCE,
@@ -166,7 +159,6 @@ def delete_registry(
 def get_registry_info(
     ctx: typer.Context,
     registry_id: int = typer.Argument(
-        ...,
         help="ID of registry to get info for.",
     ),
 ) -> None:
@@ -204,7 +196,6 @@ def get_registry_providers(
 def check_registry_status(
     ctx: typer.Context,
     registry_id: int = typer.Argument(
-        ...,
         help="ID of registry to get status of.",
     ),
     type: Optional[str] = typer.Option(

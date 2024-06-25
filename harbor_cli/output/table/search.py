@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Any
+from typing import List
 from typing import Sequence
 
 from harborapi.models.models import Search
@@ -22,7 +23,7 @@ def search_panel(search: Sequence[Search], **kwargs: Any) -> Panel:
         logger.warning("Can only display one search result at a time.")
     s = search[0]  # guaranteed to be at least one result
 
-    tables = []
+    tables: List[Table] = []
     # Re-use the project table function
     if s.project:
         tables.append(project_table(s.project))

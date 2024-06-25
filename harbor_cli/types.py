@@ -3,25 +3,27 @@ from __future__ import annotations
 import sys
 import typing
 from collections import abc
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Callable
-from typing import cast
 from typing import List
 from typing import Sequence
 from typing import Set
 from typing import Tuple
 from typing import Type
-from typing import TYPE_CHECKING
 from typing import TypeVar
-
+from typing import cast
 
 if TYPE_CHECKING:
+    from typing import Iterable
+    from typing import Optional
+    from typing import TypedDict
+
     from rich import box
     from rich.console import JustifyMethod
+    from rich.padding import PaddingDimensions
     from rich.style import StyleType
     from rich.text import TextType
-    from rich.padding import PaddingDimensions
-    from typing import Iterable, TypedDict, Optional
 
     class RichTableKwargs(TypedDict, total=False):
         caption: Optional[TextType]
@@ -88,7 +90,8 @@ def assert_type(value: Any, expect_type: Type[T]) -> T:
 
     Not to be confused with typing.assert_type which was introcduced in 3.11!
     Unfortunate naming collision, but typing.assert_type has no runtime effect,
-    while this function has."""
+    while this function has.
+    """
     # TODO: handle Union types
     if is_sequence_annotation(expect_type):
         if value:

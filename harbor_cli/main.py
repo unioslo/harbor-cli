@@ -8,30 +8,29 @@ import click
 import typer
 
 from . import commands
-from .__about__ import __version__
 from .__about__ import APP_NAME
+from .__about__ import __version__
 from .app import app
 from .config import EnvVar
 from .config import HarborCLIConfig
 from .deprecation import Deprecated
 from .deprecation import issue_deprecation_warnings
-from .exceptions import handle_exception
 from .exceptions import HarborCLIError
+from .exceptions import handle_exception
 from .format import OutputFormat
 from .logs import disable_logging
 from .logs import setup_logging
 from .option import Option
 from .output.console import exit_err
 from .output.console import exit_ok
-from .state import get_state
 from .state import State
-
+from .state import get_state
 
 # Init subcommand groups here
 for group in commands.ALL_GROUPS:
     app.add_typer(group)
 
-_PRE_OVERRIDE_CONFIG = None  # type: HarborCLIConfig | None
+_PRE_OVERRIDE_CONFIG: Optional[HarborCLIConfig] = None
 """A copy of the config before any REPL command overrides were applied."""
 
 
@@ -51,7 +50,9 @@ def _restore_config(state: State) -> None:
     if _PRE_OVERRIDE_CONFIG is not None:
         state.config = _PRE_OVERRIDE_CONFIG
     if state.repl:
-        _PRE_OVERRIDE_CONFIG = state.config.model_copy(deep=True)
+        _PRE_OVERRIDE_CONFIG = (  # pyright: ignore[reportConstantRedefinition]
+            state.config.model_copy(deep=True)
+        )
 
 
 CONFIG_EXEMPT_GROUPS = {"cli-config", "find", "sample-config", "version"}

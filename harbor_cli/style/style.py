@@ -5,7 +5,6 @@ from typing import Any
 
 from strenum import StrEnum
 
-
 STYLE_CONFIG_OPTION = "italic yellow"
 """Used to signify a configuration file option/key/entry."""
 

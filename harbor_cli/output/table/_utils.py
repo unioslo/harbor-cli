@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
 from typing import Any
 from typing import Optional
 from typing import Sequence
-from typing import TYPE_CHECKING
 
 from rich.console import Group
 from rich.panel import Panel
@@ -13,11 +13,13 @@ from ...state import get_state
 from ..formatting.builtin import plural_str
 
 if TYPE_CHECKING:
-    from typing_extensions import Unpack
-    from rich.console import OverflowMethod
-    from rich.console import RenderableType, JustifyMethod
     from rich.align import VerticalAlignMethod
+    from rich.console import JustifyMethod
+    from rich.console import OverflowMethod
+    from rich.console import RenderableType
     from rich.style import StyleType
+    from typing_extensions import Unpack
+
     from harbor_cli.types import RichTableKwargs
 
 
