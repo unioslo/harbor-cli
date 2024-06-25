@@ -156,4 +156,5 @@ enable_incomplete_feature = ["Unpack"]
 pythonVersion = "3.8"
 venvPath = "."
 venv = ".venv"
-ignore = ["tests"]
+ignore = ["tests", "scripts", "docs/scripts"]
+typeCheckingMode = "strict"
