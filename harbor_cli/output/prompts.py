@@ -239,11 +239,15 @@ def _number_prompt(
             _prompt_add = yellow(_prompt_add)
     msg = prompt_msg(prompt, _prompt_add)
 
+    # NOTE: pyright really doesn't like Ellipsis as default!
+    default_arg = (  # pyright: ignore[reportUnknownVariableType]
+        ... if default is None else default
+    )
     while True:
-        val = prompt_type.ask(
+        val = prompt_type.ask(  # pyright: ignore[reportUnknownVariableType]
             msg,
             console=err_console,
-            default=default,
+            default=default_arg,  # pyright: ignore[reportUnknownArgumentType]
             show_default=show_default,
             **kwargs,
         )
