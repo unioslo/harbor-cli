@@ -3,6 +3,7 @@ from __future__ import annotations
 import re
 from datetime import datetime
 from typing import Any
+from typing import Callable
 from typing import Dict
 from typing import Iterable
 from typing import List
@@ -841,6 +842,60 @@ class SortOrder(StrEnum):
         return self == SortOrder.desc
 
 
+# Most -> Least (total vulnerabilities)
+def sort_total(a: ArtifactInfo) -> int:
+    """Sort by total vulnerabilities."""
+    try:
+        return a.artifact.scan.summary.total or 0  # type: ignore
+    except AttributeError:
+        return 0
+
+
+# Number of critical vulnerabilities
+def sort_severity(a: ArtifactInfo) -> int:
+    """Sort by number of critical vulnerabilities."""
+    # TODO: this could take into account other severities as well
+    # And we could just weight them by severity.
+    #
+    # Weighting:
+    #   Critical: 10
+    #   High: 5
+    #   Medium: 2
+    #   Low: 1
+    #   Negligible: 0
+    #   Unknown: 0
+    #
+    # Example:
+    # try:
+    #    summary = a.artifact.scan.summary
+    # except AttributeError:
+    #    return 0
+    #
+    # for attr in ["critical", ...]:
+    #    if getattr(summary, attr):
+    #        return getattr(summary, attr) * weight
+    # return 0
+    try:
+        return a.artifact.scan.summary.critical or 0  # type: ignore
+    except AttributeError:
+        return 0
+
+
+# A -> Z
+def sort_name(a: ArtifactInfo) -> str:
+    """Sort by name of artifact."""
+    return a.name_with_digest_full
+
+
+# new -> old
+def sort_age(a: ArtifactInfo) -> float:
+    """Sort by age of artifact."""
+    try:
+        return a.artifact.push_time.timestamp()  # type: ignore
+    except AttributeError:
+        return 0.0
+
+
 @vuln_cmd.command("summary")
 def list_artifact_vulnerabilities_summary(
     ctx: typer.Context,
@@ -888,57 +943,18 @@ def list_artifact_vulnerabilities_summary(
         "Fetching artifacts...",
     )
 
-    # fmt: off
+    # TODO: remove this when we switch pre-commit to pyright
+    sort_key: Callable[[ArtifactInfo], str | int | float]  # HACK: for mypy...
     if sort == ArtifactSummarySorting.total:
-        # Most -> Least (total vulnerabilities)
-        def sort_key(a: ArtifactInfo) -> int:
-            try:
-                return a.artifact.scan.summary.total or 0  # type: ignore
-            except AttributeError:
-                return 0
+        sort_key = sort_total
     elif sort == ArtifactSummarySorting.severity:
-        # Number of critical vulnerabilities
-
-        # TODO: this could take into account other severities as well
-        # And we could just weight them by severity.
-        #
-        # Weighting:
-        #   Critical: 10
-        #   High: 5
-        #   Medium: 2
-        #   Low: 1
-        #   Negligible: 0
-        #   Unknown: 0
-        #
-        # Example:
-        # try:
-        #    summary = a.artifact.scan.summary
-        # except AttributeError:
-        #    return 0
-        #
-        # for attr in ["critical", ...]:
-        #    if getattr(summary, attr):
-        #        return getattr(summary, attr) * weight
-        # return 0
-        def sort_key(a: ArtifactInfo) -> int:
-            try:
-                return a.artifact.scan.summary.critical or 0  # type: ignore
-            except AttributeError:
-                return 0
+        sort_key = sort_severity
     elif sort == ArtifactSummarySorting.name:
-        # A -> Z
-        def sort_key(a: ArtifactInfo) -> str: # type: ignore
-            return a.name_with_digest_full
+        sort_key = sort_name
     elif sort == ArtifactSummarySorting.age:
-        # new -> old
-        def sort_key(a: ArtifactInfo) -> float: # type: ignore
-            try:
-                return a.artifact.push_time.timestamp()  # type: ignore
-            except AttributeError:
-                return 0.0
+        sort_key = sort_age
     else:
         raise ValueError(f"Unknown sorting criteria: {sort}")
-    # fmt: on
     result = sorted(result, key=sort_key, reverse=order.reverse)
 
     summary = [ArtifactVulnerabilitySummary.from_artifactinfo(r) for r in result]
