@@ -77,6 +77,6 @@ def get_artifact_severity(artifact: Artifact) -> str | None:
     has a severity string.
     """
     try:
-        return artifact.scan.severity  # type: ignore
+        return artifact.scan.severity  # type: ignore[attr-defined]
     except AttributeError:
         return None
