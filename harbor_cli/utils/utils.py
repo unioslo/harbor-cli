@@ -16,12 +16,17 @@ from typing import TypeVar
 MutableMappingType = TypeVar("MutableMappingType", bound=MutableMapping[Any, Any])
 
 
-def replace_none(d: MutableMappingType, replacement: Any = "") -> MutableMappingType:
+def replace_none(
+    d: Optional[MutableMappingType], replacement: Any = ""
+) -> MutableMappingType:
     """Replaces None values in a dict with a given replacement value.
     Iterates recursively through nested dicts and iterables.
 
     Untested with iterables other than list, tuple, and set.
     """
+
+    if d is None:
+        return replacement
 
     def _try_convert_to_original_type(
         value: Iterable[Any], original_type: type
