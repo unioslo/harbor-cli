@@ -67,7 +67,7 @@ def get_artifact_architecture(artifact: Artifact) -> str | None:
 def get_artifact_os(artifact: Artifact) -> str | None:
     try:
         return str(artifact.extra_attrs["os"])  # type: ignore[index]
-    except KeyError:
+    except (TypeError, KeyError):
         return None
 
 
