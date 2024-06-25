@@ -60,7 +60,7 @@ AttrType = TypeVar("AttrType")
 def get_artifact_architecture(artifact: Artifact) -> str | None:
     try:
         return str(artifact.extra_attrs["architecture"])  # type: ignore[index]
-    except KeyError:
+    except (TypeError, KeyError):
         return None
 
 
