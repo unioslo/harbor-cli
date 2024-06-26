@@ -87,6 +87,39 @@ def get_project_info(
     render_result(p, ctx)
 
 
+# HarborAsyncClient.get_repositories()
+@app.command("repos")
+@inject_resource_options()
+def list_repos(
+    ctx: typer.Context,
+    project: Optional[str] = typer.Argument(
+        help="Name of project to fetch repositories from.",
+    ),
+    query: Optional[str] = None,
+    sort: Optional[str] = None,
+    page: int = 1,
+    page_size: int = 10,
+    limit: Optional[int] = ...,
+) -> None:
+    """List all repositories in a project.
+
+    Alternative to `repository list`"""
+    repos = state.run(
+        state.client.get_repositories(
+            project,
+            query=query,
+            sort=sort,
+            page=page,
+            page_size=page_size,
+            limit=limit,
+        ),
+        "Fetching repositories...",
+    )
+    if not repos:
+        info(f"{project!r} has no repositories.")
+    render_result(repos, ctx)
+
+
 # HarborAsyncClient.get_project_logs()
 @app.command("logs")
 @inject_resource_options()
