@@ -115,9 +115,9 @@ def get_usergroups(
         "--group-name",
         help="Group name to filter by (fuzzy matching).",
     ),
-    page: int = ...,  # type: ignore
-    page_size: int = ...,  # type: ignore
-    limit: Optional[int] = ...,  # type: ignore
+    page: int = ...,
+    page_size: int = ...,
+    limit: Optional[int] = ...,
 ) -> None:
     """List user groups."""
     usergroups = state.run(
@@ -141,7 +141,7 @@ def search_usergroups(
     group_name: str = typer.Argument(help="Name of group to search for."),
     page: int = 1,
     page_size: int = 10,
-    # limit: Optional[int] = ...,  # type: ignore # NYI in harborapi
+    # limit: Optional[int] = ..., # NYI in harborapi
 ) -> None:
     """Search for user groups by name."""
     usergroups = state.run(

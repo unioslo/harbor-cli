@@ -286,14 +286,14 @@ def unset_user_admin(
 def set_user_password(
     username_or_id: str = ARG_USERNAME_OR_ID,
     old_password: str = typer.Option(
-        ...,  # type: ignore # pyright unable to infer type?
+        ...,  #  type: ignore # pyright unable to infer type?
         "--old-password",
         prompt="Enter old password",
         hide_input=True,
         help="Old password for user. Prompted if not provided.",
     ),
     new_password: str = typer.Option(
-        ...,  # type: ignore
+        ...,  #  type: ignore # pyright unable to infer type?
         "--new-password",
         prompt="Enter new password",
         hide_input=True,

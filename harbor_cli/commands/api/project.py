@@ -762,9 +762,9 @@ def list_project_members(
     entity_name: Optional[str] = typer.Option(
         None, "--entity", help="Entity name to search for."
     ),
-    page: int = ...,  # type: ignore
-    page_size: int = ...,  # type: ignore
-    limit: Optional[int] = ...,  # type: ignore
+    page: int = ...,
+    page_size: int = ...,
+    limit: Optional[int] = ...,
 ) -> None:
     """List all members of a project."""
     project_arg = get_project_arg(project_name_or_id)

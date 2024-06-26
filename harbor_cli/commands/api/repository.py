@@ -109,7 +109,7 @@ def list_repos(
     sort: Optional[str] = None,
     page: int = 1,
     page_size: int = 10,
-    limit: Optional[int] = ...,  # type: ignore
+    limit: Optional[int] = ...,
 ) -> None:
     """List repositories in all projects or a specific project."""
     repos = state.run(
