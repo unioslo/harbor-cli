@@ -12,6 +12,10 @@ The **third number** is the patch version (bug fixes)
 
 ## Unreleased
 
+### Changed
+
+- Styling of multiline help text in commands.
+
 ### Fixed
 
 - REPL closing when certain errors are raised.
