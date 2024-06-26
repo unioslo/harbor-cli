@@ -10,7 +10,9 @@ The **third number** is the patch version (bug fixes)
 
 <!-- changelog follows -->
 
-## Unreleased
+<!-- ## Unreleased -->
+
+## [0.3.0](https://github.com/unioslo/harbor-cli/tree/harbor-cli-v0.3.0) - 2024-06-26
 
 ### Added
 
