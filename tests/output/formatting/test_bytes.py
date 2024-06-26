@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
 from harbor_cli.output.formatting.bytes import bytesize_str
 from harbor_cli.output.formatting.constants import NONE_STR
 

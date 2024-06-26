@@ -4,9 +4,8 @@ import typing
 from typing import NamedTuple
 from typing import Optional
 
-from pydantic import ValidationError
-
 from harbor_cli.output.table import RENDER_FUNCTIONS
+from pydantic import ValidationError
 
 
 class Parameter(NamedTuple):

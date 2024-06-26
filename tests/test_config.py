@@ -3,10 +3,21 @@ from __future__ import annotations
 import copy
 from pathlib import Path
 
-import keyring
 import pytest
 import tomli
 from freezegun import freeze_time
+from harbor_cli.config import HarborCLIConfig
+from harbor_cli.config import HarborSettings
+from harbor_cli.config import LoggingSettings
+from harbor_cli.config import TableSettings
+from harbor_cli.config import TableStyleSettings
+from harbor_cli.config import load_config
+from harbor_cli.config import load_toml_file
+from harbor_cli.config import sample_config
+from harbor_cli.config import save_config
+from harbor_cli.output.console import warning
+from harbor_cli.state import State
+from harbor_cli.utils.keyring import set_password
 from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import ValidationError
@@ -15,18 +26,6 @@ from pytest import LogCaptureFixture
 
 from .conftest import requires_keyring
 from .conftest import requires_no_keyring
-from harbor_cli.config import HarborCLIConfig
-from harbor_cli.config import HarborSettings
-from harbor_cli.config import load_config
-from harbor_cli.config import load_toml_file
-from harbor_cli.config import LoggingSettings
-from harbor_cli.config import sample_config
-from harbor_cli.config import save_config
-from harbor_cli.config import TableSettings
-from harbor_cli.config import TableStyleSettings
-from harbor_cli.output.console import warning
-from harbor_cli.state import State
-from harbor_cli.utils.keyring import set_password
 
 
 def test_save_config(tmp_path: Path, config: HarborCLIConfig) -> None:
@@ -399,8 +398,8 @@ def test_loggingsettings_path_notime(config: HarborCLIConfig, tmp_path: Path) ->
 
 def test_loggingsettings_datetime_format_deprecated_name() -> None:
     """Test that we can still use the old name for the datetime_format field."""
-    l = LoggingSettings(timeformat="%Y-%m-%d")  # type: ignore
-    assert l.datetime_format == "%Y-%m-%d"
+    settings = LoggingSettings(timeformat="%Y-%m-%d")  # type: ignore
+    assert settings.datetime_format == "%Y-%m-%d"
 
 
 @freeze_time("1970-01-01")

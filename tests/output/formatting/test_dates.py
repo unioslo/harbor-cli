@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import datetime
 
 import pytest
-
 from harbor_cli.output.formatting.dates import datetime_str
 
 

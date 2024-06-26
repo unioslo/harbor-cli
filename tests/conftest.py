@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 import os
-from copy import deepcopy
 from functools import partial
 from pathlib import Path
+from typing import IO
 from typing import Any
 from typing import Generator
-from typing import IO
 from typing import Iterator
 from typing import Mapping
 from typing import Protocol
@@ -14,11 +13,6 @@ from typing import Protocol
 import click
 import pytest
 import typer
-from harborapi import HarborAsyncClient
-from pydantic import SecretStr
-from typer.testing import CliRunner
-from typer.testing import Result
-
 from harbor_cli import logs
 from harbor_cli import state
 from harbor_cli.config import EnvVar
@@ -26,6 +20,10 @@ from harbor_cli.config import HarborCLIConfig
 from harbor_cli.format import OutputFormat
 from harbor_cli.main import app as main_app
 from harbor_cli.utils.keyring import keyring_supported
+from harborapi import HarborAsyncClient
+from pydantic import SecretStr
+from typer.testing import CliRunner
+from typer.testing import Result
 
 runner = CliRunner(mix_stderr=False)
 
@@ -136,8 +134,7 @@ class PartialInvoker(Protocol):
         catch_exceptions: bool = True,
         color: bool = False,
         **extra: Any,
-    ) -> Result:
-        ...
+    ) -> Result: ...
 
 
 @pytest.fixture

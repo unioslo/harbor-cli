@@ -5,8 +5,14 @@ from unittest.mock import MagicMock
 from unittest.mock import patch
 
 import pytest
-from hypothesis import given
+from harbor_cli.format import OutputFormat
+from harbor_cli.output import render
+from harbor_cli.output.render import render_json
+from harbor_cli.output.render import render_result
+from harbor_cli.output.render import render_table
+from harbor_cli.state import State
 from hypothesis import HealthCheck
+from hypothesis import given
 from hypothesis import settings
 from hypothesis import strategies as st
 from pydantic import BaseModel
@@ -14,12 +20,6 @@ from pytest import CaptureFixture
 from pytest_mock import MockerFixture
 
 from .._strategies import COMPACT_TABLE_MODELS
-from harbor_cli.format import OutputFormat
-from harbor_cli.output import render
-from harbor_cli.output.render import render_json
-from harbor_cli.output.render import render_result
-from harbor_cli.output.render import render_table
-from harbor_cli.state import State
 
 
 # The actual testing of the render functions is done in test_render_<format>()

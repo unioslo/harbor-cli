@@ -9,11 +9,10 @@ from hypothesis import strategies as st
 from pydantic import ValidationError
 
 if TYPE_CHECKING:
-    from pydantic import BaseModel  # noqa: F401
     from hypothesis.strategies import SearchStrategy  # noqa: F401
+    from pydantic import BaseModel  # noqa: F401
 
 from harbor_cli.output.table import RENDER_FUNCTIONS
-
 
 COMPACT_TABLE_MODELS = []  # type: list[SearchStrategy[BaseModel | list[BaseModel]]]
 for model in RENDER_FUNCTIONS.keys():

@@ -8,14 +8,6 @@ from typing import Callable
 from typing import Iterator
 
 import pytest
-from hypothesis import assume
-from hypothesis import given
-from hypothesis import HealthCheck
-from hypothesis import settings
-from hypothesis import strategies as st
-from pytest import CaptureFixture
-from pytest import MonkeyPatch
-
 from harbor_cli.output.prompts import float_prompt
 from harbor_cli.output.prompts import int_prompt
 from harbor_cli.output.prompts import path_prompt
@@ -23,6 +15,13 @@ from harbor_cli.output.prompts import prompt_msg
 from harbor_cli.output.prompts import str_prompt
 from harbor_cli.style.color import green
 from harbor_cli.style.style import Icon
+from hypothesis import HealthCheck
+from hypothesis import assume
+from hypothesis import given
+from hypothesis import settings
+from hypothesis import strategies as st
+from pytest import CaptureFixture
+from pytest import MonkeyPatch
 
 # TODO: test defaults
 

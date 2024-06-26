@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import pytest
-
 from harbor_cli.models import MemberRoleType
 from harbor_cli.models import UserGroupType
 

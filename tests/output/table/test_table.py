@@ -5,15 +5,15 @@ from typing import TypeVar
 
 import pytest
 import rich
+from harbor_cli.output.table import BuiltinTypeException
+from harbor_cli.output.table import EmptySequenceError
+from harbor_cli.output.table import get_renderable
 from hypothesis import assume
 from hypothesis import given
 from hypothesis import strategies as st
 from pydantic import BaseModel
 
 from ..._strategies import COMPACT_TABLE_MODELS
-from harbor_cli.output.table import BuiltinTypeException
-from harbor_cli.output.table import EmptySequenceError
-from harbor_cli.output.table import get_renderable
 
 T = TypeVar("T", bound=BaseModel)
 

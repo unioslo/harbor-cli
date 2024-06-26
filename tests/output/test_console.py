@@ -5,9 +5,6 @@ from typing import Any
 from typing import Callable
 
 import pytest
-from pytest import CaptureFixture
-from pytest import LogCaptureFixture
-
 from harbor_cli.config import LoggingSettings
 from harbor_cli.logs import LogLevel
 from harbor_cli.logs import update_logging
@@ -16,6 +13,8 @@ from harbor_cli.output.console import info
 from harbor_cli.output.console import success
 from harbor_cli.output.console import warning
 from harbor_cli.state import State
+from pytest import CaptureFixture
+from pytest import LogCaptureFixture
 
 
 def _configure_logging(

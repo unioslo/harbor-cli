@@ -5,12 +5,11 @@ import os
 from base64 import b64encode
 
 import pytest
-from harborapi import HarborAsyncClient
-
 from harbor_cli.config import HarborCLIConfig
 from harbor_cli.output.console import console
-from harbor_cli.state import get_state
 from harbor_cli.state import State
+from harbor_cli.state import get_state
+from harborapi import HarborAsyncClient
 
 
 def test_state_run_nohandle(state: State) -> None:

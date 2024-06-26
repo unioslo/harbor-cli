@@ -134,7 +134,7 @@ typeCheckingMode = "strict"
 
 [tool.ruff]
 src = ["harbor_cli"]
-extend-exclude = ["tests", "harbor_cli/__init__.py"]
+extend-exclude = ["harbor_cli/__init__.py"]
 
 [tool.ruff.lint]
 extend-select = ["I"]

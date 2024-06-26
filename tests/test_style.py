@@ -3,15 +3,14 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-from harborapi.models.scanner import Severity
-from strenum import StrEnum
-
 from harbor_cli.style import color
 from harbor_cli.style.color import HealthColor
 from harbor_cli.style.color import SeverityColor
 from harbor_cli.style.markup import CODEBLOCK_STYLES
 from harbor_cli.style.markup import markup_as_plain_text
 from harbor_cli.style.markup import markup_to_markdown
+from harborapi.models.scanner import Severity
+from strenum import StrEnum
 
 
 @pytest.mark.parametrize(
@@ -60,7 +59,10 @@ def test_markup_to_markdown_code_styles(style: str) -> None:
 def test_markup_to_markdown_emoji() -> None:
     """Test that emoji are converted to unicode characters and play nice when nested inside other styles"""
     s = f":sparkles: [{CODEBLOCK_STYLES[0]}]Hello world :desktop_computer:[/] foo [bold]:sparkles: bar :sparkles:[/] [bold italic]:sparkles: baz :sparkles:[/] :sparkles:"
-    assert markup_to_markdown(s) == "✨ `Hello world 🖥` foo **✨ bar ✨** ***✨ baz ✨*** ✨"
+    assert (
+        markup_to_markdown(s)
+        == "✨ `Hello world 🖥` foo **✨ bar ✨** ***✨ baz ✨*** ✨"
+    )
 
 
 @pytest.mark.parametrize(

@@ -3,14 +3,13 @@ from __future__ import annotations
 from typing import Optional
 
 import typer
-from pytest import LogCaptureFixture
-from pytest_mock import MockerFixture
-from typer.testing import CliRunner
-
 from harbor_cli.deprecation import Deprecated
 from harbor_cli.deprecation import get_deprecated_params
 from harbor_cli.deprecation import get_used_deprecated_params
 from harbor_cli.deprecation import issue_deprecation_warnings
+from pytest import LogCaptureFixture
+from pytest_mock import MockerFixture
+from typer.testing import CliRunner
 
 app = typer.Typer()
 runner = CliRunner(mix_stderr=False)

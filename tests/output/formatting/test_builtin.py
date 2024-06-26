@@ -4,19 +4,17 @@ from typing import Any
 from typing import Sequence
 
 import pytest
-from harborapi.models.base import BaseModel
-
+from harbor_cli.output.formatting.builtin import NONE_STR
 from harbor_cli.output.formatting.builtin import bool_str
 from harbor_cli.output.formatting.builtin import float_str
 from harbor_cli.output.formatting.builtin import int_str
-from harbor_cli.output.formatting.builtin import NONE_STR
 from harbor_cli.output.formatting.builtin import plural_str
 from harbor_cli.output.formatting.constants import FALSE_STR
 from harbor_cli.output.formatting.constants import TRUE_STR
 from harbor_cli.state import get_state
 from harbor_cli.style import EMOJI_NO
 from harbor_cli.style import EMOJI_YES
-
+from harborapi.models.base import BaseModel
 
 state = get_state()
 
