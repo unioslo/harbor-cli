@@ -174,7 +174,7 @@ class VersionBumper(StateMachine):
 
     If dry_run is True, the command will be printed but not executed."""
 
-    source_dir = Path("")
+    source_dir = Path("harbor_cli")
     version_file = source_dir / "__about__.py"
     changelog_file = Path("CHANGELOG.md")
     changelog_file_bak = changelog_file.with_suffix(".bak")
@@ -194,7 +194,7 @@ class VersionBumper(StateMachine):
 
     @property
     def tag(self) -> str:
-        return f"-v{self.new_version}"
+        return f"harbor-cli-v{self.new_version}"
 
     def get_runner(self, dry_run: bool) -> Runner:
         def dryrun_subprocess_run(
