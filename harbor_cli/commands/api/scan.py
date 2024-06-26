@@ -176,7 +176,7 @@ def start_scan_export(
 ) -> None:
     # TODO: resolve label names to IDs (?)
 
-    req = ScanDataExportRequest()  # pyright: ignore[reportCallIssue]
+    req = ScanDataExportRequest()
     if job_name:
         req.job_name = job_name
     if cve:

@@ -325,7 +325,7 @@ def create_artifact_tag(
     """Create a tag for an artifact."""
     an = parse_artifact_name(artifact)
     # NOTE: We might need to fetch repo and artifact IDs
-    t = Tag(name=tag)  # pyright: ignore[reportCallIssue]
+    t = Tag(name=tag)
     location = state.run(
         state.client.create_artifact_tag(an.project, an.repository, an.reference, t),
         f"Creating tag {tag!r} for {artifact}...",
@@ -393,7 +393,7 @@ def add_artifact_label(
         description=description,
         color=color,
         scope=scope,
-    )  # pyright: ignore[reportCallIssue]
+    )
     state.run(
         state.client.add_artifact_label(an.project, an.repository, an.reference, label),
         f"Adding label {label.name!r} to {artifact}...",

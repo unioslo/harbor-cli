@@ -29,7 +29,7 @@ classifiers = [
 ]
 dependencies = [
   "typer==0.9.0",
-  "harborapi>=0.25.1",
+  "harborapi>=0.25.2",
   "pydantic>=2.7.4",
   "trogon>=0.5.0",
   "platformdirs>=2.5.4",

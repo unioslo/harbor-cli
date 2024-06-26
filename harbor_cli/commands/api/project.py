@@ -196,6 +196,11 @@ def create_project(
         None,
         "--retention-id",
     ),
+    auto_sbom_generation: Optional[bool] = typer.Option(
+        None,
+        "--sbom-generation",
+        is_flag=False,
+    ),
     # TODO: add support for adding CVE allowlist when creating a project
 ) -> None:
     """Create a new project."""
@@ -203,16 +208,20 @@ def create_project(
         project_name=project_name,
         storage_limit=storage_limit,
         registry_id=registry_id,
-        metadata=ProjectMetadata(
-            # validator does bool -> str conversion for the string bool fields
-            public=public,  # type: ignore
-            enable_content_trust=enable_content_trust,
-            enable_content_trust_cosign=enable_content_trust_cosign,
-            prevent_vul=prevent_vul,
-            severity=severity,
-            auto_scan=auto_scan,
-            reuse_sys_cve_allowlist=reuse_sys_cve_allowlist,
-            retention_id=retention_id,
+        metadata=ProjectMetadata.model_validate(
+            # NOTE: Constructing via a dict here to avoid type checking noise.
+            # See tests/api/test_models.py for more information.
+            {
+                "public": public,
+                "enable_content_trust": enable_content_trust,
+                "enable_content_trust_cosign": enable_content_trust_cosign,
+                "prevent_vul": prevent_vul,
+                "severity": severity,
+                "auto_scan": auto_scan,
+                "reuse_sys_cve_allowlist": reuse_sys_cve_allowlist,
+                "retention_id": retention_id,
+                "auto_sbom_generation": auto_sbom_generation,
+            }
         ),
     )
     location = state.run(
@@ -336,6 +345,11 @@ def update_project(
         None,
         "--retention-id",
     ),
+    auto_sbom_generation: Optional[bool] = typer.Option(
+        None,
+        "--sbom-generation",
+        is_flag=False,
+    ),
 ) -> None:
     """Update project information."""
     req_params = model_params_from_ctx(ctx, ProjectReq)
@@ -346,7 +360,7 @@ def update_project(
     arg = get_project_arg(project_name_or_id)
     project = get_project(arg)
     if project.metadata is None:
-        project.metadata = ProjectMetadata()  # pyright: ignore[reportCallIssue] # mypy bug
+        project.metadata = ProjectMetadata()
 
     # Create updated models from params
     req = create_updated_model(

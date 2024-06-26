@@ -86,7 +86,7 @@ def clear_allowlist(
 ) -> None:
     """Clear the current CVE allowlist of all CVEs, and optionally all metadata as well."""
     if full_clear:
-        allowlist = CVEAllowlist(items=[])  # pyright: ignore[reportCallIssue] # create a whole new allowlist
+        allowlist = CVEAllowlist(items=[])  # create a whole new allowlist
     else:
         # Fetch existing allowlist to preserve metadata
         allowlist = state.run(
