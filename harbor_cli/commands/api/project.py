@@ -143,7 +143,8 @@ def project_exists(
 @app.command("create", no_args_is_help=True)
 @inject_help(ProjectReq)
 @inject_help(
-    ProjectMetadata
+    ProjectMetadata,
+    remove=['The valid values are "true", "false".'],
 )  # inject this first so its "public" field takes precedence
 def create_project(
     ctx: typer.Context,
@@ -292,7 +293,8 @@ def list_projects(
 @app.command("update", no_args_is_help=True)
 @inject_help(ProjectReq)
 @inject_help(
-    ProjectMetadata
+    ProjectMetadata,
+    remove=['The valid values are "true", "false".'],
 )  # inject this first so its "public" field takes precedence
 def update_project(
     ctx: typer.Context,
