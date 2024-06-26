@@ -26,36 +26,36 @@ err_console = Console(stderr=True, style="red")
 
 
 class VersionType(Enum):
-    major: str = "major"
-    minor: str = "minor"
-    patch: str = "patch"
+    major = "major"
+    minor = "minor"
+    patch = "patch"
 
 
 class StatusType(Enum):
     # Release
-    release: str = "release"
+    release = "release"
 
     # Alpha
-    a: str = "a"
-    alpha: str = "alpha"
+    a = "a"
+    alpha = "alpha"
 
     # Beta
-    b: str = "b"
-    beta: str = "beta"
+    b = "b"
+    beta = "beta"
 
     # Release Candidate
-    c: str = "c"
-    rc: str = "rc"
-    pre: str = "pre"
-    preview: str = "preview"
+    c = "c"
+    rc = "rc"
+    pre = "pre"
+    preview = "preview"
 
     # Revision / Post
-    r: str = "r"
-    rev: str = "rev"
-    post: str = "post"
+    r = "r"
+    rev = "rev"
+    post = "post"
 
     # Dev
-    dev: str = "dev"
+    dev = "dev"
 
 
 versions = [v.value for v in VersionType]
