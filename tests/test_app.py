@@ -1,14 +1,17 @@
 from __future__ import annotations
 
-from enum import Enum
 from enum import IntEnum
 from pathlib import Path
 from typing import Iterable
 
-import keyring
 import pytest
 import pytest_mock
 import typer
+from harbor_cli.config import EnvVar
+from harbor_cli.format import OutputFormat
+from harbor_cli.state import State
+from harbor_cli.utils.keyring import delete_password
+from harbor_cli.utils.keyring import set_password
 from harborapi.utils import get_basicauth
 from keyring.errors import NoKeyringError
 from keyring.errors import PasswordDeleteError
@@ -16,13 +19,6 @@ from typer.testing import Result
 
 from .conftest import PartialInvoker
 from .conftest import requires_keyring
-from harbor_cli.config import EnvVar
-from harbor_cli.format import OutputFormat
-from harbor_cli.state import State
-from harbor_cli.utils.keyring import delete_password
-from harbor_cli.utils.keyring import get_backend
-from harbor_cli.utils.keyring import keyring_supported
-from harbor_cli.utils.keyring import set_password
 
 
 def test_envvars(

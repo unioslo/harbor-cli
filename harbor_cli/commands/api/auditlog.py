@@ -213,7 +213,7 @@ def _get_schedule(
     return Schedule(
         parameters=params,
         schedule=ScheduleObj(**obj_kwargs),
-    )  # pyright: ignore[reportCallIssue]
+    )
 
 
 # HarborAsyncClient.create_audit_log_rotation_schedule()

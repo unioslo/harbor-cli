@@ -5,6 +5,7 @@ import inspect
 from functools import lru_cache
 from typing import Any
 from typing import List
+from typing import Optional
 from typing import Type
 
 import click
@@ -102,7 +103,10 @@ def get_app_callback_options(app: typer.Typer) -> list[typer.models.OptionInfo]:
 
 
 def inject_help(
-    model: Type[BaseModel], strict: bool = False, **field_additions: str
+    model: Type[BaseModel],
+    strict: bool = False,
+    remove: Optional[List[str]] = None,
+    **field_additions: str,
 ) -> Any:
     """
     Injects a Pydantic model's field descriptions into the help attributes
@@ -139,6 +143,8 @@ def inject_help(
     strict : bool
         If True, fail if a field in the model does not correspond to a function
         parameter of the same name with a typer.OptionInfo as a default value.
+    remove: Optional[List[str]]
+        List of strings to remove from descriptions before injecting them.
     **field_additions
         Additional help text to add to the help attribute of a field.
         The parameter name should be the name of the field, and the value
@@ -164,7 +170,13 @@ def inject_help(
                 addition = field_additions.get(field_name, "")
                 if addition:
                     addition = f" {addition}"  # add leading space
-                param.default.help = f"{field.description or ''}{addition}"
+                description = field.description or ""
+                if remove:
+                    for to_remove in remove:
+                        # Could this be faster with a regex?
+                        description = description.replace(to_remove, "")
+                description = description.strip()
+                param.default.help = f"{description}{addition}"
         return func
 
     return decorator

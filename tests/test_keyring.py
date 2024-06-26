@@ -1,12 +1,12 @@
 from __future__ import annotations
 
 import pytest
+from harbor_cli.utils.keyring import KeyringUnsupportedError
+from harbor_cli.utils.keyring import get_password
+from harbor_cli.utils.keyring import set_password
 
 from .conftest import requires_keyring
 from .conftest import requires_no_keyring
-from harbor_cli.utils.keyring import get_password
-from harbor_cli.utils.keyring import KeyringUnsupportedError
-from harbor_cli.utils.keyring import set_password
 
 
 @requires_keyring

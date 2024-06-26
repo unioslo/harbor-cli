@@ -200,9 +200,9 @@ def list_retention_jobs(
     ctx: typer.Context,
     project_name_or_id: Optional[str] = ARG_PROJECT_NAME_OR_ID_OPTIONAL,
     policy_id: Optional[int] = OPTION_POLICY_ID,
-    page: int = ...,  # type: ignore
-    page_size: int = ...,  # type: ignore
-    limit: Optional[int] = ...,  # type: ignore
+    page: int = ...,
+    page_size: int = ...,
+    limit: Optional[int] = ...,
 ) -> None:
     """List retention jobs."""
     policy_id = policy_id_from_args(project_name_or_id, policy_id)
@@ -266,9 +266,9 @@ def list_retention_tasks(
     project_name_or_id: Optional[str] = ARG_PROJECT_NAME_OR_ID_OPTIONAL,
     job_id: int = typer.Argument(help="ID of the job to list tasks for."),
     policy_id: Optional[int] = OPTION_POLICY_ID,
-    page: int = ...,  # type: ignore
-    page_size: int = ...,  # type: ignore
-    limit: Optional[int] = ...,  # type: ignore
+    page: int = ...,
+    page_size: int = ...,
+    limit: Optional[int] = ...,
 ) -> None:
     """List retention tasks."""
     policy_id = policy_id_from_args(project_name_or_id, policy_id)

@@ -59,9 +59,9 @@ def create_gc_schedule(
     schedule_obj = ScheduleObj(
         type=type,
         cron=cron,
-    )  # pyright: ignore[reportCallIssue]
+    )
     # TODO: investigate which parameters the `parameters` field takes
-    schedule = Schedule(schedule=schedule_obj)  # pyright: ignore[reportCallIssue]
+    schedule = Schedule(schedule=schedule_obj)
     state.run(
         state.client.create_gc_schedule(schedule),
         "Creating Garbage Collection schedule...",

@@ -4,13 +4,12 @@ import typing
 from typing import Tuple
 
 import pytest
-
-from harbor_cli.style.color import Color
 from harbor_cli.style.color import COLOR_FUNCTIONS
-from harbor_cli.style.color import fallback_color
-from harbor_cli.style.color import get_color_func
+from harbor_cli.style.color import Color
 from harbor_cli.style.color import Severity
 from harbor_cli.style.color import SeverityColor
+from harbor_cli.style.color import fallback_color
+from harbor_cli.style.color import get_color_func
 
 
 def test_from_severity():

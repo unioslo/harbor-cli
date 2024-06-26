@@ -61,7 +61,7 @@ def create_usergroup(
         group_name=group_name,
         group_type=group_type.as_int(),
         ldap_group_dn=ldap_group_dn,
-    )  # pyright: ignore[reportCallIssue]
+    )
     location = state.run(
         state.client.create_usergroup(usergroup),
         f"Creating user group {group_name}...",
@@ -77,7 +77,7 @@ def update_usergroup(
     # NOTE: make group_name optional if we can update other fields in the future
 ) -> None:
     """Update a user group. Only the name can be updated currently."""
-    usergroup = UserGroup(group_name=group_name)  # pyright: ignore[reportCallIssue]
+    usergroup = UserGroup(group_name=group_name)
     state.run(
         state.client.update_usergroup(group_id, usergroup),
         f"Updating user group {group_id}...",
@@ -115,9 +115,9 @@ def get_usergroups(
         "--group-name",
         help="Group name to filter by (fuzzy matching).",
     ),
-    page: int = ...,  # type: ignore
-    page_size: int = ...,  # type: ignore
-    limit: Optional[int] = ...,  # type: ignore
+    page: int = ...,
+    page_size: int = ...,
+    limit: Optional[int] = ...,
 ) -> None:
     """List user groups."""
     usergroups = state.run(
@@ -141,7 +141,7 @@ def search_usergroups(
     group_name: str = typer.Argument(help="Name of group to search for."),
     page: int = 1,
     page_size: int = 10,
-    # limit: Optional[int] = ...,  # type: ignore # NYI in harborapi
+    # limit: Optional[int] = ..., # NYI in harborapi
 ) -> None:
     """Search for user groups by name."""
     usergroups = state.run(

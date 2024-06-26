@@ -5,16 +5,15 @@ from typing import Optional
 import click
 import pytest
 import typer
-from pydantic import BaseModel
-from pydantic import Field
-from typer import Context
-from typer.models import CommandInfo
-
 from harbor_cli.utils.commands import get_app_commands
 from harbor_cli.utils.commands import get_command_help
 from harbor_cli.utils.commands import get_parent_ctx
 from harbor_cli.utils.commands import inject_help
 from harbor_cli.utils.commands import inject_resource_options
+from pydantic import BaseModel
+from pydantic import Field
+from typer import Context
+from typer.models import CommandInfo
 
 
 def test_get_parent_ctx() -> None:

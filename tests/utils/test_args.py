@@ -10,8 +10,6 @@ from typing import Union
 
 import pytest
 import typer
-from pydantic import BaseModel
-
 from harbor_cli.utils.args import add_to_query
 from harbor_cli.utils.args import as_query
 from harbor_cli.utils.args import construct_query_list
@@ -23,6 +21,7 @@ from harbor_cli.utils.args import get_user_arg
 from harbor_cli.utils.args import model_params_from_ctx
 from harbor_cli.utils.args import parse_commalist
 from harbor_cli.utils.args import parse_key_value_args
+from pydantic import BaseModel
 
 
 class Model(BaseModel):

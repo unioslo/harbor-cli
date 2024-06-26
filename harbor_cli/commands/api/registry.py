@@ -92,7 +92,7 @@ def create_registry(
         type=type,
         insecure=insecure,
         description=description,
-    )  # pyright: ignore[reportCallIssue]
+    )
     location = state.run(state.client.create_registry(registry), "Creating registry...")
     render_result(location, ctx)
 

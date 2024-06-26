@@ -5,10 +5,9 @@ import os
 from pathlib import Path
 
 from harbor_cli.config import HarborCLIConfig
+from harbor_cli.logs import LogLevel
 from harbor_cli.logs import disable_logging
 from harbor_cli.logs import logger
-from harbor_cli.logs import LogLevel
-from harbor_cli.logs import replace_handler
 from harbor_cli.logs import setup_logging
 from harbor_cli.logs import update_logging
 

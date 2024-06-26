@@ -3,9 +3,6 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
-from pydantic import ValidationError
-
-from harbor_cli.config import HarborCLIConfig
 from harbor_cli.utils.utils import PackageVersion
 from harbor_cli.utils.utils import parse_version_string
 from harbor_cli.utils.utils import replace_none
@@ -67,8 +64,8 @@ def test_replace_none(d: dict[str, Any], expected: dict[str, Any]) -> None:
         ),
         (
             # deeply nested tuple
-            {"a": 1, "b": ((({"c": 2}, {"d": None})))},
-            {"a": 1, "b": (((({"c": 2}, {"d": ""}))))},
+            {"a": 1, "b": (({"c": 2}, {"d": None}))},
+            {"a": 1, "b": (({"c": 2}, {"d": ""}))},
         ),
     ],
 )

@@ -2,6 +2,7 @@
 
 When we drop 3.8, we can move on to using built-ins as generics.
 """
+
 from __future__ import annotations
 
 from typing import Any
@@ -11,7 +12,6 @@ from typing import Tuple
 from typing import Type
 
 import pytest
-
 from harbor_cli.types import assert_type
 from harbor_cli.types import is_sequence_func
 

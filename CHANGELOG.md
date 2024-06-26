@@ -12,13 +12,23 @@ The **third number** is the patch version (bug fixes)
 
 ## Unreleased
 
+### Added
+
+- Command: `project repos` to list repositories in a project. A more intuitive way to list repositories for a project than going through `repository list`.
+- `--sbom-generation` option for `project create` and `project update` commands to enable automatic SBOM generation for the project.
+
 ### Changed
 
 - Styling of multiline help text in commands.
 
+### Removed
+
+- Mentions of valid values from `project {create,update}` commands.
+
 ### Fixed
 
 - REPL closing when certain errors are raised.
+- `artifact list` for artifacts with no extra attributes.
 
 ## [0.2.2](https://github.com/unioslo/harbor-cli/tree/harbor-cli-v0.2.2) - 2024-03-01
 
@@ -71,7 +81,6 @@ The **third number** is the patch version (bug fixes)
 ### Fixed
 
 - Double printing of messages in terminal if logging wasn't properly configured.
-
 
 ## [0.1.0](https://github.com/unioslo/harbor-cli/tree/ca08e7e8830ff3a10e1be447b5555acd5ed672ed) - 2023-12-06
 

@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import pytest
 import typer
+from harbor_cli.commands.cli.find import MatchStrategy
+from harbor_cli.commands.cli.find import _do_find
+from harbor_cli.models import CommandSummary
 
 from ..._utils import Parameter
-from harbor_cli.commands.cli.find import _do_find
-from harbor_cli.commands.cli.find import MatchStrategy
-from harbor_cli.models import CommandSummary
 
 # Tests for the underlying _do_find() function
 
