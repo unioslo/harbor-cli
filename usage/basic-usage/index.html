@@ -1,0 +1,3439 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+        <link rel="prev" href="../../configuration/formats/">
+      
+      
+        <link rel="next" href="../options/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.0, mkdocs-material-9.5.27">
+    
+    
+      
+        <title>Basics - harbor-cli</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.6543a935.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="blue" data-md-color-accent="orange">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#basics" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="harbor-cli" class="md-header__button md-logo" aria-label="harbor-cli" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            harbor-cli
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Basics
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+    
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/unioslo/harbor-cli" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    unioslo/harbor-cli
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../.." class="md-tabs__link">
+          
+  
+    
+  
+  Home
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../commands/" class="md-tabs__link">
+          
+  
+    
+  
+  Commands
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../reference/" class="md-tabs__link">
+          
+  
+    
+  
+  Reference
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../contributing/" class="md-tabs__link">
+        
+  
+    
+  
+  Contributing
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="harbor-cli" class="md-nav__button md-logo" aria-label="harbor-cli" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    harbor-cli
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/unioslo/harbor-cli" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    unioslo/harbor-cli
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+      
+        
+        
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../.." class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Home
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_1" id="__nav_1_label" tabindex="">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1">
+            <span class="md-nav__icon md-icon"></span>
+            Home
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_1_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_1_2" id="__nav_1_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Configuration
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_1_2">
+            <span class="md-nav__icon md-icon"></span>
+            Configuration
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/introduction/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Create a config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/config-file/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Configuration file
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/auth/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Authentication
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../configuration/formats/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Formats
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_1_3" id="__nav_1_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Usage
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_1_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_1_3">
+            <span class="md-nav__icon md-icon"></span>
+            Usage
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Basics
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Basics
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#command" class="md-nav__link">
+    <span class="md-ellipsis">
+      Command
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Arguments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#argument-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Argument types
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Argument types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#text" class="md-nav__link">
+    <span class="md-ellipsis">
+      text
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integer" class="md-nav__link">
+    <span class="md-ellipsis">
+      integer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      boolean
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      choice
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multiple-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multiple values
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      Flags
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#global-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Global options
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#help" class="md-nav__link">
+    <span class="md-ellipsis">
+      Help
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#search-for-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Search for commands
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#help-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      Help output
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../options/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Options
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../repl/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    REPL
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../tui/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    TUI
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../terminology/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Terminology
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../commands/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Commands
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_2" id="__nav_2_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Commands
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/artifact/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    artifact
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/artifact_label/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    artifact label
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/artifact_tag/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    artifact tag
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/artifact_vulnerability/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    artifact vulnerability
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/auditlog/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    auditlog
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/auditlog_rotation/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    auditlog rotation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/auditlog_rotation_schedule/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    auditlog rotation schedule
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/commands/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    commands
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/cve-allowlist/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    cve-allowlist
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/find/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    find
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/gc/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    gc
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/gc_schedule/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    gc schedule
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/init/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    init
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/ldap/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ldap
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/ldap_search/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ldap search
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/project/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    project
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/project_member/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    project member
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/project_metadata/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    project metadata
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/project_metadata_field/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    project metadata field
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/project_scanner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    project scanner
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/quota/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    quota
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/registry/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    registry
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/repl/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    repl
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/replication/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    replication
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/replication_policy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    replication policy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/replication_task/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    replication task
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/repository/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    repository
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/retention/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    retention
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/retention_job/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    retention job
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/retention_job_task/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    retention job task
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/retention_policy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    retention policy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/sample-config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    sample-config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/scan-all/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scan-all
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/scan-all_schedule/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scan-all schedule
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/scan/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scan
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/scan_export/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scan export
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/scanner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    scanner
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/search/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    search
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/self_config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    self config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/self_keyring/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    self keyring
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/system/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    system
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/tui/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    tui
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/user/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    user
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/usergroup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    usergroup
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/webhook/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    webhook
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../commands/webhook_policy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    webhook policy
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../reference/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Reference
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3" id="__nav_3_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Reference
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/config/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Config
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/dirs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dirs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/exceptions/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Exceptions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/format/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Format
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/logs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Logs
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/models/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Models
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/main/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Main
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/state/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    State
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/types/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Types
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_11" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../reference/utils/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Utils
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_11" id="__nav_3_11_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_11">
+            <span class="md-nav__icon md-icon"></span>
+            Utils
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/utils/args/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Args
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/utils/commands/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Commands
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/utils/utils/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Utils
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_12" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../reference/harbor/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Harbor
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_12" id="__nav_3_12_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_12">
+            <span class="md-nav__icon md-icon"></span>
+            Harbor
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/harbor/artifact/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Artifact
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/harbor/common/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Common
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_13" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../reference/output/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Output
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_13" id="__nav_3_13_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_13">
+            <span class="md-nav__icon md-icon"></span>
+            Output
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/output/console/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Console
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/output/prompts/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Prompts
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/output/render/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Render
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_13_5" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../reference/output/formatting/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Formatting
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_13_5" id="__nav_3_13_5_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_13_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_13_5">
+            <span class="md-nav__icon md-icon"></span>
+            Formatting
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/output/formatting/bytes/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Bytes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/output/formatting/path/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Path
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+      
+        
+          
+        
+      
+        
+      
+        
+      
+        
+      
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3_13_6" >
+        
+          
+          
+          <div class="md-nav__link md-nav__container">
+            <a href="../../reference/output/table/" class="md-nav__link ">
+              
+  
+  <span class="md-ellipsis">
+    Tables
+  </span>
+  
+
+            </a>
+            
+              
+              <label class="md-nav__link " for="__nav_3_13_6" id="__nav_3_13_6_label" tabindex="0">
+                <span class="md-nav__icon md-icon"></span>
+              </label>
+            
+          </div>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_3_13_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_13_6">
+            <span class="md-nav__icon md-icon"></span>
+            Tables
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/output/table/artifact/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Artifact
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/output/table/repository/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Repository
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/output/table/system/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    System
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#command" class="md-nav__link">
+    <span class="md-ellipsis">
+      Command
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Arguments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Arguments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#argument-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      Argument types
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Argument types">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#text" class="md-nav__link">
+    <span class="md-ellipsis">
+      text
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integer" class="md-nav__link">
+    <span class="md-ellipsis">
+      integer
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#boolean" class="md-nav__link">
+    <span class="md-ellipsis">
+      boolean
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#choice" class="md-nav__link">
+    <span class="md-ellipsis">
+      choice
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Options
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Options">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multiple-values" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multiple values
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#flags" class="md-nav__link">
+    <span class="md-ellipsis">
+      Flags
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#global-options" class="md-nav__link">
+    <span class="md-ellipsis">
+      Global options
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#help" class="md-nav__link">
+    <span class="md-ellipsis">
+      Help
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#search-for-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Search for commands
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#help-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      Help output
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+<h1 id="basics">Basics</h1>
+<p>The application consists of several top-level commands pertaining to specific Harbor resources, such as <code>project</code>, <code>repository</code>, <code>artifact</code>, etc. Each of these commands have subcommands that can be used to perform actions on the resource, such as <code>create</code>, <code>delete</code>, <code>list</code>, etc.</p>
+<p>See <a href="../terminology/#actions-terminology">Actions terminology</a> for more information about the semantics of the different actions.</p>
+<h2 id="command">Command</h2>
+<p>A command is typically invoked as follows:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a>harbor project list
+</code></pre></div>
+<p><code>project</code> is the resource type, and <code>list</code> is the action to perform on the resource, and together they form the command. Most commands are <em>namespaced</em> in this way, where a resource type has one or more actions associated with it. Some command even have subsubcommands, such as:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>harbor project metadata field set
+</code></pre></div>
+<p>For more information about how command names are structured, see <a href="../terminology">Terminology</a>.</p>
+<h2 id="arguments">Arguments</h2>
+<p>Commands sometimes take one or more positional arguments:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>artifact tag create library/hello-world:latest my-tag
+</code></pre></div>
+<p>The command <a href="../../commands/artifact_tag/#artifact-tag-create"><code>artifact tag create</code></a> takes two positional arguments:</p>
+<ul>
+<li><code>library/hello-world:latest</code> - The artifact to tag</li>
+<li><code>my-tag</code> - The name of the tag to create</li>
+</ul>
+<p>These are <em>positional</em> arguments, which means the order in which they are specified is important.</p>
+<h3 id="argument-types">Argument types</h3>
+<p>The expected type of an argument is specified in the command's documentation. The following types are used:</p>
+<!-- TODO: fill out this section via templating. New types may be added. -->
+
+<h4 id="text"><code>text</code></h4>
+<p>A text string. Can be any sequence of characters. Enclose in quotes if it contains spaces.</p>
+<h4 id="integer"><code>integer</code></h4>
+<p>A whole number without a decimal point. Unconstrained unless otherwise specified in the command's help text.</p>
+<h4 id="boolean"><code>boolean</code></h4>
+<p>A boolean value. Can be <code>true</code>, <code>false</code>, <code>1</code>, or <code>0</code>. Case-insensitive.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>A boolean argument is typically used for resources whose value can be <code>None</code>, <code>True</code> or <code>False</code>.</p>
+</div>
+<h4 id="choice"><code>choice</code></h4>
+<p>A choice between a set of values. The valid values are specified in the help text for the command.</p>
+<h2 id="options">Options</h2>
+<p>Most commands also have a number of options that can be specified. In certain cases at least one option is required, such as when updating a project with <a href="../../commands/project/#project-update"><code>project update</code></a>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>harbor project update my-project --public false
+</code></pre></div>
+<p>Since we are updating a resource, we are expected to specify at least one field to update. In this case we set <code>--public</code> to <code>false</code>, making the project private.</p>
+<h3 id="multiple-values">Multiple values</h3>
+<p>Certain options accept multiple values. These can be specified as a comma-separated list:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>harbor artifact list --project library,my-project
+</code></pre></div>
+<p>Or by using the relevant option multiple times:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a>harbor artifact list --project library --project my-project
+</code></pre></div>
+<h3 id="flags">Flags</h3>
+<p>Some options are flags, meaning they do not take any arguments. Flags are specified as follows:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>harbor project list --public
+</code></pre></div>
+<p>Flags can be inverted by prefixing the flag name with <code>no-</code>:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a>harbor project list --no-public
+</code></pre></div>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Flags are typically used to toggle a certain behavior. For example, the <code>--public</code> flag for <a href="../../commands/project/#project-list"><code>project list</code></a> can be used to list only public projects.</p>
+</div>
+<h2 id="global-options">Global options</h2>
+<p>Global options are options that apply to all commands. They must be specified before the command. Examples of these are <a href="../options/#-config-c"><code>--config</code></a>, <a href="../options/#-url-u"><code>--url</code></a> and <a href="(../options/#-username-u)"><code>--username</code></a>.</p>
+<p>Global options must be specified before the command to run, e.g.:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a>harbor --format json project list
+</code></pre></div>
+<p>See the <a href="../options/">Options</a> page for more information on the available global options.</p>
+<h2 id="help">Help</h2>
+<p>For more information about a specific command, use:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>harbor &lt;command&gt; --help
+</code></pre></div>
+<p>See <a href="../../commands/">Commands</a> for more in-depth information about how to use the various commands.</p>
+<h2 id="search-for-commands">Search for commands</h2>
+<p>To search for a command based on name or description, use:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>harbor find QUERY... [OPTIONS]
+</code></pre></div>
+<p>See <a href="../../commands/find/"><code>harbor find</code></a> for more information.</p>
+<h2 id="help-output">Help output</h2>
+<p>The output of <code>harbor --help</code> shows all the available commands and command groups along with the global options:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>$ harbor --help
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a> Usage: harbor [OPTIONS] COMMAND [ARGS]...                                      
+<a id="__codelineno-11-4" name="__codelineno-11-4" href="#__codelineno-11-4"></a>
+<a id="__codelineno-11-5" name="__codelineno-11-5" href="#__codelineno-11-5"></a> Harbor CLI                                                                     
+<a id="__codelineno-11-6" name="__codelineno-11-6" href="#__codelineno-11-6"></a>
+<a id="__codelineno-11-7" name="__codelineno-11-7" href="#__codelineno-11-7"></a>╭─ Options ────────────────────────────────────────────────────────────────────╮
+<a id="__codelineno-11-8" name="__codelineno-11-8" href="#__codelineno-11-8"></a>│ --config              -c      PATH                   Path to config file.    │
+<a id="__codelineno-11-9" name="__codelineno-11-9" href="#__codelineno-11-9"></a>│ --version                                            Show application        │
+<a id="__codelineno-11-10" name="__codelineno-11-10" href="#__codelineno-11-10"></a>│                                                      version and exit.       │
+<a id="__codelineno-11-11" name="__codelineno-11-11" href="#__codelineno-11-11"></a>│ --install-completion          [bash|zsh|fish|powers  Install completion for  │
+<a id="__codelineno-11-12" name="__codelineno-11-12" href="#__codelineno-11-12"></a>│                               hell|pwsh]             the specified shell.    │
+<a id="__codelineno-11-13" name="__codelineno-11-13" href="#__codelineno-11-13"></a>│                                                      [default: None]         │
+<a id="__codelineno-11-14" name="__codelineno-11-14" href="#__codelineno-11-14"></a>│ --show-completion             [bash|zsh|fish|powers  Show completion for the │
+<a id="__codelineno-11-15" name="__codelineno-11-15" href="#__codelineno-11-15"></a>│                               hell|pwsh]             specified shell, to     │
+<a id="__codelineno-11-16" name="__codelineno-11-16" href="#__codelineno-11-16"></a>│                                                      copy it or customize    │
+<a id="__codelineno-11-17" name="__codelineno-11-17" href="#__codelineno-11-17"></a>│                                                      the installation.       │
+<a id="__codelineno-11-18" name="__codelineno-11-18" href="#__codelineno-11-18"></a>│                                                      [default: None]         │
+<a id="__codelineno-11-19" name="__codelineno-11-19" href="#__codelineno-11-19"></a>│ --help                                               Show this message and   │
+<a id="__codelineno-11-20" name="__codelineno-11-20" href="#__codelineno-11-20"></a>│                                                      exit.                   │
+<a id="__codelineno-11-21" name="__codelineno-11-21" href="#__codelineno-11-21"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+<a id="__codelineno-11-22" name="__codelineno-11-22" href="#__codelineno-11-22"></a>╭─ Harbor ─────────────────────────────────────────────────────────────────────╮
+<a id="__codelineno-11-23" name="__codelineno-11-23" href="#__codelineno-11-23"></a>│ --url,--harbor-url     -u                     TEXT     Harbor API URL.       │
+<a id="__codelineno-11-24" name="__codelineno-11-24" href="#__codelineno-11-24"></a>│                                                        Overrides config      │
+<a id="__codelineno-11-25" name="__codelineno-11-25" href="#__codelineno-11-25"></a>│                                                        option harbor.url.    │
+<a id="__codelineno-11-26" name="__codelineno-11-26" href="#__codelineno-11-26"></a>│ --username,--harbor-…  -U                     TEXT     Harbor username.      │
+<a id="__codelineno-11-27" name="__codelineno-11-27" href="#__codelineno-11-27"></a>│                                                        Overrides config      │
+<a id="__codelineno-11-28" name="__codelineno-11-28" href="#__codelineno-11-28"></a>│                                                        option                │
+<a id="__codelineno-11-29" name="__codelineno-11-29" href="#__codelineno-11-29"></a>│                                                        harbor.username.      │
+<a id="__codelineno-11-30" name="__codelineno-11-30" href="#__codelineno-11-30"></a>│ --secret,--harbor-se…  -S                     TEXT     Harbor secret         │
+<a id="__codelineno-11-31" name="__codelineno-11-31" href="#__codelineno-11-31"></a>│                                                        (password). Overrides │
+<a id="__codelineno-11-32" name="__codelineno-11-32" href="#__codelineno-11-32"></a>│                                                        config option         │
+<a id="__codelineno-11-33" name="__codelineno-11-33" href="#__codelineno-11-33"></a>│                                                        harbor.secret.        │
+<a id="__codelineno-11-34" name="__codelineno-11-34" href="#__codelineno-11-34"></a>│ --basicauth            -B                     TEXT     Harbor basic access   │
+<a id="__codelineno-11-35" name="__codelineno-11-35" href="#__codelineno-11-35"></a>│                                                        credentials (base64). │
+<a id="__codelineno-11-36" name="__codelineno-11-36" href="#__codelineno-11-36"></a>│                                                        Overrides config      │
+<a id="__codelineno-11-37" name="__codelineno-11-37" href="#__codelineno-11-37"></a>│                                                        option                │
+<a id="__codelineno-11-38" name="__codelineno-11-38" href="#__codelineno-11-38"></a>│                                                        harbor.basicauth.     │
+<a id="__codelineno-11-39" name="__codelineno-11-39" href="#__codelineno-11-39"></a>│ --credentials-file     -F                     PATH     Path to Harbor JSON   │
+<a id="__codelineno-11-40" name="__codelineno-11-40" href="#__codelineno-11-40"></a>│                                                        credentials file.     │
+<a id="__codelineno-11-41" name="__codelineno-11-41" href="#__codelineno-11-41"></a>│                                                        Overrides config      │
+<a id="__codelineno-11-42" name="__codelineno-11-42" href="#__codelineno-11-42"></a>│                                                        option                │
+<a id="__codelineno-11-43" name="__codelineno-11-43" href="#__codelineno-11-43"></a>│                                                        harbor.credentials_f… │
+<a id="__codelineno-11-44" name="__codelineno-11-44" href="#__codelineno-11-44"></a>│ --validate                 --no-validate               Validate Harbor API   │
+<a id="__codelineno-11-45" name="__codelineno-11-45" href="#__codelineno-11-45"></a>│                                                        response data. Forces │
+<a id="__codelineno-11-46" name="__codelineno-11-46" href="#__codelineno-11-46"></a>│                                                        JSON output format if │
+<a id="__codelineno-11-47" name="__codelineno-11-47" href="#__codelineno-11-47"></a>│                                                        disabled. Overrides   │
+<a id="__codelineno-11-48" name="__codelineno-11-48" href="#__codelineno-11-48"></a>│                                                        config option         │
+<a id="__codelineno-11-49" name="__codelineno-11-49" href="#__codelineno-11-49"></a>│                                                        harbor.validate_data. │
+<a id="__codelineno-11-50" name="__codelineno-11-50" href="#__codelineno-11-50"></a>│ --raw                      --no-raw                    Return raw data from  │
+<a id="__codelineno-11-51" name="__codelineno-11-51" href="#__codelineno-11-51"></a>│                                                        Harbor API. Overrides │
+<a id="__codelineno-11-52" name="__codelineno-11-52" href="#__codelineno-11-52"></a>│                                                        all output formatting │
+<a id="__codelineno-11-53" name="__codelineno-11-53" href="#__codelineno-11-53"></a>│                                                        options. Overrides    │
+<a id="__codelineno-11-54" name="__codelineno-11-54" href="#__codelineno-11-54"></a>│                                                        config option         │
+<a id="__codelineno-11-55" name="__codelineno-11-55" href="#__codelineno-11-55"></a>│                                                        harbor.raw_mode.      │
+<a id="__codelineno-11-56" name="__codelineno-11-56" href="#__codelineno-11-56"></a>│ --verify-ssl               --no-verify-ssl             Verify SSL            │
+<a id="__codelineno-11-57" name="__codelineno-11-57" href="#__codelineno-11-57"></a>│                                                        certificates when     │
+<a id="__codelineno-11-58" name="__codelineno-11-58" href="#__codelineno-11-58"></a>│                                                        connecting to Harbor. │
+<a id="__codelineno-11-59" name="__codelineno-11-59" href="#__codelineno-11-59"></a>│                                                        Overrides config      │
+<a id="__codelineno-11-60" name="__codelineno-11-60" href="#__codelineno-11-60"></a>│                                                        option                │
+<a id="__codelineno-11-61" name="__codelineno-11-61" href="#__codelineno-11-61"></a>│                                                        harbor.verify_ssl.    │
+<a id="__codelineno-11-62" name="__codelineno-11-62" href="#__codelineno-11-62"></a>│ --retry                    --no-retry                  Retry failed HTTP     │
+<a id="__codelineno-11-63" name="__codelineno-11-63" href="#__codelineno-11-63"></a>│                                                        requests. Overrides   │
+<a id="__codelineno-11-64" name="__codelineno-11-64" href="#__codelineno-11-64"></a>│                                                        config option         │
+<a id="__codelineno-11-65" name="__codelineno-11-65" href="#__codelineno-11-65"></a>│                                                        harbor.retry.enabled. │
+<a id="__codelineno-11-66" name="__codelineno-11-66" href="#__codelineno-11-66"></a>│ --retry-max-tries                             INTEGER  Number of times to    │
+<a id="__codelineno-11-67" name="__codelineno-11-67" href="#__codelineno-11-67"></a>│                                                        retry failed HTTP     │
+<a id="__codelineno-11-68" name="__codelineno-11-68" href="#__codelineno-11-68"></a>│                                                        requests. Overrides   │
+<a id="__codelineno-11-69" name="__codelineno-11-69" href="#__codelineno-11-69"></a>│                                                        config option         │
+<a id="__codelineno-11-70" name="__codelineno-11-70" href="#__codelineno-11-70"></a>│                                                        harbor.retry.max_tri… │
+<a id="__codelineno-11-71" name="__codelineno-11-71" href="#__codelineno-11-71"></a>│ --retry-max-time                              FLOAT    Maximum number of     │
+<a id="__codelineno-11-72" name="__codelineno-11-72" href="#__codelineno-11-72"></a>│                                                        seconds to retry      │
+<a id="__codelineno-11-73" name="__codelineno-11-73" href="#__codelineno-11-73"></a>│                                                        failed HTTP requests. │
+<a id="__codelineno-11-74" name="__codelineno-11-74" href="#__codelineno-11-74"></a>│                                                        Overrides config      │
+<a id="__codelineno-11-75" name="__codelineno-11-75" href="#__codelineno-11-75"></a>│                                                        option                │
+<a id="__codelineno-11-76" name="__codelineno-11-76" href="#__codelineno-11-76"></a>│                                                        harbor.retry.max_tim… │
+<a id="__codelineno-11-77" name="__codelineno-11-77" href="#__codelineno-11-77"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+<a id="__codelineno-11-78" name="__codelineno-11-78" href="#__codelineno-11-78"></a>╭─ Output ─────────────────────────────────────────────────────────────────────╮
+<a id="__codelineno-11-79" name="__codelineno-11-79" href="#__codelineno-11-79"></a>│ --table-descripti…      --no-table-desc…                  Include field      │
+<a id="__codelineno-11-80" name="__codelineno-11-80" href="#__codelineno-11-80"></a>│                                                           descriptions in    │
+<a id="__codelineno-11-81" name="__codelineno-11-81" href="#__codelineno-11-81"></a>│                                                           tables. Overrides  │
+<a id="__codelineno-11-82" name="__codelineno-11-82" href="#__codelineno-11-82"></a>│                                                           config option      │
+<a id="__codelineno-11-83" name="__codelineno-11-83" href="#__codelineno-11-83"></a>│                                                           output.table.desc… │
+<a id="__codelineno-11-84" name="__codelineno-11-84" href="#__codelineno-11-84"></a>│ --table-max-depth                           INTEGER       Maximum depth to   │
+<a id="__codelineno-11-85" name="__codelineno-11-85" href="#__codelineno-11-85"></a>│                                                           print nested       │
+<a id="__codelineno-11-86" name="__codelineno-11-86" href="#__codelineno-11-86"></a>│                                                           objects in tables. │
+<a id="__codelineno-11-87" name="__codelineno-11-87" href="#__codelineno-11-87"></a>│                                                           Overrides config   │
+<a id="__codelineno-11-88" name="__codelineno-11-88" href="#__codelineno-11-88"></a>│                                                           option             │
+<a id="__codelineno-11-89" name="__codelineno-11-89" href="#__codelineno-11-89"></a>│                                                           output.table.max_… │
+<a id="__codelineno-11-90" name="__codelineno-11-90" href="#__codelineno-11-90"></a>│ --table-compact         --no-table-comp…                  Compact table      │
+<a id="__codelineno-11-91" name="__codelineno-11-91" href="#__codelineno-11-91"></a>│                                                           output. Has no     │
+<a id="__codelineno-11-92" name="__codelineno-11-92" href="#__codelineno-11-92"></a>│                                                           effect on other    │
+<a id="__codelineno-11-93" name="__codelineno-11-93" href="#__codelineno-11-93"></a>│                                                           formats. Overrides │
+<a id="__codelineno-11-94" name="__codelineno-11-94" href="#__codelineno-11-94"></a>│                                                           config option      │
+<a id="__codelineno-11-95" name="__codelineno-11-95" href="#__codelineno-11-95"></a>│                                                           output.table.comp… │
+<a id="__codelineno-11-96" name="__codelineno-11-96" href="#__codelineno-11-96"></a>│ --json-indent                               INTEGER       Indentation level  │
+<a id="__codelineno-11-97" name="__codelineno-11-97" href="#__codelineno-11-97"></a>│                                                           for JSON output.   │
+<a id="__codelineno-11-98" name="__codelineno-11-98" href="#__codelineno-11-98"></a>│                                                           Overrides config   │
+<a id="__codelineno-11-99" name="__codelineno-11-99" href="#__codelineno-11-99"></a>│                                                           option             │
+<a id="__codelineno-11-100" name="__codelineno-11-100" href="#__codelineno-11-100"></a>│                                                           output.json.inden… │
+<a id="__codelineno-11-101" name="__codelineno-11-101" href="#__codelineno-11-101"></a>│ --json-sort-keys        --no-json-sort-…                  Sort keys in JSON  │
+<a id="__codelineno-11-102" name="__codelineno-11-102" href="#__codelineno-11-102"></a>│                                                           output. Overrides  │
+<a id="__codelineno-11-103" name="__codelineno-11-103" href="#__codelineno-11-103"></a>│                                                           config option      │
+<a id="__codelineno-11-104" name="__codelineno-11-104" href="#__codelineno-11-104"></a>│                                                           output.json.sort_… │
+<a id="__codelineno-11-105" name="__codelineno-11-105" href="#__codelineno-11-105"></a>│ --format            -f                      [table|json]  Specifies the      │
+<a id="__codelineno-11-106" name="__codelineno-11-106" href="#__codelineno-11-106"></a>│                                                           output format to   │
+<a id="__codelineno-11-107" name="__codelineno-11-107" href="#__codelineno-11-107"></a>│                                                           use. Overrides     │
+<a id="__codelineno-11-108" name="__codelineno-11-108" href="#__codelineno-11-108"></a>│                                                           config option      │
+<a id="__codelineno-11-109" name="__codelineno-11-109" href="#__codelineno-11-109"></a>│                                                           output.format.     │
+<a id="__codelineno-11-110" name="__codelineno-11-110" href="#__codelineno-11-110"></a>│ --paging                --no-paging                       Display output in  │
+<a id="__codelineno-11-111" name="__codelineno-11-111" href="#__codelineno-11-111"></a>│                                                           a pager (less,     │
+<a id="__codelineno-11-112" name="__codelineno-11-112" href="#__codelineno-11-112"></a>│                                                           etc.). Overrides   │
+<a id="__codelineno-11-113" name="__codelineno-11-113" href="#__codelineno-11-113"></a>│                                                           config option      │
+<a id="__codelineno-11-114" name="__codelineno-11-114" href="#__codelineno-11-114"></a>│                                                           output.paging.     │
+<a id="__codelineno-11-115" name="__codelineno-11-115" href="#__codelineno-11-115"></a>│ --pager                                     TEXT          Pager command to   │
+<a id="__codelineno-11-116" name="__codelineno-11-116" href="#__codelineno-11-116"></a>│                                                           use. The default   │
+<a id="__codelineno-11-117" name="__codelineno-11-117" href="#__codelineno-11-117"></a>│                                                           Rich pager will be │
+<a id="__codelineno-11-118" name="__codelineno-11-118" href="#__codelineno-11-118"></a>│                                                           used. Overrides    │
+<a id="__codelineno-11-119" name="__codelineno-11-119" href="#__codelineno-11-119"></a>│                                                           config option      │
+<a id="__codelineno-11-120" name="__codelineno-11-120" href="#__codelineno-11-120"></a>│                                                           output.pager.      │
+<a id="__codelineno-11-121" name="__codelineno-11-121" href="#__codelineno-11-121"></a>│ --output            -o                      PATH          Output file, by    │
+<a id="__codelineno-11-122" name="__codelineno-11-122" href="#__codelineno-11-122"></a>│                                                           default None,      │
+<a id="__codelineno-11-123" name="__codelineno-11-123" href="#__codelineno-11-123"></a>│                                                           which means output │
+<a id="__codelineno-11-124" name="__codelineno-11-124" href="#__codelineno-11-124"></a>│                                                           to stdout. If the  │
+<a id="__codelineno-11-125" name="__codelineno-11-125" href="#__codelineno-11-125"></a>│                                                           file already       │
+<a id="__codelineno-11-126" name="__codelineno-11-126" href="#__codelineno-11-126"></a>│                                                           exists, it will be │
+<a id="__codelineno-11-127" name="__codelineno-11-127" href="#__codelineno-11-127"></a>│                                                           overwritten.       │
+<a id="__codelineno-11-128" name="__codelineno-11-128" href="#__codelineno-11-128"></a>│ --no-overwrite                                            Do not overwrite   │
+<a id="__codelineno-11-129" name="__codelineno-11-129" href="#__codelineno-11-129"></a>│                                                           the output file if │
+<a id="__codelineno-11-130" name="__codelineno-11-130" href="#__codelineno-11-130"></a>│                                                           it already exists. │
+<a id="__codelineno-11-131" name="__codelineno-11-131" href="#__codelineno-11-131"></a>│ --verbose           -v                                    Enable verbose     │
+<a id="__codelineno-11-132" name="__codelineno-11-132" href="#__codelineno-11-132"></a>│                                                           output.            │
+<a id="__codelineno-11-133" name="__codelineno-11-133" href="#__codelineno-11-133"></a>│ --with-stdout                                             Output to stdout   │
+<a id="__codelineno-11-134" name="__codelineno-11-134" href="#__codelineno-11-134"></a>│                                                           in addition to the │
+<a id="__codelineno-11-135" name="__codelineno-11-135" href="#__codelineno-11-135"></a>│                                                           specified output   │
+<a id="__codelineno-11-136" name="__codelineno-11-136" href="#__codelineno-11-136"></a>│                                                           file, if any. Has  │
+<a id="__codelineno-11-137" name="__codelineno-11-137" href="#__codelineno-11-137"></a>│                                                           no effect if no    │
+<a id="__codelineno-11-138" name="__codelineno-11-138" href="#__codelineno-11-138"></a>│                                                           output file is     │
+<a id="__codelineno-11-139" name="__codelineno-11-139" href="#__codelineno-11-139"></a>│                                                           specified.         │
+<a id="__codelineno-11-140" name="__codelineno-11-140" href="#__codelineno-11-140"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+<a id="__codelineno-11-141" name="__codelineno-11-141" href="#__codelineno-11-141"></a>╭─ Confirmation &amp; Alerts ──────────────────────────────────────────────────────╮
+<a id="__codelineno-11-142" name="__codelineno-11-142" href="#__codelineno-11-142"></a>│ --confirm-deletion       --no-confirm-deletion       Confirm before deleting │
+<a id="__codelineno-11-143" name="__codelineno-11-143" href="#__codelineno-11-143"></a>│                                                      resources. Overrides    │
+<a id="__codelineno-11-144" name="__codelineno-11-144" href="#__codelineno-11-144"></a>│                                                      config option           │
+<a id="__codelineno-11-145" name="__codelineno-11-145" href="#__codelineno-11-145"></a>│                                                      general.confirm_deleti… │
+<a id="__codelineno-11-146" name="__codelineno-11-146" href="#__codelineno-11-146"></a>│ --confirm-enumeration    --no-confirm-enumerat…      Confirm before          │
+<a id="__codelineno-11-147" name="__codelineno-11-147" href="#__codelineno-11-147"></a>│                                                      enumerating all         │
+<a id="__codelineno-11-148" name="__codelineno-11-148" href="#__codelineno-11-148"></a>│                                                      resources without a     │
+<a id="__codelineno-11-149" name="__codelineno-11-149" href="#__codelineno-11-149"></a>│                                                      limit or query.         │
+<a id="__codelineno-11-150" name="__codelineno-11-150" href="#__codelineno-11-150"></a>│                                                      Overrides config option │
+<a id="__codelineno-11-151" name="__codelineno-11-151" href="#__codelineno-11-151"></a>│                                                      general.confirm_enumer… │
+<a id="__codelineno-11-152" name="__codelineno-11-152" href="#__codelineno-11-152"></a>│ --warnings               --no-warnings               Show/hide warnings.     │
+<a id="__codelineno-11-153" name="__codelineno-11-153" href="#__codelineno-11-153"></a>│                                                      Overrides config option │
+<a id="__codelineno-11-154" name="__codelineno-11-154" href="#__codelineno-11-154"></a>│                                                      general.warnings.       │
+<a id="__codelineno-11-155" name="__codelineno-11-155" href="#__codelineno-11-155"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+<a id="__codelineno-11-156" name="__codelineno-11-156" href="#__codelineno-11-156"></a>╭─ Commands ───────────────────────────────────────────────────────────────────╮
+<a id="__codelineno-11-157" name="__codelineno-11-157" href="#__codelineno-11-157"></a>│ artifact         Manage artifacts.                                           │
+<a id="__codelineno-11-158" name="__codelineno-11-158" href="#__codelineno-11-158"></a>│ auditlog         Audit log management and access                             │
+<a id="__codelineno-11-159" name="__codelineno-11-159" href="#__codelineno-11-159"></a>│ commands         List all commands.                                          │
+<a id="__codelineno-11-160" name="__codelineno-11-160" href="#__codelineno-11-160"></a>│ config           Manage Harbor configuration.                                │
+<a id="__codelineno-11-161" name="__codelineno-11-161" href="#__codelineno-11-161"></a>│ cve-allowlist    Manage the system-wide CVE allowlist.                       │
+<a id="__codelineno-11-162" name="__codelineno-11-162" href="#__codelineno-11-162"></a>│ find             Search for commands based on names and descriptions.        │
+<a id="__codelineno-11-163" name="__codelineno-11-163" href="#__codelineno-11-163"></a>│ gc               Garbage Collection scheduling and information               │
+<a id="__codelineno-11-164" name="__codelineno-11-164" href="#__codelineno-11-164"></a>│ init             Initialize Harbor CLI configuration file.                   │
+<a id="__codelineno-11-165" name="__codelineno-11-165" href="#__codelineno-11-165"></a>│ ldap             LDAP configuration                                          │
+<a id="__codelineno-11-166" name="__codelineno-11-166" href="#__codelineno-11-166"></a>│ project          Manage projects.                                            │
+<a id="__codelineno-11-167" name="__codelineno-11-167" href="#__codelineno-11-167"></a>│ quota            Quota management                                            │
+<a id="__codelineno-11-168" name="__codelineno-11-168" href="#__codelineno-11-168"></a>│ registry         Registry management                                         │
+<a id="__codelineno-11-169" name="__codelineno-11-169" href="#__codelineno-11-169"></a>│ repl             Start an interactive REPL.                                  │
+<a id="__codelineno-11-170" name="__codelineno-11-170" href="#__codelineno-11-170"></a>│ replication      Registry replication execution and policy.                  │
+<a id="__codelineno-11-171" name="__codelineno-11-171" href="#__codelineno-11-171"></a>│ repository       Manage repositories.                                        │
+<a id="__codelineno-11-172" name="__codelineno-11-172" href="#__codelineno-11-172"></a>│ retention        Artifact retention policy management and execution.         │
+<a id="__codelineno-11-173" name="__codelineno-11-173" href="#__codelineno-11-173"></a>│ sample-config    Print a sample config file to stdout.                       │
+<a id="__codelineno-11-174" name="__codelineno-11-174" href="#__codelineno-11-174"></a>│ scan             Scanning of individual artifacts.                           │
+<a id="__codelineno-11-175" name="__codelineno-11-175" href="#__codelineno-11-175"></a>│ scan-all         Scanning of all artifacts.                                  │
+<a id="__codelineno-11-176" name="__codelineno-11-176" href="#__codelineno-11-176"></a>│ scanner          Manage scanners.                                            │
+<a id="__codelineno-11-177" name="__codelineno-11-177" href="#__codelineno-11-177"></a>│ search           Search for projects and repositories.                       │
+<a id="__codelineno-11-178" name="__codelineno-11-178" href="#__codelineno-11-178"></a>│ self             Manage the CLI itself.                                      │
+<a id="__codelineno-11-179" name="__codelineno-11-179" href="#__codelineno-11-179"></a>│ system           System information                                          │
+<a id="__codelineno-11-180" name="__codelineno-11-180" href="#__codelineno-11-180"></a>│ tui              Start a TUI (text-based user interface).                    │
+<a id="__codelineno-11-181" name="__codelineno-11-181" href="#__codelineno-11-181"></a>│ user             Manage users.                                               │
+<a id="__codelineno-11-182" name="__codelineno-11-182" href="#__codelineno-11-182"></a>│ usergroup        Manage user groups.                                         │
+<a id="__codelineno-11-183" name="__codelineno-11-183" href="#__codelineno-11-183"></a>│ webhook          Manage webhooks                                             │
+<a id="__codelineno-11-184" name="__codelineno-11-184" href="#__codelineno-11-184"></a>╰──────────────────────────────────────────────────────────────────────────────╯
+</code></pre></div>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.expand", "navigation.indexes"], "search": "../../assets/javascripts/workers/search.b8dbb3d2.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.ad660dcc.min.js"></script>
+      
+    
+  </body>
+</html>

@@ -1,0 +1,155 @@
+- artifact accessories
+- artifact buildhistory
+- artifact clean
+- artifact copy
+- artifact delete
+- artifact get
+- artifact label add
+- artifact label delete
+- artifact list
+- artifact tag create
+- artifact tag delete
+- artifact tag list
+- artifact vulnerability find
+- artifact vulnerability summary
+- auditlog list
+- auditlog rotation get
+- auditlog rotation list
+- auditlog rotation log
+- auditlog rotation schedule create
+- auditlog rotation schedule get
+- auditlog rotation schedule update
+- auditlog rotation stop
+- commands
+- config get
+- config update
+- cve-allowlist clear
+- cve-allowlist get
+- cve-allowlist update
+- find
+- gc job
+- gc jobs
+- gc log
+- gc schedule create
+- gc schedule get
+- gc schedule update
+- init
+- ldap ping
+- ldap search groups
+- ldap search users
+- project create
+- project delete
+- project exists
+- project get
+- project list
+- project logs
+- project member add-group
+- project member add-user
+- project member get
+- project member list
+- project member remove
+- project member update-role
+- project metadata field delete
+- project metadata field get
+- project metadata field set
+- project metadata get
+- project metadata set
+- project repos
+- project scanner candidates
+- project scanner get
+- project scanner set
+- project summary
+- project update
+- quota get
+- quota list
+- quota update
+- registry adapters
+- registry create
+- registry delete
+- registry get
+- registry info
+- registry list
+- registry ping
+- registry providers
+- registry update
+- repl
+- replication get
+- replication list
+- replication policy create
+- replication policy delete
+- replication policy get
+- replication policy list
+- replication start
+- replication stop
+- replication task list
+- replication task log
+- repository delete
+- repository get
+- repository list
+- repository update
+- retention job list
+- retention job start
+- retention job stop
+- retention job task list
+- retention job task log
+- retention metadata
+- retention policy delete
+- retention policy get
+- retention policy id
+- sample-config
+- scan export download
+- scan export get
+- scan export list
+- scan export start
+- scan log
+- scan start
+- scan stop
+- scan-all metrics
+- scan-all schedule create
+- scan-all schedule get
+- scan-all schedule update
+- scan-all stop
+- scanner create
+- scanner default
+- scanner delete
+- scanner get
+- scanner list
+- scanner update
+- search
+- self config env
+- self config get
+- self config keys
+- self config path
+- self config set
+- self config write
+- self keyring status
+- system health
+- system info
+- system ping
+- system statistics
+- system volumes
+- tui
+- user create
+- user delete
+- user get
+- user get-current
+- user get-current-permissions
+- user list
+- user search
+- user set-admin
+- user set-cli-secret
+- user set-password
+- user unset-admin
+- user update
+- usergroup create
+- usergroup delete
+- usergroup get
+- usergroup list
+- usergroup search
+- usergroup update
+- webhook events
+- webhook jobs
+- webhook policy delete
+- webhook policy get
+- webhook policy list
+- webhook triggers
